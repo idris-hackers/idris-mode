@@ -9,10 +9,12 @@
   "A list of things we consider keywords in idris.")
 
 (defvar idris-assignment
-  "\\(\\w+\\) \\(\\(\\s-*\\w\\S-*\\s-*\\)+\\) ="
+  "\\(\\w+\\) \\(\\(\\s-*\\w\\S-*\\s-*\\)+\\)="
   "Match assignment, capturing two groups: the variable being assigned
 and the named arguments it may take.")
 
+(setq idris-assignment
+  "\\(\\w+\\)\\(\\(\\s-*\\w\\S-*\\s-*\\)+\\)=")
 (defvar idris-data-declaration
   "data \\(\\w+\\)"
   "Match the name of a data type being declared.")
@@ -34,9 +36,9 @@ and the named arguments it may take.")
            (,keywords . font-lock-keyword-face)
            (,idris-operator . font-lock-variable-name-face)
            (,idris-data-declaration
-             (1 'font-lock-function-name-face))
-           (,idris-assignment
              (1 'font-lock-function-name-face)))))))
+;;           (,idris-assignment
+;;             (1 'font-lock-function-name-face)))))))
 ;; TODO syntax table and thence comments and their delimiters
 ;; TODO figure out why {- comments -} conflict with rainbow-delimiters
 ;; TODO figure out why argumentless definitions aren't being highlighted.
