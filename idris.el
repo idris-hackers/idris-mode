@@ -28,9 +28,7 @@ and the named arguments it may take.")
 (defun idris-load-faces ()
   "Load or reload the idris-mode font-lock face customizations."
   (interactive)
-  (let
-    ((special (regexp-opt idris-special))
-      (keywords (regexp-opt idris-keywords)))
+  (let ((keywords (regexp-opt idris-keywords)))
     (setq font-lock-defaults
       `('((,idris-comment . font-lock-comment-face)
            (,keywords . font-lock-keyword-face)
