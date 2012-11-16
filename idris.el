@@ -23,7 +23,7 @@ and the named arguments it may take.")
 
 (defvar idris-comment
   "--.*\\|{-.*-}"
-  "Match eiter kind of idris comment.")
+  "Match either kind of idris comment.")
 
 (defun idris-load-faces ()
   "Load or reload the idris-mode font-lock face customizations."
