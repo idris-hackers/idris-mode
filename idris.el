@@ -8,13 +8,14 @@
      "compute" "solve" "attack")
   "A list of things we consider keywords in idris.")
 
-(defvar idris-assignment
-  "\\(\\w+\\) \\(\\(\\s-*\\w\\S-*\\s-*\\)+\\)="
-  "Match assignment, capturing two groups: the variable being assigned
-and the named arguments it may take.")
+(defvar idris-identifier
+  "\\(_\\|\\w\\)\\(\\w\\|\\s_\\)*"
+  "A regexp for identifiers in idris.")
 
-(setq idris-assignment
-  "\\(\\w+\\)\\(\\(\\s-*\\w\\S-*\\s-*\\)+\\)=")
+(defvar idris-assignment
+  (format "\\(%s\\).*=" idris-identifier)
+  "Match assignment, capturing the assigned name")
+
 (defvar idris-data-declaration
   "data \\(\\w+\\)"
   "Match the name of a data type being declared.")
@@ -36,12 +37,11 @@ and the named arguments it may take.")
            (,keywords . font-lock-keyword-face)
            (,idris-operator . font-lock-variable-name-face)
            (,idris-data-declaration
+             (1 'font-lock-function-name-face))
+           (,idris-assignment
              (1 'font-lock-function-name-face)))))))
-;;           (,idris-assignment
-;;             (1 'font-lock-function-name-face)))))))
 ;; TODO syntax table and thence comments and their delimiters
 ;; TODO figure out why {- comments -} conflict with rainbow-delimiters
-;; TODO figure out why argumentless definitions aren't being highlighted.
 ;; TODO highlight type declarations.
 ;; TODO highlight %assert etc.
 
