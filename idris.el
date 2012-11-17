@@ -13,7 +13,7 @@
   "A regexp for identifiers in idris.")
 
 (defvar idris-assignment
-  (format "\\(%s\\).*=" idris-identifier)
+  (format "\\(%s\\).*\\(=\\|:\\)" idris-identifier)
   "Match assignment, capturing the assigned name")
 
 (defvar idris-data-declaration
