@@ -82,7 +82,6 @@
          ;; TODO: {- comments -}
          ;; TODO: operator definitions.
          ;; TODO: let ... in ...
-         ;; TODO: lists
 ))))
 
 ; Make the actual mode.
