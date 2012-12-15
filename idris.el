@@ -57,7 +57,7 @@
            (1 ,font-lock-comment-delimiter-face)
            (2 ,font-lock-comment-face))
          ;; `%access`, `%default`, etc
-         ("^%\\(\\w+\\) \\(.+\\)"
+         ("^%\\(\\w+\\)\\s-*\\(.+\\)"
            (1 ,idris-directive-face)
            (2 ,idris-directive-argument-face))
          ;; Ordinary keywords.
