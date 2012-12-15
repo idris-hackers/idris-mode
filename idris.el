@@ -54,6 +54,12 @@
   (interactive)
   (setq font-lock-defaults
     `('(
+         ;; {- Block comments -}
+         ("\\({-\\)\\(.*\\)\\(-}\\)"
+           (1 ,font-lock-comment-delimiter-face)
+           (2 ,font-lock-comment-face)
+           (3 ,font-lock-comment-delimiter-face))
+         ;; TODO: this doesn't let you do newlines
          ;; Documentation comments.
          ("\\(--\\s-*|\\)\\(.*\\)\\(\n\\(--\\)\\(.*\\)\\)*"
            (1 ,font-lock-comment-delimiter-face)
@@ -87,7 +93,6 @@
            (1 ,idris-definition-face)
            (2 ,idris-parameter-face)
            (3 ,idris-equals-face))
-         ;; TODO: {- comments -}
          ;; TODO: operator definitions.
          ;; TODO: let ... in ...
 ))))
