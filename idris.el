@@ -83,7 +83,7 @@
          (,idris-operator-regexp . ,idris-operator-face)
          ;; Vanilla definitions with = (and optionally let ... in ...)
          ;; TODO: clean up how parameters are picked up
-         ("\\(\\w+\\) \\(.?*\\)\\(=\\)"
+         ("\\(\\w+\\)\s-*\\(.?*\\)\\(=\\)"
            (1 ,idris-definition-face)
            (2 ,idris-parameter-face)
            (3 ,idris-equals-face))
