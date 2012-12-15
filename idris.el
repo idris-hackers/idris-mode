@@ -30,6 +30,10 @@
   'font-lock-variable-name-face
   "The face to highlight '=' in definitions with.")
 
+(defvar idris-operator-face
+  'font-lock-variable-name-face
+  "The face to highlight operators with.")
+
 (defvar idris-keywords
   '("module" "namespace" "import" "where" "public" "do" "case"
      "using" "parameters" "mutual" "if" "then" "else" "prefix"
@@ -76,7 +80,7 @@
            (1 ,idris-definition-face)
            (2 ,idris-colon-face))
          ;; Operators
-         (,idris-operator-regexp . font-lock-variable-name-face)
+         (,idris-operator-regexp . ,idris-operator-face)
          ;; Vanilla definitions with = (and optionally let ... in ...)
          ;; TODO: clean up how parameters are picked up
          ("\\(\\w+\\) \\(.?*\\)\\(=\\)"
