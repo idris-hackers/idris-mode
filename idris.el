@@ -42,6 +42,10 @@
   '("data" "class" "codata" "record")
   "Keywords that introduce some identifier.")
 
+(defvar idris-operator-regexp
+  "[-!#$%&\*\+./<=>\?@\\^|~:]+"
+  "A regular expression matching an Idris operator.")
+
 (defun idris-load-faces ()
   (interactive)
   (setq font-lock-defaults
@@ -72,7 +76,7 @@
            (1 ,idris-definition-face)
            (2 ,idris-colon-face))
          ;; Operators
-         ("[-!#$%&\*\+./<=>\?@\\^|~:]+" . font-lock-variable-name-face)
+         (,idris-operator-regexp . font-lock-variable-name-face)
          ;; Vanilla definitions with = (and optionally let ... in ...)
          ;; TODO: clean up how parameters are picked up
          ("\\(\\w+\\) \\(.?*\\)\\(=\\)"
