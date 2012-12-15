@@ -74,7 +74,7 @@
          ;; Operators
          ("[-!#$%&\*\+./<=>\?@\\^|~:]+" . font-lock-variable-name-face)
          ;; Vanilla definitions with = (and optionally let ... in ...)
-         ;; TODO: clean up how parameters are picked p
+         ;; TODO: clean up how parameters are picked up
          ("\\(\\w+\\) \\(.?*\\)\\(=\\)"
            (1 ,idris-definition-face)
            (2 ,idris-parameter-face)
