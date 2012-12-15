@@ -67,8 +67,8 @@
            (1 ,idris-keyword-face)
            (2 ,idris-definition-face))
          ;; Type annotations.
-         ;; TODO: refine this -- it's matching on things like (x :: xs)
-         ("\\(\\w+\\)\\s-*\\(:\\)"
+         ;; TODO: this won't match, e.g. f:a
+         ("\\(\\w+\\)\\s-+\\(:\\)\\s-+"
            (1 ,idris-definition-face)
            (2 ,idris-colon-face))
          ;; Operators
