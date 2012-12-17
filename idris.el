@@ -82,14 +82,14 @@
            (2 ,idris-definition-face))
          ;; Type annotations.
          ;; TODO: this won't match, e.g. f:a
-         ("\\(\\w+\\)\\s-+\\(:\\)\\s-+"
+         ("^\\s-*\\(\\w+\\)\\s-+\\(:\\)\\s-+"
            (1 ,idris-definition-face)
            (2 ,idris-colon-face))
          ;; Operators
          (,idris-operator-regexp . ,idris-operator-face)
          ;; Vanilla definitions with = (and optionally let ... in ...)
          ;; TODO: clean up how parameters are picked up
-         ("\\(\\w+\\)\s-*\\(.?*\\)\\(=\\)"
+         ("^\\s-*\\(\\w+\\)\s-*\\(.?*\\)\\(=\\)"
            (1 ,idris-definition-face)
            (2 ,idris-parameter-face)
            (3 ,idris-equals-face))
