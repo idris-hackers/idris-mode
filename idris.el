@@ -67,15 +67,13 @@
            (4 ,font-lock-comment-delimiter-face)
            (5 ,font-lock-doc-face))
          ;; Ordinary comments.
-         ("\\(--\\)\\s-*\\(.*\\)"
+         ("\\(--\\)\s*\\(.*\\)"
            (1 ,font-lock-comment-delimiter-face)
            (2 ,font-lock-comment-face))
          ;; `%access`, `%default`, etc
          ("^%\\(\\w+\\)\\s-*\\(.+\\)"
            (1 ,idris-directive-face)
            (2 ,idris-directive-argument-face))
-         ;; Ordinary keywords.
-         (,(regexp-opt idris-keywords) . ,idris-keyword-face)
          ;; Definitions with keywords.
          (,(format "\\(%s\\) \\(\\w+\\)" (regexp-opt idris-definition-keywords))
            (1 ,idris-keyword-face)
@@ -93,6 +91,8 @@
            (1 ,idris-definition-face)
            (2 ,idris-parameter-face)
            (3 ,idris-equals-face))
+         ;; Ordinary keywords.
+         (,(regexp-opt idris-keywords) . ,idris-keyword-face)
          ;; TODO: operator definitions.
          ;; TODO: let ... in ...
 ))))
