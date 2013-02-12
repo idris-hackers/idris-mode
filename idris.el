@@ -1,3 +1,7 @@
+(defvar idris-identifier-face
+  'default
+  "The face to highlight idris identifiers with.")
+
 (defvar idris-keyword-face
   'font-lock-keyword-face
   "The face to highlight idris keywords with.")
@@ -93,6 +97,8 @@
            (3 ,idris-equals-face))
          ;; Ordinary keywords.
          (,(regexp-opt idris-keywords) . ,idris-keyword-face)
+         ;; Identifiers
+         ("\\w+" . ,idris-identifier-face)
          ;; TODO: operator definitions.
          ;; TODO: let ... in ...
 ))))
