@@ -38,14 +38,6 @@
   'font-lock-variable-name-face
   "The face to highlight operators with.")
 
-(defvar idris-keywords
-  '("module" "namespace" "import" "where" "public" "do" "case"
-     "using" "parameters" "mutual" "if" "then" "else" "prefix"
-     "infix" "infixr" "infixl" "pattern" "term" "syntax" "of"
-     "intros" "rewrite" "exact" "refine" "trivial" "focus" "try"
-     "compute" "solve" "attack" "with" "dsl" "instance" "partial" "total")
-  "Ordinary keywords.")
-
 (defvar idris-definition-keywords
   '("data" "class" "codata" "record")
   "Keywords that introduce some identifier.")
@@ -95,8 +87,6 @@
            (1 ,idris-definition-face)
            (2 ,idris-parameter-face)
            (3 ,idris-equals-face))
-         ;; Ordinary keywords.
-         (,(regexp-opt idris-keywords) . ,idris-keyword-face)
          ;; Identifiers
          ("\\w+" . ,idris-identifier-face)
          ;; TODO: operator definitions.
@@ -106,6 +96,44 @@
 ; Make the actual mode.
 (define-derived-mode idris-mode fundamental-mode "Idris"
   (idris-load-faces))
+
+(font-lock-add-keywords 'idris-mode
+  '(("module" . idris-keyword-face)
+     ("namespace" . idris-keyword-face)
+     ("import" . idris-keyword-face)
+     ("where" . idris-keyword-face)
+     ("public" . idris-keyword-face)
+     ("do" . idris-keyword-face)
+     ("case" . idris-keyword-face)
+     ("using" . idris-keyword-face)
+     ("parameters" . idris-keyword-face)
+     ("mutual" . idris-keyword-face)
+     ("if" . idris-keyword-face)
+     ("then" . idris-keyword-face)
+     ("else" . idris-keyword-face)
+     ("prefix" . idris-keyword-face)
+     ("infix" . idris-keyword-face)
+     ("infixr" . idris-keyword-face)
+     ("infixl" . idris-keyword-face)
+     ("pattern" . idris-keyword-face)
+     ("term" . idris-keyword-face)
+     ("syntax" . idris-keyword-face)
+     ("of" . idris-keyword-face)
+     ("intros" . idris-keyword-face)
+     ("rewrite" . idris-keyword-face)
+     ("exact" . idris-keyword-face)
+     ("refine" . idris-keyword-face)
+     ("trivial" . idris-keyword-face)
+     ("focus" . idris-keyword-face)
+     ("try" . idris-keyword-face)
+     ("compute" . idris-keyword-face)
+     ("solve" . idris-keyword-face)
+     ("attack" . idris-keyword-face)
+     ("with" . idris-keyword-face)
+     ("dsl" . idris-keyword-face)
+     ("instance" . idris-keyword-face)
+     ("partial" . idris-keyword-face)
+     ("total" . idris-keyword-face)))
 
 ; Automatically use idris-mode for .idr files.
 (push '("\\.idr$" . idris-mode) auto-mode-alist)
