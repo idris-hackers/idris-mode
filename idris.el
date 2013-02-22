@@ -46,6 +46,11 @@
   "[-!#$%&\*\+./<=>\?@\\^|~:]+"
   "A regular expression matching an Idris operator.")
 
+(defvar idris-syntax-table
+  (make-syntax-table))
+
+(modify-syntax-entry ?< "--" idris-syntax-table)
+
 (defun idris-load-faces ()
   (interactive)
   (setq font-lock-defaults
@@ -95,6 +100,7 @@
 
 ; Make the actual mode.
 (define-derived-mode idris-mode fundamental-mode "Idris"
+  (set-syntax-table idris-syntax-table)
   (idris-load-faces))
 
 (font-lock-add-keywords 'idris-mode
