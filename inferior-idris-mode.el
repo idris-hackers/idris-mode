@@ -29,7 +29,9 @@
     "Run an Idris interpreter."
     :syntax-table idris-syntax-table
     (setq comint-use-prompt-regexp t)
-    (setq comint-prompt-regexp (concat "^" idris-prompt-regexp)))
+    (setq comint-prompt-regexp (concat "^" idris-prompt-regexp))
+    (font-lock-add-keywords 'inferior-idris-mode
+                            (mapcar (lambda (kwd) (cons kwd 'font-lock-keyword-face)) idris-keywords)))
 
 (defun inferior-idris ()
   "Run an inferior Idris process, or switch to the already running process"
