@@ -79,8 +79,6 @@
 
 (defconst idris-font-lock-defaults
     `('(
-         ;; Other keywords
-         (,(regexp-opt idris-keywords 'words) . ,idris-keyword-face)
          ;; {- Block comments -}
          ("\\({-\\)\\(.*\\)\\(-}\\)"
            (1 ,font-lock-comment-delimiter-face)
@@ -118,6 +116,8 @@
            (1 ,idris-definition-face)
            (2 ,idris-parameter-face)
            (3 ,idris-equals-face))
+         ;; Other keywords
+         (,(regexp-opt idris-keywords 'words) . ,idris-keyword-face)
          ;; Identifiers
          ("\\w+" . ,idris-identifier-face)
          ;; TODO: operator definitions.
