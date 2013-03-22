@@ -144,4 +144,4 @@
 ; Automatically use idris-mode for .idr files.
 (push '("\\.idr$" . idris-mode) auto-mode-alist)
 
-(provide 'idris)
+(provide 'idris-syntax)
