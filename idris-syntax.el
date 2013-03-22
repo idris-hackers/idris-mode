@@ -46,15 +46,41 @@
   "[-!#$%&\*\+./<=>\?@\\^|~:]+"
   "A regular expression matching an Idris operator.")
 
-(defvar idris-syntax-table
-  (make-syntax-table))
+(defconst idris-syntax-table
+  (let ((st (make-syntax-table (standard-syntax-table))))
 
-(modify-syntax-entry ?< "--" idris-syntax-table)
+    ;; Matching parens
+    (modify-syntax-entry ?\( "()" st)
+    (modify-syntax-entry ?\) ")(" st)
+    (modify-syntax-entry ?\[ "(]" st)
+    (modify-syntax-entry ?\] ")[" st)
 
-(defun idris-load-faces ()
-  (interactive)
-  (setq font-lock-defaults
+    ;; Matching {}, but with nested comments
+    (modify-syntax-entry ?\{ "(} 1bn" st)
+    (modify-syntax-entry ?\} "){ 4bn" st)
+    (modify-syntax-entry ?\- "_ 123" st)
+    (modify-syntax-entry ?\n ">" st)
+
+    ;; Whitespace is whitespace
+    (modify-syntax-entry ?\  " " st)
+    (modify-syntax-entry ?\t " " st)
+
+    ;;Strings
+    (modify-syntax-entry ?\" "\"" st)
+    (modify-syntax-entry ?\' "\'" st)
+    st))
+
+(defconst idris-keywords
+  '("attack" "case" "compute" "do" "dsl" "else" "exact" "focus" "if" "import"
+    "in" "infix" "infixl" "infixr" "instance" "intros" "module" "mutual"
+    "namespace" "of" "let" "parameters" "partial" "pattern" "prefix" "public"
+    "refine" "rewrite" "solve" "syntax" "term" "then" "total" "trivial" "try"
+    "using" "where" "with"))
+
+(defconst idris-font-lock-defaults
     `('(
+         ;; Other keywords
+         (,(regexp-opt idris-keywords 'words) . ,idris-keyword-face)
          ;; {- Block comments -}
          ("\\({-\\)\\(.*\\)\\(-}\\)"
            (1 ,font-lock-comment-delimiter-face)
@@ -96,18 +122,8 @@
          ("\\w+" . ,idris-identifier-face)
          ;; TODO: operator definitions.
          ;; TODO: let ... in ...
-))))
+)))
 
 
-(defconst idris-keywords
-  '("attack" "case" "compute" "do" "dsl" "else" "exact" "focus" "if" "import"
-    "in" "infix" "infixl" "infixr" "instance" "intros" "module" "mutual"
-    "namespace" "of" "let" "parameters" "partial" "pattern" "prefix" "public"
-    "refine" "rewrite" "solve" "syntax" "term" "then" "total" "trivial" "try"
-    "using" "where" "with"))
-
-
-; Automatically use idris-mode for .idr files.
-(push '("\\.idr$" . idris-mode) auto-mode-alist)
 
 (provide 'idris-syntax)

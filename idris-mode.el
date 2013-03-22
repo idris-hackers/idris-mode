@@ -17,10 +17,12 @@
 
 (define-derived-mode idris-mode fundamental-mode "Idris"
   (set-syntax-table idris-syntax-table)
-  (idris-load-faces)
-  (font-lock-add-keywords 'idris-mode
-                          (mapcar (lambda (kwd) (cons kwd 'font-lock-keyword-face))
-                                  idris-keywords)))
+  (set (make-local-variable 'font-lock-defaults)
+       idris-font-lock-defaults))
+
+; Automatically use idris-mode for .idr files.
+(push '("\\.idr$" . idris-mode) auto-mode-alist)
+
 
 (provide 'idris-mode)
 ;;; idris-mode.el ends here
