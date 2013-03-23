@@ -31,7 +31,7 @@
 
 (define-derived-mode idris-mode fundamental-mode "Idris"
   "Major mode for Idris
-     \\{text-mode-map}
+     \\{idris-mode-map}
 We should run some hook at some point in the future."
   (set-syntax-table idris-syntax-table)
   (set (make-local-variable 'font-lock-defaults)
