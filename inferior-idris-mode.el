@@ -39,10 +39,11 @@
   "Start an inferior Idris process"
   (interactive)
   (setq inferior-idris-buffer
-        (make-comint "idris" idris-interpreter-path))
+        (make-comint "inferior-idris" idris-interpreter-path))
   (with-current-buffer inferior-idris-buffer
     (inferior-idris-mode)
-    (setq inferior-idris-working-directory nil)))
+    (setq inferior-idris-working-directory nil)
+    (setq inferior-idris-loaded-file nil)))
 
 (defun inferior-idris-process ()
   "Return the Idris process or start it"
@@ -90,6 +91,10 @@ The process PROC should be associated to a comint buffer."
   "The current working directory of Idris")
 (make-variable-buffer-local 'inferior-idris-working-directory)
 
+(defvar inferior-idris-loaded-file nil
+  "The currently loaded file of Idris")
+(make-variable-buffer-local 'inferior-idris-loaded-file)
+
 (defun inferior-idris-load-file ()
   "Pass the current buffer's file to the inferior Idris process."
   (interactive)
@@ -104,7 +109,10 @@ The process PROC should be associated to a comint buffer."
           (unless (equal inferior-idris-working-directory filedir)
             (setq inferior-idris-working-directory filedir)
             (inferior-idris-send-command proc (concat ":cd " inferior-idris-working-directory)))
-          (inferior-idris-send-command proc (concat ":l " relfile)))
+          (if (equal relfile inferior-idris-loaded-file)
+              (inferior-idris-send-command proc ":r")
+            (setq inferior-idris-loaded-file relfile)
+            (inferior-idris-send-command proc (concat ":l " relfile))))
       (error "Cannot find file for current buffer"))))
 
 
