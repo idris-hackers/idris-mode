@@ -40,7 +40,9 @@
   (interactive)
   (setq inferior-idris-buffer
         (make-comint "idris" idris-interpreter-path))
-  (with-current-buffer inferior-idris-buffer (inferior-idris-mode)))
+  (with-current-buffer inferior-idris-buffer
+    (inferior-idris-mode)
+    (setq inferior-idris-working-directory nil)))
 
 (defun inferior-idris-process ()
   "Return the Idris process or start it"
@@ -51,7 +53,6 @@
         (inferior-idris-process))))
 
 (defun inferior-idris-send-command (proc str)
-  (message (concat "sending str " str " to proc"))
   (setq str (concat str "\n"))
   (with-current-buffer (process-buffer proc)
     (inferior-idris-wait-for-prompt proc)
@@ -87,6 +88,7 @@ The process PROC should be associated to a comint buffer."
 
 (defvar inferior-idris-working-directory nil
   "The current working directory of Idris")
+(make-variable-buffer-local 'inferior-idris-working-directory)
 
 (defun inferior-idris-load-file ()
   "Pass the current buffer's file to the inferior Idris process."
