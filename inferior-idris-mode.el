@@ -67,18 +67,15 @@
 (make-variable-buffer-local 'inferior-idris-seen-prompt)
 
 (defvar inferior-idris-look-for-warnings nil)
-(make-variable-buffer-local 'inferior-idris-look-for-warnings)
-
 (defvar inferior-idris-warnings '())
-(make-variable-buffer-local 'inferior-idris-look-for-warnings)
 
 (defun inferior-idris-spot-prompt (string)
-  (cl-flet ((maybe-add-warn
-             (s)
-             (if (and inferior-idris-look-for-warnings
-                      (string-prefix-p (concat inferior-idris-loaded-file ":") s))
-                 (push (split-string s ":") inferior-idris-warnings))))
-    (mapc #'maybe-add-warn (split-string string "\n")))
+  (if inferior-idris-look-for-warnings
+      (cl-flet ((maybe-add-warn
+                 (s)
+                 (if (string-prefix-p (concat inferior-idris-loaded-file ":") s)
+                     (push (split-string s ":") inferior-idris-warnings))))
+        (mapc #'maybe-add-warn (split-string string "\n"))))
   (let ((proc (get-buffer-process (current-buffer))))
     (when proc
       (save-excursion
