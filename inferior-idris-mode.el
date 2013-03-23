@@ -66,13 +66,29 @@
 (defvar inferior-idris-seen-prompt nil)
 (make-variable-buffer-local 'inferior-idris-seen-prompt)
 
+(defvar inferior-idris-look-for-warnings nil)
+(make-variable-buffer-local 'inferior-idris-look-for-warnings)
+
+(defvar inferior-idris-warnings '())
+(make-variable-buffer-local 'inferior-idris-look-for-warnings)
+
 (defun inferior-idris-spot-prompt (string)
+  (cl-flet ((maybe-add-warn
+             (s)
+             (if (and inferior-idris-look-for-warnings
+                      (string-prefix-p (concat inferior-idris-loaded-file ":") s))
+                 (push (split-string s ":") inferior-idris-warnings))))
+    (mapc #'maybe-add-warn (split-string string "\n")))
   (let ((proc (get-buffer-process (current-buffer))))
     (when proc
       (save-excursion
         (goto-char (process-mark proc))
-        (if (re-search-backward (concat "^" idris-prompt-regexp) (line-beginning-position) t)
-            (setq inferior-idris-seen-prompt t))))))
+        (if (re-search-backward
+             (concat "^" idris-prompt-regexp)
+             (line-beginning-position) t)
+            (progn (setq inferior-idris-seen-prompt t)
+                   (if inferior-idris-look-for-warnings
+                       (idris-higlight-warnings inferior-idris-warnings))))))))
 
 (defun inferior-idris-wait-for-prompt (proc &optional timeout)
   "Wait until PROC sends us a prompt.
@@ -82,7 +98,8 @@ The process PROC should be associated to a comint buffer."
              (goto-char comint-last-input-end)
              (not (or inferior-idris-seen-prompt
                       (setq inferior-idris-seen-prompt
-                            (re-search-forward (concat "^" idris-prompt-regexp) nil t))
+                            (re-search-forward
+                             (concat "^" idris-prompt-regexp) nil t))
                       (not (accept-process-output proc timeout))))))
     (unless inferior-idris-seen-prompt
       (error "Can't find the prompt"))))
@@ -95,9 +112,13 @@ The process PROC should be associated to a comint buffer."
   "The currently loaded file of Idris")
 (make-variable-buffer-local 'inferior-idris-loaded-file)
 
+(defvar inferior-idris-loaded-buffer nil
+  "The currently loaded buffer of Idris")
+
 (defun inferior-idris-load-file ()
   "Pass the current buffer's file to the inferior Idris process."
   (interactive)
+  (setq inferior-idris-loaded-buffer (current-buffer))
   (save-buffer)
   (let* ((file buffer-file-name)
          (relfile (file-relative-name file))
@@ -109,12 +130,75 @@ The process PROC should be associated to a comint buffer."
           (unless (equal inferior-idris-working-directory filedir)
             (setq inferior-idris-working-directory filedir)
             (inferior-idris-send-command proc (concat ":cd " inferior-idris-working-directory)))
+          (setq inferior-idris-look-for-warnings t)
+          (setq inferior-idris-warnings '())
           (if (equal relfile inferior-idris-loaded-file)
               (inferior-idris-send-command proc ":r")
             (setq inferior-idris-loaded-file relfile)
             (inferior-idris-send-command proc (concat ":l " relfile))))
       (error "Cannot find file for current buffer"))))
 
+(defface idris-warning-face
+  `((((class color) (background light))
+     (:underline "orange"))
+    (((class color) (background dark))
+     (:underline "coral"))
+    (t (:underline t)))
+  "Face for warnings from the compiler.")
+; TODO: group
+
+(defvar idris-warnings '() "All warnings in the current buffer")
+
+(defun get-region (warning)
+  (goto-char (point-min))
+  (let ((lno (string-to-number (nth 1 warning))))
+    (values
+     (line-beginning-position lno)
+     (1- (line-beginning-position (1+ lno))))))
+
+(defun get-message (warning)
+  (nth 2 warning))
+
+(defun idris-warning-overlay-p (overlay)
+  (overlay-get overlay 'idris-warning))
+
+(defun idris-warning-overlay-at-point ()
+  "Return the overlay for a note starting at point, otherwise nil."
+  (find (point) (remove-if-not 'idris-warning-overlay-p (overlays-at (point)))
+        :key 'overlay-start))
+
+(defun idris-warning-overlay (warning)
+  "Add a compiler warning to the buffer as an overlay.
+May merge overlays, if there's already one in the same location"
+  (multiple-value-bind (start end) (get-region warning)
+    (when start
+      (goto-char start)
+      (let ((overlay (idris-warning-overlay-at-point))
+            (message (get-message warning)))
+        (if overlay
+            (idris-warning-merge-overlays overlay message)
+          (idris-warning-create-overlay start end message))))))
+
+(defun idris-warning-merge-overlays (overlay message)
+  (overlay-put overlay 'help-echo
+               (concat (overlay-get overlay 'help-echo) "\n" message)))
+
+(defun idris-warning-create-overlay (start end message)
+  (let ((overlay (make-overlay start end)))
+    (overlay-put overlay 'idris-warning message)
+    (overlay-put overlay 'help-echo message)
+    (overlay-put overlay 'face 'idris-warning-face)
+    (overlay-put overlay 'mouse-face 'highlight)
+    (push overlay idris-warnings)
+    overlay))
+
+(defun idris-higlight-warnings (warnings)
+  "Highlight compiler warnings"
+  (switch-to-buffer-other-window inferior-idris-loaded-buffer)
+  (mapc #'delete-overlay idris-warnings)
+  (setq idris-wanings '())
+  (setq inferior-idris-look-for-warnings nil)
+  (mapc #'idris-warning-overlay warnings))
 
 
 (provide 'inferior-idris-mode)
