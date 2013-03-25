@@ -32,8 +32,8 @@
 (easy-menu-define idris-mode-menu idris-mode-map
   "Menu for the Idris major mode"
   `("Idris"
-    ["Load file" inferior-idris-load-file]
-    ;; TODO: customize-group
+    ["Load file" inferior-idris-load-file t]
+    ["Customize idris-mode" (customize-group 'idris) t]
     ))
 
 (defcustom idris-mode-hook '(turn-on-idris-indentation)
