@@ -28,6 +28,7 @@
 ;;; Code:
 (require 'comint)
 (require 'idris-syntax)
+(require 'cl)
 
 
 (defconst idris-prompt-regexp "[^>]+> *")
