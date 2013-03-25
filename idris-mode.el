@@ -14,6 +14,7 @@
 
 (require 'idris-syntax)
 (require 'inferior-idris-mode)
+(require 'idris-indentation)
 
 (defgroup idris nil "Idris mode" :prefix 'idris)
 
@@ -35,9 +36,10 @@
     ;; TODO: customize-group
     ))
 
-(defcustom idris-mode-hook nil
+(defcustom idris-mode-hook '(turn-on-idris-indentation)
   "Hook to run upon entering Idris mode."
-  :type 'hook)
+  :type 'hook
+  :options '(turn-on-idris-indentation))
 
 (define-derived-mode idris-mode fundamental-mode "Idris"
   "Major mode for Idris
