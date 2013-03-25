@@ -45,7 +45,8 @@
   "Major mode for Idris
      \\{idris-mode-map}
 Invokes `idris-mode-hook'."
-  (set-syntax-table idris-syntax-table)
+  :syntax-table idris-syntax-table
+  :group 'idris
   (set (make-local-variable 'font-lock-defaults)
        idris-font-lock-defaults))
 
