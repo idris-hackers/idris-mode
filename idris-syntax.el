@@ -119,6 +119,12 @@
            (1 ,idris-definition-face)
            (2 ,idris-parameter-face)
            (3 ,idris-equals-face))
+         ;; Definitions using "with"
+         ("^\\s-*\\(\\w+\\)\s-*\\(.?*\\)\\(with\\)\\(.?*\\)"
+           (1 ,idris-definition-face)
+           (2 ,idris-parameter-face)
+           (3 ,idris-keyword-face)
+           (4 ,idris-parameter-face))
          ;; Other keywords
          (,(regexp-opt idris-keywords 'words) . ,idris-keyword-face)
          ;; Identifiers
