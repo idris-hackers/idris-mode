@@ -28,8 +28,6 @@
 ;;; Code:
 (require 'comint)
 (require 'idris-syntax)
-(require 'cl)
-
 
 (defconst idris-prompt-regexp "[^>]+> *")
 
@@ -151,8 +149,8 @@ The process PROC should be associated to a comint buffer."
     (((class color) (background dark))
      (:underline "coral"))
     (t (:underline t)))
-  "Face for warnings from the compiler.")
-; TODO: group
+  "Face for warnings from the compiler."
+  :group 'idris-faces)
 
 (defvar idris-warnings '() "All warnings in the current buffer")
 

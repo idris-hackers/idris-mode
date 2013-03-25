@@ -1,54 +1,54 @@
-(defgroup idris-highlighting nil "Idris highlighting" :prefix 'idris :group 'idris)
+(defgroup idris-faces nil "Idris highlighting" :prefix 'idris :group 'idris)
 
 (defface idris-identifier-face
   '((t (:inherit default)))
   "The face to highlight idris identifiers with."
-  :group 'idris-highlighting)
+  :group 'idris-faces)
 
 (defface idris-keyword-face
   '((t (:inherit font-lock-keyword-face)))
   "The face to highlight idris keywords with."
-  :group 'idris-highlighting)
+  :group 'idris-faces)
 
 (defface idris-module-face
   '((t (:inherit font-lock-variable-name-face)))
   "The face to highlight module names with."
-  :group 'idris-highlighting)
+  :group 'idris-faces)
 
 (defface idris-directive-face
   '((t (:inherit font-lock-keyword-face)))
   "The face to highlight directives."
-  :group 'idris-highlighting)
+  :group 'idris-faces)
 
 (defface idris-directive-argument-face
   '((t (:inherit font-lock-preprocessor-face)))
   "The face to highlight arguments to directives."
-  :group 'idris-highlighting)
+  :group 'idris-faces)
 
 (defface idris-definition-face
   '((t (:inherit font-lock-function-name-face)))
   "The face to highlight things being defined in."
-  :group 'idris-highlighting)
+  :group 'idris-faces)
 
 (defface idris-parameter-face
   '((t (:inherit font-lock-constant-face)))
   "The face to highlight formal parameters to function definitions with."
-  :group 'idris-highlighting)
+  :group 'idris-faces)
 
 (defface idris-colon-face
   '((t (:inherit font-lock-variable-name-face)))
   "The face to highlight ':' in type annotations with."
-  :group 'idris-highlighting)
+  :group 'idris-faces)
 
 (defface idris-equals-face
   '((t (:inherit font-lock-variable-name-face)))
   "The face to highlight '=' in definitions with."
-  :group 'idris-highlighting)
+  :group 'idris-faces)
 
 (defface idris-operator-face
   '((t (:inherit font-lock-variable-name-face)))
   "The face to highlight operators with."
-  :group 'idris-highlighting)
+  :group 'idris-faces)
 
 (defvar idris-definition-keywords
   '("data" "class" "codata" "record")
