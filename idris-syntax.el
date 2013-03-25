@@ -61,13 +61,16 @@
     (modify-syntax-entry ?\- "_ 123" st)
     (modify-syntax-entry ?\n ">" st)
 
+    ;; ' and _ can be names
+    (modify-syntax-entry ?_ "w" st)
+    (modify-syntax-entry ?' "w" st)
+
     ;; Whitespace is whitespace
     (modify-syntax-entry ?\  " " st)
     (modify-syntax-entry ?\t " " st)
 
-    ;;Strings
+    ;; Strings
     (modify-syntax-entry ?\" "\"" st)
-    (modify-syntax-entry ?\' "\'" st)
     st))
 
 (defconst idris-keywords
