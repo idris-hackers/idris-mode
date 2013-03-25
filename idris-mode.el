@@ -17,7 +17,10 @@
 
 (defgroup idris nil "Idris mode" :prefix 'idris)
 
-
+(defcustom idris-interpreter-path "idris"
+  "The path to the Idris interpreter"
+  :type 'file
+  :group 'idris)
 
 (defvar idris-mode-map
   (let ((map (make-sparse-keymap)))

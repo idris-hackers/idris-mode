@@ -33,11 +33,6 @@
 
 (defconst idris-prompt-regexp "[^>]+> *")
 
-(defcustom idris-interpreter-path "idris"
-  "The path to the Idris interpreter"
-  :type 'path
-  :group 'idris)
-
 (defvar inferior-idris-buffer nil
   "The buffer in which the inferior process is running.")
 

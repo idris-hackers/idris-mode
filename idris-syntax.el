@@ -1,62 +1,54 @@
-(defcustom idris-identifier-face
-  'default
+(defgroup idris-highlighting nil "Idris highlighting" :prefix 'idris :group 'idris)
+
+(defface idris-identifier-face
+  '((t (:inherit default)))
   "The face to highlight idris identifiers with."
-  :type 'face
-  :group 'idris)
+  :group 'idris-highlighting)
 
-(defcustom idris-keyword-face
-  'font-lock-keyword-face
+(defface idris-keyword-face
+  '((t (:inherit font-lock-keyword-face)))
   "The face to highlight idris keywords with."
-  :type 'face
-  :group 'idris)
+  :group 'idris-highlighting)
 
-(defcustom idris-module-face
-  'font-lock-variable-name-face
+(defface idris-module-face
+  '((t (:inherit font-lock-variable-name-face)))
   "The face to highlight module names with."
-  :type 'face
-  :group 'idris)
+  :group 'idris-highlighting)
 
-(defcustom idris-directive-face
-  'font-lock-keyword-face
+(defface idris-directive-face
+  '((t (:inherit font-lock-keyword-face)))
   "The face to highlight directives."
-  :type 'face
-  :group 'idris)
+  :group 'idris-highlighting)
 
-(defcustom idris-directive-argument-face
-  'font-lock-preprocessor-face
+(defface idris-directive-argument-face
+  '((t (:inherit font-lock-preprocessor-face)))
   "The face to highlight arguments to directives."
-  :type 'face
-  :group 'idris)
+  :group 'idris-highlighting)
 
-(defcustom idris-definition-face
-  'font-lock-function-name-face
+(defface idris-definition-face
+  '((t (:inherit font-lock-function-name-face)))
   "The face to highlight things being defined in."
-  :type 'face
-  :group 'idris)
+  :group 'idris-highlighting)
 
-(defcustom idris-parameter-face
-  'font-lock-constant-face
+(defface idris-parameter-face
+  '((t (:inherit font-lock-constant-face)))
   "The face to highlight formal parameters to function definitions with."
-  :type 'face
-  :group 'idris)
+  :group 'idris-highlighting)
 
-(defcustom idris-colon-face
-  'font-lock-variable-name-face
+(defface idris-colon-face
+  '((t (:inherit font-lock-variable-name-face)))
   "The face to highlight ':' in type annotations with."
-  :type 'face
-  :group 'idris)
+  :group 'idris-highlighting)
 
-(defcustom idris-equals-face
-  'font-lock-variable-name-face
+(defface idris-equals-face
+  '((t (:inherit font-lock-variable-name-face)))
   "The face to highlight '=' in definitions with."
-  :type 'face
-  :group 'idris)
+  :group 'idris-highlighting)
 
-(defcustom idris-operator-face
-  'font-lock-variable-name-face
+(defface idris-operator-face
+  '((t (:inherit font-lock-variable-name-face)))
   "The face to highlight operators with."
-  :type 'face
-  :group 'idris)
+  :group 'idris-highlighting)
 
 (defvar idris-definition-keywords
   '("data" "class" "codata" "record")
@@ -104,54 +96,54 @@
     `('(
          ;; {- Block comments -}
          ("\\({-\\)\\(.*\\)\\(-}\\)"
-           (1 ,font-lock-comment-delimiter-face)
-           (2 ,font-lock-comment-face)
-           (3 ,font-lock-comment-delimiter-face))
+           (1 font-lock-comment-delimiter-face)
+           (2 font-lock-comment-face)
+           (3 font-lock-comment-delimiter-face))
          ;; TODO: this doesn't let you do newlines
          ;; Documentation comments.
          ("\\(--\\s-*|\\)\\(.*\\)\\(\n\\(--\\)\\(.*\\)\\)*"
-           (1 ,font-lock-comment-delimiter-face)
-           (2 ,font-lock-doc-face)
-           (4 ,font-lock-comment-delimiter-face)
-           (5 ,font-lock-doc-face))
+           (1 font-lock-comment-delimiter-face)
+           (2 font-lock-doc-face)
+           (4 font-lock-comment-delimiter-face)
+           (5 font-lock-doc-face))
          ;; Ordinary comments.
          ("\\(--\\)\s*\\(.*\\)"
-           (1 ,font-lock-comment-delimiter-face)
-           (2 ,font-lock-comment-face))
+           (1 font-lock-comment-delimiter-face)
+           (2 font-lock-comment-face))
          ;; `%access`, `%default`, etc
          ("^%\\(\\w+\\)\\s-*\\(.+\\)"
-           (1 ,idris-directive-face)
-           (2 ,idris-directive-argument-face))
+           (1 'idris-directive-face)
+           (2 'idris-directive-argument-face))
          ;; Definitions with keywords.
          (,(format "\\(%s\\) \\(\\w+\\)" (regexp-opt idris-definition-keywords))
-           (1 ,idris-keyword-face)
-           (2 ,idris-definition-face))
+           (1 'idris-keyword-face)
+           (2 'idris-definition-face))
          ;; Type annotations.
          ;; TODO: this won't match, e.g. f:a
          ("^\\s-*\\(\\w+\\)\\s-+\\(:\\)\\s-+"
-           (1 ,idris-definition-face)
-           (2 ,idris-colon-face))
+           (1 'idris-definition-face)
+           (2 'idris-colon-face))
          ;; Operators
-         (,idris-operator-regexp . ,idris-operator-face)
+         (,idris-operator-regexp . 'idris-operator-face)
          ;; Vanilla definitions with = (and optionally let ... in ...)
          ;; TODO: clean up how parameters are picked up
          ("^\\s-*\\(\\w+\\)\s-*\\(.?*\\)\\(=\\)"
-           (1 ,idris-definition-face)
-           (2 ,idris-parameter-face)
-           (3 ,idris-equals-face))
+           (1 'idris-definition-face)
+           (2 'idris-parameter-face)
+           (3 'idris-equals-face))
          ;; Definitions using "with"
          ("^\\s-*\\(\\w+\\)\s-*\\(.?*\\)\\(with\\)\\(.?*\\)"
-           (1 ,idris-definition-face)
-           (2 ,idris-parameter-face)
-           (3 ,idris-keyword-face)
-           (4 ,idris-parameter-face))
+           (1 'idris-definition-face)
+           (2 'idris-parameter-face)
+           (3 'idris-keyword-face)
+           (4 'idris-parameter-face))
          ;; Character literals
          ("'\\(?:\\(?:[^']\\)\\|\\(?:\\\\[^']+\\)\\)'"
-           (0 ,font-lock-string-face t))
+           (0 font-lock-string-face t))
          ;; Other keywords
-         (,(regexp-opt idris-keywords 'words) . ,idris-keyword-face)
+         (,(regexp-opt idris-keywords 'words) . 'idris-keyword-face)
          ;; Identifiers
-         ("[a-zA-Z_]\\w*" . ,idris-identifier-face)
+         ("[a-zA-Z_]\\w*" . 'idris-identifier-face)
          ;; TODO: operator definitions.
          ;; TODO: let ... in ...
 )))
