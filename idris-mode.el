@@ -35,11 +35,14 @@
     ;; TODO: customize-group
     ))
 
+(defcustom idris-mode-hook nil
+  "Hook to run upon entering Idris mode."
+  :type 'hook)
 
 (define-derived-mode idris-mode fundamental-mode "Idris"
   "Major mode for Idris
      \\{idris-mode-map}
-We should run some hook at some point in the future."
+Invokes `idris-mode-hook'."
   (set-syntax-table idris-syntax-table)
   (set (make-local-variable 'font-lock-defaults)
        idris-font-lock-defaults))
