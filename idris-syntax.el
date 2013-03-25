@@ -46,14 +46,41 @@
   "[-!#$%&\*\+./<=>\?@\\^|~:]+"
   "A regular expression matching an Idris operator.")
 
-(defvar idris-syntax-table
-  (make-syntax-table))
+(defconst idris-syntax-table
+  (let ((st (make-syntax-table (standard-syntax-table))))
 
-(modify-syntax-entry ?< "--" idris-syntax-table)
+    ;; Matching parens
+    (modify-syntax-entry ?\( "()" st)
+    (modify-syntax-entry ?\) ")(" st)
+    (modify-syntax-entry ?\[ "(]" st)
+    (modify-syntax-entry ?\] ")[" st)
 
-(defun idris-load-faces ()
-  (interactive)
-  (setq font-lock-defaults
+    ;; Matching {}, but with nested comments
+    (modify-syntax-entry ?\{ "(} 1bn" st)
+    (modify-syntax-entry ?\} "){ 4bn" st)
+    (modify-syntax-entry ?\- "_ 123" st)
+    (modify-syntax-entry ?\n ">" st)
+
+    ;; ' and _ can be names
+    (modify-syntax-entry ?_ "w" st)
+    (modify-syntax-entry ?' "w" st)
+
+    ;; Whitespace is whitespace
+    (modify-syntax-entry ?\  " " st)
+    (modify-syntax-entry ?\t " " st)
+
+    ;; Strings
+    (modify-syntax-entry ?\" "\"" st)
+    st))
+
+(defconst idris-keywords
+  '("attack" "case" "compute" "do" "dsl" "else" "exact" "focus" "if" "import"
+    "in" "infix" "infixl" "infixr" "instance" "intros" "module" "mutual"
+    "namespace" "of" "let" "parameters" "partial" "pattern" "prefix" "public"
+    "refine" "rewrite" "solve" "syntax" "term" "then" "total" "trivial" "try"
+    "using" "where" "with"))
+
+(defconst idris-font-lock-defaults
     `('(
          ;; {- Block comments -}
          ("\\({-\\)\\(.*\\)\\(-}\\)"
@@ -92,56 +119,20 @@
            (1 ,idris-definition-face)
            (2 ,idris-parameter-face)
            (3 ,idris-equals-face))
+         ;; Definitions using "with"
+         ("^\\s-*\\(\\w+\\)\s-*\\(.?*\\)\\(with\\)\\(.?*\\)"
+           (1 ,idris-definition-face)
+           (2 ,idris-parameter-face)
+           (3 ,idris-keyword-face)
+           (4 ,idris-parameter-face))
+         ;; Other keywords
+         (,(regexp-opt idris-keywords 'words) . ,idris-keyword-face)
          ;; Identifiers
          ("\\w+" . ,idris-identifier-face)
          ;; TODO: operator definitions.
          ;; TODO: let ... in ...
-))))
+)))
 
-; Make the actual mode.
-(define-derived-mode idris-mode fundamental-mode "Idris"
-  (set-syntax-table idris-syntax-table)
-  (idris-load-faces))
 
-(font-lock-add-keywords 'idris-mode
-  '(("module" . idris-keyword-face)
-     ("namespace" . idris-keyword-face)
-     ("import" . idris-keyword-face)
-     ("where" . idris-keyword-face)
-     ("public" . idris-keyword-face)
-     ("do" . idris-keyword-face)
-     ("case" . idris-keyword-face)
-     ("using" . idris-keyword-face)
-     ("parameters" . idris-keyword-face)
-     ("mutual" . idris-keyword-face)
-     ("if" . idris-keyword-face)
-     ("then" . idris-keyword-face)
-     ("else" . idris-keyword-face)
-     ("prefix" . idris-keyword-face)
-     ("infix" . idris-keyword-face)
-     ("infixr" . idris-keyword-face)
-     ("infixl" . idris-keyword-face)
-     ("pattern" . idris-keyword-face)
-     ("term" . idris-keyword-face)
-     ("syntax" . idris-keyword-face)
-     ("of" . idris-keyword-face)
-     ("intros" . idris-keyword-face)
-     ("rewrite" . idris-keyword-face)
-     ("exact" . idris-keyword-face)
-     ("refine" . idris-keyword-face)
-     ("trivial" . idris-keyword-face)
-     ("focus" . idris-keyword-face)
-     ("try" . idris-keyword-face)
-     ("compute" . idris-keyword-face)
-     ("solve" . idris-keyword-face)
-     ("attack" . idris-keyword-face)
-     ("with" . idris-keyword-face)
-     ("dsl" . idris-keyword-face)
-     ("instance" . idris-keyword-face)
-     ("partial" . idris-keyword-face)
-     ("total" . idris-keyword-face)))
 
-; Automatically use idris-mode for .idr files.
-(push '("\\.idr$" . idris-mode) auto-mode-alist)
-
-(provide 'idris)
+(provide 'idris-syntax)
