@@ -125,10 +125,13 @@
            (2 ,idris-parameter-face)
            (3 ,idris-keyword-face)
            (4 ,idris-parameter-face))
+         ;; Character literals
+         ("'\\(?:\\(?:[^']\\)\\|\\(?:\\\\[^']+\\)\\)'"
+           (0 ,font-lock-string-face t))
          ;; Other keywords
          (,(regexp-opt idris-keywords 'words) . ,idris-keyword-face)
          ;; Identifiers
-         ("\\w+" . ,idris-identifier-face)
+         ("[a-zA-Z_]\\w*" . ,idris-identifier-face)
          ;; TODO: operator definitions.
          ;; TODO: let ... in ...
 )))
