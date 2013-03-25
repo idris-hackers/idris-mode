@@ -26,5 +26,9 @@ Customize `inferior-idris-path` if idris is not on your default path.
 
 ## Installation
 
-Drop `idris.el` somewhere in your load path and `(require 'idris)`
+Place the elisp files somewhere in your load path and `(require 'idris-mode)`
 somewhere in `~/.emacs` or `~.emacs.d/init.el`.
+
+## Customization
+
+Customize various aspects of the mode using `M-x customize-group RET idris RET`.
