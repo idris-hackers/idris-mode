@@ -15,6 +15,10 @@
 (require 'idris-syntax)
 (require 'inferior-idris-mode)
 
+(defgroup idris nil "Idris mode" :prefix 'idris)
+
+
+
 (defvar idris-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map [?\C-c ?\C-l] 'inferior-idris-load-file)

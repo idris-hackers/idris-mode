@@ -1,42 +1,62 @@
-(defvar idris-identifier-face
+(defcustom idris-identifier-face
   'default
-  "The face to highlight idris identifiers with.")
+  "The face to highlight idris identifiers with."
+  :type 'face
+  :group 'idris)
 
-(defvar idris-keyword-face
+(defcustom idris-keyword-face
   'font-lock-keyword-face
-  "The face to highlight idris keywords with.")
+  "The face to highlight idris keywords with."
+  :type 'face
+  :group 'idris)
 
-(defvar idris-module-face
+(defcustom idris-module-face
   'font-lock-variable-name-face
-  "The face to highlight module names with.")
+  "The face to highlight module names with."
+  :type 'face
+  :group 'idris)
 
-(defvar idris-directive-face
+(defcustom idris-directive-face
   'font-lock-keyword-face
-  "The face to highlight directives.")
+  "The face to highlight directives."
+  :type 'face
+  :group 'idris)
 
-(defvar idris-directive-argument-face
+(defcustom idris-directive-argument-face
   'font-lock-preprocessor-face
-  "The face to highlight arguments to directives.")
+  "The face to highlight arguments to directives."
+  :type 'face
+  :group 'idris)
 
-(defvar idris-definition-face
+(defcustom idris-definition-face
   'font-lock-function-name-face
-  "The face to highlight things being defined in.")
+  "The face to highlight things being defined in."
+  :type 'face
+  :group 'idris)
 
-(defvar idris-parameter-face
+(defcustom idris-parameter-face
   'font-lock-constant-face
-  "The face to highlight formal parameters to function definitions with.")
+  "The face to highlight formal parameters to function definitions with."
+  :type 'face
+  :group 'idris)
 
-(defvar idris-colon-face
+(defcustom idris-colon-face
   'font-lock-variable-name-face
-  "The face to highlight ':' in type annotations with.")
+  "The face to highlight ':' in type annotations with."
+  :type 'face
+  :group 'idris)
 
-(defvar idris-equals-face
+(defcustom idris-equals-face
   'font-lock-variable-name-face
-  "The face to highlight '=' in definitions with.")
+  "The face to highlight '=' in definitions with."
+  :type 'face
+  :group 'idris)
 
-(defvar idris-operator-face
+(defcustom idris-operator-face
   'font-lock-variable-name-face
-  "The face to highlight operators with.")
+  "The face to highlight operators with."
+  :type 'face
+  :group 'idris)
 
 (defvar idris-definition-keywords
   '("data" "class" "codata" "record")
