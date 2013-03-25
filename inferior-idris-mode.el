@@ -82,11 +82,10 @@
 
 (defun inferior-idris-spot-prompt (string)
   (if inferior-idris-look-for-warnings
-      (cl-flet ((maybe-add-warn
-                 (s)
-                 (if (string-prefix-p (concat inferior-idris-loaded-file ":") s)
-                     (push (split-string s ":") inferior-idris-warnings))))
-        (mapc #'maybe-add-warn (split-string string "\n"))))
+      (mapc #'(lambda (s)
+                (if (string-prefix-p (concat inferior-idris-loaded-file ":") s)
+                    (push (split-string s ":") inferior-idris-warnings)))
+            (split-string string "\n")))
   (let ((proc (get-buffer-process (current-buffer))))
     (when proc
       (save-excursion
