@@ -126,11 +126,15 @@
          ;; Operators
          (,idris-operator-regexp . 'idris-operator-face)
          ;; "where"-blocks
-         ("^\\s-+\\(where\\)\\s-*\\(\\w+\\)\s-*\\(.?*\\)\\(=\\)"
+         ("^\\s-+\\(where\\)\\s-+\\(\\w+\\)\s-*\\(.?*\\)\\(=\\)"
            (1 'idris-keyword-face)
            (2 'idris-definition-face)
            (3 'idris-parameter-face)
            (4 'idris-equals-face))
+         ("^\\s-+\\(where\\)\\s-+\\(\\w+\\)\s-*\\(:\\)\\s-*"
+           (1 'idris-keyword-face)
+           (2 'idris-definition-face)
+           (3 'idris-colon-face))
          ;; Vanilla definitions with = (and optionally let ... in ...)
          ;; TODO: clean up how parameters are picked up
          ("^\\s-*\\(\\w+\\)\s-*\\(.?*\\)\\(=\\)"
