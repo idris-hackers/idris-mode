@@ -49,7 +49,7 @@ Invokes `idris-mode-hook'."
   :group 'idris
   (set (make-local-variable 'font-lock-defaults)
        idris-font-lock-defaults)
-  (setq (make-local-variable 'indent-tabs-mode) nil))
+  (set (make-local-variable 'indent-tabs-mode) nil))
 
 ; Automatically use idris-mode for .idr files.
 (push '("\\.idr$" . idris-mode) auto-mode-alist)
