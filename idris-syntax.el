@@ -1,3 +1,25 @@
+;; idris-syntax.el - major mode for editing idris source files
+;;
+;; Copyright (C) 2013 tim dixon, David Raymond Christiansen and Hannes Mehnert
+;;
+;; Authors: tim dixon <tdixon51793@gmail.com>,
+;;          David Raymond Christiansen <drc@itu.dk>,
+;;          Hannes Mehnert <hame@itu.dk>
+;;
+;; This program is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+
+
 (defgroup idris-faces nil "Idris highlighting" :prefix 'idris :group 'idris)
 
 (defface idris-identifier-face
