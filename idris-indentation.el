@@ -630,30 +630,8 @@ Preserves indentation and removes extra whitespace"
    (lambda ()
      (let ((current-indent (idris-current-column)))
        (idris-indentation-read-next-token)
-       (when (equal current-token "(")
-	 (idris-indentation-list
-	  #'idris-indentation-module-export
-	  ")" "," nil))
        (when (equal current-token 'end-tokens)
-	 (idris-indentation-add-indentation current-indent)
-	 (throw 'parse-end nil))
-       (when (equal current-token "where")
-	 (idris-indentation-read-next-token)
-	 (when (equal current-token 'end-tokens)
-	   (idris-indentation-add-layout-indent)
-	   (throw 'parse-end nil))
-	 (idris-indentation-layout #'idris-indentation-toplevel))))
-   nil))
-
-(defun idris-indentation-module-export ()
-  (cond ((equal current-token "module")
-	 (let ((current-indent (idris-current-column)))
-	   (idris-indentation-read-next-token)
-	   (cond ((equal current-token 'end-tokens)
-		  (idris-indentation-add-indentation current-indent))
-		 ((equal current-token 'value)
-		  (idris-indentation-read-next-token)))))
-	(t (idris-indentation-type))))
+         (idris-indentation-layout #'idris-indentation-toplevel)))) nil))
 
 (defun idris-indentation-list (parser end sep stmt-sep)
   (idris-indentation-with-starter
