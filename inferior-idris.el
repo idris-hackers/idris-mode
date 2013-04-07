@@ -1,0 +1,148 @@
+;;; inferior-idris.el --- Run an Idris interpreter using S-Expression communication protocol
+
+;; Copyright (C) 2013  Hannes Mehnert
+
+;; Author: Hannes Mehnert <hame@itu.dk>
+
+;; License:
+;; Inspiration is taken from SLIME/DIME (http://common-lisp.net/project/slime/) (https://github.com/dylan-lang/dylan-mode)
+;; Therefore license is GPL
+
+;; This file is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 3, or (at your option)
+;; any later version.
+
+;; This file is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs; see the file COPYING. If not, write to
+;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+;; Boston, MA 02111-1307, USA.
+
+(require 'pp)
+(require 'cl) ;;; for assert
+
+(defun idris-buffer-name (type)
+  (assert (keywordp type))
+  (concat (format "*idris-%s*" (substring (symbol-name type) 1))))
+
+(defvar idris-event-buffer-name (idris-buffer-name :events)
+  "The name of the idris event buffer.")
+
+(defvar idris-process nil
+  "The idris process.")
+
+(defun idris-events-buffer ()
+  "Return or create the event log buffer."
+  (or (get-buffer idris-event-buffer-name)
+      (let ((buffer (get-buffer-create idris-event-buffer-name)))
+        (with-current-buffer buffer
+          (buffer-disable-undo)
+          (set (make-local-variable 'outline-regexp) "^(")
+          (set (make-local-variable 'comment-start) ";")
+          (set (make-local-variable 'comment-end) "")
+          (setq buffer-read-only t))
+        buffer)))
+
+(defun idris-log-event (event sending)
+  "Record the fact that EVENT occured."
+  (with-current-buffer (idris-events-buffer)
+    (goto-char (point-max))
+    (let ((buffer-read-only nil))
+      (save-excursion
+        (if sending
+            (insert "-> ")
+          (insert "<- "))
+        (idris-pprint-event event (current-buffer))))
+    (goto-char (point-max))))
+
+(defun idris-pprint-event (event buffer)
+  "Pretty print EVENT in BUFFER."
+  (let ((print-length 20)
+        (print-level 6)
+        (pp-escape-newlines t))
+    (pp event buffer)))
+
+;(defvar idris-repl-buffer-name (idris-buffer-name :repl)
+;  "The name of the Idris REPL buffer.")
+;
+;(defun idris-repl-buffer ()
+;  "Return or create REPL buffer."
+;  (or (get-buffer idris-repl-buffer-name)
+;      (let ((buffer (get-buffer-create idris-repl-buffer-name)))
+;        (with-current-buffer buffer
+;          (buffer-disable-undo)
+;          ;; we want some mode and completion!
+;        buffer)))
+
+
+;(defun idris-dispatch-event (event &optional process)
+;  (destructure-case event
+
+;;; Interface
+(defun idris-send (sexp proc)
+  "Send a SEXP to Idris over the PROC. This is the lowest level of communication."
+  (let* ((msg (concat (idris-prin1-to-string sexp) "\n"))
+         (string (concat (idris-encode-length (length msg)) msg)))
+    (idris-log-event sexp t)
+    (process-send-string proc string)))
+
+(defun idris-process-available-input (process)
+  "Process all complete messages which arrived from Idris."
+  (with-current-buffer (process-buffer process)
+    (while (idris-have-input-p)
+      (let ((event (idris-receive)))
+        (idris-log-event event nil)))))
+;        (unwind-protect
+;            (save-current-buffer
+;              (idris-dispach-event event process)))))))
+
+(defun idris-have-input-p ()
+  "Return true if a complete message is available."
+  (goto-char (point-min))
+  (and (>= (buffer-size) 6)
+       (>= (- (buffer-size) 6) (idris-decode-length))))
+
+(defun idris-receive ()
+  "Read a message from the idris process"
+  (goto-char (point-min))
+  (let* ((length (idris-decode-length))
+         (start (+ 6 (point)))
+         (end (+ start length)))
+    (assert (plusp length))
+    (prog1 (save-restriction
+             (narrow-to-region start end)
+             (read (current-buffer)))
+      (delete-region (point-min) end))))
+
+(defun idris-decode-length ()
+  "Read a 24-bit hex-encoded integer from buffer."
+  (string-to-number (buffer-substring-no-properties (point) (+ (point) 6)) 16))
+
+(defun idris-encode-length (n)
+  "Encode an integer into a 24-bit hex string."
+  (format "%06x" n))
+
+(defun idris-prin1-to-string (sexp)
+  "Like `prin1-to-string', but don't octal-escape non-ascii characters."
+  (with-temp-buffer
+    (let (print-escape-nonascii
+          print-escape-newlines
+          print-length
+          print-level)
+      (prin1 sexp (current-buffer))
+      (buffer-string))))
+
+
+(defun idris-run ()
+  "Run an inferior Idris process"
+  (interactive)
+  (setq idris-process
+        (start-process "idris" (idris-buffer-name :process) idris-interpreter-path "--ideslave"))
+  (set-process-query-on-exit-flag idris-process t))
+
+(provide 'inferior-idris)
