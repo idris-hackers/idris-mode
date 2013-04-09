@@ -13,7 +13,7 @@
 ;;; Code:
 
 (require 'idris-syntax)
-(require 'inferior-idris-mode)
+(require 'inferior-idris)
 (require 'idris-indentation)
 
 (defgroup idris nil "Idris mode" :prefix 'idris)
