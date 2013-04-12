@@ -31,10 +31,10 @@
   (concat (format "*idris-%s*" (substring (symbol-name type) 1))))
 
 (defvar idris-event-buffer-name (idris-buffer-name :events)
-  "The name of the idris event buffer.")
+  "The name of the Idris event buffer.")
 
 (defvar idris-process nil
-  "The idris process.")
+  "The Idris process.")
 
 (defun idris-events-buffer ()
   "Return or create the event log buffer."
@@ -67,21 +67,50 @@
         (pp-escape-newlines t))
     (pp event buffer)))
 
-;(defvar idris-repl-buffer-name (idris-buffer-name :repl)
-;  "The name of the Idris REPL buffer.")
-;
-;(defun idris-repl-buffer ()
-;  "Return or create REPL buffer."
-;  (or (get-buffer idris-repl-buffer-name)
-;      (let ((buffer (get-buffer-create idris-repl-buffer-name)))
-;        (with-current-buffer buffer
-;          (buffer-disable-undo)
-;          ;; we want some mode and completion!
-;        buffer)))
+(defmacro destructure-case (value &rest patterns)
+  "Dispatch VALUE to one of PATTERNS.
+A cross between `case' and `destructuring-bind'.
+The pattern syntax is:
+  ((HEAD . ARGS) . BODY)
+The list of patterns is searched for a HEAD `eq' to the car of
+VALUE. If one is found, the BODY is executed with ARGS bound to the
+corresponding values in the CDR of VALUE."
+  (let ((operator (gensym "op-"))
+	(operands (gensym "rand-"))
+	(tmp (gensym "tmp-")))
+    `(let* ((,tmp ,value)
+	    (,operator (car ,tmp))
+	    (,operands (cdr ,tmp)))
+       (case ,operator
+	 ,@(mapcar (lambda (clause)
+                     (if (eq (car clause) t)
+                         `(t ,@(cdr clause))
+                       (destructuring-bind ((op &rest rands) &rest body) clause
+                         `(,op (destructuring-bind ,rands ,operands
+                                 . ,body)))))
+		   patterns)
+	 ,@(if (eq (caar (last patterns)) t)
+	       '()
+	     `((t (error "ELISP destructure-case failed: %S" ,tmp))))))))
 
+(defvar idris-rex-continuations '()
+  "List of (ID . FUNCTION) continuations waiting for RPC results.")
 
-;(defun idris-dispatch-event (event &optional process)
-;  (destructure-case event
+(defvar idris-continuation-counter 0
+  "Continuation serial number counter.")
+
+(defun idris-dispatch-event (event process)
+  (destructure-case event
+    ((:emacs-rex form continuation)
+     (let ((id (incf idris-continuation-counter)))
+       (idris-send `(:emacs-rex ,form ,id) process)
+       (push (cons id continuation) idris-rex-continuations)))
+    ((:return value id)
+     (let ((rec (assq id idris-rex-continuations)))
+       (cond (rec (setf idris-rex-continuations
+                        (remove rec idris-rex-continuations))
+                  (funcall (cdr rec) value))
+             (t (error "Unexpected reply: %S %S" id value)))))))
 
 ;;; Interface
 (defun idris-send (sexp proc)
@@ -96,10 +125,8 @@
   (with-current-buffer (process-buffer process)
     (while (idris-have-input-p)
       (let ((event (idris-receive)))
-        (idris-log-event event nil)))))
-;        (unwind-protect
-;            (save-current-buffer
-;              (idris-dispach-event event process)))))))
+        (idris-log-event event nil)
+        (idris-dispatch-event event process)))))
 
 (defun idris-have-input-p ()
   "Return true if a complete message is available."
@@ -143,6 +170,63 @@
   (interactive)
   (setq idris-process
         (start-process "idris" (idris-buffer-name :process) idris-interpreter-path "--ideslave"))
+  (set-process-filter idris-process 'idris-output-filter)
+  (set-process-sentinel idris-process 'idris-sentinel)
   (set-process-query-on-exit-flag idris-process t))
+
+(defun idris-output-filter (process string)
+  "Accept output from the socket and process all complete messages"
+  (with-current-buffer (process-buffer process)
+    (goto-char (point-max))
+    (insert string)
+    (idris-process-available-input process)))
+
+(defun idris-sentinel (process message)
+  (message "Idris quit unexpectly: %s" message)
+  (delete-process idris-process)
+  (setq idris-process nil))
+
+
+(defmacro* idris-rex ((&rest saved-vars) (sexp) process &rest continuations)
+  "(idris-rex (VAR ...) (SEXP) PROCESS CLAUSES ...)
+
+Remote EXecute SEXP.
+
+VARs are a list of saved variables visible in the other forms.  Each
+VAR is either a symbol or a list (VAR INIT-VALUE).
+
+SEXP is evaluated and the princed version is sent to Dylan.
+
+PROCESS is the process to be interacted with
+
+CLAUSES is a list of patterns with same syntax as
+`destructure-case'.  The result of the evaluation of SEXP is
+dispatched on CLAUSES.  The result is either a sexp of the
+form (:ok VALUE) or (:abort CONDITION).  CLAUSES is executed
+asynchronously.
+
+Note: don't use backquote syntax for SEXP, because various Emacs
+versions cannot deal with that."
+  (let ((result (gensym)))
+    `(lexical-let ,(loop for var in saved-vars
+                         collect (etypecase var
+                                   (symbol (list var var))
+                                   (cons var)))
+       (idris-dispatch-event
+        (list :emacs-rex ,sexp
+              (lambda (,result)
+                (destructure-case ,result
+                  ,@continuations))) process))))
+
+(defun idris-eval-async (sexp process cont)
+  "Evaluate EXPR on the superior Idris and call CONT with the result."
+  (idris-rex (cont (buffer (current-buffer)))
+      (sexp) process
+    ((:ok result)
+     (when cont
+       (set-buffer buffer)
+       (funcall cont result)))
+    ((:abort condition)
+     (message "Evaluation aborted on %s." condition))))
 
 (provide 'inferior-idris)
