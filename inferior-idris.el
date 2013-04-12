@@ -178,8 +178,8 @@ corresponding values in the CDR of VALUE."
   "Accept output from the socket and process all complete messages"
   (with-current-buffer (process-buffer process)
     (goto-char (point-max))
-    (insert string)
-    (idris-process-available-input process)))
+    (insert string))
+  (idris-process-available-input process))
 
 (defun idris-sentinel (process message)
   (message "Idris quit unexpectly: %s" message)
@@ -187,7 +187,7 @@ corresponding values in the CDR of VALUE."
   (setq idris-process nil))
 
 
-(defmacro* idris-rex ((&rest saved-vars) (sexp) process &rest continuations)
+(defmacro* idris-rex ((&rest saved-vars) (sexp) (process) &rest continuations)
   "(idris-rex (VAR ...) (SEXP) PROCESS CLAUSES ...)
 
 Remote EXecute SEXP.
@@ -221,7 +221,7 @@ versions cannot deal with that."
 (defun idris-eval-async (sexp process cont)
   "Evaluate EXPR on the superior Idris and call CONT with the result."
   (idris-rex (cont (buffer (current-buffer)))
-      (sexp) process
+      (sexp) (process)
     ((:ok result)
      (when cont
        (set-buffer buffer)

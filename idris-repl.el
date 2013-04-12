@@ -135,6 +135,8 @@
     map)
   "Keymap used in Idris REPL mode.")
 
+;; Warning: Bug in idris-repl-mode: it forgets to call `run-mode-hooks'
+;; also, keymap doesn't work :/
 (defun idris-repl-mode ()
   "Major mode for interacting with Idris.
 \\{idris-repl-mode-map}"
@@ -158,9 +160,9 @@
   (let ((input (idris-repl-current-input)))
     (idris-eval-async `(:interpret ,input) idris-process
                       (lambda (result)
-                        (destructuring-bind (output value) result
+                        (destructuring-bind (output) result
                           (push-mark)
-                          (insert output value))))))
+                          (insert output))))))
 
 (defun idris-repl-complete ()
   "Completion of the current input")
