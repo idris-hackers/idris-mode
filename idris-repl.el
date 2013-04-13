@@ -160,9 +160,10 @@
   (let ((input (idris-repl-current-input)))
     (idris-eval-async `(:interpret ,input) idris-process
                       (lambda (result)
-                        (destructuring-bind (output) result
+                        (destructuring-bind (output value) result
                           (push-mark)
-                          (insert output))))))
+                          (apply 'insert output)
+                          (insert value))))))
 
 (defun idris-repl-complete ()
   "Completion of the current input")

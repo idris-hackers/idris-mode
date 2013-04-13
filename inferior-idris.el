@@ -126,7 +126,9 @@ corresponding values in the CDR of VALUE."
     (while (idris-have-input-p)
       (let ((event (idris-receive)))
         (idris-log-event event nil)
-        (idris-dispatch-event event process)))))
+        (unwind-protect
+            (save-current-buffer
+              (idris-dispatch-event event process)))))))
 
 (defun idris-have-input-p ()
   "Return true if a complete message is available."
