@@ -1,8 +1,8 @@
 ;;; idris-repl.el --- Run an Idris interpreter using S-Expression communication protocol
 
-;; Copyright (C) 2013  Hannes Mehnert
+;; Copyright (C) 2013 Hannes Mehnert
 
-;; Author: Hannes Mehnert <hame@itu.dk>
+;; Author: Hannes Mehnert <hannes@mehnert.org>
 
 ;; License:
 ;; Inspiration is taken from SLIME/DIME (http://common-lisp.net/project/slime/) (https://github.com/dylan-lang/dylan-mode)
@@ -25,6 +25,7 @@
 
 (require 'inferior-idris)
 (require 'idris-common-utils)
+(require 'idris-completion)
 
 (defgroup idris-repl nil "Idris REPL" :prefix 'idris :group 'idris)
 
@@ -122,6 +123,17 @@
           (idris-repl-mode))
         buffer)))
 
+(defun idris-switch-to-output-buffer ()
+  "Select the output buffer and scroll to bottom."
+  (interactive)
+  (pop-to-buffer (idris-repl-buffer))
+  (goto-char (point-max)))
+
+(defun idris-repl ()
+  (interactive)
+  (idris-run)
+  (idris-switch-to-output-buffer))
+
 (defvar idris-repl-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map [return] 'idris-repl-return)
@@ -158,6 +170,7 @@
 (defun idris-repl-return ()
   "Send command over to Idris"
   (let ((input (idris-repl-current-input)))
+    (idris-repl-add-to-input-history input)
     (idris-eval-async `(:interpret ,input) idris-process
                       (lambda (result)
                         (destructuring-bind (output value) result
@@ -166,8 +179,22 @@
                           (insert value))))))
 
 (defun idris-repl-complete ()
-  "Completion of the current input")
-;; need to do a sync req!
+  "Completion of the current input"
+  (let* ((input (idris-repl-current-input))
+         (result (idris-eval `(:repl-completions ,input) idris-process)))
+    (destructuring-bind (completions partial) result
+      (if (null completions)
+          (progn
+            (idris-minibuffer-respecting-message "Can't find completions for \"%s\"" input)
+            (ding)
+            (idris-complete-restore-window-configuration))
+        (insert-and-inherit (substring partial (length input)))
+        (if (= (length completions) 1)
+            (progn
+              (idris-minibuffer-respecting-message "Sole completion")
+              (idris-complete-restore-window-configuration))
+          (idris-minibuffer-respecting-message "Completions, not unique")
+          (idris-display-or-scroll-completions completions partial))))))
 
 (defun idris-repl-begin-of-prompt ()
   "Got to the beginning of linke or the prompt."
@@ -178,6 +205,9 @@
         (t (beginning-of-line 1))))
 
 ;;; history
+
+(defun idris-repl-add-to-input-history (input)
+  "Adds input to history.")
 
 (defun idris-repl-backward-history ()
   "Cycle backward through history.")

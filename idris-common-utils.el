@@ -1,8 +1,8 @@
 ;;; idris-common-utils.el --- Useful utilities
 
-;; Copyright (C) 2013  Hannes Mehnert
+;; Copyright (C) 2013 Hannes Mehnert
 
-;; Author: Hannes Mehnert <hame@itu.dk>
+;; Author: Hannes Mehnert <hannes@mehnert.org>
 
 ;; License:
 ;; Inspiration is taken from SLIME/DIME (http://common-lisp.net/project/slime/) (https://github.com/dylan-lang/dylan-mode)
@@ -22,6 +22,19 @@
 ;; along with GNU Emacs; see the file COPYING. If not, write to
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA 02111-1307, USA.
+
+(require 'cl)
+
+(defun idris-buffer-name (type)
+  (assert (keywordp type))
+  (concat (format "*idris-%s*" (substring (symbol-name type) 1))))
+
+(defun idris-minibuffer-respecting-message (text &rest args)
+  "Display TEXT as a message, without hiding any minibuffer contents."
+  (let ((mtext (format " [%s]" (apply #'format text args))))
+    (if (minibuffer-window-active-p (minibuffer-window))
+        (minibuffer-message mtext)
+      (message "%s" mtext))))
 
 (defun idris-same-line-p (pos1 pos2)
   "Return t if buffer positions POS1 and POS2 are on the same line."
