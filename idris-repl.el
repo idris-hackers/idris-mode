@@ -175,12 +175,12 @@
     (goto-char (point-max))
     (idris-mark-input-start)
     (idris-mark-output-start)
-    (idris-repl-eval-string input idris-process)))
+    (idris-repl-eval-string input)))
 
 (defun idris-repl-complete ()
   "Completion of the current input"
   (let* ((input (idris-repl-current-input))
-         (result (idris-eval `(:repl-completions ,input) idris-process)))
+         (result (idris-eval `(:repl-completions ,input))))
     (destructuring-bind (completions partial) result
       (if (null completions)
           (progn
@@ -207,10 +207,10 @@
   "Return the current input as string."
   (buffer-substring-no-properties idris-input-start (point-max)))
 
-(defun idris-repl-eval-string (string process)
+(defun idris-repl-eval-string (string)
   "Evaluate STRING on the superior Idris."
   (idris-rex ()
-      ((list ':interpret string)) (process)
+      ((list ':interpret string))
     ((:ok result)
      (destructuring-bind (output value) result
        (dolist (s output) (idris-repl-write-string s))

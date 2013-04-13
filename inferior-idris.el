@@ -153,8 +153,8 @@ corresponding values in the CDR of VALUE."
                   (funcall (cdr rec) value))
              (t (error "Unexpected reply: %S %S" id value)))))))
 
-(defmacro* idris-rex ((&rest saved-vars) (sexp) (process) &rest continuations)
-  "(idris-rex (VAR ...) (SEXP) PROCESS CLAUSES ...)
+(defmacro* idris-rex ((&rest saved-vars) (sexp) &rest continuations)
+  "(idris-rex (VAR ...) (SEXP) CLAUSES ...)
 
 Remote EXecute SEXP.
 
@@ -162,8 +162,6 @@ VARs are a list of saved variables visible in the other forms.  Each
 VAR is either a symbol or a list (VAR INIT-VALUE).
 
 SEXP is evaluated and the princed version is sent to Dylan.
-
-PROCESS is the process to be interacted with
 
 CLAUSES is a list of patterns with same syntax as
 `destructure-case'.  The result of the evaluation of SEXP is
@@ -182,12 +180,12 @@ versions cannot deal with that."
         (list :emacs-rex ,sexp
               (lambda (,result)
                 (destructure-case ,result
-                  ,@continuations))) process))))
+                  ,@continuations))) idris-process))))
 
-(defun idris-eval-async (sexp process cont)
+(defun idris-eval-async (sexp cont)
   "Evaluate EXPR on the superior Idris and call CONT with the result."
   (idris-rex (cont (buffer (current-buffer)))
-      (sexp) (process)
+      (sexp)
     ((:ok result)
      (when cont
        (set-buffer buffer)
@@ -203,7 +201,7 @@ versions cannot deal with that."
 (defvar idris-stack-eval-tags nil
   "List of stack-tags of continuations waiting on the stack.")
 
-(defun idris-eval (sexp process)
+(defun idris-eval (sexp)
   "Evaluate EXPR on the superior Idris and return the result."
   (let* ((tag (gensym (format "idris-result-%d-"
                               (1+ idris-continuation-counter))))
@@ -212,7 +210,7 @@ versions cannot deal with that."
      #'funcall
      (catch tag
        (idris-rex (tag sexp)
-           (sexp) (process)
+           (sexp)
          ((:ok value)
           (unless (member tag idris-stack-eval-tags)
             (error "Reply to canceled synchronous eval request tag=%S sexp=%S"
