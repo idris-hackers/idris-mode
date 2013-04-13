@@ -221,8 +221,8 @@ versions cannot deal with that."
        (let ((debug-on-quit t)
              (inhibit-quit nil))
          (while t
-           (unless (eq (process-status process) 'run)
+           (when (eq (process-status idris-process) 'exit)
              (error "Idris process exited unexpectedly"))
-           (accept-process-output process 0 10)))))))
+           (accept-process-output idris-process 0.1)))))))
 
 (provide 'inferior-idris)

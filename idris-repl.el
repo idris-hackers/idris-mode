@@ -187,13 +187,28 @@
             (idris-minibuffer-respecting-message "Can't find completions for \"%s\"" input)
             (ding)
             (idris-complete-restore-window-configuration))
-        (insert-and-inherit (substring partial (length input)))
-        (if (= (length completions) 1)
-            (progn
-              (idris-minibuffer-respecting-message "Sole completion")
-              (idris-complete-restore-window-configuration))
-          (idris-minibuffer-respecting-message "Completions, not unique")
-          (idris-display-or-scroll-completions completions partial))))))
+          (if (= (length completions) 1)
+              (progn
+                (insert-and-inherit (substring (concat partial (car completions)) (length input)))
+                (idris-minibuffer-respecting-message "Sole completion")
+                (idris-complete-restore-window-configuration))
+            (let* ((pp (substring input (length partial)))
+                   (mypartial (find-common-prefix pp completions)))
+              (insert-and-inherit (substring (concat partial mypartial) (length input)))
+              (idris-minibuffer-respecting-message "Completions, not unique")
+              (idris-display-or-scroll-completions completions partial mypartial)))))))
+
+(defun find-common-prefix (input slist)
+  "Finds longest common prefix of all strings in list."
+  (let ((first (car slist))
+        (ilen (length input)))
+    (if (> (length first) ilen)
+        (progn
+          (let ((next (substring first 0 (1+ ilen))))
+            (if (every (lambda (p) (string-prefix-p next p)) slist)
+                (find-common-prefix next slist)
+              input)))
+      input)))
 
 (defun idris-repl-begin-of-prompt ()
   "Got to the beginning of linke or the prompt."

@@ -73,8 +73,8 @@ terminates a current completion."
   (remove-hook 'pre-command-hook
                'idris-complete-maybe-restore-window-configuration)
   (condition-case err
-      (cond ((find last-command-char "()\"'`,# \r\n:")
-             (idris-complete-restore-window-configuration))
+      (cond ;((find last-command-char "()\"'`,# \r\n:")
+            ; (idris-complete-restore-window-configuration))
             ((not (idris-completion-window-active-p))
              (idris-complete-forget-window-configuration))
             (t
@@ -90,24 +90,24 @@ terminates a current completion."
        (equal (buffer-name (window-buffer idris-completions-window))
               idris-completions-buffer-name)))
 
-(defun idris-display-completion-list (completions partial)
-  (let ((savedp (idris-complete-maybe-save-window-configuration)))
+(defun idris-display-completion-list (completions prefix partial)
+  (let ((savedp (idris-complete-maybe-save-window-configuration))
+        (sorted-completions (sort completions 'string-lessp)))
     (with-output-to-temp-buffer idris-completions-buffer-name
-      (display-completion-list completions)
+      (display-completion-list sorted-completions prefix)
       (let ((offset (- (point) 1 (length partial))))
         (with-current-buffer standard-output
-          (setq completion-base-size offset)
-;         (set-syntax-table lisp-mode-syntax-table)
-          )))
+          (setq completion-base-size offset))))
+    (pop-to-buffer idris-completions-buffer-name)
     (when savedp
       (setq idris-completions-window
             (get-buffer-window idris-completions-buffer-name)))))
 
-(defun idris-display-or-scroll-completions (completions partial)
+(defun idris-display-or-scroll-completions (completions prefix partial)
   (if (and (eq last-command this-command)
            (idris-completion-window-active-p))
       (idris-scroll-completions)
-    (idris-display-completion-list completions partial))
+    (idris-display-completion-list completions prefix partial))
   (idris-complete-delay-restoration))
 
 (defun idris-scroll-completions ()
