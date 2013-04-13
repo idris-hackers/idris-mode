@@ -163,10 +163,6 @@
     (set-marker (symbol-value markname) (point)))
   (idris-repl-update-banner))
 
-(defun idris-repl-current-input ()
-  "Return the current input as string."
-  (buffer-substring-no-properties idris-input-start (point-max)))
-
 (defun idris-repl-return ()
   "Send command over to Idris"
   (goto-char (point-max))
@@ -179,11 +175,7 @@
     (goto-char (point-max))
     (idris-mark-input-start)
     (idris-mark-output-start)
-    (idris-eval-async `(:interpret ,input) idris-process
-                      (lambda (result)
-                        (destructuring-bind (output value) result
-                          (dolist (s output) (idris-repl-write-string s))
-                          (idris-repl-insert-result value))))))
+    (idris-repl-eval-string input idris-process)))
 
 (defun idris-repl-complete ()
   "Completion of the current input"
@@ -211,30 +203,57 @@
          (goto-char idris-input-start))
         (t (beginning-of-line 1))))
 
+(defun idris-repl-current-input ()
+  "Return the current input as string."
+  (buffer-substring-no-properties idris-input-start (point-max)))
+
+(defun idris-repl-eval-string (string process)
+  "Evaluate STRING on the superior Idris."
+  (idris-rex ()
+      ((list ':interpret string)) (process)
+    ((:ok result)
+     (destructuring-bind (output value) result
+       (dolist (s output) (idris-repl-write-string s))
+       (idris-repl-insert-result value)))
+    ((:abort condition)
+     (idris-repl-show-abort condition))))
+
+(defun idris-repl-show-abort (condition)
+  (with-current-buffer (idris-repl-buffer)
+    (save-excursion
+      (idris-save-marker idris-output-start
+        (idris-save-marker idris-output-end
+          (goto-char idris-output-end)
+          (insert-before-markers (format "; Aborted: %s.\n" condition))
+          (idris-repl-insert-prompt))))
+    (idris-repl-show-maximum-output)))
+
 (defun idris-repl-write-string (string)
   "Appends STRING to output"
-  (save-excursion
-    (goto-char idris-output-end)
-    (idris-save-marker idris-output-start
-      (idris-propertize-region `(face idris-repl-output-face rear-nonsticky (face))
-        (insert-before-markers string)
-        (when (and (= (point) idris-prompt-start)
-                   (not (bolp)))
-          (insert-before-markers "\n")
-          (set-marker idris-output-end (1- (point)))))))
-  (idris-repl-show-maximum-output))
+  (with-current-buffer (idris-repl-buffer)
+    (save-excursion
+      (goto-char idris-output-end)
+      (idris-save-marker idris-output-start
+        (idris-propertize-region `(face idris-repl-output-face rear-nonsticky (face))
+          (insert-before-markers string)
+          (when (and (= (point) idris-prompt-start)
+                     (not (bolp)))
+            (insert-before-markers "\n")
+            (set-marker idris-output-end (1- (point)))))))
+    (idris-repl-show-maximum-output)))
 
 (defun idris-repl-insert-result (string)
   "Inserts STRING and marks it as evaluation result"
-  (save-excursion
-    (idris-save-marker idris-output-start
-      (idris-save-marker idris-output-end
-        (goto-char idris-input-start)
-        (when (not (bolp)) (insert-before-markers "\n"))
-        (idris-propertize-region `(face idris-repl-result-face rear-nonsticky (face))
-          (insert-before-markers string)))))
-  (idris-repl-insert-prompt)
-  (idris-repl-show-maximum-output))
+  (with-current-buffer (idris-repl-buffer)
+    (save-excursion
+      (idris-save-marker idris-output-start
+        (idris-save-marker idris-output-end
+          (goto-char idris-input-start)
+          (when (not (bolp)) (insert-before-markers "\n"))
+          (idris-propertize-region `(face idris-repl-result-face rear-nonsticky (face))
+            (insert-before-markers string)))))
+    (idris-repl-insert-prompt)
+    (idris-repl-show-maximum-output)))
 
 (defun idris-repl-show-maximum-output ()
   "Put the end of the buffer at the bottom of the window."
