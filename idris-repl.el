@@ -120,7 +120,8 @@
   (or (get-buffer idris-repl-buffer-name)
       (let ((buffer (get-buffer-create idris-repl-buffer-name)))
         (with-current-buffer buffer
-          (idris-repl-mode))
+          (idris-repl-mode)
+          (idris-repl-buffer-init))
         buffer)))
 
 (defun idris-switch-to-output-buffer ()
@@ -147,14 +148,15 @@
     map)
   "Keymap used in Idris REPL mode.")
 
-;; Warning: Bug in idris-repl-mode: it forgets to call `run-mode-hooks'
-;; also, keymap doesn't work :/
-(defun idris-repl-mode ()
+(define-derived-mode idris-repl-mode fundamental-mode "Idris-REPL"
   "Major mode for interacting with Idris.
-\\{idris-repl-mode-map}"
-  (interactive)
-  (setq major-mode 'idris-repl-mode)
-  (setq mode-name "Idris-REPL")
+    \\{idris-repl-mode-map}
+Invokes `idris-repl-mode-hook'."
+  ;syntax-table?
+  :group 'idris-repl
+  (set (make-local-variable 'indent-tabs-mode) nil))
+
+(defun idris-repl-buffer-init ()
   (dolist (markname '(idris-output-start
                       idris-output-end
                       idris-prompt-start
@@ -165,6 +167,7 @@
 
 (defun idris-repl-return ()
   "Send command over to Idris"
+  (interactive)
   (goto-char (point-max))
   (let ((end (point)))
     (idris-repl-add-to-input-history (buffer-substring idris-input-start end))
@@ -179,6 +182,7 @@
 
 (defun idris-repl-complete ()
   "Completion of the current input"
+  (interactive)
   (let* ((input (idris-repl-current-input))
          (result (idris-eval `(:repl-completions ,input))))
     (destructuring-bind (completions partial) result
@@ -288,9 +292,11 @@
   "Adds input to history.")
 
 (defun idris-repl-backward-history ()
-  "Cycle backward through history.")
+  "Cycle backward through history."
+  (interactive))
 
 (defun idris-repl-forward-history ()
-  "Cycle forward through history.")
+  "Cycle forward through history."
+  (interactive))
 
 (provide 'idris-repl)

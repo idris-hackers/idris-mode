@@ -98,7 +98,6 @@ terminates a current completion."
       (let ((offset (- (point) 1 (length partial))))
         (with-current-buffer standard-output
           (setq completion-base-size offset))))
-    (pop-to-buffer idris-completions-buffer-name)
     (when savedp
       (setq idris-completions-window
             (get-buffer-window idris-completions-buffer-name)))))
