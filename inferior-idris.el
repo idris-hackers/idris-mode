@@ -144,7 +144,7 @@ corresponding values in the CDR of VALUE."
   (destructure-case event
     ((:emacs-rex form continuation)
      (let ((id (incf idris-continuation-counter)))
-       (idris-send `(:emacs-rex ,form ,id) process)
+       (idris-send `(:idris ,form ,id) process)
        (push (cons id continuation) idris-rex-continuations)))
     ((:return value id)
      (let ((rec (assq id idris-rex-continuations)))
@@ -166,7 +166,7 @@ SEXP is evaluated and the princed version is sent to Dylan.
 CLAUSES is a list of patterns with same syntax as
 `destructure-case'.  The result of the evaluation of SEXP is
 dispatched on CLAUSES.  The result is either a sexp of the
-form (:ok VALUE) or (:abort CONDITION).  CLAUSES is executed
+form (:ok VALUE) or (:error CONDITION).  CLAUSES is executed
 asynchronously.
 
 Note: don't use backquote syntax for SEXP, because various Emacs
@@ -190,8 +190,8 @@ versions cannot deal with that."
      (when cont
        (set-buffer buffer)
        (funcall cont result)))
-    ((:abort condition)
-     (message "Evaluation aborted on %s." condition))))
+    ((:error condition)
+     (message "Evaluation returned an error: %s." condition))))
 
 ;;; Synchronous requests are implemented in terms of asynchronous
 ;;; ones. We make an asynchronous request with a continuation function
@@ -216,8 +216,8 @@ versions cannot deal with that."
             (error "Reply to canceled synchronous eval request tag=%S sexp=%S"
                    tag sexp))
           (throw tag (list #'identity value)))
-         ((:abort condition)
-          (throw tag (list #'error "Synchronous Idris Evaluation aborted"))))
+         ((:error condition)
+          (throw tag (list #'error "Synchronous Idris Evaluation threw an error"))))
        (let ((debug-on-quit t)
              (inhibit-quit nil))
          (while t

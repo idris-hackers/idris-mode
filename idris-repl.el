@@ -251,7 +251,7 @@ Invokes `idris-repl-mode-hook'."
      (destructuring-bind (output value) result
        (dolist (s output) (idris-repl-write-string s))
        (idris-repl-insert-result value)))
-    ((:abort condition)
+    ((:error condition)
      (idris-repl-show-abort condition))))
 
 (defun idris-repl-show-abort (condition)
@@ -260,7 +260,7 @@ Invokes `idris-repl-mode-hook'."
       (idris-save-marker idris-output-start
         (idris-save-marker idris-output-end
           (goto-char idris-output-end)
-          (insert-before-markers (format "; Aborted: %s.\n" condition))
+          (insert-before-markers (format "; Error: %s.\n" condition))
           (idris-repl-insert-prompt))))
     (idris-repl-show-maximum-output)))
 
