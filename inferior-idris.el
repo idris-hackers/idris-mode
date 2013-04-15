@@ -202,7 +202,7 @@ versions cannot deal with that."
   "List of stack-tags of continuations waiting on the stack.")
 
 (defun idris-eval (sexp)
-  "Evaluate EXPR on the superior Idris and return the result."
+  "Evaluate EXPR on the inferior Idris and return the result."
   (let* ((tag (gensym (format "idris-result-%d-"
                               (1+ idris-continuation-counter))))
 	 (idris-stack-eval-tags (cons tag idris-stack-eval-tags)))

@@ -46,12 +46,23 @@
 
 (defface idris-repl-result-face
   '((t ()))
-  "Face for the result of an evaluation in the DIME REPL."
+  "Face for the result of an evaluation in the Idris REPL."
   :group 'idris-repl)
 
 (defcustom idris-repl-history-file "~/.idris-history.eld"
   "File to save the persistent REPL history to."
   :type 'string
+  :group 'idris-repl)
+
+(defcustom idris-repl-history-size 200
+  "*Maximum number of lines for persistent REPL history."
+  :type 'integer
+  :group 'idris-repl)
+
+(defcustom idris-repl-history-file-coding-system
+  'utf-8-unix
+  "*The coding system for the history file."
+  :type 'symbol
   :group 'idris-repl)
 
 (defvar idris-prompt-string "Idris"
@@ -154,7 +165,12 @@
 Invokes `idris-repl-mode-hook'."
   ;syntax-table?
   :group 'idris-repl
-  (set (make-local-variable 'indent-tabs-mode) nil))
+  (set (make-local-variable 'indent-tabs-mode) nil)
+  (when idris-repl-history-file
+    (idris-repl-safe-load-history)
+    (add-hook 'kill-buffer-hook
+              'idris-repl-safe-save-history nil t))
+  (add-hook 'kill-emacs-hook 'idris-repl-save-all-histories))
 
 (defun idris-repl-buffer-init ()
   (dolist (markname '(idris-output-start
@@ -176,6 +192,7 @@ Invokes `idris-repl-mode-hook'."
       (overlay-put overlay 'face 'idris-repl-input-face)))
   (let ((input (idris-repl-current-input)))
     (goto-char (point-max))
+    (insert "\n")
     (idris-mark-input-start)
     (idris-mark-output-start)
     (idris-repl-eval-string input)))
@@ -227,7 +244,7 @@ Invokes `idris-repl-mode-hook'."
   (buffer-substring-no-properties idris-input-start (point-max)))
 
 (defun idris-repl-eval-string (string)
-  "Evaluate STRING on the superior Idris."
+  "Evaluate STRING on the inferior Idris."
   (idris-rex ()
       ((list ':interpret string))
     ((:ok result)
@@ -288,15 +305,158 @@ Invokes `idris-repl-mode-hook'."
 
 ;;; history
 
-(defun idris-repl-add-to-input-history (input)
-  "Adds input to history.")
+(make-variable-buffer-local
+ (defvar idris-repl-input-history '()
+   "History list of strings entered into the REPL buffer."))
+
+(defun idris-repl-add-to-input-history (string)
+  "Adds input to history."
+  (unless (equal string "")
+    (setq idris-repl-input-history
+          (remove string idris-repl-input-history)))
+  (unless (equal string (car idris-repl-input-history))
+      (push string idris-repl-input-history)))
+
+(make-variable-buffer-local
+  (defvar idris-repl-input-history-position -1
+    "Newer items have smaller indices."))
+
+(defun idris-repl-delete-current-input ()
+  "Delete all text from the prompt."
+  (interactive)
+  (delete-region idris-input-start (point-max)))
+
+(defun idris-repl-replace-input (string)
+  (idris-repl-delete-current-input)
+  (insert-and-inherit string))
+
+(defun idris-repl-history-replace (direction)
+  "Replace the current input with the next line in DIRECTION.
+DIRECTION is 'forward' or 'backward' (in the history list)."
+  (let* ((min-pos -1)
+         (max-pos (length idris-repl-input-history))
+         (prefix (idris-repl-history-prefix))
+         (pos0 (if (idris-repl-history-search-in-progress-p)
+                   idris-repl-input-history-position
+                 min-pos))
+         (pos (idris-repl-position-in-history pos0 direction prefix))
+         (msg nil))
+    (cond ((and (< min-pos pos) (< pos max-pos))
+           (idris-repl-replace-input (nth pos idris-repl-input-history))
+           (setq msg (format "History item: %d" pos)))
+          (t
+           (setq pos (if (= pos min-pos) max-pos min-pos))
+           (setq msg "Wrapped history")))
+    (message "%s (prefix is: %s)" msg prefix)
+    (setq idris-repl-input-history-position pos)
+    (setq this-command 'idris-repl-history-replace)))
+
+(make-variable-buffer-local
+  (defvar idris-repl-history-prefix-data ""
+    "Current history prefix."))
+
+(defun idris-repl-history-prefix ()
+  "Return the prefix we want to look for in the history."
+  (if (idris-repl-history-search-in-progress-p)
+      idris-repl-history-prefix-data
+    (setq idris-repl-history-prefix-data (idris-repl-current-input))
+    idris-repl-history-prefix-data))
+
+(defun idris-repl-history-search-in-progress-p ()
+  (eq last-command 'idris-repl-history-replace))
+
+(defun idris-repl-position-in-history (start-pos direction prefix)
+  "Return the position of the history item matching the PREFIX.
+Return -1 resp. the length of the history if no item matches."
+  ;; Loop through the history list looking for a matching line
+  (let* ((step (ecase direction
+                 (forward -1)
+                 (backward 1)))
+         (history idris-repl-input-history)
+         (len (length history)))
+    (loop for pos = (+ start-pos step) then (+ pos step)
+          if (< pos 0) return -1
+          if (<= len pos) return len
+          for history-item = (nth pos history)
+          if (string-prefix-p prefix history-item)
+          return pos)))
 
 (defun idris-repl-backward-history ()
   "Cycle backward through history."
-  (interactive))
+  (interactive)
+  (idris-repl-history-replace 'backward))
 
 (defun idris-repl-forward-history ()
   "Cycle forward through history."
-  (interactive))
+  (interactive)
+  (idris-repl-history-replace 'forward))
+
+
+;; persistent history
+(defun idris-repl-save-all-histories ()
+  "Save the history in each repl buffer."
+  (dolist (b (buffer-list))
+    (with-current-buffer b
+      (when (eq major-mode 'idris-repl-mode)
+        (idris-repl-safe-save-history)))))
+
+(defun idris-repl-safe-save-history ()
+  (idris-repl-call-with-handler
+   #'idris-repl-save-history
+   "%S while saving the history. Continue? "))
+
+(defun idris-repl-safe-load-history ()
+  (idris-repl-call-with-handler
+   #'idris-repl-load-history
+   "%S while loading the history. Continue? "))
+
+(defun idris-repl-call-with-handler (fun query)
+  "Call FUN in the context of an error handler.
+The handler will use qeuery to ask the use if the error should be ingored."
+  (condition-case err
+      (funcall fun)
+    (error
+     (if (y-or-n-p (format query (error-message-string err)))
+         nil
+       (signal (car err) (cdr err))))))
+
+(defun idris-repl-load-history (&optional filename)
+  "Set the current Idris REPL history.
+It can be read either from FILENAME or `idris-repl-history-file' or
+from a user defined filename."
+  (interactive (list (idris-repl-read-history-filename)))
+  (let ((file (or filename idris-repl-history-file)))
+    (setq idris-repl-input-history (idris-repl-read-history file t))))
+
+(defun idris-repl-read-history (&optional filename noerrer)
+  "Read and return the history from FILENAME.
+The default value for FILENAME is `idris-repl-history-file'.
+If NOERROR is true return and the file doesn't exits return nil."
+  (let ((file (or filename idris-repl-history-file)))
+    (cond ((not (file-readable-p file)) '())
+          (t (with-temp-buffer
+               (insert-file-contents file)
+               (read (current-buffer)))))))
+
+(defun idris-repl-save-history (&optional filename history)
+  "Simply save the current Idris REPL history to a file.
+When Idris is setup to always load the old history and one uses only
+one instance of idris all the time, there is no need to merge the
+files and this function is sufficient."
+  (interactive (list (idris-repl-read-history-filename)))
+  (let ((file (or filename idris-repl-history-file))
+        (hist (or history idris-repl-input-history)))
+    (unless (file-writable-p file)
+      (error (format "History file not writable: %s" file)))
+    (let ((hist (subseq hist 0 (min (length hist) idris-repl-history-size))))
+      ;;(message "saving %s to %s\n" hist file)
+      (with-temp-file file
+        (let ((cs idris-repl-history-file-coding-system)
+              (print-length nil) (print-level nil))
+          (setq buffer-file-coding-system cs)
+          (insert (format ";; -*- coding: %s -*-\n" cs))
+          (insert ";; History for Idris REPL. Automatically written.\n"
+                  ";; Edit only if you know what you're doing\n")
+          (prin1 (mapcar #'substring-no-properties hist) (current-buffer)))))))
 
 (provide 'idris-repl)
