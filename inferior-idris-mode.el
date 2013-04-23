@@ -48,7 +48,11 @@
   "Start an inferior Idris process"
   (interactive)
   (setq inferior-idris-buffer
-        (make-comint "inferior-idris" idris-interpreter-path))
+        (apply #'make-comint
+               "inferior-idrisq"
+               idris-interpreter-path
+               nil
+               idris-interpreter-flags))
   (with-current-buffer inferior-idris-buffer
     (inferior-idris-mode)
     (setq inferior-idris-working-directory nil)
