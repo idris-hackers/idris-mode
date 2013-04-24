@@ -26,6 +26,7 @@
 (require 'pp)
 (require 'cl)
 (require 'idris-events)
+;(require 'idris-warnings)
 
 ;;; Process stuff
 (defvar idris-process nil
@@ -58,10 +59,12 @@
   (with-current-buffer (process-buffer process)
     (while (idris-have-input-p)
       (let ((event (idris-receive)))
-        (idris-log-event event nil)
-        (unwind-protect
-            (save-current-buffer
-              (idris-dispatch-event event process)))))))
+        (if (null event)
+            ()
+          (idris-log-event event nil)
+          (unwind-protect
+              (save-current-buffer
+                (idris-dispatch-event event process))))))))
 
 (defun idris-have-input-p ()
   "Return true if a complete message is available."
@@ -75,11 +78,13 @@
   (let* ((length (idris-decode-length))
          (start (+ 6 (point)))
          (end (+ start length)))
-    (assert (plusp length))
-    (prog1 (save-restriction
-             (narrow-to-region start end)
-             (read (current-buffer)))
-      (delete-region (point-min) end))))
+    (if (= length 0)
+        (delete-region (point-min) (+ 1 (line-end-position)))
+;    (assert (plusp length))
+      (prog1 (save-restriction
+               (narrow-to-region start end)
+               (read (current-buffer)))
+        (delete-region (point-min) end)))))
 
 (defun idris-decode-length ()
   "Read a 24-bit hex-encoded integer from buffer."
@@ -224,5 +229,17 @@ versions cannot deal with that."
            (when (eq (process-status idris-process) 'exit)
              (error "Idris process exited unexpectedly"))
            (accept-process-output idris-process 0.1)))))))
+
+(defun inferior-idris-load-file ()
+  "Pass the current buffer's file to the inferior Idris process."
+  (interactive)
+  (save-buffer)
+  (if (buffer-file-name)
+      (idris-eval-async `(:load-file ,(buffer-file-name))
+                        (lambda (result)
+                          (ecase result
+                            ((:good) (message "all good"))
+                            ((:warning msg) (message msg)))))
+    (error "Cannot find file for current buffer")))
 
 (provide 'inferior-idris)

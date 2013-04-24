@@ -25,15 +25,13 @@
 
 (defvar idris-completions-buffer-name "*Completions*")
 
-(make-variable-buffer-local
- (defvar idris-completions-window nil
-   "The window displaying *Completions* after saving window configuration."))
+(defvar-local idris-completions-window nil
+  "The window displaying *Completions* after saving window configuration.")
 
-(make-variable-buffer-local
- (defvar idris-complete-saved-window-configuration nil
-   "Window configuration before we show the *Completions* buffer.
+(defvar-local idris-complete-saved-window-configuration nil
+  "Window configuration before we show the *Completions* buffer.
 This is buffer local in the buffer where the completion is
-performed."))
+performed.")
 
 (defun idris-complete-maybe-save-window-configuration ()
   "Maybe save the current window configuration.
@@ -97,7 +95,7 @@ terminates a current completion."
       (display-completion-list sorted-completions prefix)
       (let ((offset (- (point) 1 (length partial))))
         (with-current-buffer standard-output
-          (setq completion-base-size offset))))
+          (setq completion-base-size offset)))) ; or base-position?
     (when savedp
       (setq idris-completions-window
             (get-buffer-window idris-completions-buffer-name)))))

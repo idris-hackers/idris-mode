@@ -71,21 +71,17 @@
 (defvar idris-repl-buffer-name (idris-buffer-name :repl)
   "The name of the Idris REPL buffer.")
 
-(make-variable-buffer-local
- (defvar idris-output-start nil
-   "Marker for the start of the output for the evaluation."))
+(defvar-local idris-output-start nil
+  "Marker for the start of the output for the evaluation.")
 
-(make-variable-buffer-local
- (defvar idris-output-end nil
-   "Marker for the end of the output. New output is inserted at this mark."))
+(defvar-local idris-output-end nil
+  "Marker for the end of the output. New output is inserted at this mark.")
 
-(make-variable-buffer-local
- (defvar idris-prompt-start nil
-   "Marker for the start of the Idris prompt."))
+(defvar-local idris-prompt-start nil
+  "Marker for the start of the Idris prompt.")
 
-(make-variable-buffer-local
- (defvar idris-input-start nil
-   "Marker for the start of user input for Idris."))
+(defvar-local idris-input-start nil
+  "Marker for the start of user input for Idris.")
 
 ;; marker invariants maintained:
 ;; point-min <= idris-output-start <= idris-output-end <=
@@ -305,9 +301,8 @@ Invokes `idris-repl-mode-hook'."
 
 ;;; history
 
-(make-variable-buffer-local
- (defvar idris-repl-input-history '()
-   "History list of strings entered into the REPL buffer."))
+(defvar-local idris-repl-input-history '()
+  "History list of strings entered into the REPL buffer.")
 
 (defun idris-repl-add-to-input-history (string)
   "Adds input to history."
@@ -317,9 +312,8 @@ Invokes `idris-repl-mode-hook'."
   (unless (equal string (car idris-repl-input-history))
       (push string idris-repl-input-history)))
 
-(make-variable-buffer-local
-  (defvar idris-repl-input-history-position -1
-    "Newer items have smaller indices."))
+(defvar-local idris-repl-input-history-position -1
+  "Newer items have smaller indices.")
 
 (defun idris-repl-delete-current-input ()
   "Delete all text from the prompt."
@@ -351,9 +345,8 @@ DIRECTION is 'forward' or 'backward' (in the history list)."
     (setq idris-repl-input-history-position pos)
     (setq this-command 'idris-repl-history-replace)))
 
-(make-variable-buffer-local
-  (defvar idris-repl-history-prefix-data ""
-    "Current history prefix."))
+(defvar-local idris-repl-history-prefix-data ""
+  "Current history prefix.")
 
 (defun idris-repl-history-prefix ()
   "Return the prefix we want to look for in the history."
