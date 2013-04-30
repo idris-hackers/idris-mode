@@ -95,7 +95,7 @@ terminates a current completion."
       (display-completion-list sorted-completions prefix)
       (let ((offset (- (point) 1 (length partial))))
         (with-current-buffer standard-output
-          (setq completion-base-size offset)))) ; or base-position?
+          (setq completion-base-position offset))))
     (when savedp
       (setq idris-completions-window
             (get-buffer-window idris-completions-buffer-name)))))
