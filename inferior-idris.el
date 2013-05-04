@@ -149,7 +149,7 @@ corresponding values in the CDR of VALUE."
   (destructure-case event
     ((:emacs-rex form continuation)
      (let ((id (incf idris-continuation-counter)))
-       (idris-send `(:idris ,form ,id) process)
+       (idris-send `(,form ,id) process)
        (push (cons id continuation) idris-rex-continuations)))
     ((:return value id)
      (let ((rec (assq id idris-rex-continuations)))
