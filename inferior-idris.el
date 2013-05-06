@@ -59,12 +59,10 @@
   (with-current-buffer (process-buffer process)
     (while (idris-have-input-p)
       (let ((event (idris-receive)))
-        (if (null event)
-            ()
-          (idris-log-event event nil)
-          (unwind-protect
-              (save-current-buffer
-                (idris-dispatch-event event process))))))))
+        (idris-log-event event nil)
+        (unwind-protect
+            (save-current-buffer
+              (idris-dispatch-event event process)))))))
 
 (defun idris-have-input-p ()
   "Return true if a complete message is available."
@@ -78,13 +76,11 @@
   (let* ((length (idris-decode-length))
          (start (+ 6 (point)))
          (end (+ start length)))
-    (if (= length 0)
-        (delete-region (point-min) (+ 1 (line-end-position)))
-;    (assert (plusp length))
-      (prog1 (save-restriction
-               (narrow-to-region start end)
-               (read (current-buffer)))
-        (delete-region (point-min) end)))))
+    (assert (plusp length))
+    (prog1 (save-restriction
+             (narrow-to-region start end)
+             (read (current-buffer)))
+      (delete-region (point-min) end))))
 
 (defun idris-decode-length ()
   "Read a 24-bit hex-encoded integer from buffer."
