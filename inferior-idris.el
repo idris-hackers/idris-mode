@@ -141,18 +141,21 @@ corresponding values in the CDR of VALUE."
 (defvar idris-continuation-counter 0
   "Continuation serial number counter.")
 
+(defvar idris-event-hooks)
+
 (defun idris-dispatch-event (event process)
-  (destructure-case event
-    ((:emacs-rex form continuation)
-     (let ((id (incf idris-continuation-counter)))
-       (idris-send `(,form ,id) process)
-       (push (cons id continuation) idris-rex-continuations)))
-    ((:return value id)
-     (let ((rec (assq id idris-rex-continuations)))
-       (cond (rec (setf idris-rex-continuations
-                        (remove rec idris-rex-continuations))
-                  (funcall (cdr rec) value))
-             (t (error "Unexpected reply: %S %S" id value)))))))
+  (or (run-hook-with-args-until-success 'idris-event-hooks event)
+      (destructure-case event
+        ((:emacs-rex form continuation)
+         (let ((id (incf idris-continuation-counter)))
+           (idris-send `(,form ,id) process)
+           (push (cons id continuation) idris-rex-continuations)))
+        ((:return value id)
+         (let ((rec (assq id idris-rex-continuations)))
+           (cond (rec (setf idris-rex-continuations
+                            (remove rec idris-rex-continuations))
+                      (funcall (cdr rec) value))
+                 (t (error "Unexpected reply: %S %S" id value))))))))
 
 (defmacro* idris-rex ((&rest saved-vars) (sexp) &rest continuations)
   "(idris-rex (VAR ...) (SEXP) CLAUSES ...)

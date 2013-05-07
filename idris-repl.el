@@ -162,11 +162,23 @@ Invokes `idris-repl-mode-hook'."
   ;syntax-table?
   :group 'idris-repl
   (set (make-local-variable 'indent-tabs-mode) nil)
+  (add-hook 'idris-event-hooks 'idris-repl-event-hook-function)
+  (add-hook 'kill-buffer-hook 'idris-repl-remove-event-hook-function nil t)
   (when idris-repl-history-file
     (idris-repl-safe-load-history)
     (add-hook 'kill-buffer-hook
               'idris-repl-safe-save-history nil t))
   (add-hook 'kill-emacs-hook 'idris-repl-save-all-histories))
+
+(defun idris-repl-remove-event-hook-function ()
+  (remove-hook 'idris-event-hooks 'idris-repl-event-hook-function))
+
+(defun idris-repl-event-hook-function (event)
+  (destructure-case event
+    ((:write-string output target)
+     (idris-repl-write-string output)
+     t)
+    (t nil)))
 
 (defun idris-repl-buffer-init ()
   (dolist (markname '(idris-output-start
