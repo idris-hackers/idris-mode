@@ -279,6 +279,7 @@ Invokes `idris-repl-mode-hook'."
       (goto-char idris-output-end)
       (idris-save-marker idris-output-start
         (idris-propertize-region `(face idris-repl-output-face rear-nonsticky (face))
+          (when (not (bolp)) (insert-before-markers "\n"))
           (insert-before-markers string)
           (when (and (= (point) idris-prompt-start)
                      (not (bolp)))
