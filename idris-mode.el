@@ -23,6 +23,11 @@
   :type 'file
   :group 'idris)
 
+(defcustom idris-interpreter-flags '()
+  "The command line arguments passed to the Idris interpreter"
+  :type '(repeat string)
+  :group 'idris)
+
 (defvar idris-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map [?\C-c ?\C-l] 'inferior-idris-load-file)
