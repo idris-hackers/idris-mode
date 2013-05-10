@@ -37,7 +37,7 @@
   (interactive)
   (when (not idris-process)
     (setq idris-process
-          (start-process "idris" (idris-buffer-name :process) idris-interpreter-path "--ideslave"))
+          (apply #'start-process "idris" (idris-buffer-name :process) idris-interpreter-path "--ideslave" idris-interpreter-flags))
     (set-process-filter idris-process 'idris-output-filter)
     (set-process-sentinel idris-process 'idris-sentinel)
     (set-process-query-on-exit-flag idris-process t)))
