@@ -15,6 +15,7 @@
 (require 'idris-syntax)
 (require 'inferior-idris)
 (require 'idris-repl)
+(require 'idris-commands)
 (require 'idris-indentation)
 
 (defgroup idris nil "Idris mode" :prefix 'idris)
@@ -31,14 +32,14 @@
 
 (defvar idris-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map [?\C-c ?\C-l] 'inferior-idris-load-file)
+    (define-key map [?\C-c ?\C-l] 'idris-load-file)
     map)
   "Keymap used in Idris mode.")
 
 (easy-menu-define idris-mode-menu idris-mode-map
   "Menu for the Idris major mode"
   `("Idris"
-    ["Load file" inferior-idris-load-file t]
+    ["Load file" idris-load-file t]
     ["Customize idris-mode" (customize-group 'idris) t]
     ))
 

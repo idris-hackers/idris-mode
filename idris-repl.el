@@ -102,25 +102,26 @@
 
 (defun idris-repl-insert-prompt ()
   "Insert Idris prompt (before markers!) into buffer. Set point after prompt"
-  (goto-char idris-input-start)
-  (idris-save-marker idris-output-start
-    (idris-save-marker idris-output-end
-      (unless (bolp) (insert-before-markers "\n"))
-      (let ((prompt-start (point))
-            (prompt (format "%s> " idris-prompt-string)))
-        (idris-propertize-region
-         '(face idris-repl-prompt-face read-only t intangible t
-                idris-repl-prompt t
-                rear-nonsticky (idris-repl-prompt read-only face intangible))
-         (insert-before-markers prompt))
-        (set-marker idris-prompt-start prompt-start)))))
+  (when (not (null idris-input-start))
+    (goto-char idris-input-start)
+    (idris-save-marker idris-output-start
+      (idris-save-marker idris-output-end
+        (unless (bolp) (insert-before-markers "\n"))
+        (let ((prompt-start (point))
+              (prompt (format "%s> " idris-prompt-string)))
+          (idris-propertize-region
+           '(face idris-repl-prompt-face read-only t intangible t
+                  idris-repl-prompt t
+                  rear-nonsticky (idris-repl-prompt read-only face intangible))
+           (insert-before-markers prompt))
+          (set-marker idris-prompt-start prompt-start))))))
 
-(defun idris-repl-update-banner ()
-  (idris-repl-insert-banner)
-  (goto-char (point-max))
-  (idris-mark-output-start)
-  (idris-mark-input-start)
-  (idris-repl-insert-prompt))
+(defun idris-repl-update-prompt (new-prompt)
+  "Update prompt to NEW-PROMPT"
+  (unless (equal idris-prompt-string new-prompt)
+    (setq idris-prompt-string new-prompt)
+    (with-current-buffer (idris-repl-buffer)
+      (idris-repl-insert-prompt))))
 
 (defun idris-repl-buffer ()
   "Return or create the Idris REPL buffer."
@@ -171,14 +172,26 @@ Invokes `idris-repl-mode-hook'."
   (add-hook 'kill-emacs-hook 'idris-repl-save-all-histories))
 
 (defun idris-repl-remove-event-hook-function ()
+  (setq idris-prompt-string "Idris")
   (remove-hook 'idris-event-hooks 'idris-repl-event-hook-function))
 
 (defun idris-repl-event-hook-function (event)
   (destructure-case event
     ((:write-string output target)
+     ; target currently unused
      (idris-repl-write-string output)
      t)
+    ((:set-prompt prompt target)
+     (idris-repl-update-prompt prompt)
+     t)
     (t nil)))
+
+(defun idris-repl-update-banner ()
+  (idris-repl-insert-banner)
+  (goto-char (point-max))
+  (idris-mark-output-start)
+  (idris-mark-input-start)
+  (idris-repl-insert-prompt))
 
 (defun idris-repl-buffer-init ()
   (dolist (markname '(idris-output-start
@@ -455,7 +468,6 @@ files and this function is sufficient."
     (unless (file-writable-p file)
       (error (format "History file not writable: %s" file)))
     (let ((hist (subseq hist 0 (min (length hist) idris-repl-history-size))))
-      ;;(message "saving %s to %s\n" hist file)
       (with-temp-file file
         (let ((cs idris-repl-history-file-coding-system)
               (print-length nil) (print-level nil))

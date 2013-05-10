@@ -229,16 +229,5 @@ versions cannot deal with that."
              (error "Idris process exited unexpectedly"))
            (accept-process-output idris-process 0.1)))))))
 
-(defun inferior-idris-load-file ()
-  "Pass the current buffer's file to the inferior Idris process."
-  (interactive)
-  (save-buffer)
-  (if (buffer-file-name)
-      (idris-eval-async `(:load-file ,(buffer-file-name))
-                        (lambda (result)
-                          (ecase result
-                            ((:good) (message "all good"))
-                            ((:warning msg) (message msg)))))
-    (error "Cannot find file for current buffer")))
 
 (provide 'inferior-idris)
