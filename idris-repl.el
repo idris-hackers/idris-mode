@@ -269,9 +269,7 @@ Invokes `idris-repl-mode-hook'."
   (idris-rex ()
       ((list ':interpret string))
     ((:ok result)
-     (destructuring-bind (output value) result
-       (dolist (s output) (idris-repl-write-string s))
-       (idris-repl-insert-result value)))
+     (idris-repl-insert-result result))
     ((:error condition)
      (idris-repl-show-abort condition))))
 
