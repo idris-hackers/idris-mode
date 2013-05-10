@@ -138,7 +138,7 @@ corresponding values in the CDR of VALUE."
 (defvar idris-rex-continuations '()
   "List of (ID . FUNCTION) continuations waiting for RPC results.")
 
-(defvar idris-continuation-counter 0
+(defvar idris-continuation-counter 1
   "Continuation serial number counter.")
 
 (defvar idris-event-hooks)
