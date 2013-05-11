@@ -42,8 +42,8 @@
     (set-process-sentinel idris-process 'idris-sentinel)
     (set-process-query-on-exit-flag idris-process t)))
 
-(defun idris-sentinel (process message)
-  (message "Idris quit unexpectly: %s" message)
+(defun idris-sentinel (process msg)
+  (message "Idris quit unexpectly: %s" (substring msg 0 -1))
   (delete-process idris-process)
   (setq idris-process nil))
 
