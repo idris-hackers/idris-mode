@@ -26,7 +26,7 @@
 (require 'pp)
 (require 'cl)
 (require 'idris-events)
-;(require 'idris-warnings)
+(require 'idris-warnings)
 
 ;;; Process stuff
 (defvar idris-process nil
@@ -40,7 +40,8 @@
           (apply #'start-process "idris" (idris-buffer-name :process) idris-interpreter-path "--ideslave" idris-interpreter-flags))
     (set-process-filter idris-process 'idris-output-filter)
     (set-process-sentinel idris-process 'idris-sentinel)
-    (set-process-query-on-exit-flag idris-process t)))
+    (set-process-query-on-exit-flag idris-process t)
+    (add-hook 'idris-event-hooks 'idris-warning-event-hook-function)))
 
 (defun idris-sentinel (process msg)
   (message "Idris quit unexpectly: %s" (substring msg 0 -1))

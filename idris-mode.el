@@ -16,6 +16,7 @@
 (require 'inferior-idris)
 (require 'idris-repl)
 (require 'idris-commands)
+(require 'idris-warnings)
 (require 'idris-indentation)
 
 (defgroup idris nil "Idris mode" :prefix 'idris)

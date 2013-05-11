@@ -25,11 +25,13 @@
 
 (require 'inferior-idris)
 (require 'idris-repl)
+(require 'idris-warnings)
 
 (defun idris-load-file ()
   "Pass the current buffer's file to the inferior Idris process."
   (interactive)
   (save-buffer)
+  (idris-warning-reset)
   (idris-repl-buffer)
   (idris-run)
   (if (buffer-file-name)

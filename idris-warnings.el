@@ -32,17 +32,24 @@
   "Face for warnings from the compiler."
   :group 'idris-faces)
 
-(defvar idris-warnings '() "All warnings in the current buffer")
+(defvar-local idris-warnings '() "All warnings in the current buffer")
 
-(defun get-region (warning)
+(defun idris-warning-event-hook-function (event)
+  (destructure-case event
+    ((:warning output target)
+     (idris-warning-overlay output)
+     t)
+    (t nil)))
+
+(defun idris-warning-reset ()
+  (mapc #'delete-overlay idris-warnings)
+  (setq idris-warnings '()))
+
+(defun get-region (line)
   (goto-char (point-min))
-  (let ((lno (string-to-number (nth 1 warning))))
-    (values
-     (line-beginning-position lno)
-     (1- (line-beginning-position (1+ lno))))))
-
-(defun get-message (warning)
-  (nth 2 warning))
+  (values
+   (line-beginning-position line)
+   (1- (line-beginning-position (1+ line)))))
 
 (defun idris-warning-overlay-p (overlay)
   (overlay-get overlay 'idris-warning))
@@ -54,15 +61,19 @@
 
 (defun idris-warning-overlay (warning)
   "Add a compiler warning to the buffer as an overlay.
-May merge overlays, if there's already one in the same location"
-  (multiple-value-bind (start end) (get-region warning)
-    (when start
-      (goto-char start)
-      (let ((overlay (idris-warning-overlay-at-point))
-            (message (get-message warning)))
-        (if overlay
-            (idris-warning-merge-overlays overlay message)
-          (idris-warning-create-overlay start end message))))))
+May merge overlays, if there's already one in the same location.
+WARNING is of form (filename linenumber message)"
+  (destructuring-bind (filename lineno message) warning
+    (let ((buffer (get-file-buffer filename)))
+      (when (not (null buffer))
+        (with-current-buffer buffer
+          (multiple-value-bind (start end) (get-region lineno)
+            (when start
+              (goto-char start)
+              (let ((overlay (idris-warning-overlay-at-point)))
+                (if overlay
+                    (idris-warning-merge-overlays overlay message)
+                  (idris-warning-create-overlay start end message))))))))))
 
 (defun idris-warning-merge-overlays (overlay message)
   (overlay-put overlay 'help-echo
@@ -76,14 +87,6 @@ May merge overlays, if there's already one in the same location"
     (overlay-put overlay 'mouse-face 'highlight)
     (push overlay idris-warnings)
     overlay))
-
-(defun idris-higlight-warnings (warnings)
-  "Highlight compiler warnings"
-  (switch-to-buffer-other-window inferior-idris-loaded-buffer)
-  (mapc #'delete-overlay idris-warnings)
-  (setq idris-wanings '())
-  (setq inferior-idris-look-for-warnings nil)
-  (mapc #'idris-warning-overlay warnings))
 
 (provide 'idris-warnings)
 
