@@ -1,4 +1,4 @@
-;;; idris-repl.el --- Run an Idris interpreter using S-Expression communication protocol
+;;; idris-warnings.el --- Mark warnings reported by idris in buffers
 
 ;; Copyright (C) 2013 Hannes Mehnert
 
