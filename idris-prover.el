@@ -1,4 +1,4 @@
-;;; idris-prover.el --- Prover for Idris
+;;; idris-prover.el --- Prover mode for Idris
 
 ;; Copyright (C) 2013 Hannes Mehnert
 
@@ -23,10 +23,14 @@
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA 02111-1307, USA.
 
-(require 'idris-repl)
-
 (defun idris-prover-event-hook-function (event)
   (destructure-case event
+    ((:start-proof-mode name target)
+     (idris-repl-write-string (concat "Start proof of " name))
+     t)
+    ((:end-proof-mode name target)
+     (idris-repl-write-string (concat "End proof of " name))
+     t)
     ((:write-goal goal target)
      (idris-repl-write-string goal)
      t)
