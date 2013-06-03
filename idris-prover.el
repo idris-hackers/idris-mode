@@ -33,7 +33,7 @@
 (defgroup idris-prover nil "Idris Prover" :prefix 'idris :group 'idris)
 
 (defface idris-prover-processed-face
-  '((t (:bold t)))
+  '((t (:background "spring green")))
   "Face for Idris proof script which is already processed."
   :group 'idris-prover)
 
@@ -56,16 +56,12 @@
 (defun idris-prover-write-goals (goals)
   (interactive)
   (with-current-buffer (idris-prover-obligations-buffer)
-    (setq buffer-read-only nil)
-    (erase-buffer)
-    (insert goals)
-    (setq buffer-read-only t)))
+    (let ((buffer-read-only nil))
+      (erase-buffer)
+      (insert goals))))
 
 (defvar-local idris-prover-script-processed nil
   "Marker for the processed part of proof script")
-
-(defvar-local idris-prover-script-processing nil
-  "Marker for the processing part of proof script")
 
 (defvar-local idris-prover-script-processed-overlay nil
   "Overlay for processed proof script")
@@ -78,46 +74,54 @@
       (let ((buffer (get-buffer-create idris-prover-script-buffer-name)))
         (with-current-buffer buffer
           (setq buffer-read-only t)
-          (set idris-prover-script-processed (make-marker))
-          (set idris-prover-script-processing (make-marker)))
+          (setq idris-prover-script-processed (make-marker))
+          (set-marker idris-prover-script-processed (point))
+          (idris-prover-reset-prover-script-buffer))
         buffer)))
+
+(defun idris-prover-reset-prover-script-buffer ()
+  (with-current-buffer (idris-prover-script-buffer)
+    (unless (null idris-prover-script-processed-overlay)
+      (delete-overlay idris-prover-script-processed-overlay)
+      (setq idris-prover-script-processed-overlay nil))
+    (setq idris-prover-prove-step 0)
+    (setq buffer-read-only nil)
+    (erase-buffer)
+    (setq buffer-read-only t)
+    (set-marker idris-prover-script-processed (point))))
 
 (defun idris-prover-write-script (script i)
   (interactive)
   (with-current-buffer (idris-prover-script-buffer)
     ; the repl should be responsible to put content into this buffer..
     ; two cases: (well, three)
-    ;  i < idris-prover-prove-step -> unmark stuff
     (cond ((< i idris-prover-prove-step)
            (goto-char idris-prover-script-processed)
            (forward-line -1)
            (end-of-line)
            (set-marker idris-prover-script-processed (point)))
-    ;  i > idris-prover-prove-step -> mark stuff
           ((> i idris-prover-prove-step)
-           (setq buffer-read-only nil)
            (goto-char idris-prover-script-processed)
-           (let ((lelem (last script)))
-             (insert-before-markers (concat "\n  " lelem ";")))
-           (setq buffer-read-only t))
-    ;  i = idris-prover-prove-step -> should not happen
+           (let ((buffer-read-only nil)
+                 (lelem (last script)))
+             (insert-before-markers (concat "\n  " (car lelem) ";"))))
           (t nil))
     (setq idris-prover-prove-step i)
     (unless (null idris-prover-script-processed-overlay)
       (delete-overlay idris-prover-script-processed-overlay))
     (let ((overlay (make-overlay 0 idris-prover-script-processed)))
       (overlay-put overlay 'read-only t)
-      (overlay-put overlay 'face 'idris-prover-processed-face))))
+      (overlay-put overlay 'face 'idris-prover-processed-face)
+      (setq idris-prover-script-processed-overlay overlay))))
 
 (defun idris-prover-event-hook-function (event)
   (destructure-case event
     ((:start-proof-mode name target)
+     (idris-prover-reset-prover-script-buffer)
      (idris-repl-write-string "Start proof of ")
-; reset buffers
      t)
     ((:end-proof-mode name target)
      (idris-repl-write-string "End proof of ")
-; reset buffers
      t)
     ((:write-proof-state msg target)
      (destructuring-bind (script i) msg
