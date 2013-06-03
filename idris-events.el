@@ -44,11 +44,12 @@
   "Record the fact that EVENT occured."
   (with-current-buffer (idris-events-buffer)
     (goto-char (point-max))
-    (let ((buffer-read-only nil))
+    (let ((buffer-read-only nil)
+          (time (substring (number-to-string (float-time)) 0 14)))
       (save-excursion
         (if sending
-            (insert "-> ")
-          (insert "<- "))
+            (insert (concat time " -> "))
+          (insert (concat time " <- ")))
         (idris-pprint-event event (current-buffer))))
     (goto-char (point-max))))
 
