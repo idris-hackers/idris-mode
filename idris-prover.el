@@ -91,9 +91,21 @@
 (defvar idris-prover-script-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map [?\C-n] 'idris-prover-script-forward)
+    (define-key map [?\C-p] 'idris-prover-script-backward)
 ;    (define-key map [tab] 'idris-repl-complete)
     map)
   "Keymap used in Idris proof script mode.")
+
+(defun idris-prover-script-backward ()
+  "Backward one piece of proof script"
+  (interactive)
+        (idris-rex ()
+                   ((list ':interpret "undo"))
+                   ((:ok result)
+                    (message (concat "success: " result)))
+                   ((:error condition)
+                    ; put error overlay
+                    (message (concat "fail: " condition)))))
 
 (defun idris-prover-script-forward ()
   "Forward one piece of proof script"
