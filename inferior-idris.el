@@ -27,6 +27,7 @@
 (require 'cl)
 (require 'idris-events)
 (require 'idris-warnings)
+(require 'idris-prover)
 
 ;;; Process stuff
 (defvar idris-process nil
@@ -41,7 +42,8 @@
     (set-process-filter idris-process 'idris-output-filter)
     (set-process-sentinel idris-process 'idris-sentinel)
     (set-process-query-on-exit-flag idris-process t)
-    (add-hook 'idris-event-hooks 'idris-warning-event-hook-function)))
+    (add-hook 'idris-event-hooks 'idris-warning-event-hook-function)
+    (add-hook 'idris-event-hooks 'idris-prover-event-hook-function)))
 
 (defun idris-sentinel (process msg)
   (message "Idris quit unexpectly: %s" (substring msg 0 -1))

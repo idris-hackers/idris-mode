@@ -17,6 +17,7 @@
 (require 'idris-repl)
 (require 'idris-commands)
 (require 'idris-warnings)
+(require 'idris-prover)
 (require 'idris-indentation)
 
 (defgroup idris nil "Idris mode" :prefix 'idris)
@@ -42,6 +43,7 @@
   `("Idris"
     ["Load file" idris-load-file t]
     ["Customize idris-mode" (customize-group 'idris) t]
+    ["Quit inferior idris process" idris-quit t]
     ))
 
 (defcustom idris-mode-hook '(turn-on-idris-indentation)
@@ -62,6 +64,14 @@ Invokes `idris-mode-hook'."
 
 ; Automatically use idris-mode for .idr files.
 (push '("\\.idr$" . idris-mode) auto-mode-alist)
+
+(defun idris-quit ()
+  (interactive)
+  (let ((bufs (list :repl :process :proof-obligations :proof-shell :proof-script)))
+    (dolist (b bufs)
+      (let ((buf (get-buffer (idris-buffer-name b))))
+	(when buf
+	  (kill-buffer buf))))))
 
 (provide 'idris-mode)
 ;;; idris-mode.el ends here

@@ -156,6 +156,13 @@
     map)
   "Keymap used in Idris REPL mode.")
 
+(easy-menu-define idris-repl-mode-menu idris-repl-mode-map
+  "Menu for the Idris REPL mode"
+  `("Idris REPL"
+    ["Customize idris-mode" (customize-group 'idris) t]
+    ["Quit inferior idris process" idris-quit t]
+    ))
+
 (define-derived-mode idris-repl-mode fundamental-mode "Idris-REPL"
   "Major mode for interacting with Idris.
     \\{idris-repl-mode-map}
@@ -209,7 +216,6 @@ Invokes `idris-repl-mode-hook'."
   (let ((end (point)))
     (idris-repl-add-to-input-history (buffer-substring idris-input-start end))
     (let ((overlay (make-overlay idris-input-start end)))
-      (overlay-put overlay 'read-only t)
       (overlay-put overlay 'face 'idris-repl-input-face)))
   (let ((input (idris-repl-current-input)))
     (goto-char (point-max))
