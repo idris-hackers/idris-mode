@@ -43,6 +43,7 @@
   `("Idris"
     ["Load file" idris-load-file t]
     ["Customize idris-mode" (customize-group 'idris) t]
+    ["Quit inferior idris process" idris-quit t]
     ))
 
 (defcustom idris-mode-hook '(turn-on-idris-indentation)
