@@ -54,11 +54,12 @@
         buffer)))
 
 (defun idris-prover-write-goals (goals)
-  (interactive)
-  (with-current-buffer (idris-prover-obligations-buffer)
-    (let ((buffer-read-only nil))
-      (erase-buffer)
-      (insert goals))))
+  (let ((buffer (idris-prover-obligations-buffer)))
+    (with-current-buffer buffer
+      (let ((buffer-read-only nil))
+        (erase-buffer)
+        (insert goals)))
+    (display-buffer buffer)))
 
 (defvar-local idris-prover-script-processed nil
   "Marker for the processed part of proof script")
