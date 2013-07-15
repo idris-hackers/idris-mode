@@ -89,7 +89,7 @@
 
 ; invariant: point-min <= idris-prover-script-processed <= idris-prover-script-processing <= point-max
 
-(defvar idris-prover-prove-step 0
+(defvar-local idris-prover-prove-step 0
   "Step counter of the proof")
 
 (defvar idris-prover-script-mode-map
@@ -133,14 +133,16 @@
                    ((list ':interpret rem))
                    ((:ok result)
                     (with-current-buffer (idris-prover-script-buffer)
-                      (delete-overlay idris-prover-script-processing-overlay)
-                      (setq idris-prover-script-processing-overlay nil)
+                      (when idris-prover-script-processing-overlay
+                        (delete-overlay idris-prover-script-processing-overlay)
+                        (setq idris-prover-script-processing-overlay nil))
                       (delete-region idris-prover-script-processed idris-prover-script-processing))
                     (message (concat "success: " result)))
                    ((:error condition)
                     (with-current-buffer (idris-prover-script-buffer)
-                      (delete-overlay idris-prover-script-processing-overlay)
-                      (setq idris-prover-script-processing-overlay nil)
+                      (when idris-prover-script-processing-overlay
+                        (delete-overlay idris-prover-script-processing-overlay)
+                        (setq idris-prover-script-processing-overlay nil))
                       (setq idris-prover-script-warning-overlay (idris-warning-create-overlay idris-prover-script-processed idris-prover-script-processing condition)))
                     ; put error overlay
                     (message (concat "fail: " condition))))))))
@@ -148,26 +150,28 @@
 (defun idris-prover-script-complete ()
   "Completion of the partial input"
   (interactive)
-  (goto-char (1+ idris-prover-script-processed))
-  (let* ((input (buffer-substring-no-properties (point) (line-end-position)))
-         (result (idris-eval `(:repl-completions ,input))))
+  (goto-char idris-prover-script-processed)
+  (let* ((input (buffer-substring-no-properties (point) (point-max)))
+         (inputp (replace-regexp-in-string "[ \t\n]*\\'" "" input))
+         (inputr (replace-regexp-in-string "\\`[ \t\n]*" "" inputp))
+         (result (idris-eval `(:repl-completions ,inputr))))
     (destructuring-bind (completions partial) result
       (if (null completions)
           (progn
             (idris-minibuffer-respecting-message "Can't find completions for \"%s\"" input)
             (ding)
             (idris-complete-restore-window-configuration))
-          (if (= (length completions) 1)
-              (progn
-                (end-of-line)
-                (insert-and-inherit (substring (concat partial (car completions)) (length input)))
-                (idris-minibuffer-respecting-message "Sole completion")
-                (idris-complete-restore-window-configuration))
-            (let* ((pp (substring input (length partial)))
-                   (mypartial (find-common-prefix pp completions)))
-              (insert-and-inherit (substring (concat partial mypartial) (length input)))
-              (idris-minibuffer-respecting-message "Completions, not unique")
-              (idris-display-or-scroll-completions completions partial mypartial)))))))
+        (if (= (length completions) 1)
+            (progn
+              (goto-char (+ idris-prover-script-processed (length inputp)))
+              (insert-and-inherit (substring (concat partial (car completions)) (length inputr)))
+              (idris-minibuffer-respecting-message "Sole completion")
+              (idris-complete-restore-window-configuration))
+          (let* ((pp (substring input (length partial)))
+                 (mypartial (find-common-prefix pp completions)))
+            (insert-and-inherit (substring (concat partial mypartial) (length input)))
+            (idris-minibuffer-respecting-message "Completions, not unique")
+            (idris-display-or-scroll-completions completions partial mypartial)))))))
 
 (define-derived-mode idris-prover-script-mode fundamental-mode "Idris-Proof-Script"
   "Major mode for interacting with Idris proof script.
@@ -180,11 +184,11 @@ Invokes `idris-prover-script-mode-hook'."
   (or (get-buffer idris-prover-script-buffer-name)
       (let ((buffer (get-buffer-create idris-prover-script-buffer-name)))
         (with-current-buffer buffer
+          (idris-prover-script-mode)
           (setq idris-prover-script-processing (make-marker))
           (setq idris-prover-script-processed (make-marker))
           (set-marker idris-prover-script-processing (point))
-          (set-marker idris-prover-script-processed (point))
-          (idris-prover-script-mode))
+          (set-marker idris-prover-script-processed (point)))
         buffer)))
 
 (defun idris-prover-reset-prover-script-buffer ()
@@ -208,19 +212,21 @@ Invokes `idris-prover-script-mode-hook'."
 (defun idris-prover-write-script (script i)
   (interactive)
   (with-current-buffer (idris-prover-script-buffer)
-    ; the repl should be responsible to put content into this buffer..
-    ; two cases: (well, three)
     (let ((inhibit-read-only t))
       (put-text-property (point-min) (point-max) 'read-only nil))
     (cond ((< i idris-prover-prove-step)
+           ; this is actually the (i - 1) == idris-prover-prove-step case!
+           ; can the other case(s) happen??
            (goto-char idris-prover-script-processed)
            (forward-line -1)
            (end-of-line)
            (set-marker idris-prover-script-processed (point)))
           ((> i idris-prover-prove-step)
            (goto-char idris-prover-script-processed)
-           (let ((lelem (last script)))
-             (insert-before-markers (concat "\n  " (car lelem) ";"))))
+           (while (< idris-prover-prove-step i)
+             (let ((lelem (nth (1- idris-prover-prove-step) script)))
+               (insert-before-markers (concat "\n  " lelem ";")))
+             (setq idris-prover-prove-step (1+ idris-prover-prove-step))))
           (t nil))
     (setq idris-prover-prove-step i)
     (when (eql (marker-position idris-prover-script-processed) (point-max))
