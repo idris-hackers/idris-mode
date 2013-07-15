@@ -156,6 +156,13 @@
     map)
   "Keymap used in Idris REPL mode.")
 
+(easy-menu-define idris-repl-mode-menu idris-repl-mode-map
+  "Menu for the Idris REPL mode"
+  `("Idris REPL"
+    ["Customize idris-mode" (customize-group 'idris) t]
+    ["Quit inferior idris process" idris-quit t]
+    ))
+
 (define-derived-mode idris-repl-mode fundamental-mode "Idris-REPL"
   "Major mode for interacting with Idris.
     \\{idris-repl-mode-map}
