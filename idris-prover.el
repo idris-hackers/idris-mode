@@ -92,7 +92,7 @@
   (let ((map (make-sparse-keymap)))
     (define-key map [?\C-n] 'idris-prover-script-forward)
     (define-key map [?\C-p] 'idris-prover-script-backward)
-;    (define-key map [tab] 'idris-repl-complete)
+    (define-key map [tab] 'idris-prover-script-complete)
     map)
   "Keymap used in Idris proof script mode.")
 
@@ -141,6 +141,29 @@
                     ; put error overlay
                     (message (concat "fail: " condition))))))))
 
+(defun idris-prover-script-complete ()
+  "Completion of the partial input"
+  (interactive)
+  (goto-char (1+ idris-prover-script-processed))
+  (let* ((input (buffer-substring-no-properties (point) (line-end-position)))
+         (result (idris-eval `(:repl-completions ,input))))
+    (destructuring-bind (completions partial) result
+      (if (null completions)
+          (progn
+            (idris-minibuffer-respecting-message "Can't find completions for \"%s\"" input)
+            (ding)
+            (idris-complete-restore-window-configuration))
+          (if (= (length completions) 1)
+              (progn
+                (end-of-line)
+                (insert-and-inherit (substring (concat partial (car completions)) (length input)))
+                (idris-minibuffer-respecting-message "Sole completion")
+                (idris-complete-restore-window-configuration))
+            (let* ((pp (substring input (length partial)))
+                   (mypartial (find-common-prefix pp completions)))
+              (insert-and-inherit (substring (concat partial mypartial) (length input)))
+              (idris-minibuffer-respecting-message "Completions, not unique")
+              (idris-display-or-scroll-completions completions partial mypartial)))))))
 
 (define-derived-mode idris-prover-script-mode fundamental-mode "Idris-Proof-Script"
   "Major mode for interacting with Idris proof script.
