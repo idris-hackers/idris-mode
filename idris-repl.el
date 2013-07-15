@@ -209,7 +209,6 @@ Invokes `idris-repl-mode-hook'."
   (let ((end (point)))
     (idris-repl-add-to-input-history (buffer-substring idris-input-start end))
     (let ((overlay (make-overlay idris-input-start end)))
-      (overlay-put overlay 'read-only t)
       (overlay-put overlay 'face 'idris-repl-input-face)))
   (let ((input (idris-repl-current-input)))
     (goto-char (point-max))
