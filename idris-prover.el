@@ -60,13 +60,17 @@
           (setq buffer-read-only t))
         buffer)))
 
+(defun idris-prover-show-obligations ()
+  (display-buffer (idris-prover-obligations-buffer)
+     '(display-buffer-pop-up-window . nil)))
+
 (defun idris-prover-write-goals (goals)
-  (let ((buffer (idris-prover-obligations-buffer)))
-    (with-current-buffer buffer
-      (let ((buffer-read-only nil))
-        (erase-buffer)
-        (insert goals)))
-    (display-buffer buffer)))
+  (with-current-buffer (idris-prover-obligations-buffer)
+    (let ((buffer-read-only nil))
+      (erase-buffer)
+      (insert goals)))
+  (idris-prover-show-obligations))
+
 
 (defvar-local idris-prover-script-processed nil
   "Marker for the processed part of proof script")
@@ -235,6 +239,9 @@ Invokes `idris-prover-script-mode-hook'."
     ((:start-proof-mode name target)
      (idris-prover-reset-prover-script-buffer)
      (idris-repl-write-string "Start proof of ")
+     (let* ((obligations-window (idris-prover-show-obligations))
+            (script-window (split-window obligations-window)))
+       (set-window-buffer script-window (idris-prover-script-buffer)))
      t)
     ((:end-proof-mode name target)
      (idris-repl-write-string "End proof of ")
