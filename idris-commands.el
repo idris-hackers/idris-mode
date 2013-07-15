@@ -37,9 +37,8 @@
   (if (buffer-file-name)
       (idris-eval-async `(:load-file ,(buffer-file-name))
                         (lambda (result)
-                          (ecase result
-                            ((:good) (message "all good"))
-                            ((:warning msg) (message msg)))))
+                          (pop-to-buffer (idris-repl-buffer))
+                          (message result)))
     (error "Cannot find file for current buffer")))
 
 (provide 'idris-commands)
