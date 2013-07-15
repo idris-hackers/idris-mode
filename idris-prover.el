@@ -23,6 +23,8 @@
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA 02111-1307, USA.
 
+(require 'idris-warnings)
+
 ; consisting of three buffers:
 ; ------------------------------
 ; | proof obligations          |
@@ -35,6 +37,11 @@
 (defface idris-prover-processed-face
   '((t (:background "spring green")))
   "Face for Idris proof script which is already processed."
+  :group 'idris-prover)
+
+(defface idris-prover-processing-face
+  '((t (:background "gold")))
+  "Face for Idris proof script which is currently processing."
   :group 'idris-prover)
 
 (defvar idris-prover-obligations-buffer-name (idris-buffer-name :proof-obligations)
@@ -67,25 +74,95 @@
 (defvar-local idris-prover-script-processed-overlay nil
   "Overlay for processed proof script")
 
+(defvar-local idris-prover-script-processing nil
+  "Marker for the processing part of proof script")
+
+(defvar-local idris-prover-script-processing-overlay nil
+  "Overlay for processing proof script")
+
+(defvar-local idris-prover-script-warning-overlay nil
+  "Overlay for warning in proof script")
+
+; invariant: point-min <= idris-prover-script-processed <= idris-prover-script-processing <= point-max
+
 (defvar idris-prover-prove-step 0
   "Step counter of the proof")
+
+(defvar idris-prover-script-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map [?\C-n] 'idris-prover-script-forward)
+;    (define-key map [tab] 'idris-repl-complete)
+    map)
+  "Keymap used in Idris proof script mode.")
+
+(defun idris-prover-script-forward ()
+  "Forward one piece of proof script"
+  (interactive)
+  (when idris-prover-script-warning-overlay
+    (delete-overlay idris-prover-script-warning-overlay)
+    (setq idris-prover-script-warning-overlay nil))
+  (goto-char (+ 1 idris-prover-script-processed))
+  (let ((end (search-forward ";" (line-end-position) t)))
+    (unless end
+      (end-of-line)
+      (insert ";"))
+    (goto-char idris-prover-script-processed)
+    (let ((remaining (buffer-substring-no-properties (point) (1- (search-forward ";")))))
+      (set-marker idris-prover-script-processing (point))
+      (let ((overlay (make-overlay idris-prover-script-processed idris-prover-script-processing)))
+        (overlay-put overlay 'face 'idris-prover-processing-face)
+        (setq idris-prover-script-processing-overlay overlay))
+      (let ((rem (replace-regexp-in-string "\\`[ \t\n]*" "" remaining)))
+        (idris-rex ()
+                   ((list ':interpret rem))
+                   ((:ok result)
+                    (with-current-buffer (idris-prover-script-buffer)
+                      (delete-overlay idris-prover-script-processing-overlay)
+                      (setq idris-prover-script-processing-overlay nil)
+                      (delete-region idris-prover-script-processed idris-prover-script-processing))
+                    (message (concat "success: " result)))
+                   ((:error condition)
+                    (with-current-buffer (idris-prover-script-buffer)
+                      (delete-overlay idris-prover-script-processing-overlay)
+                      (setq idris-prover-script-processing-overlay nil)
+                      (setq idris-prover-script-warning-overlay (idris-warning-create-overlay idris-prover-script-processed idris-prover-script-processing condition)))
+                    ; put error overlay
+                    (message (concat "fail: " condition))))))))
+
+
+(define-derived-mode idris-prover-script-mode fundamental-mode "Idris-Proof-Script"
+  "Major mode for interacting with Idris proof script.
+    \\{idris-prover-script-mode-map}
+Invokes `idris-prover-script-mode-hook'."
+  :group 'idris-prover
+  (set (make-local-variable 'indent-tabs-mode) nil))
 
 (defun idris-prover-script-buffer ()
   (or (get-buffer idris-prover-script-buffer-name)
       (let ((buffer (get-buffer-create idris-prover-script-buffer-name)))
         (with-current-buffer buffer
+          (setq idris-prover-script-processing (make-marker))
           (setq idris-prover-script-processed (make-marker))
+          (set-marker idris-prover-script-processing (point))
           (set-marker idris-prover-script-processed (point))
-          (idris-prover-reset-prover-script-buffer))
+          (idris-prover-script-mode))
         buffer)))
 
 (defun idris-prover-reset-prover-script-buffer ()
   (with-current-buffer (idris-prover-script-buffer)
-    (unless (null idris-prover-script-processed-overlay)
+    (when idris-prover-script-processed-overlay
       (delete-overlay idris-prover-script-processed-overlay)
       (setq idris-prover-script-processed-overlay nil))
+    (when idris-prover-script-processing-overlay
+      (delete-overlay idris-prover-script-processing-overlay)
+      (setq idris-prover-script-processing-overlay nil))
     (setq idris-prover-prove-step 0)
     (erase-buffer)
+    (unless idris-prover-script-processing
+      (setq idris-prover-script-processing (make-marker)))
+    (unless idris-prover-script-processed
+      (setq idris-prover-script-processed (make-marker)))
+    (set-marker idris-prover-script-processing (point))
     (set-marker idris-prover-script-processed (point))
     (insert "\n")))
 
@@ -107,6 +184,9 @@
              (insert-before-markers (concat "\n  " (car lelem) ";"))))
           (t nil))
     (setq idris-prover-prove-step i)
+    (when (eql (marker-position idris-prover-script-processed) (point-max))
+      (goto-char idris-prover-script-processed)
+      (insert "\n"))
     (unless (null idris-prover-script-processed-overlay)
       (delete-overlay idris-prover-script-processed-overlay))
     (let ((overlay (make-overlay 0 idris-prover-script-processed)))
