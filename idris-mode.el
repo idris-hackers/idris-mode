@@ -13,6 +13,7 @@
 ;;; Code:
 
 (require 'idris-syntax)
+(require 'idris-compat)
 (require 'inferior-idris)
 (require 'idris-repl)
 (require 'idris-commands)
