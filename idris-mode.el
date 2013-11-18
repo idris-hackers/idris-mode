@@ -36,6 +36,7 @@
 (defvar idris-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map [?\C-c ?\C-l] 'idris-load-file)
+    (define-key map [?\C-c ?\C-t] 'idris-type-at-point)
     map)
   "Keymap used in Idris mode.")
 
