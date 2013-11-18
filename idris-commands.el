@@ -86,4 +86,13 @@
     (delete-region (line-beginning-position) (line-end-position))
     (insert (substring result 0 (1- (length result))))))
 
+(defun idris-add-clause ()
+  "Add clauses to the declaration at point"
+  (interactive)
+  (idris-load-file-sync)
+  (let* ((what (idris-thing-at-point))
+         (result (idris-eval `(:add-clause ,(cdr what) ,(car what)))))
+    (forward-line 1)
+    (insert result)))
+
 (provide 'idris-commands)

@@ -38,6 +38,7 @@
     (define-key map [?\C-c ?\C-l] 'idris-load-file)
     (define-key map [?\C-c ?\C-t] 'idris-type-at-point)
     (define-key map [?\C-c ?\C-c] 'idris-case-split)
+    (define-key map [?\C-c ?\C-m] 'idris-add-missing)
     map)
   "Keymap used in Idris mode.")
 
