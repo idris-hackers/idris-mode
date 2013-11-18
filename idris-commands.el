@@ -67,4 +67,23 @@
          (result (idris-eval `(:type-of ,name))))
     (message "%s" result)))
 
+(defun idris-load-file-sync ()
+  "Pass the current buffer's file synchronously to the inferior Idris process."
+  (save-buffer)
+  (idris-warning-reset)
+  (idris-repl-buffer)
+  (idris-run)
+  (if (buffer-file-name)
+      (idris-eval `(:load-file ,(buffer-file-name)))
+    (error "Cannot find file for current buffer")))
+
+(defun idris-case-split ()
+  "Case split the pattern var at point"
+  (interactive)
+  (idris-load-file-sync)
+  (let* ((what (idris-thing-at-point))
+         (result (idris-eval `(:case-split ,(cdr what) ,(car what)))))
+    (delete-region (line-beginning-position) (line-end-position))
+    (insert (substring result 0 (1- (length result))))))
+
 (provide 'idris-commands)
