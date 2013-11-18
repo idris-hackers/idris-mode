@@ -41,4 +41,30 @@
                           (message result)))
     (error "Cannot find file for current buffer")))
 
+(defun string-no-properties (str)
+  (substring-no-properties str 0 (length str)))
+
+(defun idris-get-line-num ()
+  "Get the current line number"
+  (save-restriction
+    (widen)
+    (save-excursion
+      (beginning-of-line)
+      (1+ (count-lines 1 (point))))))
+
+(defun idris-thing-at-point ()
+  "Return the line number and name at point"
+  (let ((name (symbol-at-point))
+        (line (idris-get-line-num)))
+    (if name
+        (cons (string-no-properties (symbol-name name)) line)
+      (error "Nothing identifiable under point"))))
+
+(defun idris-type-at-point ()
+  "Display the type of the name at point, considered as a global variable"
+  (interactive)
+  (let* ((name (car (idris-thing-at-point)))
+         (result (idris-eval `(:type-of ,name))))
+    (message "%s" result)))
+
 (provide 'idris-commands)
