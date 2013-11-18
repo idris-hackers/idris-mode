@@ -95,4 +95,37 @@
     (forward-line 1)
     (insert result)))
 
+(defun idris-add-missing ()
+  "Add missing cases"
+  (interactive)
+  (idris-load-file-sync)
+  (let* ((what (idris-thing-at-point))
+         (result (idris-eval `(:add-missing ,(cdr what) ,(car what)))))
+    (message result)))
+
+(defun idris-make-with-block ()
+  "Add with block"
+  (interactive)
+  (idris-load-file-sync)
+  (let* ((what (idris-thing-at-point))
+         (result (idris-eval `(:make-with ,(cdr what) ,(car what)))))
+    (beginning-of-line)
+    (kill-line)
+    (insert result)))
+
+(defun idris-proof-search (hints)
+  "Invoke the proof search"
+  (interactive "P")
+  (idris-load-file-sync)
+  (let* ((hints (if hints
+                    (split-string (read-string "Hints: ") "[^a-zA-Z0-9']")
+                  '()))
+         (what (idris-thing-at-point))
+         (result (idris-eval `(:proof-search ,(cdr what) ,(car what) ,hints))))
+    (save-excursion
+      (let ((start (progn (search-backward "?") (point)))
+            (end (progn (forward-char) (search-forward-regexp "[^a-zA-Z0-9_']") (backward-char) (point))))
+        (delete-region start end))
+      (insert result))))
+
 (provide 'idris-commands)

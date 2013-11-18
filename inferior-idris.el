@@ -168,7 +168,7 @@ Remote EXecute SEXP.
 VARs are a list of saved variables visible in the other forms.  Each
 VAR is either a symbol or a list (VAR INIT-VALUE).
 
-SEXP is evaluated and the princed version is sent to Dylan.
+SEXP is evaluated and the princed version is sent to Idris.
 
 CLAUSES is a list of patterns with same syntax as
 `destructure-case'.  The result of the evaluation of SEXP is
