@@ -53,7 +53,7 @@
         (insert "\n")))
     (goto-char (point-max))))
 
-(defun idris-log-event-hook-function (event)
+(defun idris-log-hook-function (event)
   (destructure-case event
     ((:log (level message) target)
      (idris-log level message)

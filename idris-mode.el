@@ -74,7 +74,7 @@ Invokes `idris-mode-hook'."
 
 (defun idris-quit ()
   (interactive)
-  (let ((bufs (list :repl :process :proof-obligations :proof-shell :proof-script)))
+  (let ((bufs (list :repl :process :proof-obligations :proof-shell :proof-script :log)))
     (dolist (b bufs)
       (let ((buf (get-buffer (idris-buffer-name b))))
 	(when buf

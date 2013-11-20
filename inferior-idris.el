@@ -26,6 +26,7 @@
 (require 'pp)
 (require 'cl)
 (require 'idris-events)
+(require 'idris-log)
 (require 'idris-warnings)
 (require 'idris-prover)
 
@@ -42,6 +43,7 @@
     (set-process-filter idris-process 'idris-output-filter)
     (set-process-sentinel idris-process 'idris-sentinel)
     (set-process-query-on-exit-flag idris-process t)
+    (add-hook 'idris-event-hooks 'idris-log-hook-function)
     (add-hook 'idris-event-hooks 'idris-warning-event-hook-function)
     (add-hook 'idris-event-hooks 'idris-prover-event-hook-function)))
 
