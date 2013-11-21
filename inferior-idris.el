@@ -64,7 +64,7 @@
   (with-current-buffer (process-buffer process)
     (while (idris-have-input-p)
       (let ((event (idris-receive)))
-        (idris-log-event event nil)
+        (idris-event-log event nil)
         (unwind-protect
             (save-current-buffer
               (idris-dispatch-event event process)))))))
@@ -95,7 +95,7 @@
   "Send a SEXP to Idris over the PROC. This is the lowest level of communication."
   (let* ((msg (concat (idris-prin1-to-string sexp) "\n"))
          (string (concat (idris-encode-length (length msg)) msg)))
-    (idris-log-event sexp t)
+    (idris-event-log sexp t)
     (process-send-string proc string)))
 
 (defun idris-encode-length (n)

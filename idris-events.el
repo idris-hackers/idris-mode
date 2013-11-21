@@ -40,7 +40,7 @@
           (setq buffer-read-only t))
         buffer)))
 
-(defun idris-log-event (event sending)
+(defun idris-event-log (event sending)
   "Record the fact that EVENT occured."
   (with-current-buffer (idris-events-buffer)
     (goto-char (point-max))
