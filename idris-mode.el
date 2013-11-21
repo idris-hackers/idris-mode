@@ -71,11 +71,19 @@ Invokes `idris-mode-hook'."
 
 (defun idris-quit ()
   (interactive)
-  (let ((bufs (list :repl :process :proof-obligations :proof-shell :proof-script :log)))
+  (let* ((pbufname (idris-buffer-name :process))
+         (pbuf (get-buffer pbufname)))
+    (if pbuf
+        (progn
+          (kill-buffer pbuf)
+          (unless (get-buffer pbufname) (idris-kill-buffers)))
+      (idris-kill-buffers))))
+
+(defun idris-kill-buffers ()
+  (let ((bufs (list :repl :proof-obligations :proof-shell :proof-script :log)))
     (dolist (b bufs)
       (let ((buf (get-buffer (idris-buffer-name b))))
-	(when buf
-	  (kill-buffer buf))))))
+        (when buf (kill-buffer buf))))))
 
 (provide 'idris-mode)
 ;;; idris-mode.el ends here
