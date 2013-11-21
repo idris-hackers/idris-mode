@@ -41,9 +41,6 @@
                           (message result)))
     (error "Cannot find file for current buffer")))
 
-(defun string-no-properties (str)
-  (substring-no-properties str 0 (length str)))
-
 (defun idris-get-line-num ()
   "Get the current line number"
   (save-restriction
@@ -57,7 +54,7 @@
   (let ((name (symbol-at-point))
         (line (idris-get-line-num)))
     (if name
-        (cons (string-no-properties (symbol-name name)) line)
+        (cons (substring-no-properties (symbol-name name)) line)
       (error "Nothing identifiable under point"))))
 
 (defun idris-type-at-point ()
