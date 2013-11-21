@@ -13,13 +13,10 @@
 ;;; Code:
 
 (require 'idris-syntax)
+(require 'idris-indentation)
 (require 'idris-compat)
-(require 'inferior-idris)
 (require 'idris-repl)
 (require 'idris-commands)
-(require 'idris-warnings)
-(require 'idris-prover)
-(require 'idris-indentation)
 
 (defgroup idris nil "Idris mode" :prefix 'idris)
 

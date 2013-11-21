@@ -75,7 +75,7 @@
     (error "Cannot find file for current buffer")))
 
 (defun idris-case-split ()
-  "Case split the pattern var at point"
+  "Case split the pattern variable at point"
   (interactive)
   (idris-load-file-sync)
   (let* ((what (idris-thing-at-point))
