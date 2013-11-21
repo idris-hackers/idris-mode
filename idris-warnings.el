@@ -49,7 +49,7 @@
   (goto-char (point-min))
   (values
    (line-beginning-position line)
-   (1- (line-beginning-position (1+ line)))))
+   (line-end-position line)))
 
 (defun idris-warning-overlay-p (overlay)
   (overlay-get overlay 'idris-warning))
