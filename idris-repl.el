@@ -49,7 +49,7 @@
   "Face for the result of an evaluation in the Idris REPL."
   :group 'idris-repl)
 
-(defcustom idris-repl-history-file "~/.idris-history.eld"
+(defcustom idris-repl-history-file "~/.idris/idris-history.eld"
   "File to save the persistent REPL history to."
   :type 'string
   :group 'idris-repl)
