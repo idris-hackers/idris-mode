@@ -226,7 +226,7 @@ versions cannot deal with that."
                    tag sexp))
           (throw tag (list #'identity value)))
          ((:error condition)
-          (throw tag (list #'error "Synchronous Idris evaluation failed"))))
+          (throw tag (list #'error "%s (synchronous Idris evaluation failed)" condition))))
        (let ((debug-on-quit t)
              (inhibit-quit nil))
          (while t
