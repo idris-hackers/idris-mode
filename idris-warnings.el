@@ -70,10 +70,16 @@ WARNING is of form (filename linenumber message)"
           (multiple-value-bind (start end) (get-region lineno)
             (when start
               (goto-char start)
-              (let ((overlay (idris-warning-overlay-at-point)))
-                (if overlay
-                    (idris-warning-merge-overlays overlay message)
-                  (idris-warning-create-overlay start end message))))))))))
+              ; this is a hack to have warnings reported which point
+              ; to empty lines
+              (let ((rend (if (equal start end)
+                              (progn (insert " ")
+                                     (1+ end))
+                            end)))
+                (let ((overlay (idris-warning-overlay-at-point)))
+                  (if overlay
+                      (idris-warning-merge-overlays overlay message)
+                    (idris-warning-create-overlay start rend message)))))))))))
 
 (defun idris-warning-merge-overlays (overlay message)
   (overlay-put overlay 'help-echo
