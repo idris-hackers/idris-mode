@@ -32,3 +32,9 @@ somewhere in `~/.emacs` or `~.emacs.d/init.el`.
 ## Customization
 
 Customize various aspects of the mode using `M-x customize-group RET idris RET`.
+
+## Documentation
+
+Some preliminary notes are available in the [pdf]
+
+[pdf]: http://itu.dk/~hame/idris-mode.pdf
