@@ -11,6 +11,15 @@ same face as functions and values defined with `=`.
 
 ![Screenshot](http://itu.dk/~hame/idris-emacs.png)
 
+## Documentation
+
+There are some docstrings spread around the mode, thus C-h m is helpful and returns the available key bindings.
+The REPL also supports tab completion, thus pressing tab opens a buffer with the available completions.
+
+Some preliminary notes are available in the [pdf]
+
+[pdf]: http://itu.dk/~hame/idris-mode.pdf
+
 ## Inferior Idris
 
 There is now support for running an Idris interpreter in a buffer. Use
@@ -33,8 +42,3 @@ somewhere in `~/.emacs` or `~.emacs.d/init.el`.
 
 Customize various aspects of the mode using `M-x customize-group RET idris RET`.
 
-## Documentation
-
-Some preliminary notes are available in the [pdf]
-
-[pdf]: http://itu.dk/~hame/idris-mode.pdf
