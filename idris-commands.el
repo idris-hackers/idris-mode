@@ -101,7 +101,9 @@
   (let ((what (idris-thing-at-point)))
     (when (car what)
       (idris-load-file-sync)
-      (message (idris-eval `(:add-missing ,(cdr what) ,(car what)))))))
+      (let ((result (idris-eval `(:add-missing ,(cdr what) ,(car what)))))
+        (forward-line 1)
+        (insert result)))))
 
 (defun idris-make-with-block ()
   "Add with block"
