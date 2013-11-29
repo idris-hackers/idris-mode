@@ -35,8 +35,12 @@ Customize `inferior-idris-path` if idris is not on your default path.
 
 ## Installation
 
-Place the elisp files somewhere in your load path and `(require 'idris-mode)`
-somewhere in `~/.emacs` or `~.emacs.d/init.el`.
+If you have Emacs >= 23, you can install pre-built packages from
+[MELPA](http://melpa.milkbox.net/): `idris-mode` will automatically be enabled
+in `.idr` files without any further configuration.
+
+Alternatively, download the elisp files, place them somewhere in your load
+path and `(require 'idris-mode)` somewhere in `~/.emacs` or `~.emacs.d/init.el`.
 
 ## Customization
 
