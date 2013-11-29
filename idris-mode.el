@@ -3,6 +3,7 @@
 ;; Copyright (C) 2013
 
 ;; Author:
+;; URL: https://github.com/idris-hackers/idris-mode
 ;; Keywords: languages
 
 
@@ -55,6 +56,7 @@
   :type 'hook
   :options '(turn-on-idris-indentation))
 
+;;;###autoload
 (define-derived-mode idris-mode fundamental-mode "Idris"
   "Major mode for Idris
      \\{idris-mode-map}
@@ -66,7 +68,8 @@ Invokes `idris-mode-hook'."
   (set (make-local-variable 'indent-tabs-mode) nil)
   (set (make-local-variable 'comment-start) "--"))
 
-; Automatically use idris-mode for .idr files.
+;; Automatically use idris-mode for .idr files.
+;;;###autoload
 (push '("\\.idr$" . idris-mode) auto-mode-alist)
 
 (defun idris-quit ()
