@@ -23,6 +23,7 @@
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA 02111-1307, USA.
 
+(require 'idris-core)
 (require 'inferior-idris)
 (require 'idris-common-utils)
 (require 'idris-completion)
@@ -442,6 +443,10 @@ The handler will use qeuery to ask the use if the error should be ingored."
      (if (y-or-n-p (format query (error-message-string err)))
          nil
        (signal (car err) (cdr err))))))
+
+(defun idris-repl-read-history-filename ()
+  (read-file-name "Use Idris REPL history from file: "
+                  idris-repl-history-file))
 
 (defun idris-repl-load-history (&optional filename)
   "Set the current Idris REPL history.

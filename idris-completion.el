@@ -23,6 +23,8 @@
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA 02111-1307, USA.
 
+(require 'idris-core)
+
 (defvar idris-completions-buffer-name "*Completions*")
 
 (defvar-local idris-completions-window nil

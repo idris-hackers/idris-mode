@@ -23,6 +23,7 @@
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA 02111-1307, USA.
 
+(require 'idris-core)
 (require 'idris-common-utils)
 
 (defvar idris-event-buffer-name (idris-buffer-name :events)

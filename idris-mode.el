@@ -13,13 +13,13 @@
 
 ;;; Code:
 
+(require 'idris-core)
 (require 'idris-syntax)
 (require 'idris-indentation)
-(require 'idris-compat)
 (require 'idris-repl)
 (require 'idris-commands)
 
-(defgroup idris nil "Idris mode" :prefix 'idris)
+(defgroup idris nil "Idris mode" :prefix 'idris :group 'languages)
 
 (defcustom idris-interpreter-path "idris"
   "The path to the Idris interpreter"

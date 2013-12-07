@@ -35,6 +35,8 @@
 ;; Otherwise, call `idris-indentation-mode'.
 ;;
 
+(require 'idris-core)
+
 ;;; Code:
 
 (eval-when-compile (require 'cl)) ;needed for def of incf
