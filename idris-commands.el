@@ -58,13 +58,6 @@
         (cons (substring-no-properties (symbol-name name)) line)
       (error "Nothing identifiable under point"))))
 
-(defun idris-type-at-point ()
-  "Display the type of the name at point, considered as a global variable"
-  (interactive)
-  (let ((name (car (idris-thing-at-point))))
-    (when name
-      (message "%s" (idris-eval `(:type-of ,name))))))
-
 (defun idris-load-file-sync ()
   "Pass the current buffer's file synchronously to the inferior Idris process."
   (save-buffer)
@@ -74,6 +67,15 @@
   (if (buffer-file-name)
       (idris-eval `(:load-file ,(buffer-file-name)))
     (error "Cannot find file for current buffer")))
+
+(defun idris-type-at-point (thing)
+  "Display the type of the name at point, considered as a global variable"
+  (interactive "P")
+  (let ((name (if thing (read-string "Check: ")
+                (car (idris-thing-at-point)))))
+    (when name
+      (unless thing (idris-load-file-sync))
+      (message "%s" (idris-eval `(:type-of ,name))))))
 
 (defun idris-case-split ()
   "Case split the pattern variable at point"
