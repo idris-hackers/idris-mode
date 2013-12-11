@@ -28,18 +28,30 @@
 (require 'idris-repl)
 (require 'idris-warnings)
 
-(defun idris-load-file ()
+(defun idris-load-file (notpop)
   "Pass the current buffer's file to the inferior Idris process."
-  (interactive)
+  (interactive "P")
   (save-buffer)
   (idris-warning-reset)
   (idris-repl-buffer)
   (idris-run)
   (if (buffer-file-name)
-      (idris-eval-async `(:load-file ,(buffer-file-name))
-                        (lambda (result)
-                          (pop-to-buffer (idris-repl-buffer))
-                          (message result)))
+      (lexical-let ((notpop notpop))
+        (idris-eval-async `(:load-file ,(buffer-file-name))
+                          (lambda (result)
+                            (unless notpop
+                              (pop-to-buffer (idris-repl-buffer)))
+                            (message result))))
+    (error "Cannot find file for current buffer")))
+
+(defun idris-load-file-sync ()
+  "Pass the current buffer's file synchronously to the inferior Idris process."
+  (save-buffer)
+  (idris-warning-reset)
+  (idris-repl-buffer)
+  (idris-run)
+  (if (buffer-file-name)
+      (idris-eval `(:load-file ,(buffer-file-name)))
     (error "Cannot find file for current buffer")))
 
 (defun idris-get-line-num ()
@@ -57,16 +69,6 @@
     (if name
         (cons (substring-no-properties (symbol-name name)) line)
       (error "Nothing identifiable under point"))))
-
-(defun idris-load-file-sync ()
-  "Pass the current buffer's file synchronously to the inferior Idris process."
-  (save-buffer)
-  (idris-warning-reset)
-  (idris-repl-buffer)
-  (idris-run)
-  (if (buffer-file-name)
-      (idris-eval `(:load-file ,(buffer-file-name)))
-    (error "Cannot find file for current buffer")))
 
 (defun idris-type-at-point (thing)
   "Display the type of the name at point, considered as a global variable"
