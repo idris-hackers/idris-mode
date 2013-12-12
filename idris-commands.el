@@ -36,13 +36,12 @@
   (idris-repl-buffer)
   (idris-run)
   (if (buffer-file-name)
-      (lexical-let ((notpop notpop))
-        (idris-eval-async `(:load-file ,(buffer-file-name))
-                          (lambda (result)
-                            (unless notpop
-                              (pop-to-buffer (idris-repl-buffer)))
-                            (message result))))
-    (error "Cannot find file for current buffer")))
+      (idris-eval-async `(:load-file ,(buffer-file-name))
+                        (apply-partially (lambda (notpop result)
+                                           (unless notpop
+                                             (pop-to-buffer (idris-repl-buffer)))
+                                           (message result)) notpop)))
+    (error "Cannot find file for current buffer"))
 
 (defun idris-load-file-sync ()
   "Pass the current buffer's file synchronously to the inferior Idris process."
