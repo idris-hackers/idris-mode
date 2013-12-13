@@ -28,15 +28,19 @@
 (require 'idris-repl)
 (require 'idris-warnings)
 
-(defun idris-load-file (notpop)
-  "Pass the current buffer's file to the inferior Idris process."
-  (interactive "P")
-  (save-buffer)
+(defun idris-ensure-process-and-repl-buffer ()
+  "Ensures that an Idris process is running and the Idris REPL buffer exists"
   (idris-warning-reset)
   (idris-repl-buffer)
   (idris-run)
   (with-current-buffer (idris-repl-buffer)
-    (idris-mark-output-start))
+    (idris-mark-output-start)))
+
+(defun idris-load-file (notpop)
+  "Pass the current buffer's file to the inferior Idris process."
+  (interactive "P")
+  (save-buffer)
+  (idris-ensure-process-and-repl-buffer)
   (if (buffer-file-name)
       (idris-eval-async `(:load-file ,(buffer-file-name))
                         (apply-partially (lambda (notpop result)
@@ -48,11 +52,7 @@
 (defun idris-load-file-sync ()
   "Pass the current buffer's file synchronously to the inferior Idris process."
   (save-buffer)
-  (idris-warning-reset)
-  (idris-repl-buffer)
-  (idris-run)
-  (with-current-buffer (idris-repl-buffer)
-    (idris-mark-output-start))
+  (idris-ensure-process-and-repl-buffer)
   (if (buffer-file-name)
       (idris-eval `(:load-file ,(buffer-file-name)))
     (error "Cannot find file for current buffer")))
@@ -79,7 +79,7 @@
   (let ((name (if thing (read-string "Check: ")
                 (car (idris-thing-at-point)))))
     (when name
-      (unless thing (idris-load-file-sync))
+      (if thing (idris-ensure-process-and-repl-buffer) (idris-load-file-sync))
       (message "%s" (idris-eval `(:type-of ,name))))))
 
 (defun idris-case-split ()
