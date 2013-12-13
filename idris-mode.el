@@ -58,6 +58,10 @@
   :type 'hook
   :options '(turn-on-idris-indentation))
 
+(defcustom idris-use-yasnippet-expansions t
+  "Use yasnippet if available for completing interactive Idris commands"
+  :type 'boolean)
+
 ;;;###autoload
 (define-derived-mode idris-mode fundamental-mode "Idris"
   "Major mode for Idris

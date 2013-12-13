@@ -86,7 +86,7 @@
       (idris-load-file-sync)
       (let ((result (idris-eval `(:case-split ,(cdr what) ,(car what)))))
         (delete-region (line-beginning-position) (line-end-position))
-        (insert (substring result 0 (1- (length result))))))))
+        (idris-insert-or-expand (substring result 0 (1- (length result))))))))
 
 (defun idris-add-clause (proof)
   "Add clauses to the declaration at point"
@@ -97,7 +97,7 @@
       (idris-load-file-sync)
       (let ((result (idris-eval `(,command ,(cdr what) ,(car what)))))
         (forward-line 1)
-        (insert result)))))
+        (idris-insert-or-expand result)))))
 
 (defun idris-add-missing ()
   "Add missing cases"
@@ -107,7 +107,7 @@
       (idris-load-file-sync)
       (let ((result (idris-eval `(:add-missing ,(cdr what) ,(car what)))))
         (forward-line 1)
-        (insert result)))))
+        (idris-insert-or-expand result)))))
 
 (defun idris-make-with-block ()
   "Add with block"
@@ -118,7 +118,25 @@
       (let ((result (idris-eval `(:make-with ,(cdr what) ,(car what)))))
         (beginning-of-line)
         (kill-line)
-        (insert result)))))
+        (idris-insert-or-expand result)))))
+
+(defun idris-insert-or-expand (str)
+  "If yasnippet is loaded, use it to expand Idris compiler output, otherwise fall back on inserting the output"
+  (if (and (fboundp 'yas-expand-snippet) idris-use-yasnippet-expansions)
+      (let ((snippet (idris-metavar-to-snippet str)))
+        (message snippet)
+        (yas-expand-snippet snippet nil nil '((yas-indent-line nil))))
+    (insert str)))
+
+(defun idris-metavar-to-snippet (str)
+  "Replace metavariables with yasnippet snippets"
+  (lexical-let ((n 0))
+    (cl-flet ((to-snippet-param (metavar)
+                 (incf n)
+                 (if (string= metavar "(_)")
+                     (format "(${%s:_})" n)
+                   (format "${%s:%s}" n metavar))))
+      (replace-regexp-in-string "\\?[a-zA-Z0-9_]+\\|(_)" #'to-snippet-param str))))
 
 (defun idris-proof-search (hints)
   "Invoke the proof search"
@@ -134,6 +152,6 @@
           (let ((start (progn (search-backward "?") (point)))
                 (end (progn (forward-char) (search-forward-regexp "[^a-zA-Z0-9_']") (backward-char) (point))))
             (delete-region start end))
-          (insert result))))))
+          (idris-insert-or-expand result))))))
 
 (provide 'idris-commands)
