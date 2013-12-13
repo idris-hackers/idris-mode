@@ -33,6 +33,20 @@ Customize `inferior-idris-path` if idris is not on your default path.
 
 [Idris]: http://www.idris-lang.org
 
+## Interactive Editing
+
+![Interactive editing](http://itu.dk/people/drc/idris-mode.gif)
+
+The following commands are available when there is an inferior Idris process:
+
+* `C-c C-d`: Create an initial pattern match clause for a type declaration
+* `C-c C-m`: Add missing pattern-match cases to an existing definition
+* `C-c C-a`: Attempt to solve a metavariable automatically
+* `C-c C-c`: Case split the pattern variable under point
+* `C-c C-t`: Get the type for the identifier under point. A prefix argument prompts for the name.
+* `C-c C-w`: Add a with block for the pattern-match clause under point
+
+
 ## Installation
 
 If you have Emacs >= 23, you can install pre-built packages from
