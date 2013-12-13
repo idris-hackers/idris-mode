@@ -120,9 +120,9 @@
 (defun idris-repl-update-prompt (new-prompt)
   "Update prompt to NEW-PROMPT"
   (unless (equal idris-prompt-string new-prompt)
-    (setq idris-prompt-string new-prompt)
-    (with-current-buffer (idris-repl-buffer)
-      (idris-repl-insert-prompt))))
+    (setq idris-prompt-string new-prompt))
+  (with-current-buffer (idris-repl-buffer)
+    (idris-repl-insert-prompt)))
 
 (defun idris-repl-buffer ()
   "Return or create the Idris REPL buffer."
@@ -286,7 +286,7 @@ Invokes `idris-repl-mode-hook'."
       (idris-save-marker idris-output-start
         (idris-save-marker idris-output-end
           (goto-char idris-output-end)
-          (insert-before-markers (format "; Error: %s.\n" condition))
+          (insert-before-markers (format "Error: %s.\n" condition))
           (idris-repl-insert-prompt))))
     (idris-repl-show-maximum-output)))
 
