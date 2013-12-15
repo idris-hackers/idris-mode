@@ -46,8 +46,8 @@
                         (apply-partially (lambda (notpop result)
                                            (unless notpop
                                              (pop-to-buffer (idris-repl-buffer)))
-                                           (message result)) notpop)))
-    (error "Cannot find file for current buffer"))
+                                           (message result)) notpop))
+    (error "Cannot find file for current buffer")))
 
 (defun idris-load-file-sync ()
   "Pass the current buffer's file synchronously to the inferior Idris process."

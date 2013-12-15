@@ -97,7 +97,7 @@
   (let ((map (make-sparse-keymap)))
     (define-key map [?\C-n] 'idris-prover-script-forward)
     (define-key map [?\C-p] 'idris-prover-script-backward)
-    (define-key map [tab] 'idris-prover-script-complete)
+    (define-key map [?\t] 'idris-prover-script-complete)
     map)
   "Keymap used in Idris proof script mode.")
 
