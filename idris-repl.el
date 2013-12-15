@@ -146,8 +146,8 @@
 
 (defvar idris-repl-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map [return] 'idris-repl-return)
-    (define-key map [tab] 'idris-repl-complete)
+    (define-key map [?\r] 'idris-repl-return)
+    (define-key map "\t" 'idris-repl-complete)
     (define-key map [home] 'idris-repl-begin-of-prompt)
     (define-key map [?\C-a] 'idris-repl-begin-of-prompt)
     (define-key map [?\M-p] 'idris-repl-backward-history)
