@@ -64,24 +64,30 @@
 (defun idris-warning-overlay (warning)
   "Add a compiler warning to the buffer as an overlay.
 May merge overlays, if there's already one in the same location.
-WARNING is of form (filename linenumber message)"
-  (destructuring-bind (filename lineno message) warning
-    (let ((buffer (get-file-buffer filename)))
-      (when (not (null buffer))
-        (with-current-buffer buffer
-          (multiple-value-bind (start end) (get-region lineno)
-            (when start
-              (goto-char start)
-              ; this is a hack to have warnings reported which point
-              ; to empty lines
-              (let ((rend (if (equal start end)
-                              (progn (insert " ")
-                                     (1+ end))
-                            end)))
-                (let ((overlay (idris-warning-overlay-at-point)))
-                  (if overlay
-                      (idris-warning-merge-overlays overlay message)
-                    (idris-warning-create-overlay start rend message)))))))))))
+WARNING is of form (filename linenumber column message)
+ (or the old (filename linenumber message))"
+  (case (safe-length warning)
+    (3 (destructuring-bind (filename lineno message) warning
+         (idris-real-warning-overlay filename lineno 0 message)))
+    (4 (destructuring-bind (filename lineno col message) warning
+         (idris-real-warning-overlay filename lineno col message)))))
+
+(defun idris-real-warning-overlay (filename line col message)
+  "Add the compiler warning to the buffer for real!"
+  (let ((buffer (get-file-buffer filename)))
+    (when (not (null buffer))
+      (with-current-buffer buffer
+        (multiple-value-bind (start end) (get-region lineno)
+          (goto-char start)
+          ; this is a hack to have warnings reported which point to empty lines
+          (let ((rend (if (equal start end)
+                          (progn (insert " ")
+                                 (1+ end))
+                        end)))
+            (let ((overlay (idris-warning-overlay-at-point)))
+              (if overlay
+                  (idris-warning-merge-overlays overlay message)
+                (idris-warning-create-overlay (+ start col) rend message)))))))))
 
 (defun idris-warning-merge-overlays (overlay message)
   (overlay-put overlay 'help-echo
