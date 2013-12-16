@@ -27,6 +27,33 @@
 (require 'inferior-idris)
 (require 'idris-repl)
 (require 'idris-warnings)
+(require 'idris-compat)
+
+(defvar-local idris-buffer-dirty-p t
+  "An Idris buffer is dirty if there have been modifications since it was last loaded")
+
+(defvar idris-currently-loaded-buffer nil
+  "The buffer currently loaded by the running Idris")
+
+(defun idris-make-dirty ()
+  (setq idris-buffer-dirty-p t))
+
+(defun idris-make-clean ()
+  (setq idris-currently-loaded-buffer (current-buffer))
+  (setq idris-buffer-dirty-p nil))
+
+(defun idris-track-cleanliness ()
+  (add-hook 'first-change-hook 'idris-make-dirty))
+
+(add-hook 'idris-mode-hook 'idris-track-cleanliness)
+
+(defun idris-current-buffer-dirty-p ()
+  "Check whether the current buffer's most recent version is loaded"
+  (or idris-buffer-dirty-p
+      (not (equalp (current-buffer)
+                   idris-currently-loaded-buffer))))
+
+
 
 (defun idris-ensure-process-and-repl-buffer ()
   "Ensures that an Idris process is running and the Idris REPL buffer exists"
@@ -42,11 +69,13 @@
   (save-buffer)
   (idris-ensure-process-and-repl-buffer)
   (if (buffer-file-name)
-      (idris-eval-async `(:load-file ,(buffer-file-name))
-                        (apply-partially (lambda (notpop result)
-                                           (unless notpop
-                                             (pop-to-buffer (idris-repl-buffer)))
-                                           (message result)) notpop))
+      (when (idris-current-buffer-dirty-p)
+        (idris-eval-async `(:load-file ,(buffer-file-name))
+                          (apply-partially (lambda (notpop result)
+                                             (unless notpop
+                                               (pop-to-buffer (idris-repl-buffer)))
+                                             (message result)) notpop))
+        (idris-make-clean))
     (error "Cannot find file for current buffer")))
 
 (defun idris-load-file-sync ()
@@ -54,8 +83,11 @@
   (save-buffer)
   (idris-ensure-process-and-repl-buffer)
   (if (buffer-file-name)
-      (idris-eval `(:load-file ,(buffer-file-name)))
+      (when (idris-current-buffer-dirty-p)
+        (idris-eval `(:load-file ,(buffer-file-name)))
+        (idris-make-clean))
     (error "Cannot find file for current buffer")))
+
 
 (defun idris-get-line-num ()
   "Get the current line number"

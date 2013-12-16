@@ -73,7 +73,8 @@ Invokes `idris-mode-hook'."
   (set (make-local-variable 'font-lock-defaults)
        idris-font-lock-defaults)
   (set (make-local-variable 'indent-tabs-mode) nil)
-  (set (make-local-variable 'comment-start) "--"))
+  (set (make-local-variable 'comment-start) "--")
+  (setq mode-name `("Idris" (:eval (if (idris-current-buffer-dirty-p) " (Not loaded)" " (Loaded)")))))
 
 ;; Automatically use idris-mode for .idr files.
 ;;;###autoload
@@ -83,6 +84,7 @@ Invokes `idris-mode-hook'."
   (interactive)
   (let* ((pbufname (idris-buffer-name :process))
          (pbuf (get-buffer pbufname)))
+    (setq idris-currently-loaded-buffer nil)
     (if pbuf
         (progn
           (kill-buffer pbuf)
