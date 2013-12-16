@@ -34,6 +34,7 @@
   "Face for warnings from the compiler."
   :group 'idris-faces)
 
+(defvar idris-warnings-buffers '() "All buffers which have warnings")
 (defvar-local idris-warnings '() "All warnings in the current buffer")
 
 (defun idris-warning-event-hook-function (event)
@@ -43,9 +44,17 @@
      t)
     (t nil)))
 
+(defun idris-warning-reset-all ()
+  (mapc #'idris-warning-reset-buffer idris-warnings-buffers)
+  (setq idris-warnings-buffers '()))
+
+(defun idris-warning-reset-buffer (buffer)
+  (with-current-buffer buffer (idris-warning-reset)))
+
 (defun idris-warning-reset ()
   (mapc #'delete-overlay idris-warnings)
-  (setq idris-warnings '()))
+  (setq idris-warnings '())
+  (delq (current-buffer) idris-warnings-buffers))
 
 (defun get-region (line)
   (goto-char (point-min))
@@ -100,6 +109,8 @@ WARNING is of form (filename linenumber column message)
     (overlay-put overlay 'face 'idris-warning-face)
     (overlay-put overlay 'mouse-face 'highlight)
     (push overlay idris-warnings)
+    (unless (memq (current-buffer) idris-warnings-buffers)
+      (push (current-buffer) idris-warnings-buffers))
     overlay))
 
 (provide 'idris-warnings)

@@ -20,6 +20,7 @@
 (require 'idris-indentation)
 (require 'idris-repl)
 (require 'idris-commands)
+(require 'idris-warnings)
 
 (defgroup idris nil "Idris mode" :prefix 'idris :group 'languages)
 
@@ -89,6 +90,7 @@ Invokes `idris-mode-hook'."
       (idris-kill-buffers))))
 
 (defun idris-kill-buffers ()
+  (idris-warning-reset-all)
   (let ((bufs (list :repl :proof-obligations :proof-shell :proof-script :log)))
     (dolist (b bufs)
       (let ((buf (get-buffer (idris-buffer-name b))))
