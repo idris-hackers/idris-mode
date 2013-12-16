@@ -74,7 +74,7 @@
   "Add a compiler warning to the buffer as an overlay.
 May merge overlays, if there's already one in the same location.
 WARNING is of form (filename linenumber column message)
- (or the old (filename linenumber message))"
+or the old format, used by Idris up to 0.9.10.1, which does not contain a column"
   (case (safe-length warning)
     (3 (destructuring-bind (filename lineno message) warning
          (idris-real-warning-overlay filename lineno 0 message)))
