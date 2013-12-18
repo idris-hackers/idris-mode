@@ -146,14 +146,16 @@
 
 (defvar idris-repl-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map [?\r] 'idris-repl-return)
-    (define-key map [?\t] 'idris-repl-complete)
-    (define-key map [home] 'idris-repl-begin-of-prompt)
-    (define-key map [?\C-a] 'idris-repl-begin-of-prompt)
-    (define-key map [?\M-p] 'idris-repl-backward-history)
-    (define-key map [C-up] 'idris-repl-backward-history)
-    (define-key map [?\M-n] 'idris-repl-forward-history)
-    (define-key map [C-down] 'idris-repl-forward-history)
+    (define-key map (kbd "<RET>") 'idris-repl-return)
+    ;; (define-key map (kbd "<TAB>") ...) makes the debugger complain, and
+    ;; suggests this method of binding instead.
+    (define-key map "\t" 'idris-repl-complete)
+    (define-key map (kbd "<home>") 'idris-repl-begin-of-prompt)
+    (define-key map (kbd "C-a") 'idris-repl-begin-of-prompt)
+    (define-key map (kbd "M-p") 'idris-repl-backward-history)
+    (define-key map (kbd "<C-up>") 'idris-repl-backward-history)
+    (define-key map (kbd "M-n") 'idris-repl-forward-history)
+    (define-key map (kbd "<C-down>") 'idris-repl-forward-history)
     map)
   "Keymap used in Idris REPL mode.")
 
