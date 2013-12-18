@@ -95,9 +95,11 @@
 
 (defvar idris-prover-script-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map [?\C-n] 'idris-prover-script-forward)
-    (define-key map [?\C-p] 'idris-prover-script-backward)
-    (define-key map [?\t] 'idris-prover-script-complete)
+    (define-key map (kbd "C-n") 'idris-prover-script-forward)
+    (define-key map (kbd "C-p") 'idris-prover-script-backward)
+    ;; Using (kbd "<TAB>") in place of "\t" makes emacs angry, and suggests
+    ;; using the latter form.
+    (define-key map "\t" 'idris-prover-script-complete)
     map)
   "Keymap used in Idris proof script mode.")
 

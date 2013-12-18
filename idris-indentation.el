@@ -100,9 +100,9 @@
 
 (defconst idris-indentation-mode-map
   (let ((keymap (make-sparse-keymap)))
-    (define-key keymap [?\r] 'idris-newline-and-indent)
-    (define-key keymap [backspace] 'idris-indentation-delete-backward-char)
-    (define-key keymap [?\C-d] 'idris-indentation-delete-char)
+    (define-key keymap (kbd "<RET>") 'idris-newline-and-indent)
+    (define-key keymap (kbd "<DEL>") 'idris-indentation-delete-backward-char)
+    (define-key keymap (kbd "C-d") 'idris-indentation-delete-char)
     keymap))
 
 ;;;###autoload
