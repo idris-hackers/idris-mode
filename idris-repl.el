@@ -233,21 +233,20 @@ Invokes `idris-repl-mode-hook'."
   (let* ((input (idris-repl-current-input))
          (result (idris-eval `(:repl-completions ,input))))
     (destructuring-bind (completions partial) result
-      (if (null completions)
-          (progn
-            (idris-minibuffer-respecting-message "Can't find completions for \"%s\"" input)
-            (ding)
-            (idris-complete-restore-window-configuration))
-          (if (= (length completions) 1)
-              (progn
-                (insert-and-inherit (substring (concat partial (car completions)) (length input)))
-                (idris-minibuffer-respecting-message "Sole completion")
-                (idris-complete-restore-window-configuration))
-            (let* ((pp (substring input (length partial)))
-                   (mypartial (find-common-prefix pp completions)))
-              (insert-and-inherit (substring (concat partial mypartial) (length input)))
-              (idris-minibuffer-respecting-message "Completions, not unique")
-              (idris-display-or-scroll-completions completions partial mypartial)))))))
+      (cond ((null completions)
+             (idris-minibuffer-respecting-message "Can't find completions for \"%s\"" input)
+             (ding)
+             (idris-complete-restore-window-configuration))
+            ((= (length completions) 1)
+             (insert-and-inherit (substring (concat partial (car completions)) (length input)))
+             (idris-minibuffer-respecting-message "Sole completion")
+             (idris-complete-restore-window-configuration))
+            (t
+             (let* ((pp (substring input (length partial)))
+                    (mypartial (find-common-prefix pp completions)))
+               (insert-and-inherit (substring (concat partial mypartial) (length input)))
+               (idris-minibuffer-respecting-message "Completions, not unique")
+               (idris-display-or-scroll-completions completions partial mypartial)))))))
 
 (defun find-common-prefix (input slist)
   "Finds longest common prefix of all strings in list."
