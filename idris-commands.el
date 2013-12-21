@@ -42,11 +42,6 @@
   (setq idris-currently-loaded-buffer (current-buffer))
   (setq idris-buffer-dirty-p nil))
 
-(defun idris-track-cleanliness ()
-  (add-hook 'first-change-hook 'idris-make-dirty))
-
-(add-hook 'idris-mode-hook 'idris-track-cleanliness)
-
 (defun idris-current-buffer-dirty-p ()
   "Check whether the current buffer's most recent version is loaded"
   (or idris-buffer-dirty-p
