@@ -164,11 +164,15 @@
          (,(format "\\(%s\\) \\(\\w+\\)" (regexp-opt idris-definition-keywords))
            (1 'idris-keyword-face)
            (2 'idris-definition-face))
-         ;; Type annotations.
+         ;; Type declarations
          ;; TODO: this won't match, e.g. f:a
          ("^\\s-*\\(\\w+\\)\\s-+\\(:\\)\\s-+"
-           (1 'idris-definition-face)
-           (2 'idris-colon-face))
+          (1 'idris-definition-face)
+          (2 'idris-colon-face))
+         ("^\\s-*\\(total\\|partial\\)\\s-+\\(\\w+\\)\\s-+\\(:\\)\\s-+"
+          (1 'idris-keyword-face)
+          (2 'idris-definition-face)
+          (3 'idris-colon-face))
          ;; "where"-blocks
          ("^\\s-+\\(where\\)\\s-+\\(\\w+\\)\s-*\\(.?*\\)\\(=\\)"
            (1 'idris-keyword-face)
@@ -179,6 +183,11 @@
            (1 'idris-keyword-face)
            (2 'idris-definition-face)
            (3 'idris-colon-face))
+         ("^\\s-+\\(where\\)\\s-+\\(total\\|partial\\)\\s-+\\(\\w+\\)\s-*\\(:\\)\\s-*"
+           (1 'idris-keyword-face)
+           (2 'idris-keyword-face)
+           (3 'idris-definition-face)
+           (4 'idris-colon-face))
          ;; Vanilla definitions with = (and optionally let ... in ...)
          ;; TODO: clean up how parameters are picked up
          ("^\\s-*\\(\\w+\\)\s-*\\(.*?\\)\\(=\\)"
