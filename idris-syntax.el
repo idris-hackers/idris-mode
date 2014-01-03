@@ -165,7 +165,7 @@
          ;; %assert_total
          ("%assert_total" . 'idris-unsafe-face)
          ;; `%access`, `%default`, etc
-         ("^%\\(\\w+\\)\\s-*\\(.+\\)"
+         ("^\\(%\\w+\\)\\s-*\\(.+\\)"
            (1 'idris-directive-face)
            (2 'idris-directive-argument-face))
          ;; Definitions with keywords.
