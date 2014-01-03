@@ -78,6 +78,11 @@
   "Keywords that introduce some identifier.")
 
 (defvar idris-operator-regexp
+(defface idris-bottom-face
+  '((t (:inherit idris-identifier-face)))
+  "The face used to highlight _|_ in Idris"
+  :group 'idris-faces)
+
   "[-!#$%&\*\+./<=>\?@\\^|~:]+"
   "A regular expression matching an Idris operator.")
 
@@ -184,3 +189,5 @@
 
 
 (provide 'idris-syntax)
+         ;; Bottom
+         ("_|_" . 'idris-bottom-face)
