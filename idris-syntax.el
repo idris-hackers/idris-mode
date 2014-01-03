@@ -88,6 +88,12 @@
   "The face used to highlight character literals in Idris"
   :group 'idris-faces)
 
+(defface idris-unsafe-face
+  '((t (:inherit font-lock-warning-face)))
+  "The face used to highlight unsafe Idris features, such as %assert_total"
+  :group 'idris-faces)
+
+
 (defvar idris-definition-keywords
   '("data" "class" "codata" "record")
   "Keywords that introduce some identifier.")
@@ -156,6 +162,8 @@
          ("\\(--\\)\s*\\(.*\\)"
            (1 font-lock-comment-delimiter-face)
            (2 font-lock-comment-face))
+         ;; %assert_total
+         ("%assert_total" . 'idris-unsafe-face)
          ;; `%access`, `%default`, etc
          ("^%\\(\\w+\\)\\s-*\\(.+\\)"
            (1 'idris-directive-face)
