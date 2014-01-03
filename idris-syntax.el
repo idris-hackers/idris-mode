@@ -166,7 +166,7 @@
            (2 'idris-definition-face))
          ;; Type declarations
          ;; TODO: this won't match, e.g. f:a
-         ("^\\s-*\\(\\w+\\)\\s-+\\(:\\)\\s-+"
+         ("^\\s-*\\(\\w+\\|(\\s_+)\\)\\s-+\\(:\\)\\s-+"
           (1 'idris-definition-face)
           (2 'idris-colon-face))
          ("^\\s-*\\(total\\|partial\\)\\s-+\\(\\w+\\)\\s-+\\(:\\)\\s-+"
@@ -179,7 +179,7 @@
            (2 'idris-definition-face)
            (3 'idris-parameter-face)
            (4 'idris-equals-face))
-         ("^\\s-+\\(where\\)\\s-+\\(\\w+\\)\s-*\\(:\\)\\s-*"
+         ("^\\s-+\\(where\\)\\s-+\\(\\w+\\|(\\s_+)\\)\s-*\\(:\\)\\s-*"
            (1 'idris-keyword-face)
            (2 'idris-definition-face)
            (3 'idris-colon-face))
@@ -190,7 +190,7 @@
            (4 'idris-colon-face))
          ;; Vanilla definitions with = (and optionally let ... in ...)
          ;; TODO: clean up how parameters are picked up
-         ("^\\s-*\\(\\w+\\)\s-*\\(.*?\\)\\(=\\)"
+         ("^\\s-*\\(\\w+\\|(\\s_+)\\)\s-*\\(.*?\\)\\(=\\)"
            (1 'idris-definition-face)
            (2 'idris-parameter-face)
            (3 'idris-equals-face))
