@@ -25,27 +25,32 @@
 
 (defface idris-identifier-face
   '((t (:inherit default)))
-  "The face to highlight idris identifiers with."
+  "The face to highlight Idris identifiers with."
+  :group 'idris-faces)
+
+(defface idris-metavariable-face
+  '((t (:inherit idris-identifier-face)))
+  "The face to highlight Idris metavariables with."
   :group 'idris-faces)
 
 (defface idris-keyword-face
   '((t (:inherit font-lock-keyword-face)))
-  "The face to highlight idris keywords with."
+  "The face to highlight Idris keywords with."
   :group 'idris-faces)
 
 (defface idris-module-face
   '((t (:inherit font-lock-variable-name-face)))
-  "The face to highlight module names with."
+  "The face to highlight Idris module names with."
   :group 'idris-faces)
 
 (defface idris-directive-face
   '((t (:inherit font-lock-keyword-face)))
-  "The face to highlight directives."
+  "The face to highlight Idris compiler directives."
   :group 'idris-faces)
 
 (defface idris-directive-argument-face
   '((t (:inherit font-lock-preprocessor-face)))
-  "The face to highlight arguments to directives."
+  "The face to highlight arguments to Idris directives."
   :group 'idris-faces)
 
 (defface idris-definition-face
@@ -73,17 +78,19 @@
   "The face to highlight operators with."
   :group 'idris-faces)
 
-(defvar idris-definition-keywords
-  '("data" "class" "codata" "record")
-  "Keywords that introduce some identifier.")
-
-(defvar idris-operator-regexp
 (defface idris-bottom-face
   '((t (:inherit idris-identifier-face)))
   "The face used to highlight _|_ in Idris"
   :group 'idris-faces)
 
-  "[-!#$%&\*\+./<=>\?@\\^|~:]+"
+(defvar idris-definition-keywords
+  '("data" "class" "codata" "record")
+  "Keywords that introduce some identifier.")
+
+(defvar idris-operator-regexp
+  (let ((op "-!#$%&*+./<=>@\\\\^|~:"))
+    (concat "\\?[" op "]+" ; starts with ?, has at least one more opchar
+            "\\|" "["op"][" op "?]*")) ; doesn't start with ?
   "A regular expression matching an Idris operator.")
 
 (defconst idris-syntax-table
@@ -111,6 +118,9 @@
 
     ;; Strings
     (modify-syntax-entry ?\" "\"" st)
+
+    ;; Idris operator chars
+    (cl-loop for ch across "-!#$%&*+./<=>@\\^|~:" do (modify-syntax-entry ch "_" st))
     st))
 
 (defconst idris-keywords
@@ -151,8 +161,6 @@
          ("^\\s-*\\(\\w+\\)\\s-+\\(:\\)\\s-+"
            (1 'idris-definition-face)
            (2 'idris-colon-face))
-         ;; Operators
-         (,idris-operator-regexp . 'idris-operator-face)
          ;; "where"-blocks
          ("^\\s-+\\(where\\)\\s-+\\(\\w+\\)\s-*\\(.?*\\)\\(=\\)"
            (1 'idris-keyword-face)
@@ -165,7 +173,7 @@
            (3 'idris-colon-face))
          ;; Vanilla definitions with = (and optionally let ... in ...)
          ;; TODO: clean up how parameters are picked up
-         ("^\\s-*\\(\\w+\\)\s-*\\(.?*\\)\\(=\\)"
+         ("^\\s-*\\(\\w+\\)\s-*\\(.*?\\)\\(=\\)"
            (1 'idris-definition-face)
            (2 'idris-parameter-face)
            (3 'idris-equals-face))
@@ -178,8 +186,14 @@
          ;; Character literals
          ("'\\(?:\\(?:[^']\\)\\|\\(?:\\\\[^']+\\)\\)'"
            (0 font-lock-string-face t))
+         ;; Bottom
+         ("_|_" . 'idris-bottom-face)
          ;; Other keywords
          (,(regexp-opt idris-keywords 'words) . 'idris-keyword-face)
+         ;; Operators
+         (,idris-operator-regexp . 'idris-operator-face)
+         ;; Metavariables
+         ("\\?[a-zA-Z_]\\w*" . 'idris-metavariable-face)
          ;; Identifiers
          ("[a-zA-Z_]\\w*" . 'idris-identifier-face)
          ;; TODO: operator definitions.
@@ -189,5 +203,3 @@
 
 
 (provide 'idris-syntax)
-         ;; Bottom
-         ("_|_" . 'idris-bottom-face)
