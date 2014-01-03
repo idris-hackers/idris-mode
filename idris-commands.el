@@ -127,7 +127,8 @@
     (when (car what)
       (idris-load-file-sync)
       (let ((result (idris-eval `(,command ,(cdr what) ,(car what)))))
-        (forward-line 1)
+        (end-of-line)
+        (insert "\n")
         (idris-insert-or-expand result)))))
 
 (defun idris-add-missing ()
