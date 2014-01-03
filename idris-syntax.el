@@ -189,11 +189,14 @@
            (3 'idris-definition-face)
            (4 'idris-colon-face))
          ;; Vanilla definitions with = (and optionally let ... in ...)
-         ;; TODO: clean up how parameters are picked up
          ("^\\s-*\\(\\w+\\|(\\s_+)\\)\s-*\\(.*?\\)\\(=\\)"
            (1 'idris-definition-face)
            (2 'idris-parameter-face)
            (3 'idris-equals-face))
+         ("^\\s-*\\(\\w+\\|(\\s_+)\\)\\s-+\\(.*?\\)\\s-*\\(impossible\\)"
+          (1 'idris-definition-face)
+          (2 'idris-parameter-face)
+          (3 'idris-keyword-face))
          ;; Definitions using "with"
          ("^\\s-*\\(\\w+\\)\s-*\\(.?*\\)\\(with\\)\\(.?*\\)"
            (1 'idris-definition-face)
