@@ -83,6 +83,11 @@
   "The face used to highlight _|_ in Idris"
   :group 'idris-faces)
 
+(defface idris-char-face
+  '((t (:inherit font-lock-string-face)))
+  "The face used to highlight character literals in Idris"
+  :group 'idris-faces)
+
 (defvar idris-definition-keywords
   '("data" "class" "codata" "record")
   "Keywords that introduce some identifier.")
@@ -109,18 +114,21 @@
     (modify-syntax-entry ?\n ">" st)
 
     ;; ' and _ can be names
-    (modify-syntax-entry ?_ "w" st)
     (modify-syntax-entry ?' "w" st)
+    (modify-syntax-entry ?_ "w" st)
+
+
+    ;; Idris operator chars
+    (cl-loop for ch across "-!#$%&*+./<=>@^|~:" do (modify-syntax-entry ch "_" st))
 
     ;; Whitespace is whitespace
     (modify-syntax-entry ?\  " " st)
     (modify-syntax-entry ?\t " " st)
 
-    ;; Strings
+    ;; ;; Strings
     (modify-syntax-entry ?\" "\"" st)
+    (modify-syntax-entry ?\\ "/" st)
 
-    ;; Idris operator chars
-    (cl-loop for ch across "-!#$%&*+./<=>@\\^|~:" do (modify-syntax-entry ch "_" st))
     st))
 
 (defconst idris-keywords
@@ -184,8 +192,7 @@
            (3 'idris-keyword-face)
            (4 'idris-parameter-face))
          ;; Character literals
-         ("'\\(?:\\(?:[^']\\)\\|\\(?:\\\\[^']+\\)\\)'"
-           (0 font-lock-string-face t))
+         ("'\\(?:[^']\\|\\\\.\\)'" . 'idris-char-face)
          ;; Bottom
          ("_|_" . 'idris-bottom-face)
          ;; Other keywords
@@ -198,7 +205,7 @@
          ("[a-zA-Z_]\\w*" . 'idris-identifier-face)
          ;; TODO: operator definitions.
          ;; TODO: let ... in ...
-)))
+         )))
 
 
 
