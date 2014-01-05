@@ -125,7 +125,8 @@
 
 
     ;; Idris operator chars
-    (cl-loop for ch across "-!#$%&*+./<=>@^|~:" do (modify-syntax-entry ch "_" st))
+    (mapcar #'(lambda (ch) (modify-syntax-entry ch "_" st))
+            "-!#$%&*+./<=>@^|~:")
 
     ;; Whitespace is whitespace
     (modify-syntax-entry ?\  " " st)
