@@ -75,6 +75,9 @@ Invokes `idris-mode-hook'."
   (set (make-local-variable 'indent-tabs-mode) nil)
   (set (make-local-variable 'comment-start) "--")
 
+  ; REPL completion for Idris source
+  (set (make-local-variable 'completion-at-point-functions) '(idris-complete-symbol-at-point))
+
   ; Handle dirty-bit to avoid extra loads
   (add-hook 'first-change-hook 'idris-make-dirty)
   (setq mode-name `("Idris" (:eval (if (idris-current-buffer-dirty-p) " (Not loaded)" " (Loaded)")))))

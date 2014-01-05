@@ -47,6 +47,9 @@ The following commands are available when there is an inferior Idris process (wh
 * `C-c C-t`: Get the type for the identifier under point. A prefix argument prompts for the name.
 * `C-c C-w`: Add a with block for the pattern-match clause under point
 
+## Completion
+
+`M-Tab` or whatever you have `completion-at-point` bound to will ask the running Idris process for completions for the current identifier. Note that this command requires that the Idris interpreter is already running, because attempting to load an incomplete buffer would probably not work.
 
 ## Installation
 

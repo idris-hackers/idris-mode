@@ -187,4 +187,45 @@
             (delete-region start end))
           (idris-insert-or-expand result))))))
 
+(defun idris-is-ident-char-p (ch)
+  (or (and (<= ?a ch) (<= ch ?z))
+      (and (<= ?A ch) (<= ch ?Z))
+      (and (<= ?0 ch) (<= ch ?9))
+      (= ch ?_)))
+
+(defun idris-identifier-backwards-from-point ()
+  (let ((identifier-start nil)
+        (identifier-end (point))
+        (last-char (char-before))
+        (failure (list nil nil nil)))
+    (if (idris-is-ident-char-p last-char)
+        (progn
+          (save-excursion
+            (while (idris-is-ident-char-p (char-before))
+              (backward-char))
+            (setq identifier-start (point)))
+          (if identifier-start
+              (list (buffer-substring-no-properties identifier-start identifier-end)
+                    identifier-start
+                    identifier-end)
+            failure))
+      failure)))
+
+(defun idris-complete-symbol-at-point ()
+  "Attempt to complete the symbol at point as a global variable.
+
+This function does not attempt to load the buffer if it's not
+already loaded, as a buffer awaiting completion is probably not
+type-correct, so loading will fail."
+  (if (not idris-process)
+      nil
+    (destructuring-bind (identifier start end) (idris-identifier-backwards-from-point)
+      (when identifier
+        (let ((result (idris-eval `(:repl-completions ,identifier))))
+          (destructuring-bind (completions partial) result
+            (if (null completions)
+                nil
+              (list start end completions))))))))
+
+
 (provide 'idris-commands)
