@@ -28,6 +28,7 @@
 (require 'idris-repl)
 (require 'idris-warnings)
 (require 'idris-compat)
+(require 'idris-info)
 
 (defvar-local idris-buffer-dirty-p t
   "An Idris buffer is dirty if there have been modifications since it was last loaded")
@@ -107,7 +108,7 @@
                 (car (idris-thing-at-point)))))
     (when name
       (if thing (idris-ensure-process-and-repl-buffer) (idris-load-file-sync))
-      (message "%s" (idris-eval `(:type-of ,name))))))
+      (idris-show-info (format "%s" (idris-eval `(:type-of ,name)))))))
 
 (defun idris-case-split ()
   "Case split the pattern variable at point"
