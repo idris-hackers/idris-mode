@@ -48,7 +48,8 @@
              (idris-user-first-name))
     ,(format "%s, this could be the start of a beautiful proof."
              (idris-user-first-name))
-    "The terms have siezed control of the means of computation - a glorious future awaits!"))
+    "The terms have seized control of the means of computation - a glorious future awaits!"
+    "Ship if it typechecks!"))
 
 (defun idris-random-words-of-encouragement ()
   "Return a random string of encouragement"
