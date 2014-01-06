@@ -94,10 +94,7 @@ terminates a current completion."
   (let ((savedp (idris-complete-maybe-save-window-configuration))
         (sorted-completions (sort completions 'string-lessp)))
     (with-output-to-temp-buffer idris-completions-buffer-name
-      (display-completion-list sorted-completions prefix)
-      (let ((offset (- (point) 1 (length partial))))
-        (with-current-buffer standard-output
-          (setq completion-base-position offset))))
+      (display-completion-list sorted-completions (concat prefix partial)))
     (when savedp
       (setq idris-completions-window
             (get-buffer-window idris-completions-buffer-name)))))
