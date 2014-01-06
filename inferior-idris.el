@@ -35,6 +35,9 @@
 (defvar idris-process nil
   "The Idris process.")
 
+(defvar idris-process-current-working-directory ""
+  "Working directory of Idris process")
+
 (defun idris-run ()
   "Run an inferior Idris process"
   (interactive)
@@ -44,6 +47,7 @@
     (set-process-filter idris-process 'idris-output-filter)
     (set-process-sentinel idris-process 'idris-sentinel)
     (set-process-query-on-exit-flag idris-process t)
+    (setq idris-process-current-working-directory "")
     (add-hook 'idris-event-hooks 'idris-log-hook-function)
     (add-hook 'idris-event-hooks 'idris-warning-event-hook-function)
     (add-hook 'idris-event-hooks 'idris-prover-event-hook-function)))

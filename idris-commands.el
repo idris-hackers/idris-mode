@@ -50,7 +50,6 @@
                    idris-currently-loaded-buffer))))
 
 
-
 (defun idris-ensure-process-and-repl-buffer ()
   "Ensures that an Idris process is running and the Idris REPL buffer exists"
   (idris-warning-reset)
@@ -59,6 +58,12 @@
   (with-current-buffer (idris-repl-buffer)
     (idris-mark-output-start)))
 
+(defun idris-switch-working-directory (new-working-directory)
+  (unless (string= idris-process-current-working-directory new-working-directory)
+    (idris-ensure-process-and-repl-buffer)
+    (idris-eval `(:interpret ,(concat ":cd " new-working-directory)))
+    (setq idris-process-current-working-directory new-working-directory)))
+
 (defun idris-load-file (notpop)
   "Pass the current buffer's file to the inferior Idris process."
   (interactive "P")
@@ -66,11 +71,13 @@
   (idris-ensure-process-and-repl-buffer)
   (if (buffer-file-name)
       (when (idris-current-buffer-dirty-p)
-        (idris-eval-async `(:load-file ,(buffer-file-name))
+        (let ((fn (buffer-file-name)))
+          (idris-switch-working-directory (file-name-directory fn))
+          (idris-eval-async `(:load-file ,(file-name-nondirectory fn))
                           (apply-partially (lambda (notpop result)
                                              (unless notpop
                                                (pop-to-buffer (idris-repl-buffer)))
-                                             (message result)) notpop))
+                                             (message result)) notpop)))
         (idris-make-clean))
     (error "Cannot find file for current buffer")))
 
@@ -80,7 +87,9 @@
   (idris-ensure-process-and-repl-buffer)
   (if (buffer-file-name)
       (when (idris-current-buffer-dirty-p)
-        (idris-eval `(:load-file ,(buffer-file-name)))
+        (let ((fn (buffer-file-name)))
+          (idris-switch-working-directory (file-name-directory fn))
+          (idris-eval `(:load-file ,(file-name-nondirectory fn))))
         (idris-make-clean))
     (error "Cannot find file for current buffer")))
 
