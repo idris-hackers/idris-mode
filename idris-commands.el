@@ -232,7 +232,7 @@ type-correct, so loading will fail."
     (destructuring-bind (identifier start end) (idris-identifier-backwards-from-point)
       (when identifier
         (let ((result (idris-eval `(:repl-completions ,identifier))))
-          (destructuring-bind (completions partial) result
+          (destructuring-bind (completions _partial) result
             (if (null completions)
                 nil
               (list start end completions))))))))
