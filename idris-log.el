@@ -30,17 +30,78 @@
 (defvar idris-log-buffer-name (idris-buffer-name :log)
   "The name of the Idris log buffer.")
 
+(defface idris-log-timestamp-face
+  '((t :foreground "#211ab0"
+       :weight bold))
+  "The face used for timestamps in the Idris log"
+  :group 'idris-faces)
+
+(defface idris-log-level-face
+  '((t :weight bold))
+  "General properties for displaying Idris log levels"
+  :group 'idris-faces)
+
+(defface idris-log-level-1-face
+  '((t :foreground "#ff0011"))
+  "The face used for log level 1 in the Idris log"
+  :group 'idris-faces)
+
+(defface idris-log-level-2-face
+  '((t :foreground "#dd0033"))
+  "The face used for log level 2 in the Idris log"
+  :group 'idris-faces)
+
+(defface idris-log-level-3-face
+  '((t :foreground "#bb0055"))
+  "The face used for log level 3 in the Idris log"
+  :group 'idris-faces)
+
+(defface idris-log-level-4-face
+  '((t :foreground "#990077"))
+  "The face used for log level 4 in the Idris log"
+  :group 'idris-faces)
+
+(defface idris-log-level-5-face
+  '((t :foreground "#770099"))
+  "The face used for log level 5 in the Idris log"
+  :group 'idris-faces)
+
+(defface idris-log-level-higher-face
+  '((t :foreground "#550099"))
+  "The face used for log levels over 5 in the Idris log"
+  :group 'idris-faces)
+
+(defun idris-get-log-level-face (level)
+  (cond ((= level 1) 'idris-log-level-1-face)
+        ((= level 2) 'idris-log-level-2-face)
+        ((= level 3) 'idris-log-level-3-face)
+        ((= level 4) 'idris-log-level-4-face)
+        ((= level 5) 'idris-log-level-5-face)
+        (t 'idris-log-level-higher-face)))
+
+(defvar idris-log-mode-map
+  (let ((map (make-keymap)))
+    (suppress-keymap map) ; remove self-inserting char commands
+    map))
+
+(define-derived-mode idris-log-mode fundamental-mode "Idris Log"
+  "Major mode used to show Idris compiler internals logs
+      \\{idris-log-mode-map}
+Invokes `idris-log-mode-hook'."
+  (buffer-disable-undo)
+  (set (make-local-variable 'outline-regexp) "^(")
+  (set (make-local-variable 'comment-start) ";")
+  (set (make-local-variable 'comment-end) "")
+  (set (make-local-variable 'left-margin-width) 22)
+  (setq buffer-read-only t)
+  (view-mode 1))
+
 (defun idris-log-buffer ()
   "Return or create the log buffer."
   (or (get-buffer idris-log-buffer-name)
       (let ((buffer (get-buffer-create idris-log-buffer-name)))
         (with-current-buffer buffer
-          (buffer-disable-undo)
-          (set (make-local-variable 'outline-regexp) "^(")
-          (set (make-local-variable 'comment-start) ";")
-          (set (make-local-variable 'comment-end) "")
-          (set (make-local-variable 'left-margin-width) 18)
-          (setq buffer-read-only t))
+          (idris-log-mode))
         buffer)))
 
 (defun idris-log (level message)
@@ -49,8 +110,10 @@
   (with-current-buffer (idris-log-buffer)
     (goto-char (point-max))
     (let* ((buffer-read-only nil)
-           (time (substring (number-to-string (float-time)) 0 14))
-           (meta-info (format "%14s %2s " time level))
+           (time (format-time-string "%Y-%m-%d %H:%M:%S"))
+           (meta-info (concat (propertize time 'face 'idris-log-timestamp-face)
+                              (propertize (format "%2s" level)
+                                          'face (idris-get-log-level-face level))))
            (meta (propertize " "
                              'display `((margin left-margin)
                                         ,meta-info))))
