@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t -*-
 ;;; idris-common-utils.el --- Useful utilities
 
 ;; Copyright (C) 2013 Hannes Mehnert
