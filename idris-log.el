@@ -1,9 +1,10 @@
+;;; -*- lexical-binding: t -*-
 ;;; idris-log.el --- Logging of Idris
 
-;; Copyright (C) 2013 Hannes Mehnert
+;; Copyright (C) 2013-2014 Hannes Mehnert and David Raymond Christiansen
 
-;; Author: Hannes Mehnert <hannes@mehnert.org>
-
+;; Authors: Hannes Mehnert <hannes@mehnert.org>
+;;          David Raymond Christiansen <drc@itu.dk>
 ;; License:
 ;; Inspiration is taken from SLIME/DIME (http://common-lisp.net/project/slime/) (https://github.com/dylan-lang/dylan-mode)
 ;; Therefore license is GPL
@@ -38,25 +39,30 @@
           (set (make-local-variable 'outline-regexp) "^(")
           (set (make-local-variable 'comment-start) ";")
           (set (make-local-variable 'comment-end) "")
+          (set (make-local-variable 'left-margin-width) 18)
           (setq buffer-read-only t))
         buffer)))
 
 (defun idris-log (level message)
   "Record the fact that MESSAGE occured."
+  ;; TODO: Different faces for different log levels
   (with-current-buffer (idris-log-buffer)
     (goto-char (point-max))
-    (let ((buffer-read-only nil)
-          (time (substring (number-to-string (float-time)) 0 14)))
+    (let* ((buffer-read-only nil)
+           (time (substring (number-to-string (float-time)) 0 14))
+           (meta-info (format "%14s %2s " time level))
+           (meta (propertize " "
+                             'display `((margin left-margin)
+                                        ,meta-info))))
       (save-excursion
-        (insert (number-to-string level))
-        (insert " ")
+        (insert meta)
         (insert message)
         (insert "\n")))
     (goto-char (point-max))))
 
 (defun idris-log-hook-function (event)
   (destructure-case event
-    ((:log (level message) target)
+    ((:log (level message) _target)
      (idris-log level message)
      t)
     (t nil)))
