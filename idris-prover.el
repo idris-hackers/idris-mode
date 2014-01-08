@@ -1,5 +1,4 @@
-;;; -*- lexical-binding: t -*-
-;;; idris-prover.el --- Prover mode for Idris
+;;; idris-prover.el --- Prover mode for Idris -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2013 Hannes Mehnert
 

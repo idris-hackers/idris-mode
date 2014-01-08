@@ -1,6 +1,4 @@
-;;; -*- lexical-binding: t -*-
-
-;;; idris-info.el --- Facilities for showing Idris help information
+;;; idris-info.el --- Facilities for showing Idris help information -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2014  David Raymond Christiansen
 

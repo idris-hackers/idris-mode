@@ -1,5 +1,4 @@
-;;; -*- lexical-binding: t -*-
-;;; idris-mode.el --- Major mode for editing Idris code
+;;; idris-mode.el --- Major mode for editing Idris code -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2013
 

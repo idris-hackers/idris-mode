@@ -1,5 +1,4 @@
-;;; -*- lexical-binding: t -*-
-;;; idris-events.el --- Logging of events in inferior Idris
+;;; idris-events.el --- Logging of events in inferior Idris -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2013 Hannes Mehnert
 
