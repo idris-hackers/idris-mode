@@ -5,6 +5,7 @@
 ;; Author:
 ;; URL: https://github.com/idris-hackers/idris-mode
 ;; Keywords: languages
+;; Package-Requires: ((emacs "24"))
 
 
 ;;; Commentary:
