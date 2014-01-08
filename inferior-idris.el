@@ -25,7 +25,7 @@
 
 (require 'idris-core)
 (require 'pp)
-(require 'cl-lib(require 'cl-lib))
+(require 'cl-lib)
 (require 'idris-events)
 (require 'idris-log)
 (require 'idris-warnings)
