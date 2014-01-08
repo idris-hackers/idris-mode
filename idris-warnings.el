@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t -*-
 ;;; idris-warnings.el --- Mark warnings reported by idris in buffers
 
 ;; Copyright (C) 2013 Hannes Mehnert
@@ -40,7 +41,7 @@
 
 (defun idris-warning-event-hook-function (event)
   (destructure-case event
-    ((:warning output target)
+    ((:warning output _target)
      (idris-warning-overlay output)
      t)
     (t nil)))
@@ -82,7 +83,7 @@ or the old format, used by Idris up to 0.9.10.1, which does not contain a column
     (4 (destructuring-bind (filename lineno col message) warning
          (idris-real-warning-overlay filename lineno col message)))))
 
-(defun idris-real-warning-overlay (filename line col message)
+(defun idris-real-warning-overlay (filename lineno col message)
   "Add the compiler warning to the buffer for real!"
   (let ((buffer (get-file-buffer filename)))
     (when (not (null buffer))

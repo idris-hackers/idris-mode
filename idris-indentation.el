@@ -105,6 +105,8 @@
     (define-key keymap (kbd "C-d") 'idris-indentation-delete-char)
     keymap))
 
+(defvar-local idris-indent-last-position nil)
+
 ;;;###autoload
 (define-minor-mode idris-indentation-mode
   "Idris indentation mode that deals with the layout rule.
@@ -121,8 +123,7 @@ autofill-mode."
          'idris-indentation-indent-line)
     (set (make-local-variable 'normal-auto-fill-function)
          'idris-indentation-auto-fill-function)
-    (set (make-local-variable 'idris-indent-last-position)
-         nil)))
+    (setq idris-indent-last-position nil)))
 
 (defun turn-on-idris-indentation ()
   "Turn on the idris-indentation minor mode."
@@ -352,10 +353,10 @@ Preserves indentation and removes extra whitespace"
 (defun idris-indentation-delete-backward-char (n)
   (interactive "p")
   (on-parse-error
-   (delete-backward-char n)
+   (delete-char (- n))
    (cond
     ((idris-indentation-outside-bird-line)
-     (delete-backward-char n))
+     (delete-char (- n)))
     ((and delete-selection-mode
 	  mark-active
 	  (not (= (point) (mark))))
@@ -363,7 +364,7 @@ Preserves indentation and removes extra whitespace"
     ((or (= (idris-current-column) 0)
 	 (> (idris-current-column) (idris-indentation-current-indentation))
 	(nth 8 (syntax-ppss)))
-     (delete-backward-char n))
+     (delete-char (- n)))
     (t (let* ((ci (idris-indentation-current-indentation))
 	      (pi (idris-indentation-previous-indentation
 		   ci (idris-indentation-find-indentations))))
