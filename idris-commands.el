@@ -29,6 +29,7 @@
 (require 'idris-warnings)
 (require 'idris-compat)
 (require 'idris-info)
+(require 'idris-log)
 
 (defvar-local idris-buffer-dirty-p t
   "An Idris buffer is dirty if there have been modifications since it was last loaded")
@@ -80,6 +81,14 @@
                                              (message result)) notpop)))
         (idris-make-clean))
     (error "Cannot find file for current buffer")))
+
+(defun idris-view-compiler-log ()
+  "Jump to the log buffer, if it is open"
+  (interactive)
+  (let ((buffer (get-buffer idris-log-buffer-name)))
+    (if buffer
+        (pop-to-buffer buffer)
+      (message "No Idris compiler log is currently open"))))
 
 (defun idris-load-file-sync ()
   "Pass the current buffer's file synchronously to the inferior Idris process."
