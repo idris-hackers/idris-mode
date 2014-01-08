@@ -27,6 +27,7 @@
 (require 'inferior-idris)
 (require 'idris-common-utils)
 (require 'idris-completion)
+(require 'cl-lib)
 
 (defgroup idris-repl nil "Idris REPL" :prefix 'idris :group 'idris)
 
@@ -255,7 +256,7 @@ Invokes `idris-repl-mode-hook'."
     (if (> (length first) ilen)
         (progn
           (let ((next (substring first 0 (1+ ilen))))
-            (if (every (lambda (p) (string-prefix-p next p)) slist)
+            (if (cl-every (lambda (p) (string-prefix-p next p)) slist)
                 (find-common-prefix next slist)
               input)))
       input)))
@@ -477,7 +478,7 @@ files and this function is sufficient."
         (hist (or history idris-repl-input-history)))
     (unless (file-writable-p file)
       (error (format "History file not writable: %s" file)))
-    (let ((hist (subseq hist 0 (min (length hist) idris-repl-history-size))))
+    (let ((hist (cl-subseq hist 0 (min (length hist) idris-repl-history-size))))
       (with-temp-file file
         (let ((cs idris-repl-history-file-coding-system)
               (print-length nil) (print-level nil))

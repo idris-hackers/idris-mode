@@ -24,7 +24,7 @@
 ;; Boston, MA 02111-1307, USA.
 
 (require 'idris-core)
-(require 'cl)
+(require 'cl-lib)
 
 (defun idris-buffer-name (type)
   (assert (keywordp type))
@@ -43,7 +43,7 @@
                   (<= (max pos1 pos2) (line-end-position))))
 
 (defmacro idris-save-marker (marker &rest body)
-  (let ((pos (gensym "pos")))
+  (let ((pos (cl-gensym "pos")))
   `(let ((,pos (marker-position ,marker)))
      (prog1 (progn . ,body)
        (set-marker ,marker ,pos)))))
@@ -52,7 +52,7 @@
   "Execute BODY and add PROPS to all the text it inserts.
 More precisely, PROPS are added to the region between the point's
 positions before and after executing BODY."
-  (let ((start (gensym)))
+  (let ((start (cl-gensym)))
     `(let ((,start (point)))
        (prog1 (progn ,@body)
 	 (add-text-properties ,start (point) ,props)))))

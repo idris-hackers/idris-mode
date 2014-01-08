@@ -25,7 +25,7 @@
 
 (require 'idris-core)
 (require 'pp)
-(require 'cl)
+(require 'cl-lib(require 'cl-lib))
 (require 'idris-events)
 (require 'idris-log)
 (require 'idris-warnings)
@@ -153,9 +153,9 @@ The pattern syntax is:
 The list of patterns is searched for a HEAD `eq' to the car of
 VALUE. If one is found, the BODY is executed with ARGS bound to the
 corresponding values in the CDR of VALUE."
-  (let ((operator (gensym "op-"))
-	(operands (gensym "rand-"))
-	(tmp (gensym "tmp-")))
+  (let ((operator (cl-gensym "op-"))
+	(operands (cl-gensym "rand-"))
+	(tmp (cl-gensym "tmp-")))
     `(let* ((,tmp ,value)
 	    (,operator (car ,tmp))
 	    (,operands (cdr ,tmp)))
@@ -211,7 +211,7 @@ asynchronously.
 
 Note: don't use backquote syntax for SEXP, because various Emacs
 versions cannot deal with that."
-  (let ((result (gensym)))
+  (let ((result (cl-gensym)))
     `(lexical-let ,(loop for var in saved-vars
                          collect (etypecase var
                                    (symbol (list var var))
@@ -243,7 +243,7 @@ versions cannot deal with that."
 
 (defun idris-eval (sexp)
   "Evaluate EXPR on the inferior Idris and return the result."
-  (let* ((tag (gensym (format "idris-result-%d-"
+  (let* ((tag (cl-gensym (format "idris-result-%d-"
                               (1+ idris-continuation-counter))))
 	 (idris-stack-eval-tags (cons tag idris-stack-eval-tags)))
     (apply

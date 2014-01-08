@@ -46,8 +46,8 @@
 (defun idris-current-buffer-dirty-p ()
   "Check whether the current buffer's most recent version is loaded"
   (or idris-buffer-dirty-p
-      (not (equalp (current-buffer)
-                   idris-currently-loaded-buffer))))
+      (not (equal (current-buffer)
+                  idris-currently-loaded-buffer))))
 
 
 (defun idris-ensure-process-and-repl-buffer ()

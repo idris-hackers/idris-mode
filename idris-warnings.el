@@ -24,6 +24,7 @@
 ;; Boston, MA 02111-1307, USA.
 
 (require 'idris-core)
+(require 'cl-lib)
 
 (defface idris-warning-face
   `((((class color) (background light))
@@ -67,7 +68,7 @@
 
 (defun idris-warning-overlay-at-point ()
   "Return the overlay for a note starting at point, otherwise nil."
-  (find (point) (remove-if-not 'idris-warning-overlay-p (overlays-at (point)))
+  (cl-find (point) (cl-remove-if-not 'idris-warning-overlay-p (overlays-at (point)))
         :key 'overlay-start))
 
 (defun idris-warning-overlay (warning)
