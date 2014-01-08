@@ -1,5 +1,4 @@
-;;; -*- lexical-binding: t -*-
-;; idris-syntax.el - major mode for editing idris source files
+;;; idris-syntax.el --- idris syntax highlighting -*- lexical-binding: t -*-
 ;;
 ;; Copyright (C) 2013 tim dixon, David Raymond Christiansen and Hannes Mehnert
 ;;

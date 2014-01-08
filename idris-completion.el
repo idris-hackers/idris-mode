@@ -1,5 +1,4 @@
-;;; -*- lexical-binding: t -*-
-;;; idris-completion.el --- Completion popup for Idris
+;;; idris-completion.el --- Completion popup for Idris -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2013 Hannes Mehnert
 

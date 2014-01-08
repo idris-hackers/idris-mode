@@ -1,5 +1,4 @@
-;;; -*- lexical-binding: t -*-
-;;; idris-commands.el --- Commands for Emacs passed to idris
+;;; idris-commands.el --- Commands for Emacs passed to idris -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2013 Hannes Mehnert
 

@@ -1,5 +1,4 @@
-;;; -*- lexical-binding: t -*-
-;;; idris-warnings.el --- Mark warnings reported by idris in buffers
+;;; idris-warnings.el --- Mark warnings reported by idris in buffers -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2013 Hannes Mehnert
 
