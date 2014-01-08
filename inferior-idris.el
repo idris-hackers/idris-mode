@@ -49,7 +49,8 @@
     ,(format "%s, this could be the start of a beautiful proof."
              (idris-user-first-name))
     "The terms have seized control of the means of computation - a glorious future awaits!"
-    "Ship if it typechecks!"))
+    "Ship if it typechecks!"
+    "Do you know 'Land of My Fathers'?"))
 
 (defun idris-random-words-of-encouragement ()
   "Return a random string of encouragement"
