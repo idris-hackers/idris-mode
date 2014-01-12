@@ -44,6 +44,7 @@
     (define-key map (kbd "C-c C-d") 'idris-add-clause)
     (define-key map (kbd "C-c C-w") 'idris-make-with-block)
     (define-key map (kbd "C-c C-a") 'idris-proof-search)
+    (define-key map (kbd "C-c _") 'idris-insert-bottom)
     map)
   "Keymap used in Idris mode.")
 

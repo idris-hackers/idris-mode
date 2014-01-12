@@ -245,5 +245,9 @@ type-correct, so loading will fail."
                 nil
               (list start end completions))))))))
 
+(defun idris-insert-bottom ()
+  "Insert _|_ at point"
+  (interactive)
+  (insert "_|_"))
 
 (provide 'idris-commands)
