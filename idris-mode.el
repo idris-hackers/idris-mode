@@ -35,6 +35,13 @@
   :type '(repeat string)
   :group 'idris)
 
+(defcustom idris-warnings-printing (list 'warnings-tree)
+  "How to print warnings: tree view ('warnings-tree) in REPL ('warnings-repl)"
+  :group 'idris
+  :type '(repeat symbol)
+  :options '(warnings-tree warnings-repl))
+
+
 (defvar idris-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-l") 'idris-load-file)
@@ -102,10 +109,10 @@ Invokes `idris-mode-hook'."
 
 (defun idris-kill-buffers ()
   (idris-warning-reset-all)
-  (let ((bufs (list :repl :proof-obligations :proof-shell :proof-script :log)))
+  (let ((bufs (list :repl :proof-obligations :proof-shell :proof-script :log :info :notes)))
     (dolist (b bufs)
       (let ((buf (get-buffer (idris-buffer-name b))))
-        (when buf (kill-buffer buf))))))
+        (when (and buf (buffer-live-p buf)) (kill-buffer buf))))))
 
 (provide 'idris-mode)
 ;;; idris-mode.el ends here

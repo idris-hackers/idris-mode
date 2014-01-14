@@ -195,7 +195,8 @@ Invokes `idris-repl-mode-hook'."
      (idris-repl-update-prompt prompt)
      t)
     ((:warning output _target)
-     (idris-repl-write-string (format "Error: %s line %d (col %d):\n%s" (nth 0 output) (nth 1 output) (if (eq (safe-length output) 3) 0 (nth 2 output)) (car (last output)))))
+     (when (member 'warnings-repl idris-warnings-printing)
+       (idris-repl-write-string (format "Error: %s line %d (col %d):\n%s" (nth 0 output) (nth 1 output) (if (eq (safe-length output) 3) 0 (nth 2 output)) (car (last output))))))
     (t nil)))
 
 (defun idris-repl-update-banner ()

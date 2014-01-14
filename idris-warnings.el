@@ -37,6 +37,7 @@
 
 (defvar idris-warnings-buffers '() "All buffers which have warnings")
 (defvar-local idris-warnings '() "All warnings in the current buffer")
+(defvar idris-raw-warnings '() "All warnings from Idris")
 
 (defun idris-warning-event-hook-function (event)
   (destructure-case event
@@ -47,10 +48,12 @@
 
 (defun idris-warning-reset-all ()
   (mapc #'idris-warning-reset-buffer idris-warnings-buffers)
+  (setq idris-raw-warnings '())
   (setq idris-warnings-buffers '()))
 
 (defun idris-warning-reset-buffer (buffer)
-  (with-current-buffer buffer (idris-warning-reset)))
+  (when (buffer-live-p buffer)
+    (with-current-buffer buffer (idris-warning-reset))))
 
 (defun idris-warning-reset ()
   (mapc #'delete-overlay idris-warnings)
@@ -84,6 +87,8 @@ or the old format, used by Idris up to 0.9.10.1, which does not contain a column
 
 (defun idris-real-warning-overlay (filename lineno col message)
   "Add the compiler warning to the buffer for real!"
+  (message "pushing into raw warnings %s" filename)
+  (push (list filename lineno col message) idris-raw-warnings)
   (let ((buffer (get-file-buffer filename)))
     (when (not (null buffer))
       (with-current-buffer buffer

@@ -30,6 +30,7 @@
 (require 'idris-compat)
 (require 'idris-info)
 (require 'idris-log)
+(require 'idris-warnings-tree)
 
 (defvar-local idris-buffer-dirty-p t
   "An Idris buffer is dirty if there have been modifications since it was last loaded")
@@ -78,7 +79,11 @@
                           (apply-partially (lambda (notpop result)
                                              (unless notpop
                                                (pop-to-buffer (idris-repl-buffer)))
-                                             (message result)) notpop)))
+                                             (message result)) notpop)
+                          (lambda (condition)
+                            (when (member 'warnings-tree idris-warnings-printing)
+                              (idris-list-compiler-notes)
+                              (pop-to-buffer (idris-buffer-name :notes))))))
         (idris-make-clean))
     (error "Cannot find file for current buffer")))
 
@@ -98,7 +103,10 @@
       (when (idris-current-buffer-dirty-p)
         (let ((fn (buffer-file-name)))
           (idris-switch-working-directory (file-name-directory fn))
-          (idris-eval `(:load-file ,(file-name-nondirectory fn))))
+          (idris-eval `(:load-file ,(file-name-nondirectory fn)))
+          (when (member 'warnings-tree idris-warnings-printing)
+            (when (idris-list-compiler-notes)
+              (pop-to-buffer (idris-buffer-name :notes)))))
         (idris-make-clean))
     (error "Cannot find file for current buffer")))
 
