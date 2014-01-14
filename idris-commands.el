@@ -42,7 +42,6 @@
   (setq idris-buffer-dirty-p t))
 
 (defun idris-make-clean ()
-  (setq idris-currently-loaded-buffer (current-buffer))
   (setq idris-buffer-dirty-p nil))
 
 (defun idris-current-buffer-dirty-p ()
@@ -54,7 +53,6 @@
 
 (defun idris-ensure-process-and-repl-buffer ()
   "Ensures that an Idris process is running and the Idris REPL buffer exists"
-  (idris-warning-reset-all)
   (idris-repl-buffer)
   (idris-run)
   (with-current-buffer (idris-repl-buffer)
@@ -73,12 +71,15 @@
   (idris-ensure-process-and-repl-buffer)
   (if (buffer-file-name)
       (when (idris-current-buffer-dirty-p)
+        (idris-warning-reset-all)
         (let ((fn (buffer-file-name)))
           (idris-switch-working-directory (file-name-directory fn))
+          (setq idris-currently-loaded-buffer nil)
           (idris-eval-async `(:load-file ,(file-name-nondirectory fn))
                           (apply-partially (lambda (notpop result)
                                              (unless notpop
                                                (pop-to-buffer (idris-repl-buffer)))
+                                             (setq idris-currently-loaded-buffer (current-buffer))
                                              (message result)) notpop)
                           (lambda (condition)
                             (when (member 'warnings-tree idris-warnings-printing)
@@ -101,9 +102,12 @@
   (idris-ensure-process-and-repl-buffer)
   (if (buffer-file-name)
       (when (idris-current-buffer-dirty-p)
+        (idris-warning-reset-all)
         (let ((fn (buffer-file-name)))
           (idris-switch-working-directory (file-name-directory fn))
+          (setq idris-currently-loaded-buffer nil)
           (idris-eval `(:load-file ,(file-name-nondirectory fn)))
+          (setq idris-currently-loaded-buffer (current-buffer))
           (when (member 'warnings-tree idris-warnings-printing)
             (when (idris-list-compiler-notes)
               (pop-to-buffer (idris-buffer-name :notes)))))

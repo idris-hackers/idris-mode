@@ -87,7 +87,6 @@ or the old format, used by Idris up to 0.9.10.1, which does not contain a column
 
 (defun idris-real-warning-overlay (filename lineno col message)
   "Add the compiler warning to the buffer for real!"
-  (message "pushing into raw warnings %s" filename)
   (push (list filename lineno col message) idris-raw-warnings)
   (let ((buffer (get-file-buffer filename)))
     (when (not (null buffer))
