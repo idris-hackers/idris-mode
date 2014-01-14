@@ -53,7 +53,7 @@
 
 (defun idris-ensure-process-and-repl-buffer ()
   "Ensures that an Idris process is running and the Idris REPL buffer exists"
-  (idris-warning-reset)
+  (idris-warning-reset-all)
   (idris-repl-buffer)
   (idris-run)
   (with-current-buffer (idris-repl-buffer)
