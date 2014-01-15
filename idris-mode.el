@@ -60,8 +60,16 @@
   `("Idris"
     ["Load file" idris-load-file t]
     ["View compiler log" idris-view-compiler-log (get-buffer idris-log-buffer-name)]
-    ["Customize idris-mode" (customize-group 'idris) t]
     ["Quit inferior idris process" idris-quit t]
+    "-----------------"
+    ["Add initial match clause to type declaration" idris-add-clause t]
+    ["Add missing cases" idris-add-missing t]
+    ["Case split pattern variable" idris-case-split t]
+    ["Add with block" idris-make-with-block t]
+    ["Attempt to solve metavariable" idris-proof-search t]
+    ["Display type" idris-type-at-point t]
+    "-----------------"
+    ["Customize idris-mode" (customize-group 'idris) t]
     ))
 
 (defcustom idris-mode-hook '(turn-on-idris-indentation)
