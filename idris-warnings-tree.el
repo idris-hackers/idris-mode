@@ -29,12 +29,15 @@
 (require 'idris-warnings)
 (require 'cl)
 
+(defvar idris-notes-buffer-name (idris-buffer-name :notes)
+  "The name of the buffer containing Idris errors")
+
 (defun idris-list-compiler-notes ()
   "Show the compiler notes in tree view."
   (interactive)
   (with-temp-message "Preparing compiler note tree..."
     (let ((notes idris-raw-warnings)
-          (buffer (get-buffer-create (idris-buffer-name :notes))))
+          (buffer (get-buffer-create idris-notes-buffer-name)))
       (with-current-buffer buffer
         (idris-compiler-notes-mode)
         (setq buffer-read-only nil)
@@ -43,7 +46,8 @@
             (insert "[no notes]")
           (let ((root (idris-compiler-notes-to-tree notes)))
             (idris-tree-insert root "")
-            (insert "\n")))
+            (insert "\n"))
+          (message "Press q to close, return or mouse on error navigate to source"))
         (setq buffer-read-only t)
         (goto-char (point-min))
         notes))))
@@ -63,16 +67,18 @@
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "RET") 'idris-compiler-notes-default-action-or-show-details)
     (define-key map (kbd "<mouse-2>") 'idris-compiler-notes-default-action-or-show-details/mouse)
+    (define-key map (kbd "q") 'idris-notes-quit)
     map)
   "Keymap used in Idris Compiler Notes mode.")
 
-(define-derived-mode idris-compiler-notes-mode fundamental-mode
-  "Compiler-Notes"
-  "\\<idris-compiler-notes-mode-map>\
-\\{idris-compiler-notes-mode-map}
-\\{idris-popup-buffer-mode-map}
-"
-  )
+(defun idris-notes-quit ()
+  (interactive)
+  (idris-kill-buffer :notes))
+
+(define-derived-mode idris-compiler-notes-mode fundamental-mode "Compiler-Notes"
+  "Idris compiler notes
+     \\{idris-compiler-notes-mode-map}
+Invokes `idris-compiler-notes-mode-hook'.")
 
 (defun idris-compiler-notes-default-action-or-show-details/mouse (event)
   "Invoke the action pointed at by the mouse, or show details."
