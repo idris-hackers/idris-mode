@@ -44,21 +44,16 @@
 (define-derived-mode idris-info-mode fundamental-mode "Idris Info"
   "Major mode used for transient Idris information buffers
     \\{idris-info-mode-map}
-Invokes `idris-info-mode-hook'."
-  (view-mode 1))
+Invokes `idris-info-mode-hook'.")
+; if we use view-mode here, our key binding q would be shadowed.
 
 (defun idris-info-buffer ()
   "Return the Idris info buffer, creating one if there is not one"
-  (or (get-buffer idris-info-buffer-name)
-      (let ((buffer (get-buffer-create idris-info-buffer-name)))
-        (with-current-buffer buffer
-          (idris-info-mode))
-        buffer)))
+  (get-buffer-create idris-info-buffer-name))
 
 (defun idris-info-quit ()
   (interactive)
-  (when (get-buffer idris-info-buffer-name)
-    (kill-buffer idris-info-buffer-name)))
+  (idris-kill-buffer idris-info-buffer-name))
 
 (defun idris-info-buffer-visible-p ()
   (if (get-buffer-window idris-info-buffer-name 'visible) t nil))
@@ -66,9 +61,11 @@ Invokes `idris-info-mode-hook'."
 (defun idris-show-info (info-string)
   "Show INFO-STRING in the Idris info buffer, obliterating its previous contents."
   (with-current-buffer (idris-info-buffer)
-    (let ((inhibit-read-only t)) ; special variable - allows inserting into read-only buffer
-      (erase-buffer)
-      (insert (concat info-string "\n\n"))))
+    (idris-info-mode)
+    (setq buffer-read-only nil)
+    (erase-buffer)
+    (insert (concat info-string "\n\n"))
+    (setq buffer-read-only t))
   (unless (idris-info-buffer-visible-p)
     (pop-to-buffer (idris-info-buffer))
     (message "Press q to close the Idris info buffer."))
