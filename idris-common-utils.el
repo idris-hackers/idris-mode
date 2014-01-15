@@ -30,6 +30,17 @@
   (assert (keywordp type))
   (concat (format "*idris-%s*" (substring (symbol-name type) 1))))
 
+(defun idris-kill-buffer (buffer)
+  (let ((buf (cond
+              ((symbolp buffer)
+               (get-buffer (idris-buffer-name buffer)))
+              ((stringp buffer)
+               (get-buffer buffer))
+              ((bufferp buffer)
+               buffer)
+              (t (message "don't know how to kill buffer")))))
+    (when (and buf (buffer-live-p buf)) (kill-buffer buf))))
+
 (defun idris-minibuffer-respecting-message (text &rest args)
   "Display TEXT as a message, without hiding any minibuffer contents."
   (let ((mtext (format " [%s]" (apply #'format text args))))

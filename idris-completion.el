@@ -24,6 +24,7 @@
 ;; Boston, MA 02111-1307, USA.
 
 (require 'idris-core)
+(require 'idris-common-utils)
 
 (defvar idris-completions-buffer-name "*Completions*")
 
@@ -64,8 +65,7 @@ Return true if the configuration was saved."
       (set-window-configuration
        idris-complete-saved-window-configuration))
     (setq idris-complete-saved-window-configuration nil)
-    (when (buffer-live-p idris-completions-buffer-name)
-      (kill-buffer idris-completions-buffer-name))))
+    (idris-kill-buffer idris-completions-buffer-name)))
 
 (defun idris-complete-maybe-restore-window-configuration ()
   "Restore the window configuration, if the following command

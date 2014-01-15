@@ -22,6 +22,7 @@
 (require 'idris-repl)
 (require 'idris-commands)
 (require 'idris-warnings)
+(require 'idris-common-utils)
 
 (defgroup idris nil "Idris mode" :prefix 'idris :group 'languages)
 
@@ -108,7 +109,6 @@ Invokes `idris-mode-hook'."
   (interactive)
   (let* ((pbufname (idris-buffer-name :process))
          (pbuf (get-buffer pbufname)))
-    (setq idris-currently-loaded-buffer nil)
     (if pbuf
         (progn
           (kill-buffer pbuf)
@@ -117,10 +117,10 @@ Invokes `idris-mode-hook'."
 
 (defun idris-kill-buffers ()
   (idris-warning-reset-all)
+  (setq idris-currently-loaded-buffer nil)
+  ; not killing :events since it it tremendously useful for debuging
   (let ((bufs (list :repl :proof-obligations :proof-shell :proof-script :log :info :notes)))
-    (dolist (b bufs)
-      (let ((buf (get-buffer (idris-buffer-name b))))
-        (when (and buf (buffer-live-p buf)) (kill-buffer buf))))))
+    (dolist (b bufs) (idris-kill-buffer b))))
 
 (provide 'idris-mode)
 ;;; idris-mode.el ends here
