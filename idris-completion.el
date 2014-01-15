@@ -24,6 +24,7 @@
 ;; Boston, MA 02111-1307, USA.
 
 (require 'idris-core)
+(require 'idris-common-utils)
 
 (defvar idris-completions-buffer-name "*Completions*")
 

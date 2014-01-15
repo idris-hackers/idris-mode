@@ -22,6 +22,7 @@
 (require 'idris-repl)
 (require 'idris-commands)
 (require 'idris-warnings)
+(require 'idris-common-utils)
 
 (defgroup idris nil "Idris mode" :prefix 'idris :group 'languages)
 
@@ -120,17 +121,6 @@ Invokes `idris-mode-hook'."
   ; not killing :events since it it tremendously useful for debuging
   (let ((bufs (list :repl :proof-obligations :proof-shell :proof-script :log :info :notes)))
     (dolist (b bufs) (idris-kill-buffer b))))
-
-(defun idris-kill-buffer (buffer)
-  (let ((buf (cond
-              ((symbolp buffer)
-               (get-buffer (idris-buffer-name buffer)))
-              ((stringp buffer)
-               (get-buffer buffer))
-              ((bufferp buffer)
-               buffer)
-              (t (message "don't know how to kill buffer")))))
-    (when (and buf (buffer-live-p buf)) (kill-buffer buf))))
 
 (provide 'idris-mode)
 ;;; idris-mode.el ends here

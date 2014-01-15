@@ -26,6 +26,7 @@
 
 ;;; Code:
 (require 'idris-core)
+(require 'idris-common-utils)
 
 (defvar idris-info-buffer-name (idris-buffer-name :info)
   "The name of the buffer containing Idris help information")

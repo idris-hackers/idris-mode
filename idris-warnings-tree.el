@@ -27,6 +27,7 @@
 `
 (require 'idris-core)
 (require 'idris-warnings)
+(require 'idris-common-utils)
 (require 'cl)
 
 (defvar idris-notes-buffer-name (idris-buffer-name :notes)
