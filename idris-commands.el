@@ -77,15 +77,15 @@
           (setq idris-currently-loaded-buffer nil)
           (idris-eval-async `(:load-file ,(file-name-nondirectory fn))
                           (apply-partially (lambda (notpop result)
+                                             (idris-make-clean)
+                                             (setq idris-currently-loaded-buffer (current-buffer))
                                              (unless notpop
                                                (pop-to-buffer (idris-repl-buffer)))
-                                             (setq idris-currently-loaded-buffer (current-buffer))
                                              (message result)) notpop)
                           (lambda (condition)
                             (when (member 'warnings-tree idris-warnings-printing)
                               (idris-list-compiler-notes)
-                              (pop-to-buffer (idris-buffer-name :notes))))))
-        (idris-make-clean))
+                              (pop-to-buffer (idris-buffer-name :notes)))))))
     (error "Cannot find file for current buffer")))
 
 (defun idris-view-compiler-log ()

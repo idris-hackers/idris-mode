@@ -90,7 +90,7 @@ Invokes `idris-mode-hook'."
 
   ; Handle dirty-bit to avoid extra loads
   (add-hook 'first-change-hook 'idris-make-dirty)
-  (setq mode-name `("Idris" (:eval (if (idris-current-buffer-dirty-p) " (Not loaded)" " (Loaded)")))))
+  (setq mode-name `("Idris " (:eval (if (idris-current-buffer-dirty-p) "(Not loaded)" "(Loaded)")))))
 
 ;; Automatically use idris-mode for .idr files.
 ;;;###autoload

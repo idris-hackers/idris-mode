@@ -56,7 +56,7 @@
                    :print-fn idris-tree-printer))
 
 (defun idris-compiler-notes-to-tree (notes)
-  (make-idris-tree :item (format "Warnings (%d)" (length notes))
+  (make-idris-tree :item (format "Errors (%d) [return or mouse on error to navigate to their source location]" (length notes))
                    :kids (mapcar #'idris-tree-for-note notes)))
 
 (defvar idris-compiler-notes-mode-map
