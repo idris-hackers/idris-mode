@@ -188,13 +188,15 @@ Invokes `idris-repl-mode-hook'."
 
 (defun idris-repl-event-hook-function (event)
   (destructure-case event
-    ((:write-string output target)
-     ; target currently unused
+    ((:write-string output _target)
      (idris-repl-write-string output)
      t)
-    ((:set-prompt prompt target)
+    ((:set-prompt prompt _target)
      (idris-repl-update-prompt prompt)
      t)
+    ((:warning output _target)
+     (when (member 'warnings-repl idris-warnings-printing)
+       (idris-repl-write-string (format "Error: %s line %d (col %d):\n%s" (nth 0 output) (nth 1 output) (if (eq (safe-length output) 3) 0 (nth 2 output)) (car (last output))))))
     (t nil)))
 
 (defun idris-repl-update-banner ()

@@ -223,15 +223,18 @@ versions cannot deal with that."
                 (destructure-case ,result
                   ,@continuations))) idris-process))))
 
-(defun idris-eval-async (sexp cont)
-  "Evaluate EXPR on the superior Idris and call CONT with the result."
-  (idris-rex (cont (buffer (current-buffer)))
+(defun idris-eval-async (sexp cont &optional failure-cont)
+  "Evaluate EXPR on the superior Idris and call CONT with the result, or FAILURE-CONT in failure case."
+  (idris-rex (cont (buffer (current-buffer)) failure-cont)
       (sexp)
     ((:ok result)
      (when cont
        (set-buffer buffer)
        (funcall cont result)))
     ((:error condition)
+     (when failure-cont
+       (set-buffer buffer)
+       (funcall failure-cont condition))
      (message "Evaluation returned an error: %s." condition))))
 
 ;;; Synchronous requests are implemented in terms of asynchronous
