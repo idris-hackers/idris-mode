@@ -262,4 +262,27 @@ type-correct, so loading will fail."
   (interactive)
   (insert "_|_"))
 
+(defun idris-insert-comment-heading-compact (heading)
+  "Insert a compact comment heading at point."
+  (interactive "sEnter Heading: ")
+  (setq title (concat "[ " heading " ]"))
+  (setq dashes (make-string (- 76 (length title) ) ?-))
+  (insert (concat "-- " dashes " " title)))
+
+(defun idris-insert-comment-heading (heading) 
+  "Insert a comment heading at point."
+  (interactive "sEnter Heading: ")
+  (setq dashes (make-string 80 ?-))
+  (insert (concat dashes "\n" "-- " heading "\n" dashes "\n")))
+
+(defun idris-insert-module-doc-template ()
+  "Insert template for documenting modules at point."
+  (setq dashes (make-string 80 ?-))
+  (setq content (concat "-- Module    :\n"
+                        "-- Summary   :\n"
+                        "-- Copyright : (c) " (user-full-name) "\n"
+                        "-- License   : see LICENSE\n"))
+  (insert (concat dashes "\n" content dashes "\n")))
+
 (provide 'idris-commands)
+
