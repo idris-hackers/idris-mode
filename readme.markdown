@@ -1,3 +1,5 @@
+![Interactive editing](http://itu.dk/people/drc/idris-mode.gif)
+
 # idris-mode for emacs
 
 This is an emacs mode for editing [Idris][] code.
