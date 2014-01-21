@@ -82,7 +82,7 @@
                                              (unless notpop
                                                (pop-to-buffer (idris-repl-buffer)))
                                              (message result)) notpop)
-                          (lambda (condition)
+                          (lambda (_condition)
                             (when (member 'warnings-tree idris-warnings-printing)
                               (idris-list-compiler-notes)
                               (pop-to-buffer (idris-buffer-name :notes)))))))

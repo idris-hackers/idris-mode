@@ -28,7 +28,6 @@
 (require 'idris-core)
 (require 'idris-warnings)
 (require 'idris-common-utils)
-(require 'cl)
 
 (defvar idris-notes-buffer-name (idris-buffer-name :notes)
   "The name of the buffer containing Idris errors")
@@ -84,7 +83,7 @@ Invokes `idris-compiler-notes-mode-hook'.")
 (defun idris-compiler-notes-default-action-or-show-details/mouse (event)
   "Invoke the action pointed at by the mouse, or show details."
   (interactive "e")
-  (destructuring-bind (mouse-2 (w pos &rest _) &rest __) event
+  (cl-destructuring-bind (_mouse-2 (_w pos &rest more) &rest more) event
     (save-excursion
       (goto-char pos)
       (let ((fn (get-text-property (point)
