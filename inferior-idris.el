@@ -64,12 +64,31 @@
 (defvar idris-process-current-working-directory ""
   "Working directory of Idris process")
 
+(defvar-local idris-packages nil
+  "The list of packages to be loaded by Idris. Set using file or directory variables.")
+
+(defvar idris-currently-loaded-packages nil
+  "The list of packages actually loaded by Idris. This is
+  maintained to restart Idris when the package list changes.")
+
 (defun idris-run ()
   "Run an inferior Idris process"
   (interactive)
+
+  ;; Kill Idris if the package list needs updating
+  (when (not (equal idris-packages idris-currently-loaded-packages))
+    (message "Idris package list updated, restarting Idris")
+    (idris-quit)
+    (sit-for 0)) ; allows the sentinel to run and reset idris-process
+
+  ;; Start Idris if necessary
   (when (not idris-process)
     (setq idris-process
-          (apply #'start-process "idris" (idris-buffer-name :process) idris-interpreter-path "--ideslave" idris-interpreter-flags))
+          (apply #'start-process "idris" (idris-buffer-name :process)
+                 idris-interpreter-path
+                 "--ideslave"
+                 (append (cl-loop for p in idris-packages collecting "-p" collecting p)
+                         idris-interpreter-flags)))
     (set-process-filter idris-process 'idris-output-filter)
     (set-process-sentinel idris-process 'idris-sentinel)
     (set-process-query-on-exit-flag idris-process t)
@@ -77,6 +96,7 @@
     (add-hook 'idris-event-hooks 'idris-log-hook-function)
     (add-hook 'idris-event-hooks 'idris-warning-event-hook-function)
     (add-hook 'idris-event-hooks 'idris-prover-event-hook-function)
+    (setq idris-currently-loaded-packages idris-packages)
     (message "Connected. %s" (idris-random-words-of-encouragement))))
 
 (defun idris-sentinel (process msg)
