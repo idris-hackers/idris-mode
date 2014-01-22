@@ -79,7 +79,7 @@
   (when (not (equal idris-packages idris-currently-loaded-packages))
     (message "Idris package list updated, restarting Idris")
     (idris-quit)
-    (sit-for 0)) ; allows the sentinel to run and reset idris-process
+    (sit-for 0.01)) ; allows the sentinel to run and reset idris-process
 
   ;; Start Idris if necessary
   (when (not idris-process)
