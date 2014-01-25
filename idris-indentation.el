@@ -499,6 +499,7 @@ Preserves indentation and removes extra whitespace"
 (defconst idris-indentation-toplevel-list
   '(("module" . idris-indentation-module)
     ("data" . idris-indentation-data)
+    ("record" . idris-indentation-data)
     ("type" . idris-indentation-data)
     ("newtype" . idris-indentation-data)
     ("class" . idris-indentation-class-declaration)
