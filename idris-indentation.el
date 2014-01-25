@@ -516,8 +516,6 @@ Preserves indentation and removes extra whitespace"
 
 (defconst idris-indentation-expression-list
   '(("data" . idris-indentation-data)
-    ("type" . idris-indentation-data)
-    ("newtype" . idris-indentation-data)
     ("if"    . (lambda () (idris-indentation-phrase
 			   '(idris-indentation-expression
 			     "then" idris-indentation-expression
@@ -527,8 +525,6 @@ Preserves indentation and removes extra whitespace"
 			     "in" idris-indentation-expression))))
     ("do"    . (lambda () (idris-indentation-with-starter
 			   #'idris-indentation-expression-layout nil)))
-    ("mdo"   . (lambda () (idris-indentation-with-starter
-			   #'idris-indentation-expression-layout nil)))
     ("rec"   . (lambda () (idris-indentation-with-starter
 			   #'idris-indentation-expression-layout nil)))
     ("case"  . (lambda () (idris-indentation-phrase
@@ -537,20 +533,24 @@ Preserves indentation and removes extra whitespace"
     ("\\"    . (lambda () (idris-indentation-phrase
 			   '(idris-indentation-expression
 			     "->" idris-indentation-expression))))
-    ("proc"  . (lambda () (idris-indentation-phrase
-			   '(idris-indentation-expression
-			     "->" idris-indentation-expression))))
+    ("record" . (lambda ()
+		  (idris-indentation-read-next-token)
+		  (if (not (equal current-token "{"))
+		      (parse-error "Illegal token: %s (expected record update syntax)" current-token))
+		  (idris-indentation-list #'idris-indentation-expression
+					  "}" "," nil)
+		  (setq current-token 'end-tokens)))
     ("where" . (lambda () (idris-indentation-with-starter
 			   #'idris-indentation-declaration-layout nil t)))
     (":"    . (lambda () (idris-indentation-statement-right #'idris-indentation-type)))
     ("="     . (lambda () (idris-indentation-statement-right #'idris-indentation-expression)))
     ("<-"    . (lambda () (idris-indentation-statement-right #'idris-indentation-expression)))
     ("("     . (lambda () (idris-indentation-list #'idris-indentation-expression
-						    ")" '(list "," "->") nil)))
+						  ")" '(list "," "->") nil)))
     ("["     . (lambda () (idris-indentation-list #'idris-indentation-expression
-						    "]" "," "|")))
+						  "]" "," "|")))
     ("{"     . (lambda () (idris-indentation-list #'idris-indentation-expression
-						    "}" "," nil)))))
+						  "}" "," nil)))))
 	  
 (defun idris-indentation-expression-layout ()
   (idris-indentation-layout #'idris-indentation-expression))
