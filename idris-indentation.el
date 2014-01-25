@@ -937,7 +937,7 @@ Preserves indentation and removes extra whitespace"
 		 (t (setq current-token (idris-indentation-peek-token))))))))
 
 (defun idris-indentation-peek-token ()
-  (cond ((looking-at "\\(if\\|then\\|else\\|let\\|in\\|mdo\\|rec\\|do\\|proc\\|case\\|of\\|where\\|module\\|deriving\\|data\\|type\\|record\\|newtype\\|class\\|instance\\)\\([^[:alnum:]'_]\\|$\\)")
+  (cond ((looking-at "\\(if\\|then\\|else\\|let\\|in\\|rec\\|do\\|case\\|of\\|where\\|module\\|deriving\\|data\\|record\\|class\\|instance\\)\\([^[:alnum:]'_]\\|$\\)")
 	 (match-string 1))
 	((looking-at "[][(){}[,;]")
 	 (match-string 0))
