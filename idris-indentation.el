@@ -303,7 +303,7 @@ Preserves indentation and removes extra whitespace"
 	 col)))
 
 (defun idris-indentation-matching-indentation (col indentations)
-  "Find the leftmost indentation which is greater than or equal to COL."
+  "Find the leftmost indentation which is greater than or equal to COL, or the last indentation if none match."
   (catch 'return
     (while indentations
       (if (or (<= col (car indentations))
