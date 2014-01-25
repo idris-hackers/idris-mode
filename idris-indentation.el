@@ -538,8 +538,7 @@ Preserves indentation and removes extra whitespace"
 		  (if (not (equal current-token "{"))
 		      (parse-error "Illegal token: %s (expected record update syntax)" current-token))
 		  (idris-indentation-list #'idris-indentation-expression
-					  "}" "," nil)
-		  (setq current-token 'end-tokens)))
+					  "}" "," nil)))
     ("where" . (lambda () (idris-indentation-with-starter
 			   #'idris-indentation-declaration-layout nil t)))
     (":"    . (lambda () (idris-indentation-statement-right #'idris-indentation-type)))
