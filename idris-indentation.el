@@ -197,8 +197,8 @@ Preserves indentation and removes extra whitespace"
 (defun idris-indentation-auto-fill-function ()
   (when (> (idris-current-column) fill-column)
     (while (> (idris-current-column) fill-column)
-      (skip-syntax-backward "-")
-      (skip-syntax-backward "^-"))
+      (skip-syntax-backward "-") ; "-" is the syntax class of whitespace
+      (skip-syntax-backward "^-")) ; the "^" is negation
     (let ((auto-fill-function nil)
 	  (indent (car (last (idris-indentation-find-indentations)))))
       (newline)
