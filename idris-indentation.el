@@ -197,8 +197,8 @@ Preserves indentation and removes extra whitespace"
 (defun idris-indentation-auto-fill-function ()
   (when (> (idris-current-column) fill-column)
     (while (> (idris-current-column) fill-column)
-      (skip-syntax-backward "-")
-      (skip-syntax-backward "^-"))
+      (skip-syntax-backward "-") ; "-" is the syntax class of whitespace
+      (skip-syntax-backward "^-")) ; the "^" is negation
     (let ((auto-fill-function nil)
 	  (indent (car (last (idris-indentation-find-indentations)))))
       (newline)
@@ -303,7 +303,7 @@ Preserves indentation and removes extra whitespace"
 	 col)))
 
 (defun idris-indentation-matching-indentation (col indentations)
-  "Find the leftmost indentation which is greater than or equal to COL."
+  "Find the leftmost indentation which is greater than or equal to COL, or the last indentation if none match."
   (catch 'return
     (while indentations
       (if (or (<= col (car indentations))
@@ -499,6 +499,7 @@ Preserves indentation and removes extra whitespace"
 (defconst idris-indentation-toplevel-list
   '(("module" . idris-indentation-module)
     ("data" . idris-indentation-data)
+    ("record" . idris-indentation-data)
     ("type" . idris-indentation-data)
     ("newtype" . idris-indentation-data)
     ("class" . idris-indentation-class-declaration)
@@ -515,8 +516,6 @@ Preserves indentation and removes extra whitespace"
 
 (defconst idris-indentation-expression-list
   '(("data" . idris-indentation-data)
-    ("type" . idris-indentation-data)
-    ("newtype" . idris-indentation-data)
     ("if"    . (lambda () (idris-indentation-phrase
 			   '(idris-indentation-expression
 			     "then" idris-indentation-expression
@@ -526,8 +525,6 @@ Preserves indentation and removes extra whitespace"
 			     "in" idris-indentation-expression))))
     ("do"    . (lambda () (idris-indentation-with-starter
 			   #'idris-indentation-expression-layout nil)))
-    ("mdo"   . (lambda () (idris-indentation-with-starter
-			   #'idris-indentation-expression-layout nil)))
     ("rec"   . (lambda () (idris-indentation-with-starter
 			   #'idris-indentation-expression-layout nil)))
     ("case"  . (lambda () (idris-indentation-phrase
@@ -536,20 +533,23 @@ Preserves indentation and removes extra whitespace"
     ("\\"    . (lambda () (idris-indentation-phrase
 			   '(idris-indentation-expression
 			     "->" idris-indentation-expression))))
-    ("proc"  . (lambda () (idris-indentation-phrase
-			   '(idris-indentation-expression
-			     "->" idris-indentation-expression))))
+    ("record" . (lambda ()
+		  (idris-indentation-read-next-token)
+		  (if (not (equal current-token "{"))
+		      (parse-error "Illegal token: %s (expected record update syntax)" current-token))
+		  (idris-indentation-list #'idris-indentation-expression
+					  "}" "," nil)))
     ("where" . (lambda () (idris-indentation-with-starter
 			   #'idris-indentation-declaration-layout nil t)))
     (":"    . (lambda () (idris-indentation-statement-right #'idris-indentation-type)))
     ("="     . (lambda () (idris-indentation-statement-right #'idris-indentation-expression)))
     ("<-"    . (lambda () (idris-indentation-statement-right #'idris-indentation-expression)))
     ("("     . (lambda () (idris-indentation-list #'idris-indentation-expression
-						    ")" '(list "," "->") nil)))
+						  ")" '(list "," "->") nil)))
     ("["     . (lambda () (idris-indentation-list #'idris-indentation-expression
-						    "]" "," "|")))
+						  "]" "," "|")))
     ("{"     . (lambda () (idris-indentation-list #'idris-indentation-expression
-						    "}" "," nil)))))
+						  "}" "," nil)))))
 	  
 (defun idris-indentation-expression-layout ()
   (idris-indentation-layout #'idris-indentation-expression))
@@ -936,7 +936,7 @@ Preserves indentation and removes extra whitespace"
 		 (t (setq current-token (idris-indentation-peek-token))))))))
 
 (defun idris-indentation-peek-token ()
-  (cond ((looking-at "\\(if\\|then\\|else\\|let\\|in\\|mdo\\|rec\\|do\\|proc\\|case\\|of\\|where\\|module\\|deriving\\|data\\|type\\|newtype\\|class\\|instance\\)\\([^[:alnum:]'_]\\|$\\)")
+  (cond ((looking-at "\\(if\\|then\\|else\\|let\\|in\\|rec\\|do\\|case\\|of\\|where\\|module\\|deriving\\|data\\|record\\|class\\|instance\\)\\([^[:alnum:]'_]\\|$\\)")
 	 (match-string 1))
 	((looking-at "[][(){}[,;]")
 	 (match-string 0))
