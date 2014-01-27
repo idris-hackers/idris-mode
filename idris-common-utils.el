@@ -68,4 +68,16 @@ positions before and after executing BODY."
        (prog1 (progn ,@body)
 	 (add-text-properties ,start (point) ,props)))))
 
+(defmacro idris-propertize-spans (spans &rest body)
+  "Execute BODY and add the properties indicated by SPANS to the
+inserted text (that is, relative to point prior to insertion)."
+  (let ((start (cl-gensym)))
+    `(let ((,start (point)))
+       (prog1 (progn ,@body)
+         (cl-loop for (begin length props) in ,spans
+                  do (message "%s" props)
+                  do (add-text-properties (+ ,start begin)
+                                          (+ ,start begin length)
+                                          props))))))
+
 (provide 'idris-common-utils)

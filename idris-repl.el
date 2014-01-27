@@ -279,8 +279,8 @@ Invokes `idris-repl-mode-hook'."
   "Evaluate STRING on the inferior Idris."
   (idris-rex ()
       ((list ':interpret string))
-    ((:ok result)
-     (idris-repl-insert-result result))
+    ((:ok result &optional spans)
+     (idris-repl-insert-result result spans))
     ((:error condition)
      (idris-repl-show-abort condition))))
 
@@ -309,7 +309,27 @@ Invokes `idris-repl-mode-hook'."
             (set-marker idris-output-end (1- (point)))))))
     (idris-repl-show-maximum-output)))
 
-(defun idris-repl-insert-result (string)
+(defun idris-repl-semantic-text-props (highlighting)
+  (cl-flet ((get-props (props)
+              (let* ((name (assoc :name props))
+                     (implicit (assoc :implicit props))
+                     (decor (assoc :decor props))
+                     (implicit-face (if (and implicit (equal (cadr implicit) :True))
+                                        '(idris-semantic-implicit-face)
+                                      nil))
+                     (decor-face (if decor
+                                     (cdr (assoc (cadr decor)
+                                                 '((:type idris-semantic-type-face)
+                                                   (:data idris-semantic-data-face)
+                                                   (:function idris-semantic-function-face)
+                                                   (:bound idris-semantic-bound-face))))
+                                          nil)))
+                (list 'help-echo (if name (cadr name) "")
+                      'face (append implicit-face decor-face)))))
+    (cl-loop for (start length meta) in highlighting
+             collecting (list start length (get-props meta)))))
+
+(defun idris-repl-insert-result (string &optional highlighting)
   "Inserts STRING and marks it as evaluation result"
   (with-current-buffer (idris-repl-buffer)
     (save-excursion
@@ -317,8 +337,9 @@ Invokes `idris-repl-mode-hook'."
         (idris-save-marker idris-output-end
           (goto-char idris-input-start)
           (when (not (bolp)) (insert-before-markers "\n"))
-          (idris-propertize-region `(face idris-repl-result-face rear-nonsticky (face))
-            (insert-before-markers string)))))
+          (idris-propertize-spans (idris-repl-semantic-text-props highlighting)
+            (idris-propertize-region `(face idris-repl-result-face rear-nonsticky (face))
+              (insert-before-markers string))))))
     (idris-repl-insert-prompt)
     (idris-repl-show-maximum-output)))
 

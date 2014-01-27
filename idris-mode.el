@@ -42,6 +42,30 @@
   :type '(repeat symbol)
   :options '(warnings-tree warnings-repl))
 
+(defface idris-semantic-type-face
+  '((t (:foreground "blue")))
+  "The face to be used to highlight types"
+  :group 'idris-faces)
+
+(defface idris-semantic-data-face
+  '((t (:foreground "red")))
+  "The face to be used to highlight data and constructors"
+  :group 'idris-faces)
+
+(defface idris-semantic-function-face
+  '((t (:foreground "green")))
+  "The face to be used to highlight defined functions"
+  :group 'idris-faces)
+
+(defface idris-semantic-bound-face
+  '((t (:foreground "purple")))
+  "The face to be used to highlight bound variables"
+  :group 'idris-faces)
+
+(defface idris-semantic-implicit-face
+  '((t (:slant italic)))
+  "The face to be used to highlight implicit arguments"
+  :group 'idris-faces)
 
 (defvar idris-mode-map
   (let ((map (make-sparse-keymap)))
