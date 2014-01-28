@@ -138,7 +138,10 @@
                 (car (idris-thing-at-point)))))
     (when name
       (if thing (idris-ensure-process-and-repl-buffer) (idris-load-file-sync))
-      (idris-show-info (format "%s" (idris-eval `(:type-of ,name)))))))
+      (let* ((ty (idris-eval `(:type-of ,name)))
+             (result (car ty))
+             (formatting (cdr ty)))
+      (idris-show-info (format "%s" result) formatting)))))
 
 (defun idris-case-split ()
   "Case split the pattern variable at point"

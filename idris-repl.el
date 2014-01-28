@@ -1,6 +1,6 @@
 ;;; idris-repl.el --- Run an Idris interpreter using S-Expression communication protocol
 
-;; Copyright (C) 2013 Hannes Mehnert
+;; Copyright (C) 2013 Hannes Mehnert and David Raymond Christiansen
 
 ;; Author: Hannes Mehnert <hannes@mehnert.org>
 

@@ -275,11 +275,11 @@ versions cannot deal with that."
      (catch tag
        (idris-rex (tag sexp)
            (sexp)
-         ((:ok value)
+         ((:ok value &optional spans)
           (unless (member tag idris-stack-eval-tags)
             (error "Reply to canceled synchronous eval request tag=%S sexp=%S"
                    tag sexp))
-          (throw tag (list #'identity value)))
+          (throw tag (list #'identity (cons value spans))))
          ((:error condition)
           (throw tag (list #'error "%s (synchronous Idris evaluation failed)" condition))))
        (let ((debug-on-quit t)
