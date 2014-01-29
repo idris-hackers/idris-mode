@@ -180,7 +180,8 @@ Invokes `idris-repl-mode-hook'."
     (idris-repl-safe-load-history)
     (add-hook 'kill-buffer-hook
               'idris-repl-safe-save-history nil t))
-  (add-hook 'kill-emacs-hook 'idris-repl-save-all-histories))
+  (add-hook 'kill-emacs-hook 'idris-repl-save-all-histories)
+  (setq mode-name `("Idris-REPL" (:eval (if idris-rex-continuations "!" "")))))
 
 (defun idris-repl-remove-event-hook-function ()
   (setq idris-prompt-string "Idris")
