@@ -43,14 +43,17 @@
         (setq buffer-read-only nil)
         (erase-buffer)
         (if (null notes)
-            (insert "[no notes]")
+            (progn
+              (message "Cannot find any defect!")
+              (kill-buffer)
+              nil)
           (let ((root (idris-compiler-notes-to-tree notes)))
             (idris-tree-insert root "")
-            (insert "\n"))
-          (message "Press q to close, return or mouse on error navigate to source"))
-        (setq buffer-read-only t)
-        (goto-char (point-min))
-        notes))))
+            (insert "\n")
+            (message "Press q to close, return or mouse on error navigate to source")
+            (setq buffer-read-only t)
+            (goto-char (point-min))
+            notes))))))
 
 (defvar idris-tree-printer 'idris-tree-default-printer)
 

@@ -79,6 +79,9 @@
                           (apply-partially (lambda (notpop result)
                                              (idris-make-clean)
                                              (setq idris-currently-loaded-buffer (current-buffer))
+                                             (when (member 'warnings-tree idris-warnings-printing)
+                                               (idris-list-compiler-notes))
+
                                              (unless notpop
                                                (pop-to-buffer (idris-repl-buffer)))
                                              (message result)) notpop)
@@ -107,10 +110,7 @@
           (idris-switch-working-directory (file-name-directory fn))
           (setq idris-currently-loaded-buffer nil)
           (idris-eval `(:load-file ,(file-name-nondirectory fn)))
-          (setq idris-currently-loaded-buffer (current-buffer))
-          (when (member 'warnings-tree idris-warnings-printing)
-            (when (idris-list-compiler-notes)
-              (pop-to-buffer (idris-buffer-name :notes)))))
+          (setq idris-currently-loaded-buffer (current-buffer)))
         (idris-make-clean))
     (error "Cannot find file for current buffer")))
 
