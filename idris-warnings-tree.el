@@ -110,8 +110,7 @@ Invokes `idris-compiler-notes-mode-hook'.")
            (idris-show-source-location (nth 0 note) (nth 1 note) (nth 2 note))))))
 
 (defun idris-show-source-location (filename lineno col)
-  (save-selected-window   ; show the location, but don't hijack focus.
-    (idris-goto-source-location filename lineno col)))
+  (idris-goto-source-location filename lineno col))
 
 (defun idris-goto-location (filename)
   "Opens buffer for filename"
