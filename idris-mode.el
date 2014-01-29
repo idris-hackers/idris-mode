@@ -142,7 +142,7 @@ Invokes `idris-mode-hook'."
         (progn
           (kill-buffer pbuf)
           (unless (get-buffer pbufname) (idris-kill-buffers))
-          (setq idris-rex-continuations nil))
+          (setq idris-rex-continuations '()))
       (idris-kill-buffers))))
 
 (defun idris-kill-buffers ()
