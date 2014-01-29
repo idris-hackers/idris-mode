@@ -176,7 +176,7 @@
             (idris-minibuffer-respecting-message "Completions, not unique")
             (idris-display-or-scroll-completions completions partial mypartial)))))))
 
-(define-derived-mode idris-prover-script-mode fundamental-mode "Idris-Proof-Script"
+(define-derived-mode idris-prover-script-mode prog-mode "Idris-Proof-Script"
   "Major mode for interacting with Idris proof script.
     \\{idris-prover-script-mode-map}
 Invokes `idris-prover-script-mode-hook'."
