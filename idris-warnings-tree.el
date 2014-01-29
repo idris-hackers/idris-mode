@@ -43,14 +43,17 @@
         (setq buffer-read-only nil)
         (erase-buffer)
         (if (null notes)
-            (insert "[no notes]")
+            (progn
+              (message "Cannot find any defect!")
+              (kill-buffer)
+              nil)
           (let ((root (idris-compiler-notes-to-tree notes)))
             (idris-tree-insert root "")
-            (insert "\n"))
-          (message "Press q to close, return or mouse on error navigate to source"))
-        (setq buffer-read-only t)
-        (goto-char (point-min))
-        notes))))
+            (insert "\n")
+            (message "Press q to close, return or mouse on error navigate to source")
+            (setq buffer-read-only t)
+            (goto-char (point-min))
+            notes))))))
 
 (defvar idris-tree-printer 'idris-tree-default-printer)
 
@@ -107,8 +110,7 @@ Invokes `idris-compiler-notes-mode-hook'.")
            (idris-show-source-location (nth 0 note) (nth 1 note) (nth 2 note))))))
 
 (defun idris-show-source-location (filename lineno col)
-  (save-selected-window   ; show the location, but don't hijack focus.
-    (idris-goto-source-location filename lineno col)))
+  (idris-goto-source-location filename lineno col))
 
 (defun idris-goto-location (filename)
   "Opens buffer for filename"
