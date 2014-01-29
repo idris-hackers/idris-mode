@@ -64,9 +64,9 @@
     (idris-eval `(:interpret ,(concat ":cd " new-working-directory)))
     (setq idris-process-current-working-directory new-working-directory)))
 
-(defun idris-load-file (notpop)
+(defun idris-load-file ()
   "Pass the current buffer's file to the inferior Idris process."
-  (interactive "P")
+  (interactive)
   (save-buffer)
   (idris-ensure-process-and-repl-buffer)
   (if (buffer-file-name)
@@ -76,15 +76,12 @@
           (idris-switch-working-directory (file-name-directory fn))
           (setq idris-currently-loaded-buffer nil)
           (idris-eval-async `(:load-file ,(file-name-nondirectory fn))
-                          (apply-partially (lambda (notpop result)
-                                             (idris-make-clean)
-                                             (setq idris-currently-loaded-buffer (current-buffer))
-                                             (when (member 'warnings-tree idris-warnings-printing)
-                                               (idris-list-compiler-notes))
-
-                                             (unless notpop
-                                               (pop-to-buffer (idris-repl-buffer)))
-                                             (message result)) notpop)
+                          (lambda (result)
+                            (idris-make-clean)
+                            (setq idris-currently-loaded-buffer (current-buffer))
+                            (when (member 'warnings-tree idris-warnings-printing)
+                              (idris-list-compiler-notes))
+                            (message result))
                           (lambda (_condition)
                             (when (member 'warnings-tree idris-warnings-printing)
                               (idris-list-compiler-notes)

@@ -129,10 +129,12 @@
   "Return or create the Idris REPL buffer."
   (or (get-buffer idris-repl-buffer-name)
       (let ((buffer (get-buffer-create idris-repl-buffer-name)))
-        (with-current-buffer buffer
-          (idris-repl-mode)
-          (idris-repl-buffer-init))
-        buffer)))
+        (save-selected-window
+          (with-current-buffer buffer
+            (idris-repl-mode)
+            (idris-repl-buffer-init))
+          (pop-to-buffer buffer t)
+          buffer))))
 
 (defun idris-switch-to-output-buffer ()
   "Select the output buffer and scroll to bottom."
