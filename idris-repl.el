@@ -238,7 +238,7 @@ Invokes `idris-repl-mode-hook'."
   (interactive)
   (let* ((input (idris-repl-current-input))
          (result (idris-eval `(:repl-completions ,input))))
-    (destructuring-bind (completions partial) result
+    (destructuring-bind (completions partial) (car result)
       (cond ((null completions)
              (idris-minibuffer-respecting-message "Can't find completions for \"%s\"" input)
              (ding)
