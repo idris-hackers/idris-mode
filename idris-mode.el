@@ -107,7 +107,7 @@
   :type 'boolean)
 
 ;;;###autoload
-(define-derived-mode idris-mode fundamental-mode "Idris"
+(define-derived-mode idris-mode prog-mode "Idris"
   "Major mode for Idris
      \\{idris-mode-map}
 Invokes `idris-mode-hook'."
