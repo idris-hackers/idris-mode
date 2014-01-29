@@ -123,7 +123,12 @@ Invokes `idris-mode-hook'."
 
   ; Handle dirty-bit to avoid extra loads
   (add-hook 'first-change-hook 'idris-make-dirty)
-  (setq mode-name `("Idris " (:eval (if (idris-current-buffer-dirty-p) "(Not loaded)" "(Loaded)")))))
+  (setq mode-name `("Idris"
+                    (:eval (if idris-rex-continuations "!" ""))
+                    " "
+                    (:eval (if (idris-current-buffer-dirty-p)
+                               "(Not loaded)"
+                             "(Loaded)")))))
 
 ;; Automatically use idris-mode for .idr files.
 ;;;###autoload
@@ -136,7 +141,8 @@ Invokes `idris-mode-hook'."
     (if pbuf
         (progn
           (kill-buffer pbuf)
-          (unless (get-buffer pbufname) (idris-kill-buffers)))
+          (unless (get-buffer pbufname) (idris-kill-buffers))
+          (setq idris-rex-continuations nil))
       (idris-kill-buffers))))
 
 (defun idris-kill-buffers ()
