@@ -146,7 +146,7 @@
   (let ((what (idris-thing-at-point)))
     (when (car what)
       (idris-load-file-sync)
-      (let ((result (idris-eval `(:case-split ,(cdr what) ,(car what)))))
+      (let ((result (car (idris-eval `(:case-split ,(cdr what) ,(car what))))))
         (delete-region (line-beginning-position) (line-end-position))
         (idris-insert-or-expand (substring result 0 (1- (length result))))))))
 
@@ -157,7 +157,7 @@
         (command (if proof :add-proof-clause :add-clause)))
     (when (car what)
       (idris-load-file-sync)
-      (let ((result (idris-eval `(,command ,(cdr what) ,(car what)))))
+      (let ((result (car (idris-eval `(,command ,(cdr what) ,(car what))))))
         (end-of-line)
         (insert "\n")
         (idris-insert-or-expand result)))))
@@ -168,7 +168,7 @@
   (let ((what (idris-thing-at-point)))
     (when (car what)
       (idris-load-file-sync)
-      (let ((result (idris-eval `(:add-missing ,(cdr what) ,(car what)))))
+      (let ((result (car (idris-eval `(:add-missing ,(cdr what) ,(car what))))))
         (forward-line 1)
         (idris-insert-or-expand result)))))
 
@@ -178,7 +178,7 @@
   (let ((what (idris-thing-at-point)))
     (when (car what)
       (idris-load-file-sync)
-      (let ((result (idris-eval `(:make-with ,(cdr what) ,(car what)))))
+      (let ((result (car (idris-eval `(:make-with ,(cdr what) ,(car what))))))
         (beginning-of-line)
         (kill-line)
         (idris-insert-or-expand result)))))
@@ -210,7 +210,7 @@
         (what (idris-thing-at-point)))
     (when (car what)
       (idris-load-file-sync)
-      (let ((result (idris-eval `(:proof-search ,(cdr what) ,(car what) ,hints))))
+      (let ((result (car (idris-eval `(:proof-search ,(cdr what) ,(car what) ,hints)))))
         (save-excursion
           (let ((start (progn (search-backward "?") (point)))
                 (end (progn (forward-char) (search-forward-regexp "[^a-zA-Z0-9_']") (backward-char) (point))))
@@ -251,7 +251,7 @@ type-correct, so loading will fail."
       nil
     (destructuring-bind (identifier start end) (idris-identifier-backwards-from-point)
       (when identifier
-        (let ((result (idris-eval `(:repl-completions ,identifier))))
+        (let ((result (car (idris-eval `(:repl-completions ,identifier)))))
           (destructuring-bind (completions _partial) result
             (if (null completions)
                 nil
