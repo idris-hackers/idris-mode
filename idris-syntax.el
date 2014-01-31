@@ -126,7 +126,7 @@
 
     ;; Idris operator chars
     (mapc #'(lambda (ch) (modify-syntax-entry ch "_" st))
-          "-!#$%&*+./<=>@^|~:")
+          "!#$%&*+./<=>@^|~:")
 
     ;; Whitespace is whitespace
     (modify-syntax-entry ?\  " " st)
