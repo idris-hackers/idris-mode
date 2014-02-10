@@ -135,18 +135,16 @@ Invokes `idris-compiler-notes-mode-hook'.")
   "Like with-slots but works only for structs.
 \(fn (CONC-NAME &rest SLOTS) STRUCT &body BODY)"
   (declare (indent 2))
-  (cl-flet ((reader (slot) (intern (concat (symbol-name conc-name)
-					(symbol-name slot)))))
-    (let ((struct-var (cl-gensym "struct")))
-      `(let ((,struct-var ,struct))
-	 (symbol-macrolet
-	     ,(mapcar (lambda (slot)
-			(etypecase slot
-			  (symbol `(,slot (,(reader slot) ,struct-var)))
-			  (cons `(,(first slot) (,(reader (second slot))
-						 ,struct-var)))))
-		      slots)
-	   . ,body)))))
+  (let ((struct-var (cl-gensym "struct")))
+    `(let ((,struct-var ,struct))
+       (symbol-macrolet
+           ,(mapcar (lambda (slot)
+                      (etypecase slot
+                        (symbol `(,slot (,(intern (concat (symbol-name conc-name) (symbol-name slot))) ,struct-var)))
+                        (cons `(,(first slot) (,(intern (concat (symbol-name conc-name) (symbol-name (second slot))))
+                                               ,struct-var)))))
+                    slots)
+         . ,body))))
 
 (cl-defstruct (idris-tree (:conc-name idris-tree.))
   item
