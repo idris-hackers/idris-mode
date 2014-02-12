@@ -77,17 +77,19 @@
 (defun idris-warning-overlay (warning)
   "Add a compiler warning to the buffer as an overlay.
 May merge overlays, if there's already one in the same location.
-WARNING is of form (filename linenumber column message)
+WARNING is of form (filename linenumber column message &optional highlighting-spans)
 or the old format, used by Idris up to 0.9.10.1, which does not contain a column"
   (case (safe-length warning)
     (3 (destructuring-bind (filename lineno message) warning
          (idris-real-warning-overlay filename lineno 0 message)))
     (4 (destructuring-bind (filename lineno col message) warning
-         (idris-real-warning-overlay filename lineno col message)))))
+         (idris-real-warning-overlay filename lineno col message)))
+    (5 (destructuring-bind (filename lineno col message highlighting) warning
+         (idris-real-warning-overlay filename lineno col message highlighting)))))
 
-(defun idris-real-warning-overlay (filename lineno col message)
+(defun idris-real-warning-overlay (filename lineno col message &optional spans)
   "Add the compiler warning to the buffer for real!"
-  (push (list filename lineno col message) idris-raw-warnings)
+  (push (list filename lineno col message spans) idris-raw-warnings)
   (let ((buffer (get-file-buffer filename)))
     (when (not (null buffer))
       (with-current-buffer buffer

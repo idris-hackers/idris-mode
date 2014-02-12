@@ -75,7 +75,6 @@ inserted text (that is, relative to point prior to insertion)."
     `(let ((,start (point)))
        (prog1 (progn ,@body)
          (cl-loop for (begin length props) in ,spans
-                  do (message "%s" props)
                   do (add-text-properties (+ ,start begin)
                                           (+ ,start begin length)
                                           props))))))
