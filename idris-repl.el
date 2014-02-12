@@ -284,16 +284,19 @@ Invokes `idris-repl-mode-hook'."
       ((list ':interpret string))
     ((:ok result &optional spans)
      (idris-repl-insert-result result spans))
-    ((:error condition)
-     (idris-repl-show-abort condition))))
+    ((:error condition &optional spans)
+     (idris-repl-show-abort condition spans))))
 
-(defun idris-repl-show-abort (condition)
+(defun idris-repl-show-abort (condition &optional highlighting)
   (with-current-buffer (idris-repl-buffer)
     (save-excursion
       (idris-save-marker idris-output-start
         (idris-save-marker idris-output-end
           (goto-char idris-output-end)
-          (insert-before-markers (format "Error: %s.\n" condition))
+          (insert-before-markers "Error: ")
+          (idris-propertize-spans (idris-repl-semantic-text-props highlighting)
+            (insert-before-markers condition))
+          (insert-before-markers "\n")
           (idris-repl-insert-prompt))))
     (idris-repl-show-maximum-output)))
 
