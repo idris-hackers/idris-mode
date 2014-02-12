@@ -59,6 +59,7 @@
 
 (defun idris-tree-for-note (note)
   (make-idris-tree :item (nth 3 note)
+                   :highlighting (if (> (length note) 4) (nth 4 note) '())
                    :plist (list 'note note)
                    :print-fn idris-tree-printer))
 
@@ -148,6 +149,7 @@ Invokes `idris-compiler-notes-mode-hook'.")
 
 (cl-defstruct (idris-tree (:conc-name idris-tree.))
   item
+  highlighting
   (print-fn #'idris-tree-default-printer :type function)
   (kids '() :type list)
   (collapsed-p nil :type boolean)
@@ -160,7 +162,8 @@ Invokes `idris-compiler-notes-mode-hook'.")
   (not (idris-tree.kids tree)))
 
 (defun idris-tree-default-printer (tree)
-  (princ (idris-tree.item tree) (current-buffer)))
+  (idris-propertize-spans (idris-repl-semantic-text-props (idris-tree.highlighting tree))
+    (insert (idris-tree.item tree))))
 
 (defun idris-tree-decoration (tree)
   (cond ((idris-tree-leaf-p tree) "-- ")
