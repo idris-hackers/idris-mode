@@ -36,7 +36,7 @@
   "Show the compiler notes in tree view."
   (interactive)
   (with-temp-message "Preparing compiler note tree..."
-    (let ((notes idris-raw-warnings)
+    (let ((notes (reverse idris-raw-warnings))
           (buffer (get-buffer-create idris-notes-buffer-name)))
       (with-current-buffer buffer
         (idris-compiler-notes-mode)
