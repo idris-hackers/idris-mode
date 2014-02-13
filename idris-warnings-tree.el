@@ -202,7 +202,11 @@ This is used for labels spanning multiple lines."
       (idris-tree-insert-decoration tree)
       (funcall print-fn tree)
       (idris-tree-indent-item start-mark (point) (concat prefix "   "))
-      (add-text-properties line-start (point) (list 'idris-tree tree))
+      (add-text-properties line-start (point)
+        `(idris-tree ,tree
+          mouse-face highlight
+          help-echo ,(concat "<mouse-2> "
+                             (if kids (if collapsed-p "expand" "collapse") "go to source"))))
       (set-marker-insertion-type start-mark t)
       (when (and kids (not collapsed-p))
         (terpri (current-buffer))
