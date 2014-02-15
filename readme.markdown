@@ -59,8 +59,12 @@ If you have Emacs >= 23, you can install pre-built packages from
 [MELPA](http://melpa.milkbox.net/): `idris-mode` will automatically be enabled
 in `.idr` files without any further configuration.
 
-Alternatively, download the elisp files, place them somewhere in your load
-path and `(require 'idris-mode)` somewhere in `~/.emacs` or `~.emacs.d/init.el`.
+Alternatively, download the elisp files, and place them somewhere in your load
+path.
+
+If you want `idris-mode` to be enabled by default, add the line `(require 'idris-mode)` to your `~/.emacs` or `~/.emacs.d/init.el` file.
+
+Also ensure you have the idris binary available on your `exec-path`. E.g.: if you installed idris with cabal into `~/.cabal/bin`, then add the line `(add-to-list 'exec-path "~/.cabal/bin")` to your emacs initialization file.
 
 ## Customization
 
