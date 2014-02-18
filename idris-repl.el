@@ -24,48 +24,11 @@
 ;; Boston, MA 02111-1307, USA.
 
 (require 'idris-core)
+(require 'idris-settings)
 (require 'inferior-idris)
 (require 'idris-common-utils)
 (require 'idris-completion)
 (require 'cl-lib)
-
-(defgroup idris-repl nil "Idris REPL" :prefix 'idris :group 'idris)
-
-(defface idris-repl-prompt-face
-  '((t (:inherit font-lock-keyword-face)))
-  "Face for the prompt in the Idris REPL."
-  :group 'idris-repl)
-
-(defface idris-repl-output-face
-  '((t (:inherit font-lock-string-face)))
-  "Face for Idris output in the Idris REPL."
-  :group 'idris-repl)
-
-(defface idris-repl-input-face
-  '((t (:bold t)))
-  "Face for previous input in the Idris REPL."
-  :group 'idris-repl)
-
-(defface idris-repl-result-face
-  '((t ()))
-  "Face for the result of an evaluation in the Idris REPL."
-  :group 'idris-repl)
-
-(defcustom idris-repl-history-file "~/.idris/idris-history.eld"
-  "File to save the persistent REPL history to."
-  :type 'string
-  :group 'idris-repl)
-
-(defcustom idris-repl-history-size 200
-  "*Maximum number of lines for persistent REPL history."
-  :type 'integer
-  :group 'idris-repl)
-
-(defcustom idris-repl-history-file-coding-system
-  'utf-8-unix
-  "*The coding system for the history file."
-  :type 'symbol
-  :group 'idris-repl)
 
 (defvar idris-prompt-string "Idris"
   "The prompt for the user")
@@ -314,26 +277,6 @@ Invokes `idris-repl-mode-hook'."
             (insert-before-markers "\n")
             (set-marker idris-output-end (1- (point)))))))
     (idris-repl-show-maximum-output)))
-
-(defun idris-repl-semantic-text-props (highlighting)
-  (cl-flet ((get-props (props)
-              (let* ((name (assoc :name props))
-                     (implicit (assoc :implicit props))
-                     (decor (assoc :decor props))
-                     (implicit-face (if (and implicit (equal (cadr implicit) :True))
-                                        '(idris-semantic-implicit-face)
-                                      nil))
-                     (decor-face (if decor
-                                     (cdr (assoc (cadr decor)
-                                                 '((:type idris-semantic-type-face)
-                                                   (:data idris-semantic-data-face)
-                                                   (:function idris-semantic-function-face)
-                                                   (:bound idris-semantic-bound-face))))
-                                          nil)))
-                (list 'help-echo (if name (cadr name) "")
-                      'face (append implicit-face decor-face)))))
-    (cl-loop for (start length meta) in highlighting
-             collecting (list start length (get-props meta)))))
 
 (defun idris-repl-insert-result (string &optional highlighting)
   "Inserts STRING and marks it as evaluation result"

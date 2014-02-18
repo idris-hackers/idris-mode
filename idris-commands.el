@@ -24,6 +24,7 @@
 ;; Boston, MA 02111-1307, USA.
 
 (require 'idris-core)
+(require 'idris-settings)
 (require 'inferior-idris)
 (require 'idris-repl)
 (require 'idris-warnings)
@@ -31,6 +32,7 @@
 (require 'idris-info)
 (require 'idris-log)
 (require 'idris-warnings-tree)
+(require 'cl-lib)
 
 (defvar-local idris-buffer-dirty-p t
   "An Idris buffer is dirty if there have been modifications since it was last loaded")
@@ -193,9 +195,9 @@
 
 (defun idris-metavar-to-snippet (str)
   "Replace metavariables with yasnippet snippets"
-  (lexical-let ((n 0))
+  (let ((n 0))
     (cl-flet ((to-snippet-param (metavar)
-                 (incf n)
+                 (cl-incf n)
                  (if (string= metavar "(_)")
                      (format "(${%s:_})" n)
                    (format "${%s:%s}" n metavar))))
@@ -249,10 +251,10 @@ already loaded, as a buffer awaiting completion is probably not
 type-correct, so loading will fail."
   (if (not idris-process)
       nil
-    (destructuring-bind (identifier start end) (idris-identifier-backwards-from-point)
+    (cl-destructuring-bind (identifier start end) (idris-identifier-backwards-from-point)
       (when identifier
         (let ((result (car (idris-eval `(:repl-completions ,identifier)))))
-          (destructuring-bind (completions _partial) result
+          (cl-destructuring-bind (completions _partial) result
             (if (null completions)
                 nil
               (list start end completions))))))))
@@ -261,5 +263,23 @@ type-correct, so loading will fail."
   "Insert _|_ at point"
   (interactive)
   (insert "_|_"))
+
+(defun idris-kill-buffers ()
+  (idris-warning-reset-all)
+  (setq idris-currently-loaded-buffer nil)
+  ; not killing :events since it it tremendously useful for debuging
+  (let ((bufs (list :repl :proof-obligations :proof-shell :proof-script :log :info :notes)))
+    (dolist (b bufs) (idris-kill-buffer b))))
+
+(defun idris-quit ()
+  (interactive)
+  (let* ((pbufname (idris-buffer-name :process))
+         (pbuf (get-buffer pbufname)))
+    (if pbuf
+        (progn
+          (kill-buffer pbuf)
+          (unless (get-buffer pbufname) (idris-kill-buffers))
+          (setq idris-rex-continuations '()))
+      (idris-kill-buffers))))
 
 (provide 'idris-commands)

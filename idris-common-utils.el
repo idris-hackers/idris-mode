@@ -27,7 +27,7 @@
 (require 'cl-lib)
 
 (defun idris-buffer-name (type)
-  (assert (keywordp type))
+  (cl-assert (keywordp type))
   (concat (format "*idris-%s*" (substring (symbol-name type) 1))))
 
 (defun idris-kill-buffer (buffer)
@@ -78,5 +78,52 @@ inserted text (that is, relative to point prior to insertion)."
                   do (add-text-properties (+ ,start begin)
                                           (+ ,start begin length)
                                           props))))))
+
+(defun idris-repl-semantic-text-props (highlighting)
+  (cl-flet ((get-props (props)
+              (let* ((name (assoc :name props))
+                     (implicit (assoc :implicit props))
+                     (decor (assoc :decor props))
+                     (implicit-face (if (and implicit (equal (cadr implicit) :True))
+                                        '(idris-semantic-implicit-face)
+                                      nil))
+                     (decor-face (if decor
+                                     (cdr (assoc (cadr decor)
+                                                 '((:type idris-semantic-type-face)
+                                                   (:data idris-semantic-data-face)
+                                                   (:function idris-semantic-function-face)
+                                                   (:bound idris-semantic-bound-face))))
+                                          nil)))
+                (list 'help-echo (if name (cadr name) "")
+                      'face (append implicit-face decor-face)))))
+    (cl-loop for (start length meta) in highlighting
+             collecting (list start length (get-props meta)))))
+
+;;; Dispatching of events and helpers
+(defmacro destructure-case (value &rest patterns)
+  "Dispatch VALUE to one of PATTERNS.
+A cross between `case' and `destructuring-bind'.
+The pattern syntax is:
+  ((HEAD . ARGS) . BODY)
+The list of patterns is searched for a HEAD `eq' to the car of
+VALUE. If one is found, the BODY is executed with ARGS bound to the
+corresponding values in the CDR of VALUE."
+  (let ((operator (cl-gensym "op-"))
+	(operands (cl-gensym "rand-"))
+	(tmp (cl-gensym "tmp-")))
+    `(let* ((,tmp ,value)
+	    (,operator (car ,tmp))
+	    (,operands (cdr ,tmp)))
+       (case ,operator
+	 ,@(mapcar (lambda (clause)
+                     (if (eq (car clause) t)
+                         `(t ,@(cdr clause))
+                       (cl-destructuring-bind ((op &rest rands) &rest body) clause
+                         `(,op (destructuring-bind ,rands ,operands
+                                 . ,body)))))
+		   patterns)
+	 ,@(if (eq (caar (last patterns)) t)
+	       '()
+	     `((t (error "ELISP destructure-case failed: %S" ,tmp))))))))
 
 (provide 'idris-common-utils)
