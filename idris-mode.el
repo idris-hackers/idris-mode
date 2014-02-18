@@ -17,6 +17,7 @@
 ;;; Code:
 
 (require 'idris-core)
+(require 'idris-settings)
 (require 'idris-syntax)
 (require 'idris-indentation)
 (require 'idris-repl)
@@ -24,48 +25,6 @@
 (require 'idris-warnings)
 (require 'idris-common-utils)
 
-(defgroup idris nil "Idris mode" :prefix 'idris :group 'languages)
-
-(defcustom idris-interpreter-path "idris"
-  "The path to the Idris interpreter"
-  :type 'file
-  :group 'idris)
-
-(defcustom idris-interpreter-flags '()
-  "The command line arguments passed to the Idris interpreter"
-  :type '(repeat string)
-  :group 'idris)
-
-(defcustom idris-warnings-printing (list 'warnings-tree)
-  "How to print warnings: tree view ('warnings-tree) in REPL ('warnings-repl)"
-  :group 'idris
-  :type '(repeat symbol)
-  :options '(warnings-tree warnings-repl))
-
-(defface idris-semantic-type-face
-  '((t (:foreground "blue")))
-  "The face to be used to highlight types"
-  :group 'idris-faces)
-
-(defface idris-semantic-data-face
-  '((t (:foreground "red")))
-  "The face to be used to highlight data and constructors"
-  :group 'idris-faces)
-
-(defface idris-semantic-function-face
-  '((t (:foreground "green")))
-  "The face to be used to highlight defined functions"
-  :group 'idris-faces)
-
-(defface idris-semantic-bound-face
-  '((t (:foreground "purple")))
-  "The face to be used to highlight bound variables"
-  :group 'idris-faces)
-
-(defface idris-semantic-implicit-face
-  '((t (:slant italic)))
-  "The face to be used to highlight implicit arguments"
-  :group 'idris-faces)
 
 (defvar idris-mode-map
   (let ((map (make-sparse-keymap)))
@@ -97,14 +56,6 @@
     ["Customize idris-mode" (customize-group 'idris) t]
     ))
 
-(defcustom idris-mode-hook '(turn-on-idris-indentation)
-  "Hook to run upon entering Idris mode."
-  :type 'hook
-  :options '(turn-on-idris-indentation))
-
-(defcustom idris-use-yasnippet-expansions t
-  "Use yasnippet if available for completing interactive Idris commands"
-  :type 'boolean)
 
 ;;;###autoload
 (define-derived-mode idris-mode prog-mode "Idris"
@@ -133,24 +84,6 @@ Invokes `idris-mode-hook'."
 ;; Automatically use idris-mode for .idr files.
 ;;;###autoload
 (push '("\\.idr$" . idris-mode) auto-mode-alist)
-
-(defun idris-quit ()
-  (interactive)
-  (let* ((pbufname (idris-buffer-name :process))
-         (pbuf (get-buffer pbufname)))
-    (if pbuf
-        (progn
-          (kill-buffer pbuf)
-          (unless (get-buffer pbufname) (idris-kill-buffers))
-          (setq idris-rex-continuations '()))
-      (idris-kill-buffers))))
-
-(defun idris-kill-buffers ()
-  (idris-warning-reset-all)
-  (setq idris-currently-loaded-buffer nil)
-  ; not killing :events since it it tremendously useful for debuging
-  (let ((bufs (list :repl :proof-obligations :proof-shell :proof-script :log :info :notes)))
-    (dolist (b bufs) (idris-kill-buffer b))))
 
 (provide 'idris-mode)
 ;;; idris-mode.el ends here

@@ -24,6 +24,8 @@
 ;; Boston, MA 02111-1307, USA.
 
 (require 'idris-core)
+(require 'idris-settings)
+(require 'idris-common-utils)
 (require 'pp)
 (require 'cl-lib)
 (require 'idris-events)
@@ -133,7 +135,7 @@
   (let* ((length (idris-decode-length))
          (start (+ 6 (point)))
          (end (+ start length)))
-    (assert (plusp length))
+    (cl-assert (plusp length))
     (prog1 (save-restriction
              (narrow-to-region start end)
              (read (current-buffer)))
@@ -164,34 +166,6 @@
       (prin1 sexp (current-buffer))
       (buffer-string))))
 
-
-;;; Dispatching of events and helpers
-(defmacro destructure-case (value &rest patterns)
-  "Dispatch VALUE to one of PATTERNS.
-A cross between `case' and `destructuring-bind'.
-The pattern syntax is:
-  ((HEAD . ARGS) . BODY)
-The list of patterns is searched for a HEAD `eq' to the car of
-VALUE. If one is found, the BODY is executed with ARGS bound to the
-corresponding values in the CDR of VALUE."
-  (let ((operator (cl-gensym "op-"))
-	(operands (cl-gensym "rand-"))
-	(tmp (cl-gensym "tmp-")))
-    `(let* ((,tmp ,value)
-	    (,operator (car ,tmp))
-	    (,operands (cdr ,tmp)))
-       (case ,operator
-	 ,@(mapcar (lambda (clause)
-                     (if (eq (car clause) t)
-                         `(t ,@(cdr clause))
-                       (destructuring-bind ((op &rest rands) &rest body) clause
-                         `(,op (destructuring-bind ,rands ,operands
-                                 . ,body)))))
-		   patterns)
-	 ,@(if (eq (caar (last patterns)) t)
-	       '()
-	     `((t (error "ELISP destructure-case failed: %S" ,tmp))))))))
-
 (defvar idris-rex-continuations '()
   "List of (ID . FUNCTION) continuations waiting for RPC results.")
 
@@ -214,7 +188,7 @@ corresponding values in the CDR of VALUE."
                       (funcall (cdr rec) value))
                  (t (error "Unexpected reply: %S %S" id value))))))))
 
-(defmacro* idris-rex ((&rest saved-vars) (sexp) &rest continuations)
+(cl-defmacro idris-rex ((&rest saved-vars) (sexp) &rest continuations)
   "(idris-rex (VAR ...) (SEXP) CLAUSES ...)
 
 Remote EXecute SEXP.
