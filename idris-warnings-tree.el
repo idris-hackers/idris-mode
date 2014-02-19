@@ -73,6 +73,7 @@
     (define-key map (kbd "<mouse-2>") 'idris-compiler-notes-default-action-or-show-details/mouse)
     (define-key map (kbd "q") 'idris-notes-quit)
     (define-key map (kbd "C-c C-t") 'idris-type-at-point)
+    (define-key map (kbd "C-c C-d") 'idris-type-at-point)
     map)
   "Keymap used in Idris Compiler Notes mode.")
 

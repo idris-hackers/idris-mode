@@ -36,6 +36,7 @@
     (suppress-keymap map) ; remove the self-inserting char commands
     (define-key map (kbd "q") 'idris-info-quit)
     (define-key map (kbd "C-c C-t") 'idris-type-at-point)
+    (define-key map (kbd "C-c C-d") 'idris-docs-at-point)
     map))
 
 (easy-menu-define idris-info-mode-menu idris-info-mode-map

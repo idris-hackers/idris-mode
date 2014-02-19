@@ -150,6 +150,17 @@ compiler-annotated output. Does not return a line number."
              (formatting (cdr ty)))
       (idris-show-info (format "%s" result) formatting)))))
 
+(defun idris-docs-at-point (thing)
+  "Display the internal documentation for the name at point, considered as a global variable"
+  (interactive "P")
+  (let ((name (if thing (read-string "Docs: ")
+                (idris-name-at-point))))
+    (when name
+      (let* ((ty (idris-eval `(:docs-for ,name)))
+             (result (car ty))
+             (formatting (cdr ty)))
+      (idris-show-info (format "%s" result) formatting)))))
+
 (defun idris-case-split ()
   "Case split the pattern variable at point"
   (interactive)
