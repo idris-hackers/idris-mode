@@ -123,20 +123,28 @@
       (1+ (count-lines 1 (point))))))
 
 (defun idris-thing-at-point ()
-  "Return the line number and name at point"
+  "Return the line number and name at point. Use this in Idris source buffers."
   (let ((name (symbol-at-point))
         (line (idris-get-line-num)))
     (if name
         (cons (substring-no-properties (symbol-name name)) line)
       (error "Nothing identifiable under point"))))
 
+(defun idris-name-at-point ()
+  "Return the name at point, taking into account semantic
+annotations. Use this in Idris source buffers or in
+compiler-annotated output. Does not return a line number."
+  (let ((ref (get-text-property (point) 'idris-ref)))
+    (if (null ref)
+        (car (idris-thing-at-point))
+      ref)))
+
 (defun idris-type-at-point (thing)
   "Display the type of the name at point, considered as a global variable"
   (interactive "P")
   (let ((name (if thing (read-string "Check: ")
-                (car (idris-thing-at-point)))))
+                (idris-name-at-point))))
     (when name
-      (if thing (idris-ensure-process-and-repl-buffer) (idris-load-file-sync))
       (let* ((ty (idris-eval `(:type-of ,name)))
              (result (car ty))
              (formatting (cdr ty)))
