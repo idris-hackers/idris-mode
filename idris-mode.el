@@ -30,9 +30,10 @@
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-l") 'idris-load-file)
     (define-key map (kbd "C-c C-t") 'idris-type-at-point)
+    (define-key map (kbd "C-c C-d") 'idris-docs-at-point)
     (define-key map (kbd "C-c C-c") 'idris-case-split)
     (define-key map (kbd "C-c C-m") 'idris-add-missing)
-    (define-key map (kbd "C-c C-d") 'idris-add-clause)
+    (define-key map (kbd "C-c C-s") 'idris-add-clause)
     (define-key map (kbd "C-c C-w") 'idris-make-with-block)
     (define-key map (kbd "C-c C-a") 'idris-proof-search)
     (define-key map (kbd "C-c _") 'idris-insert-bottom)
@@ -52,6 +53,7 @@
     ["Add with block" idris-make-with-block t]
     ["Attempt to solve metavariable" idris-proof-search t]
     ["Display type" idris-type-at-point t]
+    ["Get documentation" idris-docs-at-point t]
     "-----------------"
     ["Customize idris-mode" (customize-group 'idris) t]
     ))

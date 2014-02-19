@@ -122,6 +122,8 @@
     (define-key map (kbd "<C-up>") 'idris-repl-backward-history)
     (define-key map (kbd "M-n") 'idris-repl-forward-history)
     (define-key map (kbd "<C-down>") 'idris-repl-forward-history)
+    (define-key map (kbd "C-c C-t") 'idris-type-at-point)
+    (define-key map (kbd "C-c C-d") 'idris-docs-at-point)
     map)
   "Keymap used in Idris REPL mode.")
 
