@@ -94,8 +94,13 @@ inserted text (that is, relative to point prior to insertion)."
                                                    (:function idris-semantic-function-face)
                                                    (:bound idris-semantic-bound-face))))
                                           nil)))
-                (list 'help-echo (if name (cadr name) "")
-                      'face (append implicit-face decor-face)))))
+                `(,@(if name
+                        (append `(help-echo ,(cadr name))
+                                (if (not (equal decor :bound))
+                                    `(idris-ref ,(cadr name))
+                                  nil))
+                      nil)
+                  face ,(append implicit-face decor-face)))))
     (cl-loop for (start length meta) in highlighting
              collecting (list start length (get-props meta)))))
 
