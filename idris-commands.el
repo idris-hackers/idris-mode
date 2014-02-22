@@ -218,11 +218,11 @@ compiler-annotated output. Does not return a line number."
 (defun idris-metavar-to-snippet (str)
   "Replace metavariables with yasnippet snippets"
   (let ((n 0))
-    (cl-flet ((to-snippet-param (metavar)
-                 (cl-incf n)
-                 (if (string= metavar "(_)")
-                     (format "(${%s:_})" n)
-                   (format "${%s:%s}" n metavar))))
+    (let ((to-snippet-param (lambda (metavar)
+                              (cl-incf n)
+                              (if (string= metavar "(_)")
+                                  (format "(${%s:_})" n)
+                                (format "${%s:%s}" n metavar)))))
       (replace-regexp-in-string "\\?[a-zA-Z0-9_]+\\|(_)" #'to-snippet-param str))))
 
 (defun idris-proof-search (hints)
