@@ -154,12 +154,14 @@
            (3 font-lock-comment-delimiter-face))
          ;; TODO: this doesn't let you do newlines
          ;; Documentation comments.
-         ("\\(--\\s-*|\\)\\(.*\\)\\(\n\\(--\\)\\(.*\\)\\)*"
-           (1 font-lock-comment-delimiter-face)
-           (2 font-lock-doc-face)
-           (4 font-lock-comment-delimiter-face)
-           (5 font-lock-doc-face))
-         ;; Ordinary comments.
+         ("^\\s-*\\(|||\\)\\(.+\\)$"
+          (1 font-lock-comment-delimiter-face)
+          (2 font-lock-doc-face))
+         ("^\\s-*\\(|||\\)\\s-*\\(@\\)\\s-*\\(\\sw+\\)"
+          (1 font-lock-comment-delimiter-face t)
+          (2 font-lock-comment-delimiter-face t)
+          (3 'idris-parameter-face t))
+          ;; Ordinary comments.
          ("\\(--\\)\s*\\(.*\\)"
            (1 font-lock-comment-delimiter-face)
            (2 font-lock-comment-face))
