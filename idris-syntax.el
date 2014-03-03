@@ -226,6 +226,9 @@
          ("\\?[a-zA-Z_]\\w*" . 'idris-metavariable-face)
          ;; Identifiers
          ("[a-zA-Z_]\\w*" . 'idris-identifier-face)
+         ;; Scary stuff
+         (,(regexp-opt '("believe_me" "really_believe_me" "assert_total" "assert_smaller" "prim__believe_me"))
+          0 'idris-unsafe-face t)
          ;; TODO: operator definitions.
          ;; TODO: let ... in ...
          )))
