@@ -154,12 +154,14 @@
            (3 font-lock-comment-delimiter-face))
          ;; TODO: this doesn't let you do newlines
          ;; Documentation comments.
-         ("\\(--\\s-*|\\)\\(.*\\)\\(\n\\(--\\)\\(.*\\)\\)*"
-           (1 font-lock-comment-delimiter-face)
-           (2 font-lock-doc-face)
-           (4 font-lock-comment-delimiter-face)
-           (5 font-lock-doc-face))
-         ;; Ordinary comments.
+         ("^\\s-*\\(|||\\)\\(.+\\)$"
+          (1 font-lock-comment-delimiter-face)
+          (2 font-lock-doc-face))
+         ("^\\s-*\\(|||\\)\\s-*\\(@\\)\\s-*\\(\\sw+\\)"
+          (1 font-lock-comment-delimiter-face t)
+          (2 font-lock-comment-delimiter-face t)
+          (3 'idris-parameter-face t))
+          ;; Ordinary comments.
          ("\\(--\\)\s*\\(.*\\)"
            (1 font-lock-comment-delimiter-face)
            (2 font-lock-comment-face))
@@ -224,6 +226,9 @@
          ("\\?[a-zA-Z_]\\w*" . 'idris-metavariable-face)
          ;; Identifiers
          ("[a-zA-Z_]\\w*" . 'idris-identifier-face)
+         ;; Scary stuff
+         (,(regexp-opt '("believe_me" "really_believe_me" "assert_total" "assert_smaller" "prim__believe_me"))
+          0 'idris-unsafe-face t)
          ;; TODO: operator definitions.
          ;; TODO: let ... in ...
          )))
