@@ -80,43 +80,43 @@ inserted text (that is, relative to point prior to insertion)."
                                           props))))))
 
 (defun idris-repl-semantic-text-props (highlighting)
-  (cl-loop for (start length meta) in highlighting
-           collecting (list start length ((lambda (props)
-                                            (let* ((name (assoc :name props))
-                                                   (implicit (assoc :implicit props))
-                                                   (decor (assoc :decor props))
-                                                   (unique-val (cl-gensym)) ; HACK to stop consecutive mouse-faces from interfering
-                                                   (implicit-face (if (and implicit (equal (cadr implicit) :True))
-                                                                      '(idris-semantic-implicit-face)
-                                                                    nil))
-                                                   (decor-face (if decor
-                                                                   (cdr (assoc (cadr decor)
-                                                                               '((:type idris-semantic-type-face)
-                                                                                 (:data idris-semantic-data-face)
-                                                                                 (:function idris-semantic-function-face)
-                                                                                 (:bound idris-semantic-bound-face))))
-                                                                 nil))
-                                                   (mousable-face (if (and (not (equal (cadr decor) :bound)) ;non-bound becomes clickable
-                                                                           name)
-                                                                      `((:inherit ,decor-face :box t :hack ,unique-val))
-                                                                    nil))
-                                                   (mouse-help (if (and (not (equal (cadr decor) :bound)) ;non-bound becomes clickable
-                                                                        name)
-                                                                   "\n<mouse-3> context menu"
-                                                                 "")))
-
-                                              `(,@(if name
-                                                      (append `(help-echo (concat ,(cadr name) ,mouse-help))
-                                                              (if (and (not (equal (cadr decor) :bound))
-                                                                       name)
-                                                                  `(idris-ref ,(cadr name)
-                                                                              keymap ,(idris-make-ref-menu-keymap (cadr name)))
-                                                                nil))
-                                                    nil)
-                                                ,@(if mousable-face
-                                                      (list 'mouse-face mousable-face)
-                                                    ())
-                                                face ,(append implicit-face decor-face)))) meta))))
+  (cl-loop for (start length props) in highlighting
+           collecting (list start
+                            length
+                            (let* ((name (assoc :name props))
+                                   (implicit (assoc :implicit props))
+                                   (decor (assoc :decor props))
+                                   (unique-val (cl-gensym)) ; HACK to stop consecutive mouse-faces from interfering
+                                   (implicit-face (if (and implicit (equal (cadr implicit) :True))
+                                                      '(idris-semantic-implicit-face)
+                                                    nil))
+                                   (decor-face (if decor
+                                                   (cdr (assoc (cadr decor)
+                                                               '((:type idris-semantic-type-face)
+                                                                 (:data idris-semantic-data-face)
+                                                                 (:function idris-semantic-function-face)
+                                                                 (:bound idris-semantic-bound-face))))
+                                                 nil))
+                                   (mousable-face (if (and (not (equal (cadr decor) :bound)) ;non-bound becomes clickable
+                                                           name)
+                                                      `((:inherit ,decor-face :box t :hack ,unique-val))
+                                                    nil))
+                                   (mouse-help (if (and (not (equal (cadr decor) :bound)) ;non-bound becomes clickable
+                                                        name)
+                                                   "\n<mouse-3> context menu"
+                                                 "")))
+                              `(,@(if name
+                                      (append `(help-echo (concat ,(cadr name) ,mouse-help))
+                                              (if (and (not (equal (cadr decor) :bound))
+                                                       name)
+                                                  `(idris-ref ,(cadr name)
+                                                              keymap ,(idris-make-ref-menu-keymap (cadr name)))
+                                                nil))
+                                    nil)
+                                ,@(if mousable-face
+                                      (list 'mouse-face mousable-face)
+                                    ())
+                                face ,(append implicit-face decor-face))))))
 
 ;;; Dispatching of events and helpers
 (defmacro destructure-case (value &rest patterns)
