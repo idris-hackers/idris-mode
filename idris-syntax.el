@@ -140,10 +140,10 @@
 
 (defconst idris-keywords
   '("abstract" "attack" "case" "compute" "do" "dsl" "else" "exact" "focus" "if"
-    "import" "in" "infix" "infixl" "infixr" "instance" "intros" "module" "mutual"
-    "namespace" "of" "let" "parameters" "partial" "pattern" "prefix" "private"
-    "public" "refine" "rewrite" "solve" "syntax" "term" "then" "total" "trivial"
-    "try" "using" "where" "with"))
+    "implicit" "import" "in" "infix" "infixl" "infixr" "instance" "intros" "module"
+    "mutual" "namespace" "of" "let" "parameters" "partial" "pattern" "prefix"
+    "private" "public" "refine" "rewrite" "solve" "syntax" "term" "then" "total"
+    "trivial" "try" "using" "where" "with"))
 
 (defconst idris-font-lock-defaults
     `('(
