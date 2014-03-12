@@ -84,7 +84,7 @@ or the old format, used by Idris up to 0.9.10.1, which does not contain a column
          (idris-real-warning-overlay filename lineno 0 message)))
     (4 (destructuring-bind (filename lineno col message) warning
          (idris-real-warning-overlay filename lineno col message)))
-    (5 (destructuring-bind (filename lineno col message highlighting) warning
+    (5 (destructuring-bind (filename (lineno col) _  message highlighting) warning
          (idris-real-warning-overlay filename lineno col message highlighting)))))
 
 (defun idris-real-warning-overlay (filename lineno col message &optional spans)
