@@ -78,14 +78,25 @@
   "Add a compiler warning to the buffer as an overlay.
 May merge overlays, if there's already one in the same location.
 WARNING is of form (filename linenumber column message &optional highlighting-spans)
-or the old format, used by Idris up to 0.9.10.1, which does not contain a column"
+or the old format, used by Idris up to 0.9.10.1, which does not contain a column
+Since March 10th 2014 (commit 7437ebe5052250630ca52117dd50dbf3187807d5) - Idris 0.9.11.2
+WARNING is of form (filename (startline startcolumn) (endline endcolumn) message &optional highlighting-spans)
+"
   (case (safe-length warning)
     (3 (destructuring-bind (filename lineno message) warning
          (idris-real-warning-overlay filename lineno 0 message)))
     (4 (destructuring-bind (filename lineno col message) warning
          (idris-real-warning-overlay filename lineno col message)))
-    (5 (destructuring-bind (filename lineno col message highlighting) warning
-         (idris-real-warning-overlay filename lineno col message highlighting)))))
+    (5 (destructuring-bind (filename sl1 sl2 message highlighting) warning
+         (if (listp sl1)
+             (progn
+               (assert (listp sl2))
+               (assert (eq (safe-length sl1) 2))
+               (assert (eq (safe-length sl2) 2))
+               (idris-real-warning-overlay filename (nth 0 sl1) (nth 1 sl1) message highlighting))
+           (assert (integerp sl1))
+           (assert (integerp sl2))
+           (idris-real-warning-overlay filename sl1 sl2 message highlighting))))))
 
 (defun idris-real-warning-overlay (filename lineno col message &optional spans)
   "Add the compiler warning to the buffer for real!"
