@@ -259,6 +259,34 @@ There are keyboard shortcuts in the \emph{*idris-proof-script*} buffer available
 Furthermore, tab completion is available there as well as in the proof shell.
 The proof script highlights the parts which have been processed by Idris.
 
+\section{Highlighting}
+Idris mode supports highlighting the output from Idris.
+In reality, this highlighting is controlled by the Idris compiler.
+Some of the return forms from Idris support an optional extra parameter: a list mapping spans of text to metadata about that text.
+Idris mode then uses this list both to highlight the displayed output and to enable richer interaction by having more metadata present.
+
+A particular semantic span is a three element list.
+The first element of the list is the index at which the span begins, the second element is the number of characters included in the span, and the third is the semantic data itself.
+The semantic data is a list of lists.
+The head of each list is a key that denotes what kind of metadata is in the list, and the tail is the metadata itself.
+Presently, the following keys are available:
+\begin{description}
+\item[name] gives a reference to the fully-qualified Idris name
+\item[implicit] provides a Boolean value that is True if the region is the name of an implicit argument
+\item[decor] describes the category of name, which can be ``type'', ``function'', ``data'' or ``bound''.
+\item[source-loc] states that the region refers to a source code location. Its body is a collection of key-value pairs, with the following possibilities:
+  \begin{description}
+  \item[filename] provides the filename
+  \item[start] provides the line and column that the source location starts at as a two-element tail
+  \item[end]  provides the line and column that the source location ends at as a two-element tail
+  \end{description}
+\item[text-formatting] provides an attribute of formatted text. This is for use with natural-language text, not code, and is presently emitted only from inline documentation. The potential values are ``bold'', ``italic'', and ``underline''.
+
+\end{description}
+
+The spans emitted by Idris may completely contain another span, but they will never overlap non-hierarchically. That is, one span may be either completely outside the others or contained entirely within another span.
+Presently, spans only overlap in output from documentation strings, but this may change in the future.
+
 \section{Conclusion}
 The ideslave mode provides a structured output of the Idris compiler.
 This is especially useful for interfacing Idris to use for interactive development.
