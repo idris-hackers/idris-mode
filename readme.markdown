@@ -35,6 +35,9 @@ Customize `inferior-idris-path` if idris is not on your default path.
 
 [Idris]: http://www.idris-lang.org
 
+## Colors and fonts
+Idris mode displays output from the Idris compiler with full semantic highlighting. It is quite possible that this is ugly in your color scheme. If that is the case, you can use `M-x customize-group RET idris-faces RET` to modify them.
+
 ## Interactive Editing
 
 ![Interactive editing](http://itu.dk/people/drc/idris-mode.gif)
