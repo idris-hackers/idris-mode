@@ -54,7 +54,9 @@
     ["Add with block" idris-make-with-block t]
     ["Attempt to solve metavariable" idris-proof-search t]
     ["Display type" idris-type-at-point t]
+    "-----------------"
     ["Get documentation" idris-docs-at-point t]
+    ["Apropos" idris-apropos t]
     "-----------------"
     ["Customize idris-mode" (customize-group 'idris) t]
     ))
