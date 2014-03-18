@@ -90,6 +90,14 @@ inserted text (that is, relative to point prior to insertion)."
                                    (implicit-face (if (and implicit (equal (cadr implicit) :True))
                                                       '(idris-semantic-implicit-face)
                                                     nil))
+                                   (text-face (pcase (assoc :text-formatting props)
+                                                (`(:text-formatting :bold)
+                                                 'bold)
+                                                (`(:text-formatting :italic)
+                                                 'italic)
+                                                (`(:text-formatting :underline)
+                                                 't)
+                                                (_ '())))
                                    (decor-face (if decor
                                                    (cdr (assoc (cadr decor)
                                                                '((:type idris-semantic-type-face)
@@ -116,7 +124,7 @@ inserted text (that is, relative to point prior to insertion)."
                                 ,@(if mousable-face
                                       (list 'mouse-face mousable-face)
                                     ())
-                                face ,(append implicit-face decor-face))))))
+                                face ,(cons text-face (append implicit-face decor-face)))))))
 
 ;;; Dispatching of events and helpers
 (defmacro destructure-case (value &rest patterns)
