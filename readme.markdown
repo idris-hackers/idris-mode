@@ -49,6 +49,7 @@ The following commands are available when there is an inferior Idris process (wh
 * `C-c C-t`: Get the type for the identifier under point. A prefix argument prompts for the name.
 * `C-c C-d`: Get the documentation for the identifier under point. A prefix argument prompts for the name.
 * `C-c C-w`: Add a with block for the pattern-match clause under point
+* `C-c C-h a`: Search names, types, and docstrings for a given string.
 
 ## Completion
 
