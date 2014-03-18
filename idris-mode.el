@@ -36,6 +36,7 @@
     (define-key map (kbd "C-c C-s") 'idris-add-clause)
     (define-key map (kbd "C-c C-w") 'idris-make-with-block)
     (define-key map (kbd "C-c C-a") 'idris-proof-search)
+    (define-key map (kbd "C-c C-h C-a") 'idris-apropos)
     (define-key map (kbd "C-c _") 'idris-insert-bottom)
     map)
   "Keymap used in Idris mode.")
@@ -53,7 +54,9 @@
     ["Add with block" idris-make-with-block t]
     ["Attempt to solve metavariable" idris-proof-search t]
     ["Display type" idris-type-at-point t]
+    "-----------------"
     ["Get documentation" idris-docs-at-point t]
+    ["Apropos" idris-apropos t]
     "-----------------"
     ["Customize idris-mode" (customize-group 'idris) t]
     ))

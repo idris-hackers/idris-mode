@@ -155,6 +155,10 @@ compiler-annotated output. Does not return a line number."
     (when name
       (idris-info-for-name :type-of name))))
 
+(defun idris-apropos (what)
+  "Look up something in names, type signatures, and docstrings"
+  (interactive "sSearch Idris docs for: ")
+  (idris-info-for-name :apropos what))
 
 (defun idris-docs-at-point (thing)
   "Display the internal documentation for the name at point, considered as a global variable"
