@@ -284,6 +284,9 @@ Presently, the following keys are available:
 
 \end{description}
 
+The spans emitted by Idris may completely contain another span, but they will never overlap non-hierarchically. That is, one span may be either completely outside the others or contained entirely within another span.
+Presently, spans only overlap in output from documentation strings, but this may change in the future.
+
 \section{Conclusion}
 The ideslave mode provides a structured output of the Idris compiler.
 This is especially useful for interfacing Idris to use for interactive development.
