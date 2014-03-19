@@ -103,6 +103,7 @@ inserted text (that is, relative to point prior to insertion)."
                                                                '((:type idris-semantic-type-face)
                                                                  (:data idris-semantic-data-face)
                                                                  (:function idris-semantic-function-face)
+                                                                 (:keyword idris-keyword-face)
                                                                  (:bound idris-semantic-bound-face))))
                                                  nil))
                                    (mousable-face (if (and (not (equal (cadr decor) :bound)) ;non-bound becomes clickable
