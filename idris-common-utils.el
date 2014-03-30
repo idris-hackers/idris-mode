@@ -107,6 +107,12 @@ inserted text (that is, relative to point prior to insertion)."
                                                                  (:metavar idris-metavariable-face)
                                                                  (:bound idris-semantic-bound-face))))
                                                  nil))
+                                   (doc-overview (pcase (assoc :doc-overview props)
+                                                   (`(:doc-overview ,docs) (concat "\n" docs))
+                                                   (_ "")))
+                                   (type (pcase (assoc :type props)
+                                           (`(:type ,ty) (concat " : " ty))
+                                           (_ "")))
                                    (mousable-face (if (and (not (equal (cadr decor) :bound)) ;non-bound becomes clickable
                                                            name)
                                                       `((:inherit ,decor-face :box t :hack ,unique-val))
@@ -116,7 +122,10 @@ inserted text (that is, relative to point prior to insertion)."
                                                    "\n<mouse-3> context menu"
                                                  "")))
                               `(,@(if name
-                                      (append `(help-echo (concat ,(cadr name) ,mouse-help))
+                                      (append `(help-echo (concat ,(cadr name)
+                                                                  ,type
+                                                                  ,doc-overview
+                                                                  ,mouse-help))
                                               (if (and (not (equal (cadr decor) :bound))
                                                        name)
                                                   `(idris-ref ,(cadr name)
