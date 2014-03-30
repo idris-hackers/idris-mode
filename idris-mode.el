@@ -58,6 +58,15 @@
     ["Get documentation" idris-docs-at-point t]
     ["Apropos" idris-apropos t]
     "-----------------"
+    ("Interpreter options" :active idris-process
+     ["Show implicits" (idris-set-option :show-implicits t)
+      :visible (not (idris-get-option :show-implicits))]
+     ["Hide implicits" (idris-set-option :show-implicits nil)
+      :visible (idris-get-option :show-implicits)]
+     ["Show error context" (idris-set-option :error-context t)
+      :visible (not (idris-get-option :error-context))]
+     ["Hide error context" (idris-set-option :error-context nil)
+      :visible (idris-get-option :error-context)])
     ["Customize idris-mode" (customize-group 'idris) t]
     ))
 

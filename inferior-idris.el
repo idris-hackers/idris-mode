@@ -266,5 +266,17 @@ versions cannot deal with that."
              (error "Idris process exited unexpectedly"))
            (accept-process-output idris-process 0.1)))))))
 
+(defun idris-get-options ()
+  (idris-eval '(:get-options)))
+
+(defun idris-get-option (opt)
+  (let ((val (assoc opt (car (idris-get-options)))))
+    (if val
+        (equal (cadr val) :True)
+      (error "Unknown Idris option %s" opt))))
+
+(defun idris-set-option (opt b)
+  (let ((bi (if b :True :False)))
+    (idris-eval `(:set-option ,opt ,bi))))
 
 (provide 'inferior-idris)
