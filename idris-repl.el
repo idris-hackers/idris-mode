@@ -174,7 +174,14 @@ Invokes `idris-repl-mode-hook'."
     ((:warning output _target)
      (when (member 'warnings-repl idris-warnings-printing)
        (idris-repl-write-string (format "Error: %s line %d (col %d):\n%s" (nth 0 output) (nth 1 output) (if (eq (safe-length output) 3) 0 (nth 2 output)) (car (last output))))))
+    ((:run-program file _target)
+     (idris-execute-compiled-program file))
     (t nil)))
+
+(defun idris-execute-compiled-program (filename)
+  (let* ((name (concat "idris-" filename))
+         (buffer (make-comint-in-buffer name nil filename)))
+    (pop-to-buffer buffer)))
 
 (defun idris-repl-update-banner ()
   (idris-repl-insert-banner)

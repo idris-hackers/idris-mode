@@ -45,6 +45,7 @@
   "Menu for the Idris major mode"
   `("Idris"
     ["Load file" idris-load-file t]
+    ["Compile and execute" idris-compile-and-execute]
     ["View compiler log" idris-view-compiler-log (get-buffer idris-log-buffer-name)]
     ["Quit inferior idris process" idris-quit t]
     "-----------------"

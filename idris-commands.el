@@ -219,6 +219,13 @@ compiler-annotated output. Does not return a line number."
         (yas-expand-snippet snippet nil nil '((yas-indent-line nil))))
     (insert str)))
 
+(defun idris-compile-and-execute ()
+  "Execute the program in the current buffer"
+  (interactive)
+  (idris-load-file-sync)
+  (idris-eval '(:interpret ":exec")))
+
+
 (defun idris-metavar-to-snippet (str)
   "Replace metavariables with yasnippet snippets"
   (lexical-let ((n 0))
