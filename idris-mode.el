@@ -39,6 +39,9 @@
     (define-key map (kbd "C-c C-a") 'idris-proof-search)
     (define-key map (kbd "C-c C-h C-a") 'idris-apropos)
     (define-key map (kbd "C-c _") 'idris-insert-bottom)
+    (define-key map (kbd "C-c b") 'idris-ipkg-build)
+    (define-key map (kbd "C-c c") 'idris-ipkg-clean)
+    (define-key map (kbd "C-c i") 'idris-ipkg-install)
     map)
   "Keymap used in Idris mode.")
 
