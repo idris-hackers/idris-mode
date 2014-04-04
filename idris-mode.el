@@ -24,6 +24,7 @@
 (require 'idris-commands)
 (require 'idris-warnings)
 (require 'idris-common-utils)
+(require 'idris-ipkg-mode)
 
 
 (defvar idris-mode-map
