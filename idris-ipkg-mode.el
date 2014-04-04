@@ -45,6 +45,30 @@
 (defconst idris-ipkg-font-lock-defaults
   `(,idris-ipkg-keywords))
 
+(defun idris-ipkg-find-keyword ()
+  (let ((start nil)
+        (end (point))
+        (failure (list nil nil nil)))
+    (if (idris-is-ident-char-p (char-before))
+        (progn
+          (save-excursion
+            (while (idris-is-ident-char-p (char-before))
+              (backward-char))
+            (setq start (point)))
+          (if start
+              (list (buffer-substring-no-properties start end)
+                    start
+                    end)
+            failure))
+      failure)))
+
+(defun idris-ipkg-complete-keyword ()
+  "Complete the current .ipkg keyword, if possible"
+  (interactive)
+  (cl-destructuring-bind (identifier start end) (idris-ipkg-find-keyword)
+    (when identifier
+      (list start end idris-ipkg-keywords))))
+
 ;;;###autoload
 (define-derived-mode idris-ipkg-mode prog-mode "Idris Pkg"
   "Major mode for Idris package files
@@ -53,7 +77,9 @@ Invokes `idris-ipkg-mode-hook'."
   :group 'idris
   :syntax-table idris-ipkg-syntax-table
   (set (make-local-variable 'font-lock-defaults)
-       idris-ipkg-font-lock-defaults))
+       idris-ipkg-font-lock-defaults)
+  (set (make-local-variable 'completion-at-point-functions)
+       '(idris-ipkg-complete-keyword)))
 
 (push '("\\.ipkg$" . idris-ipkg-mode) auto-mode-alist)
 

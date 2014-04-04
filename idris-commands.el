@@ -253,12 +253,6 @@ compiler-annotated output. Does not return a line number."
             (delete-region start end))
           (idris-insert-or-expand result))))))
 
-(defun idris-is-ident-char-p (ch)
-  (or (and (<= ?a ch) (<= ch ?z))
-      (and (<= ?A ch) (<= ch ?Z))
-      (and (<= ?0 ch) (<= ch ?9))
-      (= ch ?_)))
-
 (defun idris-identifier-backwards-from-point ()
   (let ((identifier-start nil)
         (identifier-end (point))
