@@ -19,6 +19,9 @@
 (require 'idris-core)
 (require 'idris-settings)
 
+
+;;; Faces
+
 (defface idris-ipkg-keyword-face
   '((t (:inherit font-lock-keyword-face)))
   "The face to highlight Idris package keywords"
@@ -28,6 +31,9 @@
   '((t (:inherit font-lock-function-name-face)))
   "The face to highlight the name of the package"
   :group 'idris-faces)
+
+
+;;; Syntax
 
 (defconst idris-ipkg-syntax-table
   (let ((st (make-syntax-table (standard-syntax-table))))
@@ -44,6 +50,9 @@
 
 (defconst idris-ipkg-font-lock-defaults
   `(,idris-ipkg-keywords))
+
+
+;;; Completion
 
 (defun idris-ipkg-find-keyword ()
   (let ((start nil)
@@ -68,6 +77,31 @@
   (cl-destructuring-bind (identifier start end) (idris-ipkg-find-keyword)
     (when identifier
       (list start end idris-ipkg-keywords))))
+
+;;; Finding ipkg files
+
+;; Based on http://www.emacswiki.org/emacs/EmacsTags section "Finding tags files"
+;; That page is GPL, so this is OK to include
+(defun idris-find-file-upwards (suffix)
+  "Recursively searches each parent directory starting from the default-directory.
+looking for a file with name ending in suffix.  Returns the paths
+to the matching files, or nil if not found."
+  (labels
+      ((find-file-r (path)
+         (let* ((parent (file-name-directory path))
+                (matching (directory-files parent t (concat suffix "$"))))
+           (cond
+            (matching matching)
+            ;; The parent of ~ is nil and the parent of / is itself.
+            ;; Thus the terminating condition for not finding the file
+            ;; accounts for both.
+            ((or (null parent) (equal parent (directory-file-name parent))) nil) ; Not found
+            (t (find-file-r (directory-file-name parent))))))) ; Continue
+    (find-file-r default-directory)))
+
+
+
+;;; Mode definition
 
 ;;;###autoload
 (define-derived-mode idris-ipkg-mode prog-mode "Idris Pkg"
