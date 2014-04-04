@@ -57,6 +57,10 @@
     ["Attempt to solve metavariable" idris-proof-search t]
     ["Display type" idris-type-at-point t]
     "-----------------"
+    ["Build package" idris-ipkg-build t]
+    ["Install package" idris-ipkg-install t]
+    ["Clean package" idris-ipkg-clean t]
+    "-----------------"
     ["Get documentation" idris-docs-at-point t]
     ["Apropos" idris-apropos t]
     "-----------------"

@@ -42,9 +42,6 @@
     (modify-syntax-entry ?\\ "/" st)
     st))
 
-(defvar idris-ipkg-mode-keymap
-  (make-sparse-keymap))
-
 (defconst idris-ipkg-keywords
   '("package" "opts" "modules" "sourcedir" "makefile" "objs"))
 
@@ -129,7 +126,8 @@ Invokes `idris-ipkg-build-mode-hook'.")
     (unless dir
       (error "Unable to determine directory for filename '%s'" ipkg-file))
     (let ((default-directory dir)) ; default-directory is a special variable - this starts idris in dir
-      (start-process cmd idris-ipkg-build-buffer-name idris-interpreter-path cmd file)
+      (start-process (concat "idris " cmd)
+                     idris-ipkg-build-buffer-name idris-interpreter-path cmd file)
       (with-current-buffer idris-ipkg-build-buffer-name
         (idris-ipkg-build-mode))
       (pop-to-buffer idris-ipkg-build-buffer-name))))
@@ -175,8 +173,22 @@ Invokes `idris-ipkg-build-mode-hook'.")
   (idris-kill-buffer idris-ipkg-build-buffer-name))
 
 
-
 ;;; Mode definition
+
+(defvar idris-ipkg-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c b") 'idris-ipkg-build)
+    (define-key map (kbd "C-c c") 'idris-ipkg-clean)
+    (define-key map (kbd "C-c i") 'idris-ipkg-install)
+    map)
+  "Keymap used for Idris package mode")
+
+(easy-menu-define idris-ipkg-mode-menu idris-ipkg-mode-map
+  "Menu for Idris package mode"
+  `("IPkg"
+    ["Build package" idris-ipkg-build t]
+    ["Install package" idris-ipkg-install t]
+    ["Clean package" idris-ipkg-clean t]))
 
 ;;;###autoload
 (define-derived-mode idris-ipkg-mode prog-mode "Idris Pkg"
