@@ -86,7 +86,7 @@
   "Recursively searches each parent directory starting from the default-directory.
 looking for a file with name ending in suffix.  Returns the paths
 to the matching files, or nil if not found."
-  (labels
+  (cl-labels
       ((find-file-r (path)
          (let* ((parent (file-name-directory path))
                 (matching (directory-files parent t (concat suffix "$"))))
@@ -98,6 +98,81 @@ to the matching files, or nil if not found."
             ((or (null parent) (equal parent (directory-file-name parent))) nil) ; Not found
             (t (find-file-r (directory-file-name parent))))))) ; Continue
     (find-file-r default-directory)))
+
+(defvar idris-ipkg-build-buffer-name "*idris-build*")
+
+(defvar idris-ipkg-build-mode-map
+  (let ((map (make-keymap)))
+    (suppress-keymap map) ; remove the self-inserting char commands
+    (define-key map (kbd "q") 'idris-ipkg-build-quit)
+    map))
+
+(easy-menu-define idris-ipkg-build-mode-menu idris-ipkg-build-mode-map
+  "Menu for the Idris build mode buffer"
+  `("Idris Building"
+    ["Close Idris build buffer" idris-ipkg-build-quit t]))
+
+(define-derived-mode idris-ipkg-build-mode fundamental-mode "Idris Build"
+  "Major mode used for transient Idris build bufers
+    \\{idris-ipkg-build-mode-map}
+Invokes `idris-ipkg-build-mode-hook'.")
+
+(defun idris-ipkg-command (ipkg-file command)
+  "Run a command on ipkg-file. The command can be build, install, or clean."
+  ;; Idris must have its working directory in the same place as the ipkg file
+  (let ((dir (file-name-directory ipkg-file))
+        (file (file-name-nondirectory ipkg-file))
+        (cmd (cond ((equal command 'build) "--build")
+                    ((equal command 'install) "--install")
+                    ((equal command 'clean) "--clean")
+                    (t (error "Invalid command name %s" command)))))
+    (unless dir
+      (error "Unable to determine directory for filename '%s'" ipkg-file))
+    (let ((default-directory dir)) ; default-directory is a special variable - this starts idris in dir
+      (start-process cmd idris-ipkg-build-buffer-name idris-interpreter-path cmd file)
+      (with-current-buffer idris-ipkg-build-buffer-name
+        (idris-ipkg-build-mode))
+      (pop-to-buffer idris-ipkg-build-buffer-name))))
+
+(defun idris-ipkg-build (ipkg-file)
+  (interactive (list
+                (let ((ipkg-default (idris-find-file-upwards "ipkg")))
+                  (if ipkg-default
+                      (read-file-name "Package file to build: "
+                                      (file-name-directory (car ipkg-default))
+                                      (car ipkg-default)
+                                      t
+                                      (file-name-nondirectory (car ipkg-default)))
+                    (read-file-name "Package file to build: " nil nil nil t)))))
+  (idris-ipkg-command ipkg-file 'build))
+
+(defun idris-ipkg-install (ipkg-file)
+  (interactive (list
+                (let ((ipkg-default (idris-find-file-upwards "ipkg")))
+                  (if ipkg-default
+                      (read-file-name "Package file to install: "
+                                      (file-name-directory (car ipkg-default))
+                                      (car ipkg-default)
+                                      t
+                                      (file-name-nondirectory (car ipkg-default)))
+                    (read-file-name "Package file to install: " nil nil nil t)))))
+  (idris-ipkg-command ipkg-file 'install))
+
+(defun idris-ipkg-clean (ipkg-file)
+  (interactive (list
+                (let ((ipkg-default (idris-find-file-upwards "ipkg")))
+                  (if ipkg-default
+                      (read-file-name "Package file to clean: "
+                                      (file-name-directory (car ipkg-default))
+                                      (car ipkg-default)
+                                      t
+                                      (file-name-nondirectory (car ipkg-default)))
+                    (read-file-name "Package file to clean: " nil nil nil t)))))
+  (idris-ipkg-command ipkg-file 'clean))
+
+(defun idris-ipkg-build-quit ()
+  (interactive)
+  (idris-kill-buffer idris-ipkg-build-buffer-name))
 
 
 
