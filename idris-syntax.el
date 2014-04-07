@@ -139,7 +139,7 @@
     st))
 
 (defconst idris-keywords
-  '("abstract" "attack" "case" "compute" "do" "dsl" "else" "exact" "focus" "if"
+  '("abstract" "attack" "case" "compute" "covering" "do" "dsl" "else" "exact" "focus" "if"
     "implicit" "import" "in" "infix" "infixl" "infixr" "instance" "intros" "module"
     "mutual" "namespace" "of" "let" "parameters" "partial" "pattern" "prefix"
     "private" "public" "refine" "rewrite" "solve" "syntax" "term" "then" "total"
