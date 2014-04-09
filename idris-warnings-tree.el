@@ -158,7 +158,8 @@ Invokes `idris-compiler-notes-mode-hook'.")
   (prefix "" :type string)
   (start-mark nil)
   (end-mark nil)
-  (plist '() :type list))
+  (plist '() :type list)
+  (active-p t :type boolean))
 
 (defun idris-tree-leaf-p (tree)
   (not (idris-tree.kids tree)))
@@ -198,17 +199,20 @@ This is used for labels spanning multiple lines."
 
 (defun idris-tree-insert (tree prefix)
   "Insert TREE prefixed with PREFIX at point."
-  (with-struct (idris-tree. print-fn kids collapsed-p start-mark end-mark) tree
+  (with-struct (idris-tree. print-fn kids collapsed-p start-mark end-mark active-p) tree
     (let ((line-start (line-beginning-position)))
       (setf start-mark (point-marker))
       (idris-tree-insert-decoration tree)
       (funcall print-fn tree)
       (idris-tree-indent-item start-mark (point) (concat prefix "   "))
       (add-text-properties line-start (point)
-        `(idris-tree ,tree
-          mouse-face highlight
-          help-echo ,(concat "<mouse-2> "
-                             (if kids (if collapsed-p "expand" "collapse") "go to source"))))
+        (append `(idris-tree ,tree)
+                (if active-p
+                    `(mouse-face highlight
+                      help-echo ,(concat "<mouse-2> "
+                                         (if kids (if collapsed-p "expand" "collapse")
+                                                  "go to source")))
+                  '())))
       (set-marker-insertion-type start-mark t)
       (when (and kids (not collapsed-p))
         (terpri (current-buffer))
