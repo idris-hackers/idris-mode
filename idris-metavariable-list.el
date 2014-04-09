@@ -1,4 +1,4 @@
-;;; idris-warnings.el --- Mark warnings reported by idris in buffers -*- lexical-binding: t -*-
+;;; idris-metavariable-list.el --- List Idris metavariables in a buffer -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2014 David Raymond Christiansen
 
