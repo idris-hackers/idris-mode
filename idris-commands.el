@@ -32,6 +32,7 @@
 (require 'idris-info)
 (require 'idris-log)
 (require 'idris-warnings-tree)
+(require 'idris-metavariable-list)
 (require 'cl-lib)
 
 (defvar-local idris-buffer-dirty-p t
@@ -66,6 +67,12 @@
     (idris-eval `(:interpret ,(concat ":cd " new-working-directory)))
     (setq idris-process-current-working-directory new-working-directory)))
 
+(defcustom idris-load-file-success-hook '(idris-list-metavariables)
+  "Functions to call when loading a file is successful"
+  :type 'hook
+  :options '(idris-list-metavariables)
+  :group 'idris)
+
 (defun idris-load-file ()
   "Pass the current buffer's file to the inferior Idris process."
   (interactive)
@@ -83,6 +90,7 @@
                             (setq idris-currently-loaded-buffer (current-buffer))
                             (when (member 'warnings-tree idris-warnings-printing)
                               (idris-list-compiler-notes))
+                            (run-hooks 'idris-load-file-success-hook)
                             (message result))
                           (lambda (_condition)
                             (when (member 'warnings-tree idris-warnings-printing)
@@ -291,6 +299,11 @@ type-correct, so loading will fail."
   "Insert _|_ at point"
   (interactive)
   (insert "_|_"))
+
+(defun idris-list-metavariables ()
+  "Get a list of currently-open metavariables"
+  (interactive)
+  (idris-metavariable-list-show (car (idris-eval '(:metavariables 80)))))
 
 (defun idris-kill-buffers ()
   (idris-warning-reset-all)
