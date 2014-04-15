@@ -142,7 +142,7 @@ Invokes `idris-compiler-notes-mode-hook'.")
   item
   highlighting
   (print-fn #'idris-tree-default-printer :type function)
-  (kids '() :type list)
+  (kids '() :type (or list function))
   (collapsed-p nil :type boolean)
   (prefix "" :type string)
   (start-mark nil)
@@ -153,7 +153,7 @@ Invokes `idris-compiler-notes-mode-hook'.")
   (after-button "" :type string))
 
 (defun idris-tree-leaf-p (tree)
-  (not (idris-tree.kids tree)))
+  (null (idris-tree.kids tree)))
 
 (defun idris-tree-default-printer (tree)
   (when (idris-tree.button tree)
@@ -211,9 +211,12 @@ This is used for labels spanning multiple lines."
       (idris-tree-indent-item start-mark (point) (concat prefix "   "))
       (add-text-properties line-start (point) (list 'idris-tree tree))
       (set-marker-insertion-type start-mark t)
-      (when (and kids (not collapsed-p))
-        (terpri (current-buffer))
-        (idris-tree-insert-list kids prefix))
+      (when  (not collapsed-p)
+        (when (functionp kids)
+          (setf kids (funcall kids)))
+        (when kids
+          (terpri (current-buffer))
+          (idris-tree-insert-list kids prefix)))
       (setf (idris-tree.prefix tree) prefix)
       (setf end-mark (point-marker)))))
 
