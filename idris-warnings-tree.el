@@ -153,6 +153,10 @@ Invokes `idris-compiler-notes-mode-hook'.")
   (after-button "" :type string))
 
 (defun idris-tree-leaf-p (tree)
+  ;; Evaluate the kids to see if we are at a leaf
+  (when (functionp (idris-tree.kids tree))
+    (setf (idris-tree.kids tree) (funcall (idris-tree.kids tree))))
+  (assert (listp (idris-tree.kids tree)))
   (null (idris-tree.kids tree)))
 
 (defun idris-tree-default-printer (tree)
@@ -213,7 +217,8 @@ This is used for labels spanning multiple lines."
       (set-marker-insertion-type start-mark t)
       (when  (not collapsed-p)
         (when (functionp kids)
-          (setf kids (funcall kids)))
+          (setf kids (funcall kids))
+          (assert (listp kids)))
         (when kids
           (terpri (current-buffer))
           (idris-tree-insert-list kids prefix)))
