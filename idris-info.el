@@ -67,7 +67,6 @@ Invokes `idris-info-mode-hook'.")
             (setq buffer-read-only nil)
             (erase-buffer)
             ,@cmds
-            (insert "\n\n")
             (setq buffer-read-only t))
           (unless (idris-info-buffer-visible-p)
             (pop-to-buffer (idris-info-buffer))
@@ -78,7 +77,8 @@ Invokes `idris-info-mode-hook'.")
   "Show INFO-STRING in the Idris info buffer, obliterating its previous contents."
   (with-idris-info-buffer
     (idris-propertize-spans (idris-repl-semantic-text-props spans)
-       (insert info-string)))
+       (insert info-string))
+    (insert "\n\n"))
   info-string)
 
 
