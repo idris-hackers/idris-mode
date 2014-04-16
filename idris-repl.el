@@ -27,7 +27,6 @@
 (require 'idris-settings)
 (require 'inferior-idris)
 (require 'idris-common-utils)
-(require 'idris-completion)
 (require 'cl-lib)
 
 (defvar idris-prompt-string "Idris"
@@ -115,7 +114,7 @@
     (define-key map (kbd "<RET>") 'idris-repl-return)
     ;; (define-key map (kbd "<TAB>") ...) makes the debugger complain, and
     ;; suggests this method of binding instead.
-    (define-key map "\t" 'idris-repl-complete)
+    (define-key map "\t" 'completion-at-point)
     (define-key map (kbd "<home>") 'idris-repl-begin-of-prompt)
     (define-key map (kbd "C-a") 'idris-repl-begin-of-prompt)
     (define-key map (kbd "M-p") 'idris-repl-backward-history)
@@ -157,6 +156,7 @@ Invokes `idris-repl-mode-hook'."
     (add-hook 'kill-buffer-hook
               'idris-repl-safe-save-history nil t))
   (add-hook 'kill-emacs-hook 'idris-repl-save-all-histories)
+  (set (make-local-variable 'completion-at-point-functions) '(idris-repl-complete))
   (setq mode-name `("Idris-REPL" (:eval (if idris-rex-continuations "!" "")))))
 
 (defun idris-repl-remove-event-hook-function ()
@@ -216,24 +216,12 @@ Invokes `idris-repl-mode-hook'."
 
 (defun idris-repl-complete ()
   "Completion of the current input"
-  (interactive)
   (let* ((input (idris-repl-current-input))
          (result (idris-eval `(:repl-completions ,input))))
     (destructuring-bind (completions partial) (car result)
-      (cond ((null completions)
-             (idris-minibuffer-respecting-message "Can't find completions for \"%s\"" input)
-             (ding)
-             (idris-complete-restore-window-configuration))
-            ((= (length completions) 1)
-             (insert-and-inherit (substring (concat partial (car completions)) (length input)))
-             (idris-minibuffer-respecting-message "Sole completion")
-             (idris-complete-restore-window-configuration))
-            (t
-             (let* ((pp (substring input (length partial)))
-                    (mypartial (find-common-prefix pp completions)))
-               (insert-and-inherit (substring (concat partial mypartial) (length input)))
-               (idris-minibuffer-respecting-message "Completions, not unique")
-               (idris-display-or-scroll-completions completions partial mypartial)))))))
+      (if (null completions)
+          nil
+        (list (+ idris-input-start (length partial)) (point-max) completions)))))
 
 (defun find-common-prefix (input slist)
   "Finds longest common prefix of all strings in list."
