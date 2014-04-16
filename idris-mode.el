@@ -95,6 +95,17 @@ Invokes `idris-mode-hook'."
   ; REPL completion for Idris source
   (set (make-local-variable 'completion-at-point-functions) '(idris-complete-symbol-at-point))
 
+  ; imenu support
+  (set (make-local-variable 'imenu-case-fold-search) nil)
+  (set (make-local-variable 'imenu-generic-expression)
+       '(("Data" "^\\s-*data\\s-+\\(\\sw+\\)" 1)
+         ("Data" "^\\s-*record\\s-+\\(\\sw+\\)" 1)
+         ("Data" "^\\s-*codata\\s-+\\(\\sw+\\)" 1)
+         ("Postulates" "^\\s-*postulate\\s-+\\(\\sw+\\)" 1)
+         ("Classes" "^\\s-*class\\s-+\\(\\sw+\\)" 1)
+         (nil "^\\s-*\\(\\sw+\\)\\s-*:" 1)
+         ("Namespaces" "^\\s-*namespace\\s-+\\(\\sw\\|\\.\\)" 1)))
+
   ; Handle dirty-bit to avoid extra loads
   (add-hook 'first-change-hook 'idris-make-dirty)
   (setq mode-name `("Idris"
