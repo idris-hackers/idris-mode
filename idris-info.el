@@ -61,20 +61,27 @@ Invokes `idris-info-mode-hook'.")
 (defun idris-info-buffer-visible-p ()
   (if (get-buffer-window idris-info-buffer-name 'visible) t nil))
 
+(defmacro with-idris-info-buffer (&rest cmds)
+  `(progn (with-current-buffer (idris-info-buffer)
+            (idris-info-mode)
+            (setq buffer-read-only nil)
+            (erase-buffer)
+            ,@cmds
+            (setq buffer-read-only t))
+          (unless (idris-info-buffer-visible-p)
+            (pop-to-buffer (idris-info-buffer))
+            (message "Press q to close the Idris info buffer."))))
+
+
 (defun idris-show-info (info-string &optional spans)
   "Show INFO-STRING in the Idris info buffer, obliterating its previous contents."
-  (with-current-buffer (idris-info-buffer)
-    (idris-info-mode)
-    (setq buffer-read-only nil)
-    (erase-buffer)
+  (with-idris-info-buffer
     (idris-propertize-spans (idris-repl-semantic-text-props spans)
        (insert info-string))
-    (insert "\n\n")
-    (setq buffer-read-only t))
-  (unless (idris-info-buffer-visible-p)
-    (pop-to-buffer (idris-info-buffer))
-    (message "Press q to close the Idris info buffer."))
+    (insert "\n\n"))
   info-string)
+
+
 
 (provide 'idris-info)
 ;;; idris-info.el ends here

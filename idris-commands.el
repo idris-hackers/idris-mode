@@ -163,6 +163,55 @@ compiler-annotated output. Does not return a line number."
     (when name
       (idris-info-for-name :type-of name))))
 
+(defun idris-who-calls-name (name)
+  "Show the callers of NAME in a tree"
+  (with-idris-info-buffer
+   (insert "Callers\n")
+   (let* ((callers (idris-eval `(:who-calls ,name)))
+          (roots (mapcar #'(lambda (c) (idris-caller-tree c :who-calls)) (car callers))))
+     (dolist (r roots) (idris-tree-insert r "")))
+   (goto-char (point-min))))
+
+(defun idris-who-calls-name-at-point (thing)
+  (interactive "P")
+  (let ((name (if thing (read-string "Who calls: ")
+                (idris-name-at-point))))
+    (when name
+      (idris-who-calls-name name))))
+
+(defun idris-name-calls-who (name)
+  "Show the callees of NAME in a tree"
+  (with-idris-info-buffer
+   (insert "Callees\n")
+   (let* ((callees (idris-eval `(:calls-who ,name)))
+          (roots (mapcar #'(lambda (c) (idris-caller-tree c :calls-who)) (car callees))))
+     (dolist (r roots) (idris-tree-insert r "")))
+   (goto-char (point-min))))
+
+(defun idris-name-calls-who-at-point (thing)
+  (interactive "P")
+  (let ((name (if thing (read-string "Calls who: ")
+                (idris-name-at-point))))
+    (when name
+      (idris-name-calls-who name))))
+
+(defun idris-caller-tree (caller cmd)
+  "Display a tree from an IDESlave caller list, lazily retrieving a few levels at a time"
+  (pcase caller
+    (`((,name ,highlight) ,children)
+     (make-idris-tree
+      :item name
+      :highlighting highlight
+      :collapsed-p t
+      :kids (lambda ()
+              (cl-mapcan #'(lambda (child)
+                             (let ((child-name (caar (idris-eval `(,cmd ,(car child))))))
+                               (if child-name
+                                   (list (idris-caller-tree child-name cmd))
+                                 nil)))
+                      children))))
+    (t (error "failed to make tree from %s" caller))))
+
 (defun idris-apropos (what)
   "Look up something in names, type signatures, and docstrings"
   (interactive "sSearch Idris docs for: ")
@@ -331,6 +380,12 @@ type-correct, so loading will fail."
     (define-key-after menu [idris-ref-menu-get-docs]
       `(menu-item "Get documentation"
                   (lambda () (interactive)))) ; x-popup-menu doesn't run cmds
+    (define-key-after menu [idris-ref-menu-who-calls]
+      `(menu-item "Who calls?"
+                  (lambda () (interactive))))
+    (define-key-after menu [idris-ref-menu-calls-who]
+      `(menu-item "Calls who?"
+                  (lambda () (interactive))))
     menu))
 
 (defun idris-make-ref-menu-keymap (name)
@@ -342,7 +397,12 @@ type-correct, so loading will fail."
                  (idris-info-for-name :type-of name))
                 ((equal selection '(idris-ref-menu-get-docs))
                  (idris-info-for-name :docs-for name))
+                ((equal selection '(idris-ref-menu-who-calls))
+                 (idris-who-calls-name name))
+                ((equal selection '(idris-ref-menu-calls-who))
+                 (idris-name-calls-who name))
                 (t (message "%S" selection))))))
     map))
+
 
 (provide 'idris-commands)

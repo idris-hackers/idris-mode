@@ -50,7 +50,7 @@
           (let ((root (idris-compiler-notes-to-tree notes)))
             (idris-tree-insert root "")
             (insert "\n")
-            (message "Press q to close, return or mouse on error navigate to source")
+            (message "Press q to close, return or mouse on error to navigate to source")
             (setq buffer-read-only t)
             (goto-char (point-min))
             notes))))))
@@ -60,17 +60,22 @@
 (defun idris-tree-for-note (note)
   (make-idris-tree :item (nth 3 note)
                    :highlighting (if (> (length note) 4) (nth 4 note) '())
+                   :button `(,(format "%s line %s col %s:" (nth 0 note) (nth 1 note) (nth 2 note))
+                             help-echo "go to source location"
+                             action ,#'(lambda (_)
+                                         (idris-show-source-location (nth 0 note)
+                                                                     (nth 1 note)
+                                                                     (nth 2 note))))
+                   :after-button "\n"
                    :plist (list 'note note)
                    :print-fn idris-tree-printer))
 
 (defun idris-compiler-notes-to-tree (notes)
-  (make-idris-tree :item (format "Errors (%d) [return or mouse on error to navigate to their source location]" (length notes))
+  (make-idris-tree :item (format "Errors (%d)" (length notes))
                    :kids (mapcar #'idris-tree-for-note notes)))
 
 (defvar idris-compiler-notes-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "RET") 'idris-compiler-notes-default-action-or-show-details)
-    (define-key map (kbd "<mouse-2>") 'idris-compiler-notes-default-action-or-show-details/mouse)
     (define-key map (kbd "q") 'idris-notes-quit)
     (define-key map (kbd "C-c C-t") 'idris-type-at-point)
     (define-key map (kbd "C-c C-d") 'idris-type-at-point)
@@ -85,22 +90,6 @@
   "Idris compiler notes
      \\{idris-compiler-notes-mode-map}
 Invokes `idris-compiler-notes-mode-hook'.")
-
-(defun idris-compiler-notes-default-action-or-show-details/mouse (event)
-  "Invoke the action pointed at by the mouse, or show details."
-  (interactive "e")
-  (cl-destructuring-bind (_mouse-2 (_w pos &rest more) &rest more) event
-    (save-excursion
-      (goto-char pos)
-      (let ((fn (get-text-property (point)
-                                   'idris-compiler-notes-default-action)))
-	(if fn (funcall fn) (idris-compiler-notes-show-details))))))
-
-(defun idris-compiler-notes-default-action-or-show-details ()
-  "Invoke the action at point, or show details."
-  (interactive)
-  (let ((fn (get-text-property (point) 'idris-compiler-notes-default-action)))
-    (if fn (funcall fn) (idris-compiler-notes-show-details))))
 
 (defun idris-compiler-notes-show-details ()
   (interactive)
@@ -153,25 +142,34 @@ Invokes `idris-compiler-notes-mode-hook'.")
   item
   highlighting
   (print-fn #'idris-tree-default-printer :type function)
-  (kids '() :type list)
+  (kids '() :type (or list function))
   (collapsed-p nil :type boolean)
   (prefix "" :type string)
   (start-mark nil)
   (end-mark nil)
   (plist '() :type list)
-  (active-p t :type boolean))
+  (active-p t :type boolean)
+  (button nil :type list)
+  (after-button "" :type string))
 
 (defun idris-tree-leaf-p (tree)
-  (not (idris-tree.kids tree)))
+  ;; Evaluate the kids to see if we are at a leaf
+  (when (functionp (idris-tree.kids tree))
+    (setf (idris-tree.kids tree) (funcall (idris-tree.kids tree))))
+  (assert (listp (idris-tree.kids tree)))
+  (null (idris-tree.kids tree)))
 
 (defun idris-tree-default-printer (tree)
+  (when (idris-tree.button tree)
+    (apply #'insert-button (idris-tree.button tree))
+    (insert (idris-tree.after-button tree)))
   (idris-propertize-spans (idris-repl-semantic-text-props (idris-tree.highlighting tree))
     (insert (idris-tree.item tree))))
 
 (defun idris-tree-decoration (tree)
-  (cond ((idris-tree-leaf-p tree) "-- ")
-	((idris-tree.collapsed-p tree) "[+] ")
-	(t "-+  ")))
+  (cond ((idris-tree-leaf-p tree) "--")
+	((idris-tree.collapsed-p tree) "[+]")
+	(t "- +")))
 
 (defun idris-tree-insert-list (list prefix)
   "Insert a list of trees."
@@ -185,7 +183,16 @@ Invokes `idris-compiler-notes-mode-hook'.")
 		  (idris-tree-insert elt (concat prefix "  "))))))
 
 (defun idris-tree-insert-decoration (tree)
-  (insert (idris-tree-decoration tree)))
+  (with-struct (idris-tree. print-fn kids collapsed-p start-mark end-mark active-p) tree
+    (let ((deco (idris-tree-decoration tree)))
+      (if (and active-p kids)
+          (insert-button deco 'action #'(lambda (_)
+                                          (setq buffer-read-only nil)
+                                          (idris-tree-toggle tree)
+                                          (setq buffer-read-only t))
+                              'help-echo (if collapsed-p "expand" "collapse"))
+        (insert deco))
+      (insert " "))))
 
 (defun idris-tree-indent-item (start end prefix)
   "Insert PREFIX at the beginning of each but the first line.
@@ -199,24 +206,22 @@ This is used for labels spanning multiple lines."
 
 (defun idris-tree-insert (tree prefix)
   "Insert TREE prefixed with PREFIX at point."
+  (unless (idris-tree-p tree) (error "%s is not an idris-tree" tree))
   (with-struct (idris-tree. print-fn kids collapsed-p start-mark end-mark active-p) tree
     (let ((line-start (line-beginning-position)))
       (setf start-mark (point-marker))
       (idris-tree-insert-decoration tree)
       (funcall print-fn tree)
       (idris-tree-indent-item start-mark (point) (concat prefix "   "))
-      (add-text-properties line-start (point)
-        (append `(idris-tree ,tree)
-                (if active-p
-                    `(mouse-face highlight
-                      help-echo ,(concat "<mouse-2> "
-                                         (if kids (if collapsed-p "expand" "collapse")
-                                                  "go to source")))
-                  '())))
+      (add-text-properties line-start (point) (list 'idris-tree tree))
       (set-marker-insertion-type start-mark t)
-      (when (and kids (not collapsed-p))
-        (terpri (current-buffer))
-        (idris-tree-insert-list kids prefix))
+      (when  (not collapsed-p)
+        (when (functionp kids)
+          (setf kids (funcall kids))
+          (assert (listp kids)))
+        (when kids
+          (terpri (current-buffer))
+          (idris-tree-insert-list kids prefix)))
       (setf (idris-tree.prefix tree) prefix)
       (setf end-mark (point-marker)))))
 
@@ -232,12 +237,14 @@ This is used for labels spanning multiple lines."
 (defun idris-tree-toggle (tree)
   "Toggle the visibility of TREE's children."
   (with-struct (idris-tree. collapsed-p start-mark end-mark prefix) tree
-    (setf collapsed-p (not collapsed-p))
-    (idris-tree-delete tree)
-    (insert-before-markers " ") ; move parent's end-mark
-    (backward-char 1)
-    (idris-tree-insert tree prefix)
-    (delete-char 1)
+    (save-excursion
+      (setf collapsed-p (not collapsed-p))
+      (goto-char start-mark)
+      (idris-tree-delete tree)
+      (insert-before-markers " ") ; move parent's end-mark
+      (backward-char 1)
+      (idris-tree-insert tree prefix)
+      (delete-char 1))
     (goto-char start-mark)))
 
 (provide 'idris-warnings-tree)
