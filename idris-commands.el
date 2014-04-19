@@ -310,6 +310,20 @@ compiler-annotated output. Does not return a line number."
             (delete-region start end))
           (idris-insert-or-expand result))))))
 
+(defun idris-refine (name)
+  "Refine by some name, without recursive proof search"
+  (interactive "MRefine by: ")
+  (let ((what (idris-thing-at-point)))
+    (unless (car what)
+      (error "Could not find a metavariable at point to refine by"))
+    (idris-load-file-sync)
+    (let ((result (car (idris-eval `(:refine ,(cdr what) ,(car what) ,name)))))
+      (save-excursion
+        (let ((start (progn (search-backward "?") (point)))
+              (end (progn (forward-char) (search-forward-regexp "[^a-zA-Z0-9_']") (backward-char) (point))))
+          (delete-region start end))
+        (idris-insert-or-expand result)))))
+
 (defun idris-identifier-backwards-from-point ()
   (let ((identifier-start nil)
         (identifier-end (point))
