@@ -266,17 +266,38 @@ versions cannot deal with that."
              (error "Idris process exited unexpectedly"))
            (accept-process-output idris-process 0.1)))))))
 
+(defvar idris-options-cache '()
+  "An alist caching the Idris interpreter options, to
+  allow consulting them when the Idris interpreter is busy.")
+
+(defun idris-update-options-cache ()
+  (idris-eval-async '(:get-options)
+                    #'(lambda (opts) (setq idris-options-cache opts))))
+
 (defun idris-get-options ()
   (idris-eval '(:get-options)))
 
 (defun idris-get-option (opt)
-  (let ((val (assoc opt (car (idris-get-options)))))
-    (if val
-        (equal (cadr val) :True)
-      (error "Unknown Idris option %s" opt))))
+  ;; First check the local cache
+  (let ((local-val (assoc opt idris-options-cache)))
+    (if local-val
+        (equal (cadr local-val) :True)
+      (let ((remote-val (assoc opt (car (idris-get-options)))))
+        (if remote-val
+            (equal (cadr remote-val) :True)
+          (error "Unknown Idris option %s" opt))))))
 
 (defun idris-set-option (opt b)
   (let ((bi (if b :True :False)))
-    (idris-eval `(:set-option ,opt ,bi))))
+    (idris-rex ((buffer (current-buffer)) opt b bi)
+        (`(:set-option ,opt ,bi))
+      ((:ok _res)
+       (set-buffer buffer)
+       (let ((cache-elt (assoc opt idris-options-cache)))
+         (if cache-elt
+             (setf (cadr cache-elt) bi)
+           (add-to-list 'idris-options-cache (list opt bi)))))
+      ((:error condition)
+       (message "Setting option %s to %s returned an error: %s." opt b condition)))))
 
 (provide 'inferior-idris)
