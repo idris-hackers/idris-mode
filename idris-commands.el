@@ -67,10 +67,15 @@
     (idris-eval `(:interpret ,(concat ":cd " new-working-directory)))
     (setq idris-process-current-working-directory new-working-directory)))
 
+(defun idris-list-metavariables-on-load ()
+  "Use the user's settings from customize to determine whether to list the metavariables."
+  (interactive)
+  (when idris-metavariable-show-on-load (idris-list-metavariables)))
+
 (defcustom idris-load-file-success-hook '(idris-list-metavariables)
   "Functions to call when loading a file is successful"
   :type 'hook
-  :options '(idris-list-metavariables)
+  :options '(idris-list-metavariables-on-load)
   :group 'idris)
 
 (defun idris-load-file ()
