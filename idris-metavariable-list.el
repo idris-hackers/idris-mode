@@ -82,13 +82,13 @@ Invoces `idris-metavariable-list-mode-hook'.")
         (message "Press q to close")
         (setq buffer-read-only t)
         (goto-char (point-min))))
-    (pop-to-buffer (idris-metavariable-list-buffer))))
+    (display-buffer (idris-metavariable-list-buffer))))
 
 (defun idris-tree-for-metavariable (metavar)
   (cl-destructuring-bind (name premises conclusion) metavar
     (make-idris-tree :item name
                      :highlighting `((0 ,(length name) ((:decor :metavar))))
-                     :collapsed-p t
+                     :collapsed-p (not idris-metavariable-list-show-expanded) ; from customize
                      :kids (list (idris-tree-for-metavariable-details name premises conclusion)))))
 
 (defun idris-tree-for-metavariable-details (name premises conclusion)

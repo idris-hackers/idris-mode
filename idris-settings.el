@@ -81,6 +81,17 @@
   :type 'boolean
   :group 'idris)
 
+(defcustom idris-metavariable-show-on-load t
+  "Show the current metavariables on successful load."
+  :type 'boolean
+  :group 'idris)
+
+(defcustom idris-metavariable-list-show-expanded nil
+  "Show the metavariable list fully expanded by default. This may be useful on wide monitors
+with lots of space for the metavariable buffer."
+  :type 'boolean
+  :group 'idris)
+
 ;;;; REPL settings
 
 (defgroup idris-repl nil "Idris REPL" :prefix 'idris :group 'idris)
