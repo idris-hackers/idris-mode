@@ -119,9 +119,11 @@ Invokes `idris-mode-hook'."
                                "(Not loaded)"
                              "(Loaded)")))))
 
-;; Automatically use idris-mode for .idr files.
+;; Automatically use idris-mode for .idr and .lidr files.
 ;;;###autoload
 (push '("\\.idr$" . idris-mode) auto-mode-alist)
+;;;###autoload
+(push '("\\.lidr$" . idris-mode) auto-mode-alist)
 
 (provide 'idris-mode)
 ;;; idris-mode.el ends here

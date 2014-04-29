@@ -247,9 +247,17 @@ compiler-annotated output. Does not return a line number."
         (command (if proof :add-proof-clause :add-clause)))
     (when (car what)
       (idris-load-file-sync)
-      (let ((result (car (idris-eval `(,command ,(cdr what) ,(car what))))))
+      (let ((result (car (idris-eval `(,command ,(cdr what) ,(car what)))))
+            (prefix (save-excursion
+                      (goto-line (cdr what))
+                      (goto-char (line-beginning-position))
+                      (re-search-forward "\\(^>?\\s-*\\)" nil t)
+                      (let ((prefix (match-string 1)))
+                        (if prefix
+                            prefix
+                          "")))))
         (end-of-line)
-        (insert "\n")
+        (insert "\n" prefix)
         (idris-insert-or-expand result)))))
 
 (defun idris-add-missing ()
@@ -277,7 +285,6 @@ compiler-annotated output. Does not return a line number."
   "If yasnippet is loaded, use it to expand Idris compiler output, otherwise fall back on inserting the output"
   (if (and (fboundp 'yas-expand-snippet) idris-use-yasnippet-expansions)
       (let ((snippet (idris-metavar-to-snippet str)))
-        (message snippet)
         (yas-expand-snippet snippet nil nil '((yas-indent-line nil))))
     (insert str)))
 
