@@ -72,11 +72,16 @@
       (idris-save-marker idris-output-end
         (unless (bolp) (insert-before-markers "\n"))
         (let ((prompt-start (point))
-              (prompt (format "%s> " idris-prompt-string)))
+              (prompt (if (equal idris-repl-prompt-style 'short)
+                          "λΠ> "
+                        (format "%s> " idris-prompt-string))))
           (idris-propertize-region
-           '(face idris-repl-prompt-face read-only t intangible t
-                  idris-repl-prompt t
-                  rear-nonsticky (idris-repl-prompt read-only face intangible))
+           `(face idris-repl-prompt-face
+             read-only t
+             intangible t
+             idris-repl-prompt t
+             help-echo ,idris-prompt-string
+             rear-nonsticky (idris-repl-prompt read-only face intangible))
            (insert-before-markers prompt))
           (set-marker idris-prompt-start prompt-start))))))
 

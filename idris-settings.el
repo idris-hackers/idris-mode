@@ -132,4 +132,10 @@ with lots of space for the metavariable buffer."
   :type 'symbol
   :group 'idris-repl)
 
+(defcustom idris-repl-prompt-style 'short
+  "What sort of prompt to show. 'long shows the Idris REPL prompt, while 'short shows a shorter one."
+  :options '(short long)
+  :type 'symbol
+  :group 'idris-repl)
+
 (provide 'idris-settings)
