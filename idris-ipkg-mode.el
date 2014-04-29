@@ -172,6 +172,25 @@ Invokes `idris-ipkg-build-mode-hook'.")
   (interactive)
   (idris-kill-buffer idris-ipkg-build-buffer-name))
 
+(defun idris-ipkg-find-src-dir (&optional ipkg-file)
+  (unless ipkg-file
+    (let ((found (idris-find-file-upwards "ipkg")))
+      (if (not found)
+          nil
+        (setq ipkg-file (car found))
+        ;; Now ipkg-file contains the path to the package
+        (with-temp-buffer
+          (insert-file ipkg-file)
+          (goto-char (point-min))
+          (let ((found
+                 (re-search-forward "^\\s-*sourcedir\\s-*=\\s-*\\(\\sw+\\)"
+                                    nil
+                                    t)))
+            (if found
+                (let ((subdir (match-string 1)))
+                  (concat (file-name-directory ipkg-file) subdir))
+              (file-name-directory ipkg-file))))))))
+    
 
 ;;; Mode definition
 
