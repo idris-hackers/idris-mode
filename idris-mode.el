@@ -93,9 +93,6 @@ Invokes `idris-mode-hook'."
   (set (make-local-variable 'indent-tabs-mode) nil)
   (set (make-local-variable 'comment-start) "--")
 
-  ; Initialize the local options cache
-  (idris-update-options-cache)
-
   ; REPL completion for Idris source
   (set (make-local-variable 'completion-at-point-functions) '(idris-complete-symbol-at-point))
 
@@ -119,9 +116,11 @@ Invokes `idris-mode-hook'."
                                "(Not loaded)"
                              "(Loaded)")))))
 
-;; Automatically use idris-mode for .idr files.
+;; Automatically use idris-mode for .idr and .lidr files.
 ;;;###autoload
 (push '("\\.idr$" . idris-mode) auto-mode-alist)
+;;;###autoload
+(push '("\\.lidr$" . idris-mode) auto-mode-alist)
 
 (provide 'idris-mode)
 ;;; idris-mode.el ends here
