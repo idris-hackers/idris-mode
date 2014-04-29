@@ -92,6 +92,8 @@
           (idris-eval-async `(:load-file ,(file-name-nondirectory fn))
                           (lambda (result)
                             (idris-make-clean)
+                            (idris-update-options-cache)
+
                             (setq idris-currently-loaded-buffer (current-buffer))
                             (when (member 'warnings-tree idris-warnings-printing)
                               (idris-list-compiler-notes))
@@ -122,6 +124,7 @@
           (idris-switch-working-directory (file-name-directory fn))
           (setq idris-currently-loaded-buffer nil)
           (idris-eval `(:load-file ,(file-name-nondirectory fn)))
+          (idris-update-options-cache)
           (setq idris-currently-loaded-buffer (current-buffer)))
         (idris-make-clean))
     (error "Cannot find file for current buffer")))

@@ -93,9 +93,6 @@ Invokes `idris-mode-hook'."
   (set (make-local-variable 'indent-tabs-mode) nil)
   (set (make-local-variable 'comment-start) "--")
 
-  ; Initialize the local options cache
-  (idris-update-options-cache)
-
   ; REPL completion for Idris source
   (set (make-local-variable 'completion-at-point-functions) '(idris-complete-symbol-at-point))
 
