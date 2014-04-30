@@ -395,6 +395,14 @@ type-correct, so loading will fail."
   (let ((bufs (list :repl :proof-obligations :proof-shell :proof-script :log :info :notes)))
     (dolist (b bufs) (idris-kill-buffer b))))
 
+(defun idris-pop-to-repl ()
+  "Go to the REPL, if one is open."
+  (interactive)
+  (let ((buf (get-buffer (idris-buffer-name :repl))))
+    (if buf
+        (pop-to-buffer buf)
+      (error "No Idris REPL buffer is open."))))
+
 (defun idris-quit ()
   (interactive)
   (let* ((pbufname (idris-buffer-name :process))
