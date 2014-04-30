@@ -43,6 +43,7 @@
     (define-key map (kbd "C-c b") 'idris-ipkg-build)
     (define-key map (kbd "C-c c") 'idris-ipkg-clean)
     (define-key map (kbd "C-c i") 'idris-ipkg-install)
+    (define-key map (kbd "C-c C-z") 'idris-pop-to-repl)
     map)
   "Keymap used in Idris mode.")
 
