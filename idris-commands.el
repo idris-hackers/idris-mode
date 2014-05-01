@@ -94,6 +94,10 @@
                          (file-name-directory fn))))
           (idris-switch-working-directory srcdir)
           (setq idris-currently-loaded-buffer nil)
+          (when (and  ;; check that srcdir is prefix of filename - then load relative
+                 (> (length fn) (length srcdir))
+                 (string= (substring fn 0 (length srcdir)) srcdir))
+            (setq fn (substring fn (length srcdir))))
           (idris-eval-async `(:load-file ,fn)
                           (lambda (result)
                             (idris-make-clean)
