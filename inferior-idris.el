@@ -225,7 +225,7 @@ versions cannot deal with that."
      (when cont
        (set-buffer buffer)
        (funcall cont result)))
-    ((:error condition)
+    ((:error condition &optional spans)
      (when failure-cont
        (set-buffer buffer)
        (funcall failure-cont condition))
@@ -254,7 +254,7 @@ versions cannot deal with that."
             (error "Reply to canceled synchronous eval request tag=%S sexp=%S"
                    tag sexp))
           (throw tag (list #'identity (cons value spans))))
-         ((:error condition)
+         ((:error condition &optional spans)
           (when (member 'warnings-tree idris-warnings-printing)
             (when (idris-list-compiler-notes)
               (pop-to-buffer (idris-buffer-name :notes))))
@@ -297,7 +297,7 @@ versions cannot deal with that."
          (if cache-elt
              (setf (cadr cache-elt) bi)
            (add-to-list 'idris-options-cache (list opt bi)))))
-      ((:error condition)
+      ((:error condition &optional spans)
        (message "Setting option %s to %s returned an error: %s." opt b condition)))))
 
 (provide 'inferior-idris)
