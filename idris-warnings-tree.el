@@ -58,17 +58,19 @@
 (defvar idris-tree-printer 'idris-tree-default-printer)
 
 (defun idris-tree-for-note (note)
-  (make-idris-tree :item (nth 3 note)
-                   :highlighting (if (> (length note) 4) (nth 4 note) '())
-                   :button `(,(format "%s line %s col %s:" (nth 0 note) (nth 1 note) (nth 2 note))
-                             help-echo "go to source location"
-                             action ,#'(lambda (_)
-                                         (idris-show-source-location (nth 0 note)
-                                                                     (nth 1 note)
-                                                                     (nth 2 note))))
-                   :after-button "\n"
-                   :plist (list 'note note)
-                   :print-fn idris-tree-printer))
+  (let* ((buttonp (> (length (nth 0 note)) 0)) ;; if empty source location
+         (button-text `(,(format "%s line %s col %s:" (nth 0 note) (nth 1 note) (nth 2 note))
+                               help-echo "go to source location"
+                               action ,#'(lambda (_)
+                                           (idris-show-source-location (nth 0 note)
+                                                                       (nth 1 note)
+                                                                       (nth 2 note))))))
+    (make-idris-tree :item (nth 3 note)
+                     :highlighting (if (> (length note) 4) (nth 4 note) '())
+                     :button (if buttonp button-text nil)
+                     :after-button (if buttonp "\n" nil)
+                     :plist (list 'note note)
+                     :print-fn idris-tree-printer)))
 
 (defun idris-compiler-notes-to-tree (notes)
   (make-idris-tree :item (format "Errors (%d)" (length notes))
