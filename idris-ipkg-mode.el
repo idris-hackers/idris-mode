@@ -40,6 +40,13 @@
     ;; Strings
     (modify-syntax-entry ?\" "\"" st)
     (modify-syntax-entry ?\\ "/" st)
+
+    ;; Matching {}, but with nested comments
+    (modify-syntax-entry ?\{ "(} 1bn" st)
+    (modify-syntax-entry ?\} "){ 4bn" st)
+    (modify-syntax-entry ?\- "_ 123" st)
+    (modify-syntax-entry ?\n ">" st)
+
     st))
 
 (defconst idris-ipkg-keywords
