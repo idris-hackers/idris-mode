@@ -229,6 +229,17 @@ compiler-annotated output. Does not return a line number."
                       children))))
     (t (error "failed to make tree from %s" caller))))
 
+
+(defun idris-newline-and-indent ()
+  "Indent a new line like the current one by default"
+  (interactive)
+  (let ((indent ""))
+    (save-excursion
+      (move-beginning-of-line nil)
+      (when (looking-at (if (idris-lidr-p) "^\\(>\\s-*\\)" "\\(\\s-*\\)"))
+        (setq indent (match-string 1))))
+    (insert "\n" indent)))
+
 (defun idris-apropos (what)
   "Look up something in names, type signatures, and docstrings"
   (interactive "sSearch Idris docs for: ")
