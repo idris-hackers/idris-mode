@@ -44,6 +44,7 @@
     (define-key map (kbd "C-c c") 'idris-ipkg-clean)
     (define-key map (kbd "C-c i") 'idris-ipkg-install)
     (define-key map (kbd "C-c C-z") 'idris-pop-to-repl)
+    (define-key map (kbd "RET") 'idris-newline-and-indent)
     map)
   "Keymap used in Idris mode.")
 
