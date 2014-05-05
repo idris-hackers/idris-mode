@@ -34,7 +34,9 @@
 (require 'idris-ipkg-mode)
 (require 'idris-warnings-tree)
 (require 'idris-metavariable-list)
+
 (require 'cl-lib)
+(require 'thingatpt)
 
 (defvar-local idris-buffer-dirty-p t
   "An Idris buffer is dirty if there have been modifications since it was last loaded")
@@ -147,13 +149,17 @@
       (beginning-of-line)
       (1+ (count-lines 1 (point))))))
 
+
 (defun idris-thing-at-point ()
   "Return the line number and name at point. Use this in Idris source buffers."
-  (let ((name (symbol-at-point))
+  (let ((name (thing-at-point 'word))
+        (op (thing-at-point 'symbol))
         (line (idris-get-line-num)))
     (if name
-        (cons (substring-no-properties (symbol-name name)) line)
-      (error "Nothing identifiable under point"))))
+        (cons (substring-no-properties name) line)
+      (if op
+          (cons (substring-no-properties op) line)
+        (error "Nothing identifiable under point")))))
 
 (defun idris-name-at-point ()
   "Return the name at point, taking into account semantic
