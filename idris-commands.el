@@ -429,6 +429,16 @@ type-correct, so loading will fail."
           (setq idris-rex-continuations '()))
       (idris-kill-buffers))))
 
+(defun idris-delete-ibc ()
+  (interactive)
+  (let* ((fname (buffer-file-name))
+         (ibc (concat (file-name-sans-extension fname) ".ibc")))
+    (if (not (or (string= (file-name-extension fname) "idr")
+                 (string= (file-name-extension fname) "lidr")))
+        (error "The current file is not an Idris file")
+      (when (y-or-n-p (concat "Really delete " ibc "?"))
+        (delete-file ibc)))))
+
 (defun idris-make-ref-menu (name)
   (let ((menu (make-sparse-keymap)))
     (define-key menu [idris-ref-menu-get-type]
