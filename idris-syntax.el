@@ -17,7 +17,7 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (require 'idris-core)
 
@@ -145,6 +145,10 @@
     "private" "public" "refine" "rewrite" "solve" "syntax" "term" "then" "total"
     "trivial" "try" "using" "where" "with"))
 
+(defconst idris-basic-syntactic-keywords
+  ;; Backslash \ is not escaping in \(x, y) -> x + y.
+  '(("\\(\\\\\\)(" (1 "."))))
+
 (defconst idris-font-lock-defaults
     `('(
          ;; {- Block comments -}
@@ -231,7 +235,10 @@
           0 'idris-unsafe-face t)
          ;; TODO: operator definitions.
          ;; TODO: let ... in ...
-         )))
+         )
+      nil nil nil nil
+      ;; Special font lock syntactic keywords
+      (font-lock-syntactic-keywords . idris-basic-syntactic-keywords)))
 
 
 
