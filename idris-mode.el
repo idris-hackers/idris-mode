@@ -110,6 +110,9 @@ Invokes `idris-mode-hook'."
          (nil "^\\s-*\\(\\sw+\\)\\s-*:" 1)
          ("Namespaces" "^\\s-*namespace\\s-+\\(\\sw\\|\\.\\)" 1)))
 
+  ; Filling of comments and docs
+  (set (make-local-variable 'fill-paragraph-function) 'idris-fill-paragraph)
+
   ; Handle dirty-bit to avoid extra loads
   (add-hook 'first-change-hook 'idris-make-dirty)
   (setq mode-name `("Idris"

@@ -477,5 +477,18 @@ type-correct, so loading will fail."
                 (t (message "%S" selection))))))
     map))
 
+(defun idris-fill-paragraph (justify)
+  (save-excursion
+    (if (nth 4 (syntax-ppss))
+        (fill-comment-paragraph justify) ;;; if inside comment, use normal Emacs comment filling
+      (if (save-excursion (move-beginning-of-line nil)
+                          (looking-at "\\s-*|||\s-*")) ;;; if inside documentation, fill with special prefix
+          (let ((fill-prefix (substring-no-properties (match-string 0)))
+                (paragraph-start "\\s-*|||\\s-*$\\|\\s-*$\\|\\s-*@" )
+                (paragraph-separate "\\s-*|||\\s-*$\\|\\s-*$"))
+            (fill-paragraph))
+        ;;; Otherwise do nothing
+        ""))))
+
 
 (provide 'idris-commands)
