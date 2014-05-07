@@ -128,5 +128,22 @@ Invokes `idris-mode-hook'."
 ;;;###autoload
 (push '("\\.lidr$" . idris-mode) auto-mode-alist)
 
+
+;;; Handy utilities for other modes
+;;;###autoload
+(eval-after-load 'flycheck
+  '(progn
+     (flycheck-define-checker idris
+       "An Idris syntax and type checker."
+       :command ("idris" "--check" "--nocolor" "--warnpartial" source)
+       :error-patterns
+       ((warning line-start (file-name) ":" line ":" column ":Warning - "
+                 (message (and (* nonl) (* "\n" (not (any "/" "~")) (* nonl)))))
+        (error line-start (file-name) ":" line ":" column ":"
+               (message (and (* nonl) (* "\n" (not (any "/" "~")) (* nonl))))))
+       :modes idris-mode)
+
+     (add-to-list 'flycheck-checkers 'idris)))
+
 (provide 'idris-mode)
 ;;; idris-mode.el ends here
