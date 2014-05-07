@@ -167,6 +167,6 @@ corresponding values in the CDR of VALUE."
 (defun idris-lidr-p (&optional buffer)
   "Return t if BUFFER is a literate Idris file, or nil otherwise. Use the current buffer if
 BUFFER is not supplied or is nil."
-  (string= (file-name-extension (buffer-file-name)) "lidr"))
+  (string= (file-name-extension (buffer-file-name buffer)) "lidr"))
 
 (provide 'idris-common-utils)
