@@ -53,10 +53,19 @@ The following commands are available when there is an inferior Idris process (wh
 * `C-c C-d`: Get the documentation for the identifier under point. A prefix argument prompts for the name.
 * `C-c C-w`: Add a with block for the pattern-match clause under point
 * `C-c C-h a`: Search names, types, and docstrings for a given string.
+* `C-c C-z`: Pop to a presently open REPL buffer
 
 ## Completion
 
 `M-Tab` or whatever you have `completion-at-point` bound to will ask the running Idris process for completions for the current identifier. Note that this command requires that the Idris interpreter is already running, because attempting to load an incomplete buffer would probably not work.
+
+## Package files
+Idris's build system, which consists of package files ending in `.ipkg`, has rudimentary support from `idris-mode`. The following commands are available in Idris buffers or package buffers; if they are run from an Idris buffer, then `idris-mode` will attempt to locate the package file automatically.
+* `C-c c`: Clean the package, removing `.ibc` files
+* `C-c b`: Build the package
+* `C-c i`: Install the package to the user's repository, building first if necessary
+
+Additionally, the command `M-x idris-start-project` will create a directory structure and initial package file for a new project.
 
 ## Installation
 
