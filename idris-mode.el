@@ -51,6 +51,8 @@
 (easy-menu-define idris-mode-menu idris-mode-map
   "Menu for the Idris major mode"
   `("Idris"
+    ["New Project" idris-start-project t]
+    "-----------------"
     ["Load file" idris-load-file t]
     ["Compile and execute" idris-compile-and-execute]
     ["Delete IBC file" idris-delete-ibc t]
