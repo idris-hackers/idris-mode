@@ -278,7 +278,8 @@ compiler-annotated output. Does not return a line number."
       (idris-load-file-sync)
       (let ((result (car (idris-eval `(,command ,(cdr what) ,(car what)))))
             (prefix (save-excursion
-                      (goto-line (cdr what))
+                      (goto-char (point-min))
+                      (forward-line (1- (cdr what)))
                       (goto-char (line-beginning-position))
                       (re-search-forward "\\(^>?\\s-*\\)" nil t)
                       (let ((prefix (match-string 1)))
@@ -445,7 +446,7 @@ type-correct, so loading will fail."
       (when (y-or-n-p (concat "Really delete " ibc "?"))
         (delete-file ibc)))))
 
-(defun idris-make-ref-menu (name)
+(defun idris-make-ref-menu (_name)
   (let ((menu (make-sparse-keymap)))
     (define-key menu [idris-ref-menu-get-type]
       `(menu-item "Get type"
