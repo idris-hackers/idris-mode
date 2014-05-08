@@ -65,6 +65,9 @@ Idris's build system, which consists of package files ending in `.ipkg`, has rud
 * `C-c b`: Build the package
 * `C-c i`: Install the package to the user's repository, building first if necessary
 
+The following commands are available in `idris-ipkg-mode`:
+* `C-c C-f`: Insert a field, with completion support. Completion for field names is also available by pressing `M-TAB`.
+
 Additionally, the command `M-x idris-start-project` will create a directory structure and initial package file for a new project.
 
 ## Installation

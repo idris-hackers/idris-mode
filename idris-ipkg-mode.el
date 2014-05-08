@@ -50,7 +50,7 @@
     st))
 
 (defconst idris-ipkg-keywords
-  '("package" "opts" "modules" "sourcedir" "makefile" "objs"))
+  '("package" "opts" "modules" "sourcedir" "makefile" "objs" "executable" "main" "libs"))
 
 (defconst idris-ipkg-font-lock-defaults
   `(,idris-ipkg-keywords))
@@ -81,6 +81,23 @@
   (cl-destructuring-bind (identifier start end) (idris-ipkg-find-keyword)
     (when identifier
       (list start end idris-ipkg-keywords))))
+
+;;; Inserting fields
+(defun idris-ipkg-insert-field ()
+  "Insert one of the ipkg fields"
+  (interactive)
+  (let ((field (completing-read "Field: " (remove "package" idris-ipkg-keywords) nil t)))
+    (beginning-of-line)
+    (while (and (not (looking-at-p "^\\s-*$")) (= (forward-line) 0)))
+    (beginning-of-line)
+    (when (not (looking-at-p "^\\s-*$")) ;; end of buffer had stuff
+      (goto-char (point-max))
+      (newline))
+    (newline)
+    (insert field " = ")
+    (let ((p (point)))
+      (newline)
+      (goto-char p))))
 
 ;;; Finding ipkg files
 
@@ -197,7 +214,7 @@ Invokes `idris-ipkg-build-mode-hook'.")
                 (let ((subdir (match-string 1)))
                   (concat (file-name-directory ipkg-file) subdir))
               (file-name-directory ipkg-file))))))))
-    
+
 
 ;;; Mode definition
 
@@ -206,6 +223,7 @@ Invokes `idris-ipkg-build-mode-hook'.")
     (define-key map (kbd "C-c b") 'idris-ipkg-build)
     (define-key map (kbd "C-c c") 'idris-ipkg-clean)
     (define-key map (kbd "C-c i") 'idris-ipkg-install)
+    (define-key map (kbd "C-c C-f") 'idris-ipkg-insert-field)
     map)
   "Keymap used for Idris package mode")
 
@@ -214,7 +232,9 @@ Invokes `idris-ipkg-build-mode-hook'.")
   `("IPkg"
     ["Build package" idris-ipkg-build t]
     ["Install package" idris-ipkg-install t]
-    ["Clean package" idris-ipkg-clean t]))
+    ["Clean package" idris-ipkg-clean t]
+    "----------------"
+    ["Insert field" idris-ipkg-insert-field t]))
 
 ;;;###autoload
 (define-derived-mode idris-ipkg-mode prog-mode "Idris Pkg"
