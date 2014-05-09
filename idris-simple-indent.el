@@ -4,6 +4,7 @@
 
 ;; Author: Heribert Schuetz <Heribert.Schuetz@informatik.uni-muenchen.de>
 ;; Graeme E Moss <gem@cs.york.ac.uk>
+;; Hacked for Idris by David Raymond Christiansen <david@davidchristiansen.dk>
 ;; Keywords: indentation files Idris
 
 ;; This file is not part of GNU Emacs.
