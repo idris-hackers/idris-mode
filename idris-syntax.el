@@ -149,7 +149,12 @@
   ;; Backslash \ is not escaping in \(x, y) -> x + y.
   '(("\\(\\\\\\)(" (1 "."))))
 
-(defconst idris-font-lock-defaults
+;; This should be a function so that it evaluates `idris-lidr-p` at the correct time
+(defun idris-font-lock-defaults ()
+  (cl-flet ((line-start (regexp)
+              (if (idris-lidr-p)
+                  (concat "^>" regexp)
+                (concat "^" regexp))))
     `('(
          ;; {- Block comments -}
          ("\\({-\\)\\(.*\\)\\(-}\\)"
@@ -158,10 +163,10 @@
            (3 font-lock-comment-delimiter-face))
          ;; TODO: this doesn't let you do newlines
          ;; Documentation comments.
-         ("^\\s-*\\(|||\\)\\(.+\\)$"
+         (,(line-start "\\s-*\\(|||\\)\\(.+\\)$")
           (1 font-lock-comment-delimiter-face)
           (2 font-lock-doc-face))
-         ("^\\s-*\\(|||\\)\\s-*\\(@\\)\\s-*\\(\\sw+\\)"
+         (,(line-start "\\s-*\\(|||\\)\\s-*\\(@\\)\\s-*\\(\\sw+\\)")
           (1 font-lock-comment-delimiter-face t)
           (2 font-lock-comment-delimiter-face t)
           (3 'idris-parameter-face t))
@@ -172,7 +177,7 @@
          ;; %assert_total
          ("%assert_total" . 'idris-unsafe-face)
          ;; `%access`, `%default`, etc
-         ("^\\s-*\\(%\\w+\\)\\s-*\\(.*\\)"
+         (,(line-start "\\s-*\\(%\\w+\\)\\s-*\\(.*\\)")
            (1 'idris-directive-face)
            (2 'idris-directive-argument-face))
          ;; Definitions with keywords.
@@ -181,39 +186,39 @@
            (2 'idris-definition-face))
          ;; Type declarations
          ;; TODO: this won't match, e.g. f:a
-         ("^\\s-*\\(\\w+\\|(\\s_+)\\)\\s-+\\(:\\)\\s-+"
+         (,(line-start "\\s-*\\(\\w+\\|(\\s_+)\\)\\s-+\\(:\\)\\s-+")
           (1 'idris-definition-face)
           (2 'idris-colon-face))
-         ("^\\s-*\\(total\\|partial\\)\\s-+\\(\\w+\\)\\s-+\\(:\\)\\s-+"
+         (,(line-start "\\s-*\\(total\\|partial\\)\\s-+\\(\\w+\\)\\s-+\\(:\\)\\s-+")
           (1 'idris-keyword-face)
           (2 'idris-definition-face)
           (3 'idris-colon-face))
          ;; "where"-blocks
-         ("^\\s-+\\(where\\)\\s-+\\(\\w+\\)\s-*\\(.?*\\)\\(=\\)"
+         (,(line-start "\\s-+\\(where\\)\\s-+\\(\\w+\\)\s-*\\(.?*\\)\\(=\\)")
            (1 'idris-keyword-face)
            (2 'idris-definition-face)
            (3 'idris-parameter-face)
            (4 'idris-equals-face))
-         ("^\\s-+\\(where\\)\\s-+\\(\\w+\\|(\\s_+)\\)\s-*\\(:\\)\\s-*"
+         (,(line-start "\\s-+\\(where\\)\\s-+\\(\\w+\\|(\\s_+)\\)\s-*\\(:\\)\\s-*")
            (1 'idris-keyword-face)
            (2 'idris-definition-face)
            (3 'idris-colon-face))
-         ("^\\s-+\\(where\\)\\s-+\\(total\\|partial\\)\\s-+\\(\\w+\\)\s-*\\(:\\)\\s-*"
+         (,(line-start "\\s-+\\(where\\)\\s-+\\(total\\|partial\\)\\s-+\\(\\w+\\)\s-*\\(:\\)\\s-*")
            (1 'idris-keyword-face)
            (2 'idris-keyword-face)
            (3 'idris-definition-face)
            (4 'idris-colon-face))
          ;; Vanilla definitions with = (and optionally let ... in ...)
-         ("^\\s-*\\(\\w+\\|(\\s_+)\\)\s-*\\(.*?\\)\\(=\\)"
+         (,(line-start "\\s-*\\(\\w+\\|(\\s_+)\\)\s-*\\(.*?\\)\\(=\\)")
            (1 'idris-definition-face)
            (2 'idris-parameter-face)
            (3 'idris-equals-face))
-         ("^\\s-*\\(\\w+\\|(\\s_+)\\)\\s-+\\(.*?\\)\\s-*\\(impossible\\)"
+         (,(line-start "\\s-*\\(\\w+\\|(\\s_+)\\)\\s-+\\(.*?\\)\\s-*\\(impossible\\)")
           (1 'idris-definition-face)
           (2 'idris-parameter-face)
           (3 'idris-keyword-face))
          ;; Definitions using "with"
-         ("^\\s-*\\(\\w+\\)\s-*\\(.?*\\)\\(with\\)\\(.?*\\)"
+         (,(line-start "\\s-*\\(\\w+\\)\s-*\\(.?*\\)\\(with\\)\\(.?*\\)")
            (1 'idris-definition-face)
            (2 'idris-parameter-face)
            (3 'idris-keyword-face)
@@ -238,7 +243,7 @@
          )
       nil nil nil nil
       ;; Special font lock syntactic keywords
-      (font-lock-syntactic-keywords . idris-basic-syntactic-keywords)))
+      (font-lock-syntactic-keywords . idris-basic-syntactic-keywords))))
 
 
 

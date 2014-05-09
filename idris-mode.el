@@ -95,7 +95,7 @@ Invokes `idris-mode-hook'."
   :syntax-table idris-syntax-table
   :group 'idris
   (set (make-local-variable 'font-lock-defaults)
-       idris-font-lock-defaults)
+       (idris-font-lock-defaults))
   (set (make-local-variable 'indent-tabs-mode) nil)
   (set (make-local-variable 'comment-start) "--")
 
