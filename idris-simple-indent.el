@@ -59,6 +59,7 @@
 ;; `(turn-(on/off)-)idris-simple-indent'.
 
 (require 'idris-mode)
+(require 'idris-common-utils)
 
 (defgroup idris-simple-indent nil
   "Simple Idris indentation."
@@ -75,6 +76,38 @@
   (message "Using idris-simple-indent version %s"
            idris-simple-indent-version))
 
+(defun idris-simple-indent-current-indentation ()
+  "Return the indentation of the current line, taking into account literate Idris syntax"
+  (save-excursion
+    (move-to-column 0)
+    (looking-at (if (idris-lidr-p) ">\\s-*" "\\s-*"))
+    (length (match-string 0))))
+
+(defun idris-simple-indent-indent-line-to (column)
+  "Just like `indent-line-to`, but ignoring the leading > for literate Idris"
+  (if (idris-lidr-p)
+      (if (save-excursion (move-to-column 0) (looking-at ">")) ;; lidr code line - look out for >
+          (progn
+            (save-excursion (move-to-column 0)
+                            (re-search-forward ">\\s-*" nil t)
+                            (replace-match (concat ">"
+                                                   (if (<= column 1)
+                                                       " "
+                                                     (make-string (1- column) ? ))) nil nil))
+            (move-to-column column))
+        (indent-line-to column)) ;; in text part, do normal indent
+    (indent-line-to column))) ;; not lidr, do normal indent
+
+(defun idris-simple-indent-tab-to-tab-stop ()
+  "A version of `tab-to-tab-stop' that takes literate Idris into account"
+  (let ((indent (idris-simple-indent-current-indentation))
+        (stops tab-stop-list)
+        indent-to)
+    (while (and stops (>= indent (car stops)))
+      (setq stops (cdr stops)))
+    (setq indent-to (if stops (car stops) 0))
+    (idris-simple-indent-indent-line-to indent-to)))
+
 ;; Partly stolen from `indent-relative' in indent.el:
 (defun idris-simple-indent ()
   "Space out to under next visible indent point.
@@ -84,57 +117,65 @@ the first non-whitespace of every nonblank line between the position and
 the current line. If there is no visible indent point beyond the current
 column, `tab-to-tab-stop' is done instead."
   (interactive)
-  (let* ((start-column (current-column))
-         (invisible-from nil) ; `nil' means infinity here
-         (indent
-          (catch 'idris-simple-indent-break
-            (save-excursion
-              (while (progn (beginning-of-line)
-                            (not (bobp)))
-                (forward-line -1)
-                (if (not (looking-at "[ \t]*\n"))
-                    (let ((this-indentation (current-indentation)))
-                      (if (or (not invisible-from)
-                              (< this-indentation invisible-from))
-                          (if (> this-indentation start-column)
-                              (setq invisible-from this-indentation)
-                            (let ((end (line-beginning-position 2)))
-                              (move-to-column start-column)
-                              ;; Is start-column inside a tab on this line?
-                              (if (> (current-column) start-column)
-                                  (backward-char 1))
-                              (or (looking-at "[ \t]")
-                                  (skip-chars-forward "^ \t" end))
-                              (skip-chars-forward " \t" end)
-                              (let ((col (current-column)))
-                                (throw 'idris-simple-indent-break
-                                       (if (or (= (point) end)
-                                               (and invisible-from
-                                                    (> col invisible-from)))
-                                           invisible-from
-                                         col)))))))))))))
-    (if indent
-        (let ((opoint (point-marker)))
-          (indent-line-to indent)
-          (if (> opoint (point))
-              (goto-char opoint))
-          (set-marker opoint nil))
-      (tab-to-tab-stop))))
+  ;; just insert two spaces for lidr if not on a code line
+  (if (and (idris-lidr-p)
+           (save-excursion (beginning-of-line) (not (looking-at-p ">"))))
+      (progn (beginning-of-line)
+             (insert "  ")
+             (skip-chars-forward " "))
+    ;; otherwise we're in code - do code indenting
+    (let* ((start-column (current-column))
+           (invisible-from nil) ; `nil' means infinity here
+           (indent
+            (catch 'idris-simple-indent-break
+              (save-excursion
+                (while (progn (beginning-of-line)
+                              (not (bobp)))
+                  (forward-line -1)
+                  (if (not (if (idris-lidr-p)           ;; if this line isn't whitespace-only
+                               (or (looking-at ">[ \t]*\n") ;; whitespace only
+                                   (looking-at "[^>]"))     ;; not code
+                             (looking-at "[ \t]*\n")))
+                      (let ((this-indentation (idris-simple-indent-current-indentation)))
+                        (if (or (not invisible-from)
+                                (< this-indentation invisible-from))
+                            (if (> this-indentation start-column)
+                                (setq invisible-from this-indentation)
+                              (let ((end (line-beginning-position 2)))
+                                (move-to-column start-column)
+                                ;; Is start-column inside a tab on this line?
+                                (if (> (current-column) start-column)
+                                    (backward-char 1))
+                                (or (looking-at "[ \t]")
+                                    (skip-chars-forward "^ \t" end))
+                                (skip-chars-forward " \t" end)
+                                (let ((col (current-column)))
+                                  (throw 'idris-simple-indent-break
+                                         (if (or (= (point) end)
+                                                 (and invisible-from
+                                                      (> col invisible-from)))
+                                             invisible-from
+                                           col)))))))))))))
+      (if indent
+          (let ((opoint (point-marker)))
+            (idris-simple-indent-indent-line-to indent)
+            (if (> opoint (point))
+                (goto-char opoint))
+            (set-marker opoint nil))
+        (idris-simple-indent-tab-to-tab-stop)))))
 
 (defun idris-simple-indent-backtab ()
   "Indent backwards. Dual to `idris-simple-indent'."
   (interactive)
-  (let ((current-point (point))
-        (i 0)
-        (x 0))
-    (goto-char (line-beginning-position))
-    (save-excursion
-      (while (< (point) current-point)
-        (idris-simple-indent)
-        (setq i (+ i 1))))
-    (while (< x (- i 1))
+  (let ((current-indent (idris-simple-indent-current-indentation))
+        (indent-to (cons 0 0)))
+    (idris-simple-indent-indent-line-to 0)
+    (while (< (idris-simple-indent-current-indentation) (1- current-indent))
       (idris-simple-indent)
-      (setq x (+ x 1)))))
+      (setf (cdr indent-to) (car indent-to))
+      (setf (car indent-to) (idris-simple-indent-current-indentation)))
+    (idris-simple-indent-indent-line-to (cdr indent-to))))
+
 
 (defun idris-simple-indent-newline-same-col ()
   "Make a newline and go to the same column as the current line."
