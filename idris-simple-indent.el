@@ -58,7 +58,6 @@
 ;; All functions/variables start with
 ;; `(turn-(on/off)-)idris-simple-indent'.
 
-(require 'idris-mode)
 (require 'idris-common-utils)
 
 (defgroup idris-simple-indent nil
