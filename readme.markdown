@@ -18,9 +18,10 @@ same face as functions and values defined with `=`.
 There are some docstrings spread around the mode, thus C-h m is helpful and returns the available key bindings.
 The REPL also supports tab completion, thus pressing tab opens a buffer with the available completions.
 
-Some preliminary notes are available in the [pdf]
+The [extended abstract] for DTP14 gives overview of the features of idris-mode. Some preliminary notes are available in the [pdf]
 
-[pdf]: http://itu.dk/~hame/idris-mode.pdf
+[extended abstract]: http://itu.dk/people/drc/pubs/dtp2014-idris-mode.pdf
+[pdf]: http://itu.dk/people/hame/idris-mode.pdf
 
 ## Inferior Idris
 
