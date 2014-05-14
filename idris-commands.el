@@ -318,6 +318,66 @@ compiler-annotated output. Does not return a line number."
         (yas-expand-snippet snippet nil nil '((yas-indent-line nil))))
     (insert str)))
 
+(defun idris-make-lemma ()
+  "Extract a lemma from a metavariable"
+  (interactive)
+  (let ((what (idris-thing-at-point)))
+    (when (car what)
+      (idris-load-file-sync)
+      (let* ((result (car (idris-eval `(:make-lemma ,(cdr what) ,(car what)))))
+             (lemma-type (car result)))
+        ;; There are two cases here: either a ?metavariable, or the {name} of a provisional defn.
+        (cond ((equal lemma-type :metavariable-lemma)
+               (let ((lem-app (cadr (assoc :replace-metavariable (cdr result))))
+                     (type-decl (cadr (assoc :definition-type (cdr result)))))
+                 ;; replace the metavariable
+                 ;; assume point is on the metavar right now!
+                 (while (not (looking-at "\\?[a-zA-Z0-9?_]+"))
+                   (backward-char 1))
+                 ;; now we're on the ? - we just matched the metavar
+                 (replace-match lem-app)
+
+                 ;; now we add the type signature - search upwards for the current
+                 ;; signature, then insert before it
+                 (re-search-backward (if (idris-lidr-p)
+                                         "^\\(>\\s-*\\)\\(([^)]+)\\|\\w+\\)\\s-*:"
+                                       "^\\(\\s-*\\)\\(([^)]+)\\|\\w+\\)\\s-*:"))
+                 (let ((indentation (match-string 1)) end-point)
+                   (beginning-of-line)
+                   (insert indentation)
+                   (setq end-point (point))
+                   (insert type-decl)
+                   (newline 2)
+                   ;; make sure point ends up ready to start a new pattern match
+                   (goto-char end-point))))
+              ((equal lemma-type :provisional-definition-lemma)
+               (let ((clause (cadr (assoc :definition-clause (cdr result)))))
+                 ;; Insert the definition just after the current definition
+                 ;; This can either be before the next type definition or at the end of
+                 ;; the buffer, if there is no next type definition
+                 (let ((next-defn-point
+                        (re-search-forward (if (idris-lidr-p)
+                                               "^\\(>\\s-*\\)\\(([^)]+)\\|\\w+\\)\\s-*:"
+                                             "^\\(\\s-*\\)\\(([^)]+)\\|\\w+\\)\\s-*:") nil t)))
+                   (if next-defn-point ;; if we found a definition
+                       (let ((indentation (match-string 1)) end-point)
+                         (goto-char next-defn-point)
+                         (beginning-of-line)
+                         (insert indentation)
+                         (setq end-point (point))
+                         (insert clause)
+                         (newline 2)
+                         ;; make sure point is at new defn
+                         (goto-char end-point))
+                     ;; otherwise it goes at the end of the buffer
+                     (let ((end (point-max)))
+                       (goto-char end)
+                       (insert clause)
+                       (newline)
+                       ;; make sure point is at new defn
+                       (goto-char end)))))))))))
+
+
 (defun idris-compile-and-execute ()
   "Execute the program in the current buffer"
   (interactive)

@@ -35,6 +35,7 @@
     (define-key map (kbd "C-c C-d") 'idris-docs-at-point)
     (define-key map (kbd "C-c C-c") 'idris-case-split)
     (define-key map (kbd "C-c C-m") 'idris-add-missing)
+    (define-key map (kbd "C-c C-e") 'idris-make-lemma)
     (define-key map (kbd "C-c C-s") 'idris-add-clause)
     (define-key map (kbd "C-c C-w") 'idris-make-with-block)
     (define-key map (kbd "C-c C-a") 'idris-proof-search)

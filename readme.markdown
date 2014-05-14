@@ -49,6 +49,7 @@ The following commands are available when there is an inferior Idris process (wh
 * `C-c C-s`: Create an initial pattern match clause for a type declaration
 * `C-c C-m`: Add missing pattern-match cases to an existing definition
 * `C-c C-a`: Attempt to solve a metavariable automatically. A prefix argument prompts for hints.
+* `C-c C-e`: Extract a metavariable or provisional definition name to an explicit top level definition
 * `C-c C-c`: Case split the pattern variable under point
 * `C-c C-t`: Get the type for the identifier under point. A prefix argument prompts for the name.
 * `C-c C-d`: Get the documentation for the identifier under point. A prefix argument prompts for the name.
