@@ -551,6 +551,26 @@ type-correct, so loading will fail."
         ;;; Otherwise do nothing
         ""))))
 
+(defun idris-set-idris-packages ()
+  "Interactively set the `idris-packages' variable"
+  (interactive)
+  (let* ((idris-libdir (replace-regexp-in-string
+                        "[\r\n]*\\'" ""   ; remove trailing newline junk
+                        (shell-command-to-string (concat idris-interpreter-path " --libdir"))))
+         (idris-libs (cl-remove-if #'(lambda (x) (string= (substring x 0 1) "."))
+                                   (directory-files idris-libdir)))
+         (packages '())
+         (prompt "Package to use (blank when done): ")
+         (this-package (completing-read prompt idris-libs)))
+    (while (not (string= this-package ""))
+      (push this-package packages)
+      (setq this-package (completing-read prompt (cl-remove-if #'(lambda (x) (member x packages))
+                                                               idris-libs))))
+    (when (y-or-n-p (format "Use the packages %s for this session?"
+                               (cl-reduce #'(lambda (x y) (concat x ", " y)) packages)))
+      (setq idris-packages packages)
+      (when (y-or-n-p "Save package list for future sessions? ")
+        (add-file-local-variable 'idris-packages packages)))))
 
 (defun idris-start-project ()
   "Interactively create a new Idris project, complete with ipkg file."
