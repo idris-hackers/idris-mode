@@ -57,6 +57,7 @@
     ["New Project" idris-start-project t]
     "-----------------"
     ["Load file" idris-load-file t]
+    ["Choose packages" idris-set-idris-packages t]
     ["Compile and execute" idris-compile-and-execute]
     ["Delete IBC file" idris-delete-ibc t]
     ["View compiler log" idris-view-compiler-log (get-buffer idris-log-buffer-name)]
