@@ -88,7 +88,13 @@
   (idris-ensure-process-and-repl-buffer)
   (if (buffer-file-name)
       (when (idris-current-buffer-dirty-p)
+        ;; Remove warning overlays
         (idris-warning-reset-all)
+        ;; Clear the contents of the compiler notes buffer, if it exists
+        (when (get-buffer idris-notes-buffer-name)
+          (with-current-buffer idris-notes-buffer-name
+            (let ((inhibit-read-only t)) (erase-buffer))))
+        ;; Actually do the loading
         (let* ((fn (buffer-file-name))
                (ipkg-srcdir (idris-ipkg-find-src-dir))
                (srcdir (if ipkg-srcdir
