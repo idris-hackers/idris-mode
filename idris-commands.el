@@ -283,7 +283,8 @@ compiler-annotated output. Does not return a line number."
     (when (car what)
       (idris-load-file-sync)
       (let ((result (car (idris-eval `(,command ,(cdr what) ,(car what)))))
-            (prefix (save-excursion
+            final-point
+            (prefix (save-excursion        ; prefix is the indentation to insert for the clause
                       (goto-char (point-min))
                       (forward-line (1- (cdr what)))
                       (goto-char (line-beginning-position))
@@ -292,9 +293,22 @@ compiler-annotated output. Does not return a line number."
                         (if prefix
                             prefix
                           "")))))
-        (end-of-line)
-        (insert "\n" prefix)
-        (idris-insert-or-expand result)))))
+        ;; Go forward until we get to a line with equal or less indentation to
+        ;; the type declaration, or the end of the buffer, and insert the
+        ;; result
+        (goto-char (line-beginning-position))
+        (forward-line)
+        (while (and (not (eobp))
+                    (progn (goto-char (line-beginning-position))
+                           ;; this will be true if we're looking at the prefix
+                           ;; with extra whitespace
+                           (looking-at-p (concat prefix "\\s-+"))))
+          (forward-line))
+        (insert prefix)
+        (setq final-point (point)) ;; Save the location of the start of the clause
+        (idris-insert-or-expand result)
+        (newline)
+        (goto-char final-point))))) ;; Put the cursor on the start of the inserted clause
 
 (defun idris-add-missing ()
   "Add missing cases"
