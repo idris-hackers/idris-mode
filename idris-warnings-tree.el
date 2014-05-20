@@ -43,10 +43,7 @@
         (setq buffer-read-only nil)
         (erase-buffer)
         (if (null notes)
-            (progn
-              (message "Cannot find any defect!")
-              (kill-buffer)
-              nil)
+            nil
           (let ((root (idris-compiler-notes-to-tree notes)))
             (idris-tree-insert root "")
             (insert "\n")
