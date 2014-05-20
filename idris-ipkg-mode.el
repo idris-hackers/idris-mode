@@ -99,7 +99,52 @@
       (newline)
       (goto-char p))))
 
-;;; Finding ipkg files
+;;; Clickable modules
+(defun idris-ipkg-make-module-link (start end src-dir)
+  "Attempt to make the region between START and END into a
+clickable link to open a module for editing, with modules located
+relative to SRC-DIR"
+  (let* ((name (buffer-substring-no-properties start end))
+         (fname (split-string name "\\."))
+         (basename (concat (mapconcat 'file-name-as-directory (cons src-dir (butlast fname)) "")
+                           (car (last fname))))
+         (idr (concat basename ".idr"))
+         (lidr (concat basename ".lidr")))
+    (cl-flet ((make-link (src-name)
+                 (let ((map (make-sparse-keymap)))
+                   (define-key map [mouse-2] #'(lambda ()
+                                                 (interactive)
+                                                 (find-file src-name)))
+                   (put-text-property start end 'keymap map)
+                   (put-text-property start end 'mouse-face 'highlight)
+                   (put-text-property start end 'help-echo
+                                      "mouse-2: edit module"))))
+      (if (file-exists-p idr)
+          (make-link idr)
+      (when (file-exists-p lidr)
+        (make-link lidr))))))
+
+
+(defun idris-ipkg-make-modules-clickable ()
+  "Make all modules with existing files clickable, where clicking opens them"
+  (interactive)
+  (remove-list-of-text-properties (point-min) (point-max) '(keymap mouse-face help-echo))
+  (save-excursion
+    (goto-char (point-min))
+    (when (re-search-forward "^modules\\s-*=\\s-*" nil t)
+      (while (re-search-forward "[a-zA-Z0-9\\.]+" nil t)
+        (let ((beg (match-beginning 0))
+              (end (match-end 0))
+              (src-dir (idris-ipkg-buffer-src-dir (file-name-directory (buffer-file-name)))))
+          (idris-ipkg-make-module-link beg end src-dir))
+        (re-search-forward "\\s-*,\\s-*" nil t)))))
+
+(defun idris-ipkg-enable-clickable-modules ()
+  "Enable setting up clickable modules on idle Emacs"
+  (interactive)
+  (run-with-idle-timer 1 t 'idris-ipkg-make-modules-clickable))
+
+;;; finding ipkg files
 
 ;; Based on http://www.emacswiki.org/emacs/EmacsTags section "Finding tags files"
 ;; That page is GPL, so this is OK to include
@@ -196,24 +241,28 @@ Invokes `idris-ipkg-build-mode-hook'.")
   (interactive)
   (idris-kill-buffer idris-ipkg-build-buffer-name))
 
+(defun idris-ipkg-buffer-src-dir (basename)
+  (save-excursion
+    (goto-char (point-min))
+    (let ((found
+           (re-search-forward "^\\s-*sourcedir\\s-*=\\s-*\\(\\sw+\\)"
+                              nil
+                              t)))
+      (if found
+          (let ((subdir (match-string 1)))
+            (concat (file-name-directory basename) subdir))
+        (file-name-directory basename)))))
+
 (defun idris-ipkg-find-src-dir (&optional ipkg-file)
-  (unless ipkg-file
-    (let ((found (idris-find-file-upwards "ipkg")))
-      (if (not found)
-          nil
-        (setq ipkg-file (car found))
-        ;; Now ipkg-file contains the path to the package
-        (with-temp-buffer
-          (insert-file ipkg-file)
-          (goto-char (point-min))
-          (let ((found
-                 (re-search-forward "^\\s-*sourcedir\\s-*=\\s-*\\(\\sw+\\)"
-                                    nil
-                                    t)))
-            (if found
-                (let ((subdir (match-string 1)))
-                  (concat (file-name-directory ipkg-file) subdir))
-              (file-name-directory ipkg-file))))))))
+  (let ((found (or (and ipkg-file (list ipkg-file))
+                   (idris-find-file-upwards "ipkg"))))
+    (if (not found)
+        nil
+      (setq ipkg-file (car found))
+      ;; Now ipkg-file contains the path to the package
+      (with-temp-buffer
+        (insert-file ipkg-file)
+        (idris-ipkg-buffer-src-dir ipkg-file)))))
 
 
 ;;; Mode definition
