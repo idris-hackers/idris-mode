@@ -125,24 +125,61 @@ relative to SRC-DIR"
         (make-link lidr))))))
 
 
-(defun idris-ipkg-make-modules-clickable ()
+(defun idris-ipkg-make-files-clickable ()
   "Make all modules with existing files clickable, where clicking opens them"
   (interactive)
   (remove-list-of-text-properties (point-min) (point-max) '(keymap mouse-face help-echo))
-  (save-excursion
-    (goto-char (point-min))
-    (when (re-search-forward "^modules\\s-*=\\s-*" nil t)
-      (while (re-search-forward "[a-zA-Z0-9\\.]+" nil t)
-        (let ((beg (match-beginning 0))
-              (end (match-end 0))
-              (src-dir (idris-ipkg-buffer-src-dir (file-name-directory (buffer-file-name)))))
-          (idris-ipkg-make-module-link beg end src-dir))
-        (re-search-forward "\\s-*,\\s-*" nil t)))))
+  (let ((src-dir (idris-ipkg-buffer-src-dir (file-name-directory (buffer-file-name)))))
+    ;; Make the sourcedir clickable
+    (save-excursion
+      (goto-char (point-min))
+      (when (and (file-exists-p src-dir)
+                 (file-directory-p src-dir)
+                 (re-search-forward "^sourcedir\\s-*=\\s-*\\([a-zA-Z/0-9]+\\)" nil t))
+        (let ((start (match-beginning 1))
+              (end (match-end 1))
+              (map (make-sparse-keymap)))
+          (define-key map [mouse-2] #'(lambda ()
+                                        (interactive)
+                                        (dired src-dir)))
+          (put-text-property start end 'keymap map)
+          (put-text-property start end 'mouse-face 'highlight)
+          (put-text-property start end 'help-echo (concat "mouse-2: dired " src-dir)))))
+    ;; Make the modules clickable
+    (save-excursion
+      (goto-char (point-min))
+      (cl-flet ((mod-link ()
+                  (re-search-forward "[a-zA-Z0-9\\.]+" nil t)
+                  (let ((beg (match-beginning 0))
+                        (end (match-end 0)))
+                    (idris-ipkg-make-module-link beg end src-dir))))
+        (when (re-search-forward "^modules\\s-*=\\s-*" nil t)
+          (cl-loop initially (mod-link)
+                   while (looking-at-p "\\s-*,\\s-*")
+                   do (progn (skip-chars-forward " ,\n")
+                             (mod-link))))))
+    ;; Make the Makefile clickable
+    (save-excursion
+      (goto-char (point-min))
+      (when (re-search-forward "^makefile\\s-*=\\s-*\\([a-zA-Z/0-9]+\\)")
+        (let ((start (match-beginning 1))
+              (end (match-end 1))
+              (makefile (concat (file-name-as-directory src-dir) (match-string 1))))
+        (when (file-exists-p makefile)
+          (let ((map (make-sparse-keymap)))
+            (define-key map [mouse-2] #'(lambda ()
+                                          (interactive)
+                                          (find-file makefile)))
+            (put-text-property start end 'keymap map)
+            (put-text-property start end 'mouse-face 'highlight)
+            (put-text-property start end 'help-echo "mouse-2: edit makefile"))))))))
 
-(defun idris-ipkg-enable-clickable-modules ()
-  "Enable setting up clickable modules on idle Emacs"
+
+
+(defun idris-ipkg-enable-clickable-files ()
+  "Enable setting up clickable modules and makefiles on idle Emacs"
   (interactive)
-  (run-with-idle-timer 1 t 'idris-ipkg-make-modules-clickable))
+  (run-with-idle-timer 1 t 'idris-ipkg-make-files-clickable))
 
 ;;; finding ipkg files
 
@@ -249,7 +286,7 @@ Invokes `idris-ipkg-build-mode-hook'.")
                               nil
                               t)))
       (if found
-          (let ((subdir (match-string 1)))
+          (let ((subdir (buffer-substring-no-properties (match-beginning 1) (match-end 1))))
             (concat (file-name-directory basename) subdir))
         (file-name-directory basename)))))
 
@@ -264,6 +301,16 @@ Invokes `idris-ipkg-build-mode-hook'.")
         (insert-file ipkg-file)
         (idris-ipkg-buffer-src-dir ipkg-file)))))
 
+
+;;; Settings
+
+(defgroup idris-ipkg nil "Idris package mode" :prefix 'idris-ipkg :group 'idris)
+
+(defcustom idris-ipkg-mode-hook '(idris-ipkg-enable-clickable-files)
+  "Functions to call when opening the Idris package mode"
+  :type 'hook
+  :options '(idris-ipkg-enable-clickable-files)
+  :group 'idris-ipkg)
 
 ;;; Mode definition
 
