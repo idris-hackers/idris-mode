@@ -18,6 +18,7 @@
 
 (require 'idris-core)
 (require 'idris-settings)
+(require 'idris-common-utils)
 
 
 ;;; Faces
@@ -100,55 +101,68 @@
       (goto-char p))))
 
 ;;; Clickable modules
-(defun idris-ipkg-make-module-link (start end src-dir)
-  "Attempt to make the region between START and END into a
-clickable link to open a module for editing, with modules located
-relative to SRC-DIR"
-  (let* ((name (buffer-substring-no-properties start end))
-         (fname (split-string name "\\."))
-         (basename (concat (mapconcat 'file-name-as-directory (cons src-dir (butlast fname)) "")
-                           (car (last fname))))
-         (idr (concat basename ".idr"))
-         (lidr (concat basename ".lidr")))
-    (cl-flet ((make-link (src-name)
-                 (let ((map (make-sparse-keymap)))
-                   (define-key map [mouse-2] #'(lambda ()
-                                                 (interactive)
-                                                 (find-file src-name)))
-                   (put-text-property start end 'keymap map)
-                   (put-text-property start end 'mouse-face 'highlight)
-                   (put-text-property start end 'help-echo
-                                      "mouse-2: edit module"))))
-      (if (file-exists-p idr)
-          (make-link idr)
-      (when (file-exists-p lidr)
-        (make-link lidr))))))
 
-
-(defun idris-ipkg-make-modules-clickable ()
+(defun idris-ipkg-make-files-clickable ()
   "Make all modules with existing files clickable, where clicking opens them"
   (interactive)
   (remove-list-of-text-properties (point-min) (point-max) '(keymap mouse-face help-echo))
-  (save-excursion
-    (goto-char (point-min))
-    (when (re-search-forward "^modules\\s-*=\\s-*" nil t)
-      (while (re-search-forward "[a-zA-Z0-9\\.]+" nil t)
-        (let ((beg (match-beginning 0))
-              (end (match-end 0))
-              (src-dir (idris-ipkg-buffer-src-dir (file-name-directory (buffer-file-name)))))
-          (idris-ipkg-make-module-link beg end src-dir))
-        (re-search-forward "\\s-*,\\s-*" nil t)))))
+  (let ((src-dir (idris-ipkg-buffer-src-dir (file-name-directory (buffer-file-name)))))
+    ;; Make the sourcedir clickable
+    (save-excursion
+      (goto-char (point-min))
+      (when (and (file-exists-p src-dir)
+                 (file-directory-p src-dir)
+                 (re-search-forward "^sourcedir\\s-*=\\s-*\\([a-zA-Z/0-9]+\\)" nil t))
+        (let ((start (match-beginning 1))
+              (end (match-end 1))
+              (map (make-sparse-keymap)))
+          (define-key map [mouse-2] #'(lambda ()
+                                        (interactive)
+                                        (dired src-dir)))
+          (put-text-property start end 'keymap map)
+          (put-text-property start end 'mouse-face 'highlight)
+          (put-text-property start end 'help-echo (concat "mouse-2: dired " src-dir)))))
+    ;; Make the modules clickable
+    (save-excursion
+      (goto-char (point-min))
+      (cl-flet ((mod-link ()
+                  (re-search-forward "[a-zA-Z0-9\\.]+" nil t)
+                  (let ((beg (match-beginning 0))
+                        (end (match-end 0)))
+                    (idris-make-module-link beg end src-dir))))
+        (when (re-search-forward "^modules\\s-*=\\s-*" nil t)
+          (cl-loop initially (mod-link)
+                   while (looking-at-p "\\s-*,\\s-*")
+                   do (progn (skip-chars-forward " ,\n")
+                             (mod-link))))))
+    ;; Make the Makefile clickable
+    (save-excursion
+      (goto-char (point-min))
+      (when (re-search-forward "^makefile\\s-*=\\s-*\\([a-zA-Z/0-9]+\\)")
+        (let ((start (match-beginning 1))
+              (end (match-end 1))
+              (makefile (concat (file-name-as-directory src-dir) (match-string 1))))
+        (when (file-exists-p makefile)
+          (let ((map (make-sparse-keymap)))
+            (define-key map [mouse-2] #'(lambda ()
+                                          (interactive)
+                                          (find-file makefile)))
+            (put-text-property start end 'keymap map)
+            (put-text-property start end 'mouse-face 'highlight)
+            (put-text-property start end 'help-echo "mouse-2: edit makefile"))))))))
 
-(defun idris-ipkg-enable-clickable-modules ()
-  "Enable setting up clickable modules on idle Emacs"
+
+
+(defun idris-ipkg-enable-clickable-files ()
+  "Enable setting up clickable modules and makefiles on idle Emacs"
   (interactive)
-  (run-with-idle-timer 1 t 'idris-ipkg-make-modules-clickable))
+  (run-with-idle-timer 1 t 'idris-ipkg-make-files-clickable))
 
 ;;; finding ipkg files
 
 ;; Based on http://www.emacswiki.org/emacs/EmacsTags section "Finding tags files"
 ;; That page is GPL, so this is OK to include
-(defun idris-find-file-upwards (suffix)
+(defun idris-find-file-upwards (suffix &optional allow-hidden)
   "Recursively searches each parent directory starting from the default-directory.
 looking for a file with name ending in suffix.  Returns the paths
 to the matching files, or nil if not found."
@@ -163,7 +177,10 @@ to the matching files, or nil if not found."
             ;; accounts for both.
             ((or (null parent) (equal parent (directory-file-name parent))) nil) ; Not found
             (t (find-file-r (directory-file-name parent))))))) ; Continue
-    (find-file-r default-directory)))
+    (cl-remove-if #'(lambda (f)
+                      (and (not allow-hidden)
+                           (string-prefix-p "." (file-name-nondirectory f))))
+                  (find-file-r default-directory))))
 
 (defvar idris-ipkg-build-buffer-name "*idris-build*")
 
@@ -249,7 +266,7 @@ Invokes `idris-ipkg-build-mode-hook'.")
                               nil
                               t)))
       (if found
-          (let ((subdir (match-string 1)))
+          (let ((subdir (buffer-substring-no-properties (match-beginning 1) (match-end 1))))
             (concat (file-name-directory basename) subdir))
         (file-name-directory basename)))))
 
@@ -261,9 +278,19 @@ Invokes `idris-ipkg-build-mode-hook'.")
       (setq ipkg-file (car found))
       ;; Now ipkg-file contains the path to the package
       (with-temp-buffer
-        (insert-file ipkg-file)
+        (insert-file-contents ipkg-file)
         (idris-ipkg-buffer-src-dir ipkg-file)))))
 
+
+;;; Settings
+
+(defgroup idris-ipkg nil "Idris package mode" :prefix 'idris-ipkg :group 'idris)
+
+(defcustom idris-ipkg-mode-hook '(idris-ipkg-enable-clickable-files)
+  "Functions to call when opening the Idris package mode"
+  :type 'hook
+  :options '(idris-ipkg-enable-clickable-files)
+  :group 'idris-ipkg)
 
 ;;; Mode definition
 

@@ -70,10 +70,10 @@
   "The face to be used to highlight implicit arguments"
   :group 'idris-faces)
 
-(defcustom idris-mode-hook '(turn-on-idris-simple-indent)
+(defcustom idris-mode-hook '(turn-on-idris-simple-indent idris-enable-clickable-imports)
   "Hook to run upon entering Idris mode. You should choose at most one indentation style."
   :type 'hook
-  :options '(turn-on-idris-indentation turn-on-idris-simple-indent)
+  :options '(turn-on-idris-indentation turn-on-idris-simple-indent idris-enable-clickable-imports)
   :group 'idris)
 
 (defcustom idris-use-yasnippet-expansions t
