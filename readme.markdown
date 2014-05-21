@@ -76,7 +76,9 @@ Additionally, the command `M-x idris-start-project` will create a directory stru
 
 ## Installation
 
-If you have Emacs >= 23, you can install pre-built packages from
+Idris mode uses lexical binding and other features not available in versions of Emacs prior to 24. Thus, only Emacs 24 and up are supported.
+
+You can install pre-built packages from
 [MELPA](http://melpa.milkbox.net/): `idris-mode` will automatically be enabled
 in `.idr` files without any further configuration.
 
