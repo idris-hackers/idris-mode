@@ -18,6 +18,7 @@
 
 (require 'idris-core)
 (require 'idris-settings)
+(require 'idris-common-utils)
 
 
 ;;; Faces
@@ -100,30 +101,6 @@
       (goto-char p))))
 
 ;;; Clickable modules
-(defun idris-ipkg-make-module-link (start end src-dir)
-  "Attempt to make the region between START and END into a
-clickable link to open a module for editing, with modules located
-relative to SRC-DIR"
-  (let* ((name (buffer-substring-no-properties start end))
-         (fname (split-string name "\\."))
-         (basename (concat (mapconcat 'file-name-as-directory (cons src-dir (butlast fname)) "")
-                           (car (last fname))))
-         (idr (concat basename ".idr"))
-         (lidr (concat basename ".lidr")))
-    (cl-flet ((make-link (src-name)
-                 (let ((map (make-sparse-keymap)))
-                   (define-key map [mouse-2] #'(lambda ()
-                                                 (interactive)
-                                                 (find-file src-name)))
-                   (put-text-property start end 'keymap map)
-                   (put-text-property start end 'mouse-face 'highlight)
-                   (put-text-property start end 'help-echo
-                                      "mouse-2: edit module"))))
-      (if (file-exists-p idr)
-          (make-link idr)
-      (when (file-exists-p lidr)
-        (make-link lidr))))))
-
 
 (defun idris-ipkg-make-files-clickable ()
   "Make all modules with existing files clickable, where clicking opens them"
@@ -152,7 +129,7 @@ relative to SRC-DIR"
                   (re-search-forward "[a-zA-Z0-9\\.]+" nil t)
                   (let ((beg (match-beginning 0))
                         (end (match-end 0)))
-                    (idris-ipkg-make-module-link beg end src-dir))))
+                    (idris-make-module-link beg end src-dir))))
         (when (re-search-forward "^modules\\s-*=\\s-*" nil t)
           (cl-loop initially (mod-link)
                    while (looking-at-p "\\s-*,\\s-*")
@@ -185,7 +162,7 @@ relative to SRC-DIR"
 
 ;; Based on http://www.emacswiki.org/emacs/EmacsTags section "Finding tags files"
 ;; That page is GPL, so this is OK to include
-(defun idris-find-file-upwards (suffix)
+(defun idris-find-file-upwards (suffix &optional allow-hidden)
   "Recursively searches each parent directory starting from the default-directory.
 looking for a file with name ending in suffix.  Returns the paths
 to the matching files, or nil if not found."
@@ -200,7 +177,10 @@ to the matching files, or nil if not found."
             ;; accounts for both.
             ((or (null parent) (equal parent (directory-file-name parent))) nil) ; Not found
             (t (find-file-r (directory-file-name parent))))))) ; Continue
-    (find-file-r default-directory)))
+    (cl-remove-if #'(lambda (f)
+                      (and (not allow-hidden)
+                           (string-prefix-p "." (file-name-nondirectory f))))
+                  (find-file-r default-directory))))
 
 (defvar idris-ipkg-build-buffer-name "*idris-build*")
 
@@ -298,7 +278,7 @@ Invokes `idris-ipkg-build-mode-hook'.")
       (setq ipkg-file (car found))
       ;; Now ipkg-file contains the path to the package
       (with-temp-buffer
-        (insert-file ipkg-file)
+        (insert-file-contents ipkg-file)
         (idris-ipkg-buffer-src-dir ipkg-file)))))
 
 

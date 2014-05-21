@@ -169,4 +169,30 @@ corresponding values in the CDR of VALUE."
 BUFFER is not supplied or is nil."
   (string= (file-name-extension (buffer-file-name buffer)) "lidr"))
 
+
+(defun idris-make-module-link (start end src-dir)
+  "Attempt to make the region between START and END into a
+clickable link to open a module for editing, with modules located
+relative to SRC-DIR"
+  (let* ((name (buffer-substring-no-properties start end))
+         (fname (split-string name "\\."))
+         (basename (concat (mapconcat 'file-name-as-directory (cons src-dir (butlast fname)) "")
+                           (car (last fname))))
+         (idr (concat basename ".idr"))
+         (lidr (concat basename ".lidr")))
+    (cl-flet ((make-link (src-name)
+                 (let ((map (make-sparse-keymap)))
+                   (define-key map [mouse-2] #'(lambda ()
+                                                 (interactive)
+                                                 (find-file src-name)))
+                   (put-text-property start end 'keymap map)
+                   (put-text-property start end 'mouse-face 'highlight)
+                   (put-text-property start end 'help-echo
+                                      "mouse-2: edit module"))))
+      (if (file-exists-p idr)
+          (make-link idr)
+        (when (file-exists-p lidr)
+          (make-link lidr))))))
+
+
 (provide 'idris-common-utils)

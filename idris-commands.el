@@ -575,6 +575,25 @@ type-correct, so loading will fail."
           ;; Otherwise do nothing
           "")))))
 
+(defun idris-make-imports-clickable ()
+  "Attempt to make imports in the current package into clickable links"
+  (interactive)
+  (remove-list-of-text-properties (point-min) (point-max) '(keymap mouse-face help-echo))
+  (let ((ipkg-src-dir (idris-ipkg-find-src-dir)))
+    (when ipkg-src-dir
+      (save-excursion
+        (goto-char (point-min))
+        (while (re-search-forward (if (idris-lidr-p)
+                                      "^> import\\s-+\\([a-zA-Z0-9\\.]+\\)"
+                                    "^import\\s-+\\([a-zA-Z0-9\\.]+\\)") nil t)
+          (let ((start (match-beginning 1)) (end (match-end 1)))
+            (idris-make-module-link start end ipkg-src-dir)))))))
+
+(defun idris-enable-clickable-imports ()
+  "Enable the generation of clickable module imports for the current buffer"
+  (interactive)
+  (run-with-idle-timer 1 t 'idris-make-imports-clickable))
+
 (defun idris-set-idris-packages ()
   "Interactively set the `idris-packages' variable"
   (interactive)
