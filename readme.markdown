@@ -70,6 +70,8 @@ Idris's build system, which consists of package files ending in `.ipkg`, has rud
 The following commands are available in `idris-ipkg-mode`:
 * `C-c C-f`: Insert a field, with completion support. Completion for field names is also available by pressing `M-TAB`.
 
+When a package is present, `idris-mode` gains a few convenience features. In particular, the Idris compiler's working directory is set based on the `sourcedir` directive in the package file, and certain filenames or module names become clickable buttons, to conveniently open them.
+
 Additionally, the command `M-x idris-start-project` will create a directory structure and initial package file for a new project.
 
 ## Installation
