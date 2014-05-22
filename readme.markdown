@@ -45,7 +45,9 @@ Idris mode displays output from the Idris compiler with full semantic highlighti
 
 The following commands are available when there is an inferior Idris process (which is started on demand by the commands):
 
-* `C-c C-l`: Load the current file into Idris. A prefix version does not switch to the REPL buffer afterwards.
+* `C-c C-l`: Load the current file into Idris. A prefix argument causes Idris to only load the portion of the file up to point.
+* `C-u C-u C-c C-l`: Obliterate the loading marker, switching back to loading the whole buffer.
+* `C-c C-n`, `C-c C-p`: Extend and contract the region to be loaded, if such a region exists, one line at a time.
 * `C-c C-s`: Create an initial pattern match clause for a type declaration
 * `C-c C-m`: Add missing pattern-match cases to an existing definition
 * `C-c C-a`: Attempt to solve a metavariable automatically. A plain prefix argument prompts for hints, while a numeric prefix argument sets the recursion depth.

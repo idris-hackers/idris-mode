@@ -70,6 +70,11 @@
   "The face to be used to highlight implicit arguments"
   :group 'idris-faces)
 
+(defface idris-loaded-region-face
+  '((t (:background "pale green")))
+  "The face to use for the currently-loaded region of a buffer"
+  :group 'idris-faces)
+
 (defcustom idris-mode-hook '(turn-on-idris-simple-indent idris-enable-clickable-imports)
   "Hook to run upon entering Idris mode. You should choose at most one indentation style."
   :type 'hook
