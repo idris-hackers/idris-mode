@@ -416,16 +416,26 @@ compiler-annotated output. Does not return a line number."
                                    (format "${%s:%s}" n metavar)))
                                str)))
 
-(defun idris-proof-search (hints)
-  "Invoke the proof search"
+(defun idris-proof-search (prefix-arg)
+  "Invoke the proof search. A plain prefix argument causes the
+command to prompt for hints and recursion depth, while a numeric
+prefix argument sets the recursion depth directly."
   (interactive "P")
-  (let ((hints (if hints
+  (let ((hints (if (consp prefix-arg)
                    (split-string (read-string "Hints: ") "[^a-zA-Z0-9']")
                  '()))
+        (depth (cond ((consp prefix-arg)
+                      (let ((input (string-to-number (read-string "Search depth: "))))
+                        (if (= input 0)
+                            nil
+                          (list input))))
+                     ((numberp prefix-arg)
+                      (list prefix-arg))
+                     (t nil)))
         (what (idris-thing-at-point)))
     (when (car what)
       (idris-load-file-sync)
-      (let ((result (car (idris-eval `(:proof-search ,(cdr what) ,(car what) ,hints)))))
+      (let ((result (car (idris-eval `(:proof-search ,(cdr what) ,(car what) ,hints ,@depth)))))
         (save-excursion
           (let ((start (progn (search-backward "?") (point)))
                 (end (progn (forward-char) (search-forward-regexp "[^a-zA-Z0-9_']") (backward-char) (point))))
