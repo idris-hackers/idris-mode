@@ -534,7 +534,8 @@ type-correct, so loading will fail."
                  (string= (file-name-extension fname) "lidr")))
         (error "The current file is not an Idris file")
       (when (y-or-n-p (concat "Really delete " ibc "?"))
-        (delete-file ibc)))))
+        (delete-file ibc)
+        (message "%s deleted" ibc)))))
 
 (defun idris-make-ref-menu (_name)
   (let ((menu (make-sparse-keymap)))
