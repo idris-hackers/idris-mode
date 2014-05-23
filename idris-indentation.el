@@ -139,6 +139,7 @@ autofill-mode."
   (signal 'parse-error (apply 'format args)))
 
 (defmacro on-parse-error (except &rest body)
+  (declare (indent 1))
   `(condition-case parse-error-string
        (progn ,@body)
      (parse-error

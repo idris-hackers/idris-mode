@@ -206,6 +206,7 @@ asynchronously.
 
 Note: don't use backquote syntax for SEXP, because various Emacs
 versions cannot deal with that."
+  (declare (indent 2))
   (let ((result (cl-gensym)))
     `(lexical-let ,(loop for var in saved-vars
                          collect (etypecase var
