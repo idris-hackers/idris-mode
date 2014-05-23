@@ -64,10 +64,10 @@ The following commands are available when there is an inferior Idris process (wh
 `M-Tab` or whatever you have `completion-at-point` bound to will ask the running Idris process for completions for the current identifier. Note that this command requires that the Idris interpreter is already running, because attempting to load an incomplete buffer would probably not work.
 
 ## Package files
-Idris's build system, which consists of package files ending in `.ipkg`, has rudimentary support from `idris-mode`. The following commands are available in Idris buffers or package buffers; if they are run from an Idris buffer, then `idris-mode` will attempt to locate the package file automatically.
-* `C-c c`: Clean the package, removing `.ibc` files
-* `C-c b`: Build the package
-* `C-c i`: Install the package to the user's repository, building first if necessary
+Idris's build system, which consists of package files ending in `.ipkg`, has rudimentary support from `idris-mode`. The following commands are available in Idris buffers or package buffers; if they are run from an Idris buffer, then `idris-mode` will attempt to locate the package file automatically. The mnemonic for `C-b` in the prefix is "build".
+* `C-c C-b c`: Clean the package, removing `.ibc` files
+* `C-c C-b b`: Build the package
+* `C-c C-b i`: Install the package to the user's repository, building first if necessary
 
 The following commands are available in `idris-ipkg-mode`:
 * `C-c C-f`: Insert a field, with completion support. Completion for field names is also available by pressing `M-TAB`.
@@ -95,3 +95,6 @@ Idris mode is heavily dependent on the Idris compiler for its more advanced feat
 
 Customize various aspects of the mode using `M-x customize-group RET idris RET`.
 
+## Keybinding conventions
+
+All three-letter keybindings are available in versions with and without `C-` on the final key, following the convention from SLIME.
