@@ -26,6 +26,7 @@
 (require 'idris-warnings)
 (require 'idris-common-utils)
 (require 'idris-ipkg-mode)
+(require 'eldoc)
 
 
 (defvar idris-mode-map
@@ -117,6 +118,9 @@ Invokes `idris-mode-hook'."
          ("Classes" "^\\s-*class\\s-+\\(\\sw+\\)" 1)
          (nil "^\\s-*\\(\\sw+\\)\\s-*:" 1)
          ("Namespaces" "^\\s-*namespace\\s-+\\(\\sw\\|\\.\\)" 1)))
+
+  ; eldoc support
+  (set (make-local-variable 'eldoc-documentation-function) 'idris-eldoc-lookup)
 
   ; Filling of comments and docs
   (set (make-local-variable 'fill-paragraph-function) 'idris-fill-paragraph)

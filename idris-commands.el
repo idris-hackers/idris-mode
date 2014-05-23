@@ -351,6 +351,15 @@ compiler-annotated output. Does not return a line number."
     (when name
       (idris-info-for-name :docs-for name))))
 
+(defun idris-eldoc-lookup ()
+  "Support for showing type signatures in the modeline when there's a running Idris"
+  (let ((signature (ignore-errors (idris-eval (list :type-of (idris-name-at-point))))))
+    (when signature
+      (with-temp-buffer
+        (idris-propertize-spans (idris-repl-semantic-text-props (cdr signature))
+          (insert (car signature)))
+        (buffer-string)))))
+
 (defun idris-case-split ()
   "Case split the pattern variable at point"
   (interactive)
