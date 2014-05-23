@@ -54,6 +54,7 @@
                   (<= (max pos1 pos2) (line-end-position))))
 
 (defmacro idris-save-marker (marker &rest body)
+  (declare (indent 1))
   (let ((pos (cl-gensym "pos")))
   `(let ((,pos (marker-position ,marker)))
      (prog1 (progn . ,body)
@@ -63,6 +64,7 @@
   "Execute BODY and add PROPS to all the text it inserts.
 More precisely, PROPS are added to the region between the point's
 positions before and after executing BODY."
+  (declare (indent 1))
   (let ((start (cl-gensym)))
     `(let ((,start (point)))
        (prog1 (progn ,@body)
@@ -71,6 +73,7 @@ positions before and after executing BODY."
 (defmacro idris-propertize-spans (spans &rest body)
   "Execute BODY and add the properties indicated by SPANS to the
 inserted text (that is, relative to point prior to insertion)."
+  (declare (indent 1))
   (let ((start (cl-gensym)))
     `(let ((,start (point)))
        (prog1 (progn ,@body)
@@ -146,6 +149,7 @@ The pattern syntax is:
 The list of patterns is searched for a HEAD `eq' to the car of
 VALUE. If one is found, the BODY is executed with ARGS bound to the
 corresponding values in the CDR of VALUE."
+  (declare (indent 1))
   (let ((operator (cl-gensym "op-"))
 	(operands (cl-gensym "rand-"))
 	(tmp (cl-gensym "tmp-")))

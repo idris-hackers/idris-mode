@@ -62,6 +62,8 @@ Invokes `idris-info-mode-hook'.")
   (if (get-buffer-window idris-info-buffer-name 'visible) t nil))
 
 (defmacro with-idris-info-buffer (&rest cmds)
+  "Execute `CMDS' in a fresh Idris info buffer, then display it to the user."
+  (declare (indent defun))
   `(progn (with-current-buffer (idris-info-buffer)
             (idris-info-mode)
             (setq buffer-read-only nil)
