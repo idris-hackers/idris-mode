@@ -353,7 +353,7 @@ compiler-annotated output. Does not return a line number."
 
 (defun idris-eldoc-lookup ()
   "Support for showing type signatures in the modeline when there's a running Idris"
-  (let ((signature (ignore-errors (idris-eval (list :type-of (idris-name-at-point))))))
+  (let ((signature (ignore-errors (idris-eval (list :type-of (idris-name-at-point)) t))))
     (when signature
       (with-temp-buffer
         (idris-propertize-spans (idris-repl-semantic-text-props (cdr signature))

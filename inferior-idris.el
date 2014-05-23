@@ -240,8 +240,10 @@ versions cannot deal with that."
 (defvar idris-stack-eval-tags nil
   "List of stack-tags of continuations waiting on the stack.")
 
-(defun idris-eval (sexp)
-  "Evaluate EXPR on the inferior Idris and return the result."
+(defun idris-eval (sexp &optional no-errors)
+  "Evaluate EXPR on the inferior Idris and return the result. If
+`NO-ERRORS' is non-nil, don't trigger warning buffers and don't
+call `ERROR' if there was an Idris error."
   (let* ((tag (cl-gensym (format "idris-result-%d-"
                               (1+ idris-continuation-counter))))
 	 (idris-stack-eval-tags (cons tag idris-stack-eval-tags)))
@@ -256,10 +258,12 @@ versions cannot deal with that."
                    tag sexp))
           (throw tag (list #'identity (cons value spans))))
          ((:error condition &optional spans)
-          (when (member 'warnings-tree idris-warnings-printing)
-            (when (idris-list-compiler-notes)
-              (pop-to-buffer (idris-buffer-name :notes))))
-          (throw tag (list #'error "%s (synchronous Idris evaluation failed)" condition))))
+          (if no-errors
+              (throw tag (list #'identity nil))
+            (when (member 'warnings-tree idris-warnings-printing)
+              (when (idris-list-compiler-notes)
+                (pop-to-buffer (idris-buffer-name :notes))))
+            (throw tag (list #'error "%s (synchronous Idris evaluation failed)" condition)))))
        (let ((debug-on-quit t)
              (inhibit-quit nil))
          (while t
