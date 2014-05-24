@@ -748,6 +748,16 @@ means to not ask for confirmation."
       (when (y-or-n-p "Save package list for future sessions? ")
         (add-file-local-variable 'idris-packages packages)))))
 
+(defun idris-open-package-file ()
+  "Provide easy access to package files."
+  (interactive)
+  (let ((files (idris-find-file-upwards "ipkg")))
+    (cond ((= (length files) 0)
+           (error "No .ipkg file found"))
+          ((= (length files) 1)
+           (find-file (car files)))
+          (t (find-file (completing-read "Package file: " files nil t))))))
+
 (defun idris-start-project ()
   "Interactively create a new Idris project, complete with ipkg file."
   (interactive)
