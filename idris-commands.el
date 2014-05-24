@@ -86,7 +86,7 @@
   (interactive)
   (when idris-metavariable-show-on-load (idris-list-metavariables)))
 
-(defcustom idris-load-file-success-hook '(idris-list-metavariables)
+(defcustom idris-load-file-success-hook '(idris-list-metavariables-on-load)
   "Functions to call when loading a file is successful"
   :type 'hook
   :options '(idris-list-metavariables-on-load)
@@ -105,6 +105,22 @@
         (setq idris-loaded-region-overlay nil))
     (idris-make-dirty)))
 
+(defun idris-whole-buffer-fc ()
+  "Create a source span corresponding to the entire buffer. This
+is a workaround for old versions of Idris that don't provide a
+parsed region on success - it can be deleted after 0.9.13 comes
+out."
+  (let* ((cwd (file-name-as-directory idris-process-current-working-directory))
+         (fname (if (string= (substring (buffer-file-name)
+                                        0 (length cwd))
+                             cwd)
+                    (substring (buffer-file-name) (length cwd))
+                  (buffer-file-name))))
+    (save-excursion
+      (goto-char (point-max))
+      `((:filename ,fname)
+        (:start 1 1)
+        (:end ,(line-number-at-pos) ,(1+ (current-column)))))))
 
 (defun idris-update-loaded-region (fc)
   (let* ((end (assoc :end fc))
@@ -191,7 +207,9 @@ line."
                             (when (member 'warnings-tree idris-warnings-printing)
                               (idris-list-compiler-notes))
                             (run-hooks 'idris-load-file-success-hook)
-                            (idris-update-loaded-region result))
+                            (if (stringp result) ;; Remove this hack after the next Idris release
+                                (idris-update-loaded-region (idris-whole-buffer-fc))
+                              (idris-update-loaded-region result)))
                           (lambda (_condition)
                             (when (member 'warnings-tree idris-warnings-printing)
                               (idris-list-compiler-notes)
@@ -229,7 +247,9 @@ Idris process. This sets the load position to point, if there is one."
             (idris-update-options-cache)
             (setq idris-currently-loaded-buffer (current-buffer))
             (idris-make-clean)
-            (idris-update-loaded-region (car result)))))
+            (if (stringp result) ;; Remove this hack after the next Idris release
+                (idris-update-loaded-region (idris-whole-buffer-fc))
+              (idris-update-loaded-region (car result))))))
     (error "Cannot find file for current buffer")))
 
 
@@ -619,7 +639,10 @@ type-correct, so loading will fail."
         (progn
           (kill-buffer pbuf)
           (unless (get-buffer pbufname) (idris-kill-buffers))
-          (setq idris-rex-continuations '()))
+          (setq idris-rex-continuations '())
+          (when idris-loaded-region-overlay
+            (delete-overlay idris-loaded-region-overlay)
+            (setq idris-loaded-region-overlay nil)))
       (idris-kill-buffers))))
 
 (defun idris-delete-ibc (no-confirmation)
