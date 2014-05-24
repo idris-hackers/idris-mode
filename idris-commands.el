@@ -247,7 +247,9 @@ Idris process. This sets the load position to point, if there is one."
             (idris-update-options-cache)
             (setq idris-currently-loaded-buffer (current-buffer))
             (idris-make-clean)
-            (idris-update-loaded-region (car result)))))
+            (if (stringp result) ;; Remove this hack after the next Idris release
+                (idris-update-loaded-region (idris-whole-buffer-fc))
+              (idris-update-loaded-region (car result))))))
     (error "Cannot find file for current buffer")))
 
 
