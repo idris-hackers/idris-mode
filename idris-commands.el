@@ -86,7 +86,7 @@
   (interactive)
   (when idris-metavariable-show-on-load (idris-list-metavariables)))
 
-(defcustom idris-load-file-success-hook '(idris-list-metavariables)
+(defcustom idris-load-file-success-hook '(idris-list-metavariables-on-load)
   "Functions to call when loading a file is successful"
   :type 'hook
   :options '(idris-list-metavariables-on-load)
