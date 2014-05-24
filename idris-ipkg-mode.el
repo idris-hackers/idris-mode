@@ -105,7 +105,7 @@
 (defun idris-ipkg-make-files-clickable ()
   "Make all modules with existing files clickable, where clicking opens them"
   (interactive)
-  (remove-list-of-text-properties (point-min) (point-max) '(keymap mouse-face help-echo))
+  (idris-clear-file-link-overlays 'idris-ipkg-mode)
   (let ((src-dir (idris-ipkg-buffer-src-dir (file-name-directory (buffer-file-name)))))
     ;; Make the sourcedir clickable
     (save-excursion
@@ -119,9 +119,8 @@
           (define-key map [mouse-2] #'(lambda ()
                                         (interactive)
                                         (dired src-dir)))
-          (put-text-property start end 'keymap map)
-          (put-text-property start end 'mouse-face 'highlight)
-          (put-text-property start end 'help-echo (concat "mouse-2: dired " src-dir)))))
+          (idris-make-file-link-overlay start end map
+                                        (concat "mouse-2: dired " src-dir)))))
     ;; Make the modules clickable
     (save-excursion
       (goto-char (point-min))
@@ -138,7 +137,7 @@
     ;; Make the Makefile clickable
     (save-excursion
       (goto-char (point-min))
-      (when (re-search-forward "^makefile\\s-*=\\s-*\\([a-zA-Z/0-9]+\\)")
+      (when (re-search-forward "^makefile\\s-*=\\s-*\\([a-zA-Z/0-9]+\\)" nil t)
         (let ((start (match-beginning 1))
               (end (match-end 1))
               (makefile (concat (file-name-as-directory src-dir) (match-string 1))))
@@ -147,10 +146,7 @@
             (define-key map [mouse-2] #'(lambda ()
                                           (interactive)
                                           (find-file makefile)))
-            (put-text-property start end 'keymap map)
-            (put-text-property start end 'mouse-face 'highlight)
-            (put-text-property start end 'help-echo "mouse-2: edit makefile"))))))))
-
+            (idris-make-file-link-overlay start end map  "mouse-2: edit makefile"))))))))
 
 
 (defun idris-ipkg-enable-clickable-files ()

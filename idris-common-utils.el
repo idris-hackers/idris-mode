@@ -173,6 +173,17 @@ corresponding values in the CDR of VALUE."
 BUFFER is not supplied or is nil."
   (string= (file-name-extension (buffer-file-name buffer)) "lidr"))
 
+(defun idris-make-file-link-overlay (start end keymap help-echo)
+  (let ((overlay (make-overlay start end)))
+    (overlay-put overlay 'idris-file-link t)
+    (overlay-put overlay 'keymap keymap)
+    (overlay-put overlay 'mouse-face 'highlight)
+    (overlay-put overlay 'help-echo help-echo)))
+
+(defun idris-clear-file-link-overlays (mode)
+  "Remove all file link overlays from the current buffer"
+  (when (eq major-mode mode)
+    (remove-overlays (point-min) (point-max) 'idris-file-link t)))
 
 (defun idris-make-module-link (start end src-dir)
   "Attempt to make the region between START and END into a
@@ -189,10 +200,7 @@ relative to SRC-DIR"
                    (define-key map [mouse-2] #'(lambda ()
                                                  (interactive)
                                                  (find-file src-name)))
-                   (put-text-property start end 'keymap map)
-                   (put-text-property start end 'mouse-face 'highlight)
-                   (put-text-property start end 'help-echo
-                                      "mouse-2: edit module"))))
+                   (idris-make-file-link-overlay start end map "mouse-2: edit module"))))
       (if (file-exists-p idr)
           (make-link idr)
         (when (file-exists-p lidr)
