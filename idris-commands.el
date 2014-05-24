@@ -637,7 +637,10 @@ type-correct, so loading will fail."
         (progn
           (kill-buffer pbuf)
           (unless (get-buffer pbufname) (idris-kill-buffers))
-          (setq idris-rex-continuations '()))
+          (setq idris-rex-continuations '())
+          (when idris-loaded-region-overlay
+            (delete-overlay idris-loaded-region-overlay)
+            (setq idris-loaded-region-overlay nil)))
       (idris-kill-buffers))))
 
 (defun idris-delete-ibc (no-confirmation)
