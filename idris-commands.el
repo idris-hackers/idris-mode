@@ -711,7 +711,7 @@ means to not ask for confirmation."
 (defun idris-make-imports-clickable ()
   "Attempt to make imports in the current package into clickable links"
   (interactive)
-  (remove-list-of-text-properties (point-min) (point-max) '(keymap mouse-face help-echo))
+  (idris-clear-file-link-overlays 'idris-mode)
   (let ((ipkg-src-dir (idris-ipkg-find-src-dir)))
     (when ipkg-src-dir
       (save-excursion
