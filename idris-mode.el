@@ -46,12 +46,14 @@
     (define-key map (kbd "C-c C-h C-a") 'idris-apropos)
     (define-key map (kbd "C-c C-h a") 'idris-apropos)
     (define-key map (kbd "C-c _") 'idris-insert-bottom)
-    (define-key map (kbd "C-c C-b b") 'idris-ipkg-build)
     (define-key map (kbd "C-c C-b C-b") 'idris-ipkg-build)
-    (define-key map (kbd "C-c C-b c") 'idris-ipkg-clean)
+    (define-key map (kbd "C-c C-b b") 'idris-ipkg-build)
     (define-key map (kbd "C-c C-b C-c") 'idris-ipkg-clean)
-    (define-key map (kbd "C-c C-b i") 'idris-ipkg-install)
+    (define-key map (kbd "C-c C-b c") 'idris-ipkg-clean)
     (define-key map (kbd "C-c C-b C-i") 'idris-ipkg-install)
+    (define-key map (kbd "C-c C-b i") 'idris-ipkg-install)
+    (define-key map (kbd "C-c C-b C-p") 'idris-open-package-file)
+    (define-key map (kbd "C-c C-b p") 'idris-open-package-file)
     (define-key map (kbd "C-c C-z") 'idris-pop-to-repl)
     (define-key map (kbd "RET") 'idris-newline-and-indent)
     map)
@@ -76,6 +78,7 @@
     ["Attempt to solve metavariable" idris-proof-search t]
     ["Display type" idris-type-at-point t]
     "-----------------"
+    ["Open package" idris-open-package-file t]
     ["Build package" idris-ipkg-build t]
     ["Install package" idris-ipkg-install t]
     ["Clean package" idris-ipkg-clean t]
