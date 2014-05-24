@@ -107,20 +107,22 @@
 
 
 (defun idris-update-loaded-region (fc)
-  (let* ((end (assoc :end fc))
-         (line (cadr end))
-         (col (caddr end)))
-    (when (overlayp idris-loaded-region-overlay)
-      (delete-overlay idris-loaded-region-overlay))
-    (with-current-buffer idris-currently-loaded-buffer
-      (setq idris-loaded-region-overlay
-            (make-overlay (point-min)
-                          (save-excursion (goto-char (point-min))
-                                          (forward-line (1- line))
-                                          (move-to-column (1- col))
-                                          (point))
-                          (current-buffer)))
-      (overlay-put idris-loaded-region-overlay 'face 'idris-loaded-region-face))))
+  (if (stringp fc)
+      (message fc)
+    (let* ((end (assoc :end fc))
+           (line (cadr end))
+           (col (caddr end)))
+      (when (overlayp idris-loaded-region-overlay)
+        (delete-overlay idris-loaded-region-overlay))
+      (with-current-buffer idris-currently-loaded-buffer
+        (setq idris-loaded-region-overlay
+              (make-overlay (point-min)
+                            (save-excursion (goto-char (point-min))
+                                            (forward-line (1- line))
+                                            (move-to-column (1- col))
+                                            (point))
+                            (current-buffer)))
+        (overlay-put idris-loaded-region-overlay 'face 'idris-loaded-region-face)))))
 
 (defvar-local idris-load-to-here nil
   "The maximum position to load")
