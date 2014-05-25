@@ -52,7 +52,8 @@
              (idris-user-first-name))
     "The terms have seized control of the means of computation - a glorious future awaits!"
     "Ship if it typechecks!"
-    "Do you know 'Land of My Fathers'?"))
+    "Do you know 'Land of My Fathers'?"
+    "Constructors are red / Types are blue / Your code always works / Because Idris loves you"))
 
 (defun idris-random-words-of-encouragement ()
   "Return a random string of encouragement"
