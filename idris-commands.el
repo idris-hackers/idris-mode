@@ -363,6 +363,11 @@ compiler-annotated output. Does not return a line number."
   (interactive "sSearch Idris docs for: ")
   (idris-info-for-name :apropos what))
 
+(defun idris-type-search (what)
+  "Search the Idris libraries by fuzzy type matching"
+  (interactive "sSearch for type: ")
+  (idris-info-for-name :interpret (concat ":search " what)))
+
 (defun idris-docs-at-point (thing)
   "Display the internal documentation for the name at point, considered as a global variable"
   (interactive "P")

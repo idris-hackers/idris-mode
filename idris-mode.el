@@ -35,7 +35,12 @@
     (define-key map (kbd "C-c C-n") 'idris-load-forward-line)
     (define-key map (kbd "C-c C-p") 'idris-load-backward-line)
     (define-key map (kbd "C-c C-t") 'idris-type-at-point)
-    (define-key map (kbd "C-c C-d") 'idris-docs-at-point)
+    (define-key map (kbd "C-c C-d C-d") 'idris-docs-at-point)
+    (define-key map (kbd "C-c C-d d") 'idris-docs-at-point)
+    (define-key map (kbd "C-c C-d C-a") 'idris-apropos)
+    (define-key map (kbd "C-c C-d a") 'idris-apropos)
+    (define-key map (kbd "C-c C-d C-t") 'idris-type-search)
+    (define-key map (kbd "C-c C-d t") 'idris-type-search)
     (define-key map (kbd "C-c C-c") 'idris-case-split)
     (define-key map (kbd "C-c C-m") 'idris-add-missing)
     (define-key map (kbd "C-c C-e") 'idris-make-lemma)
@@ -43,8 +48,6 @@
     (define-key map (kbd "C-c C-w") 'idris-make-with-block)
     (define-key map (kbd "C-c C-a") 'idris-proof-search)
     (define-key map (kbd "C-c C-r") 'idris-refine)
-    (define-key map (kbd "C-c C-h C-a") 'idris-apropos)
-    (define-key map (kbd "C-c C-h a") 'idris-apropos)
     (define-key map (kbd "C-c _") 'idris-insert-bottom)
     (define-key map (kbd "C-c C-b C-b") 'idris-ipkg-build)
     (define-key map (kbd "C-c C-b b") 'idris-ipkg-build)
@@ -84,6 +87,7 @@
     ["Clean package" idris-ipkg-clean t]
     "-----------------"
     ["Get documentation" idris-docs-at-point t]
+    ["Search for type" idris-type-search t]
     ["Apropos" idris-apropos t]
     "-----------------"
     ("Interpreter options" :active idris-process
