@@ -224,6 +224,7 @@ line."
         (pop-to-buffer buffer)
       (message "No Idris compiler log is currently open"))))
 
+
 (defun idris-load-file-sync ()
   "Pass the current buffer's file synchronously to the inferior
 Idris process. This sets the load position to point, if there is one."
@@ -232,7 +233,8 @@ Idris process. This sets the load position to point, if there is one."
   (if (buffer-file-name)
       (unless (idris-position-loaded-p (point))
         (idris-warning-reset-all)
-        (when (< (marker-position idris-load-to-here) (point))
+        (when (and idris-load-to-here
+                   (< (marker-position idris-load-to-here) (point)))
           (idris-load-to (point)))
         (let ((fn (buffer-file-name)))
           (idris-switch-working-directory (file-name-directory fn))
