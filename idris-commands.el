@@ -698,6 +698,28 @@ means to not ask for confirmation."
                 (t (message "%S" selection))))))
     map))
 
+(defun idris-make-metavariable-menu (_name)
+  (let ((menu (make-sparse-keymap)))
+    (define-key menu [idris-metavariable-menu-prover]
+      `(menu-item "Launch prover"
+                  (lambda () (interactive))))
+    menu))
+
+(defun idris-make-metavariable-keymap (name)
+  (let ((map (make-sparse-keymap)))
+    (define-key map [mouse-3]
+      (lambda () (interactive)
+        (let ((selection (x-popup-menu t (idris-make-metavariable-menu name))))
+          (cond ((equal selection '(idris-metavariable-menu-prover))
+                 (idris-prove-metavariable name))
+                (t (message "%S" selection))))))
+    map))
+
+(defun idris-prove-metavariable (name)
+  "Launch the prover on the metavariable NAME."
+  (idris-eval-async `(:interpret ,(concat ":p " name))
+                    (lambda (res) t)))
+
 (defun idris-fill-paragraph (justify)
   ;; In literate Idris files, allow filling non-code paragraphs
   (if (and (idris-lidr-p) (not (save-excursion (move-beginning-of-line nil)
