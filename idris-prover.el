@@ -283,6 +283,13 @@ Invokes `idris-prover-script-mode-hook'."
     (let ((inhibit-read-only t))
       (put-text-property (point-min) idris-prover-script-processed 'read-only t))))
 
+(defun idris-prover-end ()
+  "Get rid of left over buffers from proof mode."
+  (let ((obligations (idris-prover-obligations-buffer))
+        (script (idris-prover-script-buffer)))
+    (when obligations (kill-buffer obligations))
+    (when script (kill-buffer script))))
+
 (defun idris-prover-event-hook-function (event)
   (destructure-case event
     ((:start-proof-mode _name _target)
@@ -294,6 +301,7 @@ Invokes `idris-prover-script-mode-hook'."
      t)
     ((:end-proof-mode name _target)
      (idris-repl-write-string (concat "End proof of " name))
+     (idris-prover-end)
      t)
     ((:write-proof-state msg _target)
      (destructuring-bind (script i) msg
