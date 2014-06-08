@@ -54,6 +54,7 @@
                   (<= (max pos1 pos2) (line-end-position))))
 
 (defmacro idris-save-marker (marker &rest body)
+  "Save the contents of the marker MARKER while executing BODY."
   (declare (indent 1))
   (let ((pos (cl-gensym "pos")))
   `(let ((,pos (marker-position ,marker)))

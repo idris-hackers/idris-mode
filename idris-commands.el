@@ -34,6 +34,7 @@
 (require 'idris-ipkg-mode)
 (require 'idris-warnings-tree)
 (require 'idris-metavariable-list)
+(require 'idris-prover)
 
 (require 'cl-lib)
 (require 'thingatpt)
@@ -69,11 +70,9 @@
        t))
 
 (defun idris-ensure-process-and-repl-buffer ()
-  "Ensures that an Idris process is running and the Idris REPL buffer exists"
+  "Ensure that an Idris process is running and the Idris REPL buffer exists."
   (idris-repl-buffer)
-  (idris-run)
-  (with-current-buffer (idris-repl-buffer)
-    (idris-mark-output-start)))
+  (idris-run))
 
 (defun idris-switch-working-directory (new-working-directory)
   (unless (string= idris-process-current-working-directory new-working-directory)
@@ -165,8 +164,8 @@ out."
   (idris-load-forward-line -1))
 
 (defun idris-load-file (set-line)
-  "Pass the current buffer's file to the inferior Idris
-process. A prefix argument restricts loading to the current
+  "Pass the current buffer's file to the inferior Idris process.
+A prefix argument restricts loading to the current
 line."
   (interactive "p")
   (save-buffer)
@@ -175,6 +174,11 @@ line."
   (when (= set-line 16) (idris-no-load-to))
   (if (buffer-file-name)
       (when (idris-current-buffer-dirty-p)
+        (when idris-prover-currently-proving
+          (if (y-or-n-p (format "%s is open in the prover. Abandon and load? "
+                                idris-prover-currently-proving))
+              (idris-prover-abandon)
+            (signal 'quit nil)))
         ;; Remove warning overlays
         (idris-warning-reset-all)
         ;; Clear the contents of the compiler notes buffer, if it exists
@@ -627,7 +631,7 @@ type-correct, so loading will fail."
   (idris-warning-reset-all)
   (setq idris-currently-loaded-buffer nil)
   ; not killing :events since it it tremendously useful for debuging
-  (let ((bufs (list :repl :proof-obligations :proof-shell :proof-script :log :info :notes)))
+  (let ((bufs (list :repl :proof-obligations :proof-shell :proof-script :log :info :notes :metavariables)))
     (dolist (b bufs) (idris-kill-buffer b))))
 
 (defun idris-pop-to-repl ()
@@ -639,6 +643,7 @@ type-correct, so loading will fail."
       (error "No Idris REPL buffer is open."))))
 
 (defun idris-quit ()
+  "Quit the Idris process, cleaning up the state that it has synchronized with Emacs."
   (interactive)
   (let* ((pbufname (idris-buffer-name :process))
          (pbuf (get-buffer pbufname)))
@@ -650,6 +655,7 @@ type-correct, so loading will fail."
           (when idris-loaded-region-overlay
             (delete-overlay idris-loaded-region-overlay)
             (setq idris-loaded-region-overlay nil)))
+      (idris-prover-end)
       (idris-kill-buffers))))
 
 (defun idris-delete-ibc (no-confirmation)

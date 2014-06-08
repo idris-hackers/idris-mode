@@ -27,35 +27,20 @@
 (require 'idris-settings)
 (require 'inferior-idris)
 (require 'idris-common-utils)
+(require 'idris-prover)
 (require 'cl-lib)
 
 (defvar idris-prompt-string "Idris"
-  "The prompt for the user")
+  "The prompt shown in the REPL.")
 
 (defvar idris-repl-buffer-name (idris-buffer-name :repl)
   "The name of the Idris REPL buffer.")
-
-(defvar-local idris-output-start nil
-  "Marker for the start of the output for the evaluation.")
-
-(defvar-local idris-output-end nil
-  "Marker for the end of the output. New output is inserted at this mark.")
 
 (defvar-local idris-prompt-start nil
   "Marker for the start of the Idris prompt.")
 
 (defvar-local idris-input-start nil
   "Marker for the start of user input for Idris.")
-
-;; marker invariants maintained:
-;; point-min <= idris-output-start <= idris-output-end <=
-;;   idris-prompt-start <= idris-input-start <= point-max
-(defun idris-mark-input-start ()
-  (set-marker idris-input-start (point)))
-
-(defun idris-mark-output-start ()
-  (set-marker idris-output-start (point))
-  (set-marker idris-output-end (point)))
 
 ; TODO: insert version number / protocol version / last changed date!?
 (defun idris-repl-insert-banner ()
@@ -64,33 +49,42 @@
     (let ((welcome "Welcome to Idris REPL!"))
       (insert welcome))))
 
-(defun idris-repl-insert-prompt ()
-  "Insert Idris prompt (before markers!) into buffer. Set point after prompt"
-  (when (not (null idris-input-start))
-    (goto-char idris-input-start)
-    (idris-save-marker idris-output-start
-      (idris-save-marker idris-output-end
-        (unless (bolp) (insert-before-markers "\n"))
-        (let ((prompt-start (point))
-              (prompt (if (equal idris-repl-prompt-style 'short)
-                          "λΠ> "
-                        (format "%s> " idris-prompt-string))))
-          (idris-propertize-region
-           `(face idris-repl-prompt-face
-             read-only t
-             intangible t
-             idris-repl-prompt t
-             help-echo ,idris-prompt-string
-             rear-nonsticky (idris-repl-prompt read-only face intangible))
-           (insert-before-markers prompt))
-          (set-marker idris-prompt-start prompt-start))))))
+(defun idris-repl-insert-prompt (&optional always-insert)
+  "Insert or update Idris prompt in buffer.
+If ALWAYS-INSERT is non-nil, always insert a prompt at the end of the buffer."
+  ;; Put the prompt at the end, if no active prompt is present.
+  (when always-insert
+    (set-marker idris-prompt-start (point-max))
+    (set-marker idris-input-start (point-max)))
+  (goto-char idris-prompt-start)
+  (let ((inhibit-read-only 'idris-repl-prompt))
+    (delete-region idris-prompt-start idris-input-start))
+  (unless (bolp) (newline))
+  (let ((prompt (if (and (equal idris-repl-prompt-style 'short)
+                         (not idris-prover-currently-proving))
+                    "λΠ> "
+                  (format "%s> " idris-prompt-string))))
+    (set-marker idris-prompt-start (point))
+    (idris-propertize-region
+        `(face idris-repl-prompt-face
+          read-only idris-repl-prompt
+          intangible t
+          idris-repl-prompt t
+          help-echo ,idris-prompt-string
+          rear-nonsticky (idris-repl-prompt read-only face intangible))
+      (let ((inhibit-read-only t))
+        (insert prompt)))
+    (set-marker idris-input-start (point))
+    (goto-char idris-input-start)))
+
 
 (defun idris-repl-update-prompt (new-prompt)
-  "Update prompt to NEW-PROMPT"
+  "Update prompt string to NEW-PROMPT."
   (unless (equal idris-prompt-string new-prompt)
-    (setq idris-prompt-string new-prompt))
-  (with-current-buffer (idris-repl-buffer)
-    (idris-repl-insert-prompt)))
+    (setq idris-prompt-string new-prompt)
+    (with-current-buffer (idris-repl-buffer)
+      (idris-repl-insert-prompt))))
+
 
 (defun idris-repl-buffer ()
   "Return or create the Idris REPL buffer."
@@ -191,21 +185,17 @@ Invokes `idris-repl-mode-hook'."
 (defun idris-repl-update-banner ()
   (idris-repl-insert-banner)
   (goto-char (point-max))
-  (idris-mark-output-start)
-  (idris-mark-input-start)
-  (idris-repl-insert-prompt))
+  (idris-repl-insert-prompt t))
 
 (defun idris-repl-buffer-init ()
-  (dolist (markname '(idris-output-start
-                      idris-output-end
-                      idris-prompt-start
+  (dolist (markname '(idris-prompt-start
                       idris-input-start))
     (set markname (make-marker))
     (set-marker (symbol-value markname) (point)))
   (idris-repl-update-banner))
 
 (defun idris-repl-return ()
-  "Send command over to Idris"
+  "Send command over to Idris."
   (interactive)
   (goto-char (point-max))
   (let ((end (point)))
@@ -214,10 +204,12 @@ Invokes `idris-repl-mode-hook'."
       (overlay-put overlay 'face 'idris-repl-input-face)))
   (let ((input (idris-repl-current-input)))
     (goto-char (point-max))
-    (insert "\n")
-    (idris-mark-input-start)
-    (idris-mark-output-start)
-    (idris-repl-eval-string input)))
+    (if (string-match-p "^\\s-*$" input)
+        (delete-region (point) idris-input-start)
+      (insert "\n")
+      (set-marker idris-prompt-start (point))
+      (set-marker idris-input-start (point))
+      (idris-repl-eval-string input))))
 
 (defun idris-repl-complete ()
   "Completion of the current input"
@@ -264,44 +256,50 @@ Invokes `idris-repl-mode-hook'."
 (defun idris-repl-show-abort (condition &optional highlighting)
   (with-current-buffer (idris-repl-buffer)
     (save-excursion
-      (idris-save-marker idris-output-start
-        (idris-save-marker idris-output-end
-          (goto-char idris-output-end)
-          (insert-before-markers "Error: ")
-          (idris-propertize-spans (idris-repl-semantic-text-props highlighting)
-            (insert-before-markers condition))
-          (insert-before-markers "\n")
-          (idris-repl-insert-prompt))))
-    (idris-repl-show-maximum-output)))
-
-(defun idris-repl-write-string (string)
-  "Appends STRING to output"
-  (with-current-buffer (idris-repl-buffer)
-    (save-excursion
-      (goto-char idris-output-end)
-      (idris-save-marker idris-output-start
-        (idris-propertize-region `(face idris-repl-output-face rear-nonsticky (face))
-          (when (not (bolp)) (insert-before-markers "\n"))
-          (insert-before-markers string)
-          (when (and (= (point) idris-prompt-start)
-                     (not (bolp)))
-            (insert-before-markers "\n")
-            (set-marker idris-output-end (1- (point)))))))
-    (idris-repl-show-maximum-output)))
-
-(defun idris-repl-insert-result (string &optional highlighting)
-  "Inserts STRING and marks it as evaluation result"
-  (with-current-buffer (idris-repl-buffer)
-    (save-excursion
-      (idris-save-marker idris-output-start
-        (idris-save-marker idris-output-end
-          (goto-char idris-input-start)
-          (when (not (bolp)) (insert-before-markers "\n"))
-          (idris-propertize-spans (idris-repl-semantic-text-props highlighting)
-            (idris-propertize-region `(face idris-repl-result-face rear-nonsticky (face))
-              (insert-before-markers string))))))
+      (goto-char idris-prompt-start)
+      (idris-propertize-spans (idris-repl-semantic-text-props highlighting)
+        (insert-before-markers condition)))
     (idris-repl-insert-prompt)
     (idris-repl-show-maximum-output)))
+
+
+(defun idris-repl-write-string (string)
+  "Append STRING to output."
+  (with-current-buffer (idris-repl-buffer)
+    (save-excursion
+      (goto-char idris-prompt-start)
+      (idris-propertize-region
+          `(face idris-repl-output-face
+            read-only idris-repl-output
+            rear-nonsticky (face read-only))
+        (insert-before-markers string))
+      (when (and (= (point) idris-prompt-start)
+                 (not (bolp)))
+        (insert-before-markers "\n")))
+    (idris-repl-insert-prompt)
+    (idris-repl-show-maximum-output)))
+
+
+(defun idris-repl-insert-result (string &optional highlighting)
+  "Insert STRING and mark it asg evaluation result.
+Optional argument HIGHLIGHTING is a collection of semantic
+highlighting information from Idris."
+  (with-current-buffer (idris-repl-buffer)
+    (save-excursion
+      (goto-char (point-max))
+      (when (and (not (bolp))
+                 (not (string-equal string "")))
+        (insert-before-markers "\n"))
+      (idris-propertize-region '(read-only idris-repl-output
+                                 rear-nonsticky (face read-only))
+        (idris-propertize-spans (idris-repl-semantic-text-props highlighting)
+          (idris-propertize-region
+              '(face idris-repl-result-face
+                rear-nonsticky (face))
+            (insert-before-markers string)))))
+    (idris-repl-insert-prompt)
+    (idris-repl-show-maximum-output)))
+
 
 (defun idris-repl-show-maximum-output ()
   "Put the end of the buffer at the bottom of the window."
@@ -312,7 +310,8 @@ Invokes `idris-repl-mode-hook'."
       (when win
         (with-selected-window win
           (set-window-point win (point-max))
-          (recenter -1))))))
+          (recenter -1)
+          (goto-char idris-input-start))))))
 
 
 ;;; history
