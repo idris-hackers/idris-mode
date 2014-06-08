@@ -165,7 +165,9 @@ to the matching files, or nil if not found."
   (cl-labels
       ((find-file-r (path)
          (let* ((parent (file-name-directory path))
-                (matching (directory-files parent t (concat suffix "$"))))
+                (matching (if parent
+                              (directory-files parent t (concat suffix "$"))
+                            nil)))
            (cond
             (matching matching)
             ;; The parent of ~ is nil and the parent of / is itself.
