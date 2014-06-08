@@ -289,16 +289,19 @@ the length reported by Idris."
       (put-text-property (point-min) (point-max) 'read-only nil))
     (cond ((< count idris-prover-prove-step)
            ; this is actually the (count - 1) == Idris-prover-prove-step case!
+           ; in other words, we are undoing the final step.
            ; can the other case(s) happen??
            (goto-char idris-prover-script-processed)
            (forward-line -1)
            (end-of-line)
            (set-marker idris-prover-script-processed (point)))
           ((> count idris-prover-prove-step)
+           ;; Here we are inserting a newly-checked proof step.
            (goto-char idris-prover-script-processed)
            (while (< idris-prover-prove-step count)
              (let ((lelem (nth idris-prover-prove-step script)))
                (insert-before-markers lelem))
+             (newline)
              (setq idris-prover-prove-step (1+ idris-prover-prove-step))))
           (t nil))
     (setq idris-prover-prove-step count)
@@ -312,7 +315,7 @@ the length reported by Idris."
       (setq idris-prover-script-processed-overlay overlay))
     (let ((inhibit-read-only t))
       (put-text-property (point-min) idris-prover-script-processed 'read-only t))
-    (goto-char (1+ idris-prover-script-processed))))
+    (goto-char (1+ (marker-position idris-prover-script-processed)))))
 
 (defun idris-prover-end ()
   "Get rid of left over buffers from proof mode and unset global state related to the prover."
