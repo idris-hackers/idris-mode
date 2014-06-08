@@ -718,7 +718,13 @@ means to not ask for confirmation."
 (defun idris-prove-metavariable (name)
   "Launch the prover on the metavariable NAME."
   (idris-eval-async `(:interpret ,(concat ":p " name))
-                    (lambda (res) t)))
+                    (lambda (_) t))
+  ;; The timer is necessary because of the async nature of starting the prover
+  (run-with-timer 0.25 nil
+                  #'(lambda ()
+                      (let ((window (get-buffer-window idris-prover-script-buffer-name)))
+                        (when window
+                          (select-window window))))))
 
 (defun idris-fill-paragraph (justify)
   ;; In literate Idris files, allow filling non-code paragraphs
