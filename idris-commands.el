@@ -626,7 +626,7 @@ type-correct, so loading will fail."
   (idris-warning-reset-all)
   (setq idris-currently-loaded-buffer nil)
   ; not killing :events since it it tremendously useful for debuging
-  (let ((bufs (list :repl :proof-obligations :proof-shell :proof-script :log :info :notes)))
+  (let ((bufs (list :repl :proof-obligations :proof-shell :proof-script :log :info :notes :metavariables)))
     (dolist (b bufs) (idris-kill-buffer b))))
 
 (defun idris-pop-to-repl ()
@@ -638,6 +638,7 @@ type-correct, so loading will fail."
       (error "No Idris REPL buffer is open."))))
 
 (defun idris-quit ()
+  "Quit the Idris process, cleaning up the state that it has synchronized with Emacs."
   (interactive)
   (let* ((pbufname (idris-buffer-name :process))
          (pbuf (get-buffer pbufname)))
@@ -649,6 +650,7 @@ type-correct, so loading will fail."
           (when idris-loaded-region-overlay
             (delete-overlay idris-loaded-region-overlay)
             (setq idris-loaded-region-overlay nil)))
+      (idris-prover-end)
       (idris-kill-buffers))))
 
 (defun idris-delete-ibc (no-confirmation)
