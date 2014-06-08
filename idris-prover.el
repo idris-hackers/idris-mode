@@ -351,7 +351,8 @@ the length reported by Idris."
            (proof (cadr msg)))
        (idris-perhaps-insert-proof-script proof)
        (idris-prover-end)
-       (idris-repl-write-string (concat "End proof of " name)))
+       (idris-repl-write-string (concat "End proof of " name))
+       (run-hooks 'idris-prover-success-hook))
      t)
     ((:write-proof-state msg _target)
      (destructuring-bind (script count) msg
@@ -365,6 +366,12 @@ the length reported by Idris."
      (idris-repl-write-string "Abandoned proof")
      t)
     (t nil)))
+
+(defcustom idris-prover-success-hook '(idris-list-metavariables-on-load)
+  "Functions to call when completing a proof"
+  :type 'hook
+  :options '(idris-list-metavariables-on-load)
+  :group 'idris-prover)
 
 (defun idris-perhaps-insert-proof-script (proof)
   "Prompt the user as to whether PROOF should be inserted into the buffer."
