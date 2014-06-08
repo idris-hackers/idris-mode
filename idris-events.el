@@ -46,7 +46,7 @@
   (with-current-buffer (idris-events-buffer)
     (goto-char (point-max))
     (let ((buffer-read-only nil)
-          (time (substring (number-to-string (float-time)) 0 14)))
+          (time (format-time-string "%H:%M:%S")))
       (save-excursion
         (if sending
             (insert (concat time " -> "))

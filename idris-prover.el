@@ -45,6 +45,12 @@
   "Face for Idris proof script which is currently processing."
   :group 'idris-prover)
 
+(defcustom idris-prover-restore-window-configuration t
+  "When non-nil, restore the window configuration after exiting
+the prover."
+  :type 'boolean
+  :group 'idris-prover)
+
 (defvar idris-prover-obligations-buffer-name (idris-buffer-name :proof-obligations)
   "The name of the Idris proof obligation buffer.")
 
@@ -72,6 +78,8 @@
       (insert goals)))
   (idris-prover-show-obligations))
 
+(defvar idris-prover-saved-window-configuration nil
+  "The saved window configuration from before running the prover.")
 
 (defvar-local idris-prover-script-processed nil
   "Marker for the processed part of proof script")
@@ -95,63 +103,115 @@
 
 (defvar idris-prover-script-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-n") 'idris-prover-script-forward)
-    (define-key map (kbd "C-p") 'idris-prover-script-backward)
+    (define-key map (kbd "RET") 'idris-prover-script-ret)
+    (define-key map (kbd "M-n") 'idris-prover-script-forward)
+    (define-key map (kbd "M-p") 'idris-prover-script-backward)
     ;; Using (kbd "<TAB>") in place of "\t" makes emacs angry, and suggests
     ;; using the latter form.
     (define-key map "\t" 'idris-prover-script-complete)
     map)
   "Keymap used in Idris proof script mode.")
 
+(defun idris-prover-find-tactic (start-pos)
+  "Use some layout heuristics to find the tactic beginning at
+START-POS, returning a pair consisting of the start and end
+positions of the tactic. Tactics are required to begin at the
+left margin."
+  (let (tactic-start tactic-end)
+    (save-excursion
+      (goto-char start-pos)
+
+      ;; Ensure that we're at the next line beginning
+      (beginning-of-line)
+      (unless (= (point) start-pos)
+        (forward-line))
+
+      ;; Go forward until the current line begins a tactic
+      (while (and (not (eobp)) (not (looking-at-p "[a-zA-Z]")))
+        (forward-line))
+
+      (if (eobp) ;; if at end of buffer, no tactic to be found!
+          nil
+        (setq tactic-start (point))
+
+        ;; Go forward until end of buffer or non-blank line at left margin
+        (forward-line)
+        (while (and (not (eobp)) (not (looking-at-p "[a-zA-Z]")))
+          (forward-line))
+
+        ;; Go backward until a non-whitespace char is found - it is the end of
+        ;; the tactic
+        (backward-char)
+        (while (looking-at-p "\\s-\\|$") (backward-char))
+        (forward-char)
+        (setq tactic-end (point))
+
+        (cons tactic-start tactic-end)))))
+
 (defun idris-prover-script-backward ()
   "Backward one piece of proof script"
   (interactive)
-        (idris-rex ()
-                   ((list ':interpret "undo"))
-                   ((:ok result)
-                    (message (concat "success: " result)))
-                   ((:error condition)
-                    ; put error overlay
-                    (message (concat "fail: " condition)))))
+  (idris-rex ()
+      ((list ':interpret "undo"))
+    ((:ok result)
+     t)
+    ((:error condition)
+     ;; put error overlay
+     (message (concat "fail: " condition)))))
 
 (defun idris-prover-script-forward ()
-  "Forward one piece of proof script"
+  "Forward one piece of proof script."
   (interactive)
+  (when (eobp) (newline)) ;; There must be a newline at the end
   (when idris-prover-script-warning-overlay
     (delete-overlay idris-prover-script-warning-overlay)
     (setq idris-prover-script-warning-overlay nil))
   (goto-char (+ 1 idris-prover-script-processed))
-  (let ((end (search-forward ";" (line-end-position) t)))
-    (unless end
-      (end-of-line)
-      (insert ";"))
-    (goto-char idris-prover-script-processed)
-    (let ((remaining (buffer-substring-no-properties (point) (1- (search-forward ";")))))
-      (set-marker idris-prover-script-processing (point))
-      (let ((overlay (make-overlay idris-prover-script-processed idris-prover-script-processing)))
-        (overlay-put overlay 'face 'idris-prover-processing-face)
-        (setq idris-prover-script-processing-overlay overlay))
-      (let ((rem (replace-regexp-in-string "\\`[ \t\n]*" "" remaining)))
-        (idris-rex ()
-                   ((list ':interpret rem))
-                   ((:ok result)
-                    (with-current-buffer (idris-prover-script-buffer)
-                      (when idris-prover-script-processing-overlay
-                        (delete-overlay idris-prover-script-processing-overlay)
-                        (setq idris-prover-script-processing-overlay nil))
-                      (delete-region idris-prover-script-processed idris-prover-script-processing))
-                    (message (concat "success: " result)))
-                   ((:error condition)
-                    (with-current-buffer (idris-prover-script-buffer)
-                      (when idris-prover-script-processing-overlay
-                        (delete-overlay idris-prover-script-processing-overlay)
-                        (setq idris-prover-script-processing-overlay nil))
-                      (setq idris-prover-script-warning-overlay (idris-warning-create-overlay idris-prover-script-processed idris-prover-script-processing condition)))
+  (let ((next-tactic (idris-prover-find-tactic
+                      idris-prover-script-processed)))
+    (if (null next-tactic)
+        (error "At the end of the proof script")
+      (let* ((tactic-start (car next-tactic))
+             (tactic-end (cdr next-tactic))
+             (tactic-text (buffer-substring-no-properties tactic-start
+                                                          tactic-end)))
+        (set-marker idris-prover-script-processed tactic-start)
+        (set-marker idris-prover-script-processing tactic-end)
+        (let ((overlay (make-overlay idris-prover-script-processed
+                                     idris-prover-script-processing)))
+          (overlay-put overlay 'face 'idris-prover-processing-face)
+          (setq idris-prover-script-processing-overlay overlay))
+        (let ((tactic-cmd (replace-regexp-in-string
+                           "\\`[ \t\n]*" ""
+                           (replace-regexp-in-string "" " " tactic-text))))
+          (idris-rex () ((list ':interpret tactic-cmd))
+            ((:ok result)
+             (with-current-buffer (idris-prover-script-buffer)
+               (when idris-prover-script-processing-overlay
+                 (delete-overlay idris-prover-script-processing-overlay)
+                 (setq idris-prover-script-processing-overlay nil))
+               ;; Delete the region because it will be written with the proof
+               ;; state.
+               (delete-region idris-prover-script-processed
+                              idris-prover-script-processing)))
+            ((:error condition)
+             (with-current-buffer (idris-prover-script-buffer)
+               (when idris-prover-script-processing-overlay
+                 (delete-overlay idris-prover-script-processing-overlay)
+                 (setq idris-prover-script-processing-overlay nil))
+               (setq idris-prover-script-warning-overlay (idris-warning-create-overlay idris-prover-script-processed idris-prover-script-processing condition)))
                     ; put error overlay
-                    (message (concat "fail: " condition))))))))
+             (message (concat "fail: " condition)))))))))
+
+(defun idris-prover-script-ret ()
+  "Insert a newline at the end of buffer, even if it's read-only."
+  (interactive)
+  (if (equal (point) (marker-position idris-prover-script-processed))
+      (let ((inhibit-read-only t)) (insert "\n"))
+    (newline)))
 
 (defun idris-prover-script-complete ()
-  "Completion of the partial input"
+  "Completion of the partial input."
   (interactive)
   (goto-char idris-prover-script-processed)
   (let* ((input (buffer-substring-no-properties (point) (point-max)))
@@ -195,6 +255,8 @@ Invokes `idris-prover-script-mode-hook'."
         buffer)))
 
 (defun idris-prover-reset-prover-script-buffer ()
+  "Erase or initialize a proof script buffer, resetting all the
+special prover state."
   (with-current-buffer (idris-prover-script-buffer)
     (when idris-prover-script-processed-overlay
       (delete-overlay idris-prover-script-processed-overlay)
@@ -209,29 +271,31 @@ Invokes `idris-prover-script-mode-hook'."
     (unless idris-prover-script-processed
       (setq idris-prover-script-processed (make-marker)))
     (set-marker idris-prover-script-processing (point))
-    (set-marker idris-prover-script-processed (point))
-    (insert "\n")))
+    (set-marker idris-prover-script-processed (point))))
 
-(defun idris-prover-write-script (script i)
+(defun idris-prover-write-script (script count)
+  "Put the proof state recieved from Idris into the proof script buffer.
+SCRIPT is the list of tactics in the proof state, and COUNT is
+the length reported by Idris."
   (interactive)
   (with-current-buffer (idris-prover-script-buffer)
     (let ((inhibit-read-only t))
       (put-text-property (point-min) (point-max) 'read-only nil))
-    (cond ((< i idris-prover-prove-step)
-           ; this is actually the (i - 1) == idris-prover-prove-step case!
+    (cond ((< count idris-prover-prove-step)
+           ; this is actually the (count - 1) == Idris-prover-prove-step case!
            ; can the other case(s) happen??
            (goto-char idris-prover-script-processed)
            (forward-line -1)
            (end-of-line)
            (set-marker idris-prover-script-processed (point)))
-          ((> i idris-prover-prove-step)
+          ((> count idris-prover-prove-step)
            (goto-char idris-prover-script-processed)
-           (while (< idris-prover-prove-step i)
-             (let ((lelem (nth (1- idris-prover-prove-step) script)))
-               (insert-before-markers (concat "\n  " lelem ";")))
+           (while (< idris-prover-prove-step count)
+             (let ((lelem (nth idris-prover-prove-step script)))
+               (insert-before-markers lelem))
              (setq idris-prover-prove-step (1+ idris-prover-prove-step))))
           (t nil))
-    (setq idris-prover-prove-step i)
+    (setq idris-prover-prove-step count)
     (when (eql (marker-position idris-prover-script-processed) (point-max))
       (goto-char idris-prover-script-processed)
       (insert "\n"))
@@ -241,28 +305,83 @@ Invokes `idris-prover-script-mode-hook'."
       (overlay-put overlay 'face 'idris-prover-processed-face)
       (setq idris-prover-script-processed-overlay overlay))
     (let ((inhibit-read-only t))
-      (put-text-property (point-min) idris-prover-script-processed 'read-only t))))
+      (put-text-property (point-min) idris-prover-script-processed 'read-only t))
+    (goto-char (1+ idris-prover-script-processed))))
+
+(defun idris-prover-end ()
+  "Get rid of left over buffers from proof mode."
+  (interactive)
+  (let ((obligations (idris-prover-obligations-buffer))
+        (script (idris-prover-script-buffer)))
+    (when obligations
+      (delete-windows-on obligations)
+      (kill-buffer obligations))
+    (when script (kill-buffer script))))
 
 (defun idris-prover-event-hook-function (event)
   (destructure-case event
-    ((:start-proof-mode _name _target)
+    ((:start-proof-mode name _target)
+     (setq idris-prover-saved-window-configuration
+           (current-window-configuration))
      (idris-prover-reset-prover-script-buffer)
-     (idris-repl-write-string "Start proof of ")
+     (idris-repl-write-string (format "Start proof of %s" name))
      (let* ((obligations-window (idris-prover-show-obligations))
             (script-window (split-window obligations-window)))
        (set-window-buffer script-window (idris-prover-script-buffer)))
      t)
-    ((:end-proof-mode name _target)
-     (idris-repl-write-string (concat "End proof of " name))
+    ((:end-proof-mode msg _target)
+     (let ((name (car msg))
+           (proof (cadr msg)))
+       (idris-repl-write-string (concat "End proof of " name))
+       (idris-perhaps-insert-proof-script proof))
+     (idris-prover-end)
+     (when (and idris-prover-restore-window-configuration
+                (window-configuration-p
+                 idris-prover-saved-window-configuration))
+       (set-window-configuration idris-prover-saved-window-configuration))
+     (setq idris-prover-saved-window-configuration nil)
      t)
     ((:write-proof-state msg _target)
-     (destructuring-bind (script i) msg
-       (idris-prover-write-script script i))
+     (destructuring-bind (script count) msg
+       (idris-prover-write-script script count))
      t)
     ((:write-goal goal _target)
      (idris-prover-write-goals goal)
      t)
+    ((:abandon-proof _msg _target)
+     (idris-prover-end)
+     t)
     (t nil)))
 
+(defun idris-perhaps-insert-proof-script (proof)
+  "Prompt the user as to whether PROOF should be inserted into the buffer."
+  (save-window-excursion
+    (pop-to-buffer idris-currently-loaded-buffer)
+    (delete-other-windows)
+    (let ((proof-buffer (get-buffer-create "*idris-finished-proof*")))
+      (unwind-protect
+          (progn
+            (pop-to-buffer proof-buffer)
+            (insert proof)
+            (if (y-or-n-p "Keep this proof script?")
+                (idris-insert-proof-script idris-currently-loaded-buffer proof)
+              (kill-new proof)
+              (message "Proof saved to kill ring")))
+        (kill-buffer proof-buffer)))))
+
+(defconst idris-proof-script-insertion-marker "---------- Proofs ----------"
+  "Look for this marker to insert proofs. Should agree with the
+  one in the Idris compiler source.")
+
+(defun idris-insert-proof-script (buffer proof)
+  "Insert PROOF into BUFFER."
+  (with-current-buffer buffer
+    (save-excursion
+      (goto-char (point-min))
+      (unless (re-search-forward idris-proof-script-insertion-marker nil t)
+        (replace-regexp "\\(\\s-*\n\\)*\\'"
+                        (concat "\n\n" idris-proof-script-insertion-marker "\n")))
+      (newline)
+      (insert proof))))
 
 (provide 'idris-prover)

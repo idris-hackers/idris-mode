@@ -129,11 +129,14 @@ inserted text (that is, relative to point prior to insertion)."
                                                                   ,type
                                                                   ,doc-overview
                                                                   ,mouse-help))
-                                              (if (and (not (equal (cadr decor) :bound))
-                                                       name)
-                                                  `(idris-ref ,(cadr name)
-                                                              keymap ,(idris-make-ref-menu-keymap (cadr name)))
-                                                nil))
+                                              (cond ((and (not (member (cadr decor) '(:bound :metavar)))
+                                                          name)
+                                                     `(idris-ref ,(cadr name)
+                                                       keymap ,(idris-make-ref-menu-keymap (cadr name))))
+                                                    ((equal (cadr decor) :metavar)
+                                                     `(idris-ref ,(cadr name)
+                                                       keymap ,(idris-make-metavariable-keymap (cadr name))))
+                                                    (t nil)))
                                     nil)
                                 ,@(if mousable-face
                                       (list 'mouse-face mousable-face)

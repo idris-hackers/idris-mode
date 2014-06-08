@@ -84,10 +84,30 @@ Invoces `idris-metavariable-list-mode-hook'.")
         (goto-char (point-min))))
     (display-buffer (idris-metavariable-list-buffer))))
 
+(defun idris-metavariable-tree-printer (tree)
+  "Print TREE, formatted for metavariables."
+  (idris-propertize-spans (idris-repl-semantic-text-props (idris-tree.highlighting tree))
+    (insert (idris-tree.item tree)))
+  (when (idris-tree.button tree)
+    (insert " ")
+    (apply #'insert-button (idris-tree.button tree))
+    (insert (idris-tree.after-button tree))))
+
+
 (defun idris-tree-for-metavariable (metavar)
+  "Generate a tree for METAVAR.
+
+METAVAR should be a three-element list consisting of the
+metavariable name, its premises, and its conclusion."
   (cl-destructuring-bind (name premises conclusion) metavar
     (make-idris-tree :item name
+                     :button `("[P]"
+                               help-echo "Open in prover"
+                               action ,#'(lambda (_)
+                                           (interactive)
+                                           (idris-prove-metavariable name)))
                      :highlighting `((0 ,(length name) ((:decor :metavar))))
+                     :print-fn #'idris-metavariable-tree-printer
                      :collapsed-p (not idris-metavariable-list-show-expanded) ; from customize
                      :kids (list (idris-tree-for-metavariable-details name premises conclusion)))))
 
