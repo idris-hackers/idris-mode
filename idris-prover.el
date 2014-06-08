@@ -317,6 +317,13 @@ the length reported by Idris."
       (put-text-property (point-min) idris-prover-script-processed 'read-only t))
     (goto-char (1+ (marker-position idris-prover-script-processed)))))
 
+(defun idris-prover-abandon ()
+  "Abandon an in-progress proof."
+  (interactive)
+  (if idris-prover-currently-proving
+      (idris-eval (list :interpret "abandon") t)
+    (error "No proof in progress")))
+
 (defun idris-prover-end ()
   "Get rid of left over buffers from proof mode and unset global state related to the prover."
   (interactive)

@@ -164,8 +164,8 @@ out."
   (idris-load-forward-line -1))
 
 (defun idris-load-file (set-line)
-  "Pass the current buffer's file to the inferior Idris
-process. A prefix argument restricts loading to the current
+  "Pass the current buffer's file to the inferior Idris process.
+A prefix argument restricts loading to the current
 line."
   (interactive "p")
   (save-buffer)
@@ -174,6 +174,11 @@ line."
   (when (= set-line 16) (idris-no-load-to))
   (if (buffer-file-name)
       (when (idris-current-buffer-dirty-p)
+        (when idris-prover-currently-proving
+          (if (y-or-n-p (format "%s is open in the prover. Abandon and load? "
+                                idris-prover-currently-proving))
+              (idris-prover-abandon)
+            (signal 'quit nil)))
         ;; Remove warning overlays
         (idris-warning-reset-all)
         ;; Clear the contents of the compiler notes buffer, if it exists
