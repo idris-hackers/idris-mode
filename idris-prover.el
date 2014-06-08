@@ -60,6 +60,10 @@ the prover."
 (defvar idris-prover-script-buffer-name (idris-buffer-name :proof-script)
   "The name of the Idris proof script buffer.")
 
+(defvar idris-prover-currently-proving nil
+  "The metavariable that Idris has open in the interactive
+prover, or nil if Idris is not proving anything.")
+
 (defun idris-prover-obligations-buffer ()
   (or (get-buffer idris-prover-obligations-buffer-name)
       (let ((buffer (get-buffer-create idris-prover-obligations-buffer-name)))
@@ -157,7 +161,8 @@ left margin."
      t)
     ((:error condition)
      ;; put error overlay
-     (message (concat "fail: " condition)))))
+     (message (concat "fail: " condition))
+     t)))
 
 (defun idris-prover-script-forward ()
   "Forward one piece of proof script."
@@ -201,7 +206,8 @@ left margin."
                  (setq idris-prover-script-processing-overlay nil))
                (setq idris-prover-script-warning-overlay (idris-warning-create-overlay idris-prover-script-processed idris-prover-script-processing condition)))
                     ; put error overlay
-             (message (concat "fail: " condition)))))))))
+             (message (concat "fail: " condition))
+             t)))))))
 
 (defun idris-prover-script-ret ()
   "Insert a newline at the end of buffer, even if it's read-only."
@@ -309,18 +315,26 @@ the length reported by Idris."
     (goto-char (1+ idris-prover-script-processed))))
 
 (defun idris-prover-end ()
-  "Get rid of left over buffers from proof mode."
+  "Get rid of left over buffers from proof mode and unset global state related to the prover."
   (interactive)
+  (setq idris-prover-currently-proving nil)
   (let ((obligations (idris-prover-obligations-buffer))
         (script (idris-prover-script-buffer)))
     (when obligations
       (delete-windows-on obligations)
       (kill-buffer obligations))
-    (when script (kill-buffer script))))
+    (when script (kill-buffer script)))
+  (when (and idris-prover-restore-window-configuration
+             (window-configuration-p
+              idris-prover-saved-window-configuration))
+    (set-window-configuration idris-prover-saved-window-configuration))
+  (setq idris-prover-saved-window-configuration nil))
 
 (defun idris-prover-event-hook-function (event)
+  "Process an EVENT returned from Idris when the prover is running."
   (destructure-case event
     ((:start-proof-mode name _target)
+     (setq idris-prover-currently-proving name)
      (setq idris-prover-saved-window-configuration
            (current-window-configuration))
      (idris-prover-reset-prover-script-buffer)
@@ -332,14 +346,9 @@ the length reported by Idris."
     ((:end-proof-mode msg _target)
      (let ((name (car msg))
            (proof (cadr msg)))
-       (idris-repl-write-string (concat "End proof of " name))
-       (idris-perhaps-insert-proof-script proof))
-     (idris-prover-end)
-     (when (and idris-prover-restore-window-configuration
-                (window-configuration-p
-                 idris-prover-saved-window-configuration))
-       (set-window-configuration idris-prover-saved-window-configuration))
-     (setq idris-prover-saved-window-configuration nil)
+       (idris-perhaps-insert-proof-script proof)
+       (idris-prover-end)
+       (idris-repl-write-string (concat "End proof of " name)))
      t)
     ((:write-proof-state msg _target)
      (destructuring-bind (script count) msg
@@ -350,6 +359,7 @@ the length reported by Idris."
      t)
     ((:abandon-proof _msg _target)
      (idris-prover-end)
+     (idris-repl-write-string "Abandoned proof")
      t)
     (t nil)))
 

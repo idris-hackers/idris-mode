@@ -34,6 +34,7 @@
 (require 'idris-ipkg-mode)
 (require 'idris-warnings-tree)
 (require 'idris-metavariable-list)
+(require 'idris-prover)
 
 (require 'cl-lib)
 (require 'thingatpt)
@@ -69,11 +70,9 @@
        t))
 
 (defun idris-ensure-process-and-repl-buffer ()
-  "Ensures that an Idris process is running and the Idris REPL buffer exists"
+  "Ensure that an Idris process is running and the Idris REPL buffer exists."
   (idris-repl-buffer)
-  (idris-run)
-  (with-current-buffer (idris-repl-buffer)
-    (idris-mark-output-start)))
+  (idris-run))
 
 (defun idris-switch-working-directory (new-working-directory)
   (unless (string= idris-process-current-working-directory new-working-directory)
