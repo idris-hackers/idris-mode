@@ -112,9 +112,22 @@ prover, or nil if Idris is not proving anything.")
     (define-key map (kbd "M-p") 'idris-prover-script-backward)
     ;; Using (kbd "<TAB>") in place of "\t" makes emacs angry, and suggests
     ;; using the latter form.
-    (define-key map "\t" 'idris-prover-script-complete)
+    (define-key map "\t" 'completion-at-point)
     map)
   "Keymap used in Idris proof script mode.")
+
+
+(defun idris-prover-complete ()
+  "Completion of the current input."
+  (let* ((start (save-excursion (beginning-of-line) (point)))
+         (input (buffer-substring-no-properties
+                 start
+                 (point)))
+         (result (idris-eval `(:repl-completions ,input))))
+    (destructuring-bind (completions partial) (car result)
+      (if (null completions)
+          nil
+        (list start (point) completions)))))
 
 (defun idris-prover-find-tactic (start-pos)
   "Use some layout heuristics to find the tactic beginning at
@@ -216,37 +229,12 @@ left margin."
       (let ((inhibit-read-only t)) (insert "\n"))
     (newline)))
 
-(defun idris-prover-script-complete ()
-  "Completion of the partial input."
-  (interactive)
-  (goto-char idris-prover-script-processed)
-  (let* ((input (buffer-substring-no-properties (point) (point-max)))
-         (inputp (replace-regexp-in-string "[ \t\n]*\\'" "" input))
-         (inputr (replace-regexp-in-string "\\`[ \t\n]*" "" inputp))
-         (result (idris-eval `(:repl-completions ,inputr))))
-    (destructuring-bind (completions partial) result
-      (if (null completions)
-          (progn
-            (idris-minibuffer-respecting-message "Can't find completions for \"%s\"" input)
-            (ding)
-            (idris-complete-restore-window-configuration))
-        (if (= (length completions) 1)
-            (progn
-              (goto-char (+ idris-prover-script-processed (length inputp)))
-              (insert-and-inherit (substring (concat partial (car completions)) (length inputr)))
-              (idris-minibuffer-respecting-message "Sole completion")
-              (idris-complete-restore-window-configuration))
-          (let* ((pp (substring input (length partial)))
-                 (mypartial (find-common-prefix pp completions)))
-            (insert-and-inherit (substring (concat partial mypartial) (length input)))
-            (idris-minibuffer-respecting-message "Completions, not unique")
-            (idris-display-or-scroll-completions completions partial mypartial)))))))
-
 (define-derived-mode idris-prover-script-mode prog-mode "Idris-Proof-Script"
   "Major mode for interacting with Idris proof script.
     \\{idris-prover-script-mode-map}
 Invokes `idris-prover-script-mode-hook'."
   :group 'idris-prover
+  (set (make-local-variable 'completion-at-point-functions) '(idris-prover-complete))
   (set (make-local-variable 'indent-tabs-mode) nil))
 
 (defun idris-prover-script-buffer ()
