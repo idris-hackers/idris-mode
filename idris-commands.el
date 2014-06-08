@@ -211,7 +211,7 @@ line."
                             (when (member 'warnings-tree idris-warnings-printing)
                               (idris-list-compiler-notes))
                             (run-hooks 'idris-load-file-success-hook)
-                            (if (stringp result) ;; Remove this hack after the next Idris release
+                            (if (not (consp result)) ;; Remove this hack after the next Idris release
                                 (idris-update-loaded-region (idris-whole-buffer-fc))
                               (idris-update-loaded-region result)))
                           (lambda (_condition)
@@ -253,7 +253,7 @@ Idris process. This sets the load position to point, if there is one."
             (idris-update-options-cache)
             (setq idris-currently-loaded-buffer (current-buffer))
             (idris-make-clean)
-            (if (stringp result) ;; Remove this hack after the next Idris release
+            (if (not (consp result)) ;; Remove this hack after the next Idris release
                 (idris-update-loaded-region (idris-whole-buffer-fc))
               (idris-update-loaded-region (car result))))))
     (error "Cannot find file for current buffer")))
