@@ -205,7 +205,7 @@ Invokes `idris-repl-mode-hook'."
   (idris-repl-update-banner))
 
 (defun idris-repl-return ()
-  "Send command over to Idris"
+  "Send command over to Idris."
   (interactive)
   (goto-char (point-max))
   (let ((end (point)))
@@ -217,7 +217,9 @@ Invokes `idris-repl-mode-hook'."
     (insert "\n")
     (idris-mark-input-start)
     (idris-mark-output-start)
-    (idris-repl-eval-string input)))
+    (if (string-match-p "^\\s-*$" input)
+        (idris-repl-insert-prompt)
+      (idris-repl-eval-string input))))
 
 (defun idris-repl-complete ()
   "Completion of the current input"
