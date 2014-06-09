@@ -645,6 +645,7 @@ type-correct, so loading will fail."
 (defun idris-quit ()
   "Quit the Idris process, cleaning up the state that it has synchronized with Emacs."
   (interactive)
+  (setq idris-prover-currently-proving nil)
   (let* ((pbufname (idris-buffer-name :process))
          (pbuf (get-buffer pbufname)))
     (if pbuf
