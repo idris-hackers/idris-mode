@@ -46,18 +46,23 @@
   "The buffer currently loaded by the running Idris")
 
 (defun idris-make-dirty ()
-  (setq idris-buffer-dirty-p t))
+  "Mark an Idris buffer as dirty and remove the loaded region."
+  (setq idris-buffer-dirty-p t)
+  (when idris-loaded-region-overlay
+    (delete-overlay idris-loaded-region-overlay))
+  (setq idris-loaded-region-overlay nil))
+
 
 (defun idris-make-clean ()
   (setq idris-buffer-dirty-p nil))
 
 (defun idris-current-buffer-dirty-p ()
-  "Check whether the current buffer's most recent version is loaded"
+  "Check whether the current buffer's most recent version is loaded."
   (or idris-buffer-dirty-p
       (not (equal (current-buffer)
                   idris-currently-loaded-buffer))
-      ;; true when load-here has been removed
-      (and idris-loaded-region-overlay (not idris-load-to-here))
+      ;; for when we load the whole buffer
+      (and (not idris-load-to-here) (not idris-loaded-region-overlay))
       ;; true when the place to load is outside the loaded region - extend region!
       (and idris-loaded-region-overlay
            idris-load-to-here
@@ -95,13 +100,13 @@
   "The region loaded by Idris, should such a thing exist")
 
 (defun idris-possibly-make-dirty (beginning end length)
-  ;; If there is a currently loaded region, only make the buffer dirty when it has changed
-  (if idris-loaded-region-overlay
+  ;; If there is a load-to-here marker and a currently loaded region, only
+  ;; make the buffer dirty when the change overlaps the loaded region.
+  (if (and idris-load-to-here idris-loaded-region-overlay)
       (when (member idris-loaded-region-overlay
                     (overlays-in beginning end))
-        (idris-make-dirty)
-        (delete-overlay idris-loaded-region-overlay)
-        (setq idris-loaded-region-overlay nil))
+        (idris-make-dirty))
+    ;; Otherwise just make it dirty.
     (idris-make-dirty)))
 
 (defun idris-whole-buffer-fc ()

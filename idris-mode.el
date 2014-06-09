@@ -135,7 +135,7 @@ Invokes `idris-mode-hook'."
   ; Filling of comments and docs
   (set (make-local-variable 'fill-paragraph-function) 'idris-fill-paragraph)
   ; Make dirty if necessary
-  (add-hook 'after-change-functions 'idris-possibly-make-dirty)
+  (add-hook (make-local-variable 'after-change-functions) 'idris-possibly-make-dirty)
   (setq mode-name `("Idris"
                     (:eval (if idris-rex-continuations "!" ""))
                     " "
