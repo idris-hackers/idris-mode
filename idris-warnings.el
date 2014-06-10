@@ -101,7 +101,9 @@ WARNING is of form (filename (startline startcolumn) (endline endcolumn) message
 (defun idris-real-warning-overlay (filename lineno col message &optional spans)
   "Add the compiler warning to the buffer for real!"
   (push (list filename lineno col message spans) idris-raw-warnings)
-  (let ((buffer (get-file-buffer filename)))
+  (let* ((fullpath (concat (file-name-as-directory idris-process-current-working-directory)
+                          filename))
+         (buffer (get-file-buffer fullpath)))
     (when (not (null buffer))
       (with-current-buffer buffer
         (multiple-value-bind (start end) (get-region lineno)
