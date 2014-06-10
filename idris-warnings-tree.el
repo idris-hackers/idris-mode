@@ -105,7 +105,8 @@ Invokes `idris-compiler-notes-mode-hook'.")
 
 (defun idris-goto-location (filename)
   "Opens buffer for filename"
-  (let ((fullpath (concat idris-process-current-working-directory filename)))
+  (let ((fullpath (concat (file-name-as-directory idris-process-current-working-directory)
+                          filename)))
     (or (get-buffer filename)
         (get-file-buffer fullpath)
         (find-file-noselect fullpath))))

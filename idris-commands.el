@@ -412,7 +412,6 @@ compiler-annotated output. Does not return a line number."
   (let ((what (idris-thing-at-point))
         (command (if proof :add-proof-clause :add-clause)))
     (when (car what)
-      (idris-load-to (point))
       (idris-load-file-sync)
       (let ((result (car (idris-eval `(,command ,(cdr what) ,(car what)))))
             final-point
