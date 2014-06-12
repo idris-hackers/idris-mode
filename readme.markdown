@@ -36,6 +36,13 @@ Customize `inferior-idris-path` if idris is not on your default path.
 
 [Idris]: http://www.idris-lang.org
 
+## Keybindings
+`idris-mode` follows conventions from SLIME whenever possible. In particular:
+
+* For ease of typing, any sequence of three keys allows the final key to be pressed with or without the control key, unless the last key is `h`. For example, `C-c C-d d` can also be typed `C-c C-d C-d`.
+* Documentation-related commands are prefixed with `C-c C-d`.
+* Commands related to **b**uilding packages are prefixed with `C-c C-b`.
+
 ## Error messages
 
 When loading a buffer, `idris-mode` will decorate errors from the Idris compiler with underlines. Tooltips show the error message.
@@ -62,10 +69,16 @@ The following commands are available when there is an inferior Idris process (wh
 * `C-c C-e`: Extract a metavariable or provisional definition name to an explicit top level definition
 * `C-c C-c`: Case split the pattern variable under point
 * `C-c C-t`: Get the type for the identifier under point. A prefix argument prompts for the name.
-* `C-c C-d`: Get the documentation for the identifier under point. A prefix argument prompts for the name.
 * `C-c C-w`: Add a with block for the pattern-match clause under point
 * `C-c C-h a`: Search names, types, and docstrings for a given string.
 * `C-c C-z`: Pop to a presently open REPL buffer
+
+## Online documentation
+
+The Idris compiler supports documentation. The following commands access it:
+* `C-c C-d d`: Show the documentation for the name under point (`:doc` at the REPL). A prefix argument prompts for the name.
+* `C-c C-d a`: Search the documentation for a string (`:apropos` at the REPL).
+* `C-c C-d t`: Search for documentation regarding a particular type (`:search` at the REPL).
 
 ## Completion
 
