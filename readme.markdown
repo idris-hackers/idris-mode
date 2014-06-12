@@ -36,10 +36,18 @@ Customize `inferior-idris-path` if idris is not on your default path.
 
 [Idris]: http://www.idris-lang.org
 
+## Error messages
+
+When loading a buffer, `idris-mode` will decorate errors from the Idris compiler with underlines. Tooltips show the error message.
+The following error message commands are available:
+
+* `M-n`: Move the point to the next compiler note
+* `M-p`: Move the point to the previous comiler note
+
 ## Colors and fonts
 Idris mode displays output from the Idris compiler with full semantic highlighting. It is quite possible that this is ugly in your color scheme. If that is the case, you can use `M-x customize-group RET idris-faces RET` to modify them.
 
-## Interactive Editing
+## Interactive editing
 
 ![Interactive editing](http://itu.dk/people/drc/idris-mode.gif)
 

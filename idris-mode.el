@@ -59,6 +59,8 @@
     (define-key map (kbd "C-c C-b p") 'idris-open-package-file)
     (define-key map (kbd "C-c C-z") 'idris-pop-to-repl)
     (define-key map (kbd "RET") 'idris-newline-and-indent)
+    (define-key map (kbd "M-n") 'idris-next-error)
+    (define-key map (kbd "M-p") 'idris-previous-error)
     map)
   "Keymap used in Idris mode.")
 
