@@ -233,6 +233,23 @@ line."
         (pop-to-buffer buffer)
       (message "No Idris compiler log is currently open"))))
 
+(defun idris-next-error ()
+  "Jump to the next error overlay in the buffer."
+  (interactive)
+  (let ((warnings-forward (sort (cl-remove-if-not #'(lambda (w) (> (overlay-start w) (point))) idris-warnings)
+                                #'(lambda (w1 w2) (<= (overlay-start w1) (overlay-start w2))))))
+    (if warnings-forward
+        (goto-char (overlay-start (car warnings-forward)))
+      (error "No warnings or errors until end of buffer"))))
+
+(defun idris-previous-error ()
+  "Jump to the previous error overlay in the buffer."
+  (interactive)
+  (let ((warnings-backward (sort (cl-remove-if-not #'(lambda (w) (< (overlay-end w) (point))) idris-warnings)
+                                #'(lambda (w1 w2) (>= (overlay-end w1) (overlay-end w2))))))
+    (if warnings-backward
+        (goto-char (overlay-end (car warnings-backward)))
+      (error "No warnings or errors until beginning of buffer"))))
 
 (defun idris-load-file-sync ()
   "Pass the current buffer's file synchronously to the inferior
