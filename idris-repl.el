@@ -59,7 +59,7 @@ If ALWAYS-INSERT is non-nil, always insert a prompt at the end of the buffer."
   (goto-char idris-prompt-start)
   (let ((inhibit-read-only 'idris-repl-prompt))
     (delete-region idris-prompt-start idris-input-start))
-  (unless (bolp) (newline))
+  (unless (bolp) (insert "\n"))
   (let ((prompt (if (and (equal idris-repl-prompt-style 'short)
                          (not idris-prover-currently-proving))
                     "λΠ> "
