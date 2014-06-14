@@ -147,6 +147,28 @@ inserted text (that is, relative to point prior to insertion)."
                                                    decor-face)))
                                     (if f (list 'face f) ())))))))
 
+;;; Was originally slime-search-property - thanks SLIME!
+(defun idris-search-property (prop &optional backward prop-value-fn)
+  "Search for the next text range where PROP is non-nil.
+Return the value of PROP, or nil if it is not found.
+If BACKWARD is non-nil, search backward.
+If PROP-VALUE-FN is non-nil use it to extract PROP's value."
+  (let ((next-candidate (if backward
+                            #'previous-single-char-property-change
+                          #'next-single-char-property-change))
+        (prop-value-fn (or prop-value-fn
+                            (lambda ()
+                              (get-text-property (point) prop))))
+        (start (point))
+        (prop-value))
+    (while (progn
+             (goto-char (funcall next-candidate (point) prop))
+             (not (or (setq prop-value (funcall prop-value-fn))
+                      (eobp)
+                      (bobp)))))
+    (cond (prop-value)
+          (t (goto-char start) nil))))
+
 ;;; Dispatching of events and helpers
 (defmacro destructure-case (value &rest patterns)
   "Dispatch VALUE to one of PATTERNS.
