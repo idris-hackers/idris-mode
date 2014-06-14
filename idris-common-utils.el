@@ -96,12 +96,12 @@ inserted text (that is, relative to point prior to insertion)."
                                                     nil))
                                    (text-face (pcase (assoc :text-formatting props)
                                                 (`(:text-formatting :bold)
-                                                 'bold)
+                                                 '(bold))
                                                 (`(:text-formatting :italic)
-                                                 'italic)
+                                                 '(italic))
                                                 (`(:text-formatting :underline)
-                                                 't)
-                                                (_ '())))
+                                                 '(underline))
+                                                (_ nil)))
                                    (decor-face (if decor
                                                    (cdr (assoc (cadr decor)
                                                                '((:type idris-semantic-type-face)
@@ -142,7 +142,10 @@ inserted text (that is, relative to point prior to insertion)."
                                 ,@(if mousable-face
                                       (list 'mouse-face mousable-face)
                                     ())
-                                face ,(cons text-face (append implicit-face decor-face)))))))
+                                ,@(let ((f (append text-face
+                                                   implicit-face
+                                                   decor-face)))
+                                    (if f (list 'face f) ())))))))
 
 ;;; Dispatching of events and helpers
 (defmacro destructure-case (value &rest patterns)
