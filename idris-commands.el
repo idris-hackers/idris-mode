@@ -743,6 +743,91 @@ means to not ask for confirmation."
                 (t (message "%S" selection))))))
     map))
 
+(defun idris-make-term-menu (term)
+  "Make a menu for the widget for TERM"
+  (let ((menu (make-sparse-keymap)))
+    (define-key menu [idris-term-menu-normalize]
+      `(menu-item "Normalize"
+                  (lambda () (interactive))))
+    menu))
+
+(defun idris-insert-term-widget (term)
+  "Make a widget for interacting with the term represented by TERM."
+  (insert
+   (propertize "▶ "
+               'mouse-face 'highlight
+               'help-echo "<mouse-3>: term menu"
+               'keymap (let ((map (make-sparse-keymap)))
+                         (define-key map [mouse-3]
+                           (lambda () (interactive)
+                             (let ((selection
+                                    (x-popup-menu t
+                                      (idris-make-term-menu term))))
+                               (cond ((equal selection
+                                             '(idris-term-menu-normalize))
+                                      (message "Normalizing %s" term))))))
+                         map))))
+
+(defun idris-add-term-widgets (start end)
+  "Add interactiong widgets to annotated terms between START and END."
+  (interactive)
+  (save-excursion
+    (save-restriction
+      (narrow-to-region start end)
+      (goto-char (point-min))
+      (let (term)
+        (while (setq term (idris-search-property 'idris-tt-term))
+          (idris-insert-term-widget term))))))
+
+(defun idris-show-term-implicits (position)
+  "Replace the term at POSITION with a fully-explicit version."
+  (interactive "d")
+  (idris-live-term-command position :show-term-implicits))
+
+(defun idris-hide-term-implicits (position)
+  "Replace the term at POSITION with a fully-implicit version."
+  (interactive "d")
+  (idris-live-term-command position :hide-term-implicits))
+
+(defun idris-normalize-term (position)
+  "Replace the term at POSITION with a normalized version."
+  (interactive "d")
+  (idris-live-term-command position :normalise-term))
+
+
+(defun idris-live-term-command (position cmd)
+  "For the term at POSITION, Run the live term command CMD."
+  (unless (member cmd '(:show-term-implicits
+                        :hide-term-implicits
+                        :normalise-term))
+    (error "Invalid term command %s" cmd))
+  (let ((term (plist-get (text-properties-at position) 'idris-tt-term)))
+    (if (null term)
+        (error "No term here")
+      (let* ((res (car (idris-eval (list cmd term))))
+             (new-term (car res))
+             (spans (cadr res))
+             (rendered
+              (with-temp-buffer
+                (idris-propertize-spans (idris-repl-semantic-text-props spans)
+                  (insert new-term))
+                (buffer-string))))
+        (idris-replace-term-at position rendered)))))
+
+(defun idris-replace-term-at (position new-term)
+  "Replace the term at POSITION with the new rendered term NEW-TERM.
+The idris-tt-term text property is used to determined the extent
+of the term to replace."
+  (when (null (plist-get (text-properties-at position) 'idris-tt-term))
+    (error "No term here"))
+  (let ((start (previous-single-property-change position 'idris-tt-term))
+        (end (next-single-property-change position 'idris-tt-term))
+        (inhibit-read-only t))
+    (save-excursion
+      (delete-region start end)
+      (goto-char start)
+      (insert new-term))))
+
 (defun idris-prove-metavariable (name)
   "Launch the prover on the metavariable NAME."
   (idris-eval-async `(:interpret ,(concat ":p " name))

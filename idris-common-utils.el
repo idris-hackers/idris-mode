@@ -90,6 +90,7 @@ inserted text (that is, relative to point prior to insertion)."
                             (let* ((name (assoc :name props))
                                    (implicit (assoc :implicit props))
                                    (decor (assoc :decor props))
+                                   (term (assoc :tt-term props))
                                    (unique-val (cl-gensym)) ; HACK to stop consecutive mouse-faces from interfering
                                    (implicit-face (if (and implicit (equal (cadr implicit) :True))
                                                       '(idris-semantic-implicit-face)
@@ -125,7 +126,8 @@ inserted text (that is, relative to point prior to insertion)."
                                                         name)
                                                    "\n<mouse-3> context menu"
                                                  "")))
-                              `(,@(if name
+                              `(rear-nonsticky t
+                                ,@(if name
                                       (append `(help-echo (concat ,(cadr name)
                                                                   ,type
                                                                   ,doc-overview
@@ -141,6 +143,9 @@ inserted text (that is, relative to point prior to insertion)."
                                     nil)
                                 ,@(if mousable-face
                                       (list 'mouse-face mousable-face)
+                                    ())
+                                ,@(if term
+                                      (list 'idris-tt-term (cadr term))
                                     ())
                                 ,@(let ((f (append text-face
                                                    implicit-face
