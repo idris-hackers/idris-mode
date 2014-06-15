@@ -807,6 +807,7 @@ means to not ask for confirmation."
       (let* ((res (car (idris-eval (list cmd term))))
              (new-term (car res))
              (spans (cadr res))
+             (col (current-column))
              (rendered
               (with-temp-buffer
                 (idris-propertize-spans (idris-repl-semantic-text-props spans)
@@ -814,14 +815,32 @@ means to not ask for confirmation."
                 (buffer-string))))
         (idris-replace-term-at position rendered)))))
 
+(defun idris-find-term-end (pos step)
+  "Find an end of the term at POS, moving STEP positions in each iteration.
+Return the position found."
+  ;; Can't use previous-single-property-change-position because it breaks if
+  ;; point is at the beginning of the term (likewise for next/end).
+  (let ((term (plist-get (text-properties-at pos) 'idris-tt-term)))
+    (when (null term)
+      (error "No term at %s" pos))
+    (save-excursion
+      (goto-char pos)
+      (while (and (string= term
+                           (plist-get (text-properties-at (point))
+                                      'idris-tt-term))
+                  (not (eobp))
+                  (not (bobp)))
+        (forward-char step))
+      (- (point) step))))
+
 (defun idris-replace-term-at (position new-term)
   "Replace the term at POSITION with the new rendered term NEW-TERM.
 The idris-tt-term text property is used to determined the extent
 of the term to replace."
   (when (null (plist-get (text-properties-at position) 'idris-tt-term))
     (error "No term here"))
-  (let ((start (previous-single-property-change position 'idris-tt-term))
-        (end (next-single-property-change position 'idris-tt-term))
+  (let ((start (idris-find-term-end position -1))
+        (end (idris-find-term-end position 1))
         (inhibit-read-only t))
     (save-excursion
       (delete-region start end)
