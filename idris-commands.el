@@ -818,6 +818,8 @@ means to not ask for confirmation."
 (defun idris-find-term-end (pos step)
   "Find an end of the term at POS, moving STEP positions in each iteration.
 Return the position found."
+  (unless (or (= step 1) (= step -1))
+    (error "Valid values for STEP are 1 or -1"))
   ;; Can't use previous-single-property-change-position because it breaks if
   ;; point is at the beginning of the term (likewise for next/end).
   (let ((term (plist-get (text-properties-at pos) 'idris-tt-term)))
@@ -831,7 +833,9 @@ Return the position found."
                   (not (eobp))
                   (not (bobp)))
         (forward-char step))
-      (- (point) step))))
+      (if (= step -1)
+          (1+ (point))
+        (point)))))
 
 (defun idris-replace-term-at (position new-term)
   "Replace the term at POSITION with the new rendered term NEW-TERM.
