@@ -84,6 +84,17 @@ The Idris compiler supports documentation. The following commands access it:
 
 `M-Tab` or whatever you have `completion-at-point` bound to will ask the running Idris process for completions for the current identifier. Note that this command requires that the Idris interpreter is already running, because attempting to load an incomplete buffer would probably not work.
 
+## Active terms
+
+Some terms output by the Idris compiler are *active*, meaning that `idris-mode` is aware of their original representation. For these terms, commands exist to normalise them and show or hide their implicit arguments.
+
+To see the active terms available, use the command `idris-add-term-widgets`, which is also found in the menu. To issue term commands, right-click on the triangle that points at the term. The widgets can be removed again using `idris-remove-term-widgets`.
+
+The following keybindings are available:
+* `C-c C-m n`: Normalize the term at point (`M-x idris-normalize-term`)
+* `C-c C-m i`: Show implicits for the term at point (`M-x idris-show-term-implicits`)
+* `C-c C-m h`: Hide implicits for the term at point (`M-x idris-hide-term-implicits`)
+
 ## Package files
 Idris's build system, which consists of package files ending in `.ipkg`, has rudimentary support from `idris-mode`. The following commands are available in Idris buffers or package buffers; if they are run from an Idris buffer, then `idris-mode` will attempt to locate the package file automatically. The mnemonic for `C-b` in the prefix is "build".
 * `C-c C-b c`: Clean the package, removing `.ibc` files

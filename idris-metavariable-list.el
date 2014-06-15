@@ -41,6 +41,9 @@
     (define-key map (kbd "q") 'idris-metavariable-list-quit)
     (define-key map (kbd "C-c C-t") 'idris-type-at-point)
     (define-key map (kbd "C-c C-d") 'idris-docs-at-point)
+    (define-key map (kbd "C-c C-m n") 'idris-normalize-term)
+    (define-key map (kbd "C-c C-m i") 'idris-show-term-implicits)
+    (define-key map (kbd "C-c C-m h") 'idris-hide-term-implicits)
     (define-key map (kbd "RET") 'idris-compiler-notes-default-action-or-show-details)
     (define-key map (kbd "<mouse-2>") 'idris-compiler-notes-default-action-or-show-details/mouse)
     map))
@@ -48,6 +51,7 @@
 (easy-menu-define idris-metavariable-list-mode-menu idris-metavariable-list-mode-map
   "Menu for the Idris metavariable list buffer"
   `("Idris Metavars"
+    ["Show term interaction widgets" idris-add-term-widgets t]
     ["Close metavariable list buffer" idris-metavariable-list-quit t]))
 
 (define-derived-mode idris-metavariable-list-mode fundamental-mode "Idris Metavars"

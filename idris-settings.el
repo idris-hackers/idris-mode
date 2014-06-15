@@ -45,6 +45,14 @@
   :type '(repeat symbol)
   :options '(warnings-tree warnings-repl))
 
+(defface idris-active-term-face
+  '((((background light))
+     :background "lightgray")
+    (((background dark))
+     :background "darkgray"))
+  "The face to highlight active terms"
+  :group 'idris-faces)
+
 (defface idris-semantic-type-face
   '((t (:foreground "blue")))
   "The face to be used to highlight types"

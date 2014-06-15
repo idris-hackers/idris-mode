@@ -78,8 +78,17 @@
     (define-key map (kbd "q") 'idris-notes-quit)
     (define-key map (kbd "C-c C-t") 'idris-type-at-point)
     (define-key map (kbd "C-c C-d") 'idris-type-at-point)
+    (define-key map (kbd "C-c C-m n") 'idris-normalize-term)
+    (define-key map (kbd "C-c C-m i") 'idris-show-term-implicits)
+    (define-key map (kbd "C-c C-m h") 'idris-hide-term-implicits)
     map)
   "Keymap used in Idris Compiler Notes mode.")
+
+(easy-menu-define idris-compiler-notes-mode-menu idris-compiler-notes-mode-map
+  "Menu for Idris compiler notes buffers"
+  `("Idris Notes"
+    ["Show term interaction widgets" idris-add-term-widgets t]
+    ["Close Idris info buffer" idris-notes-quit t]))
 
 (defun idris-notes-quit ()
   (interactive)
