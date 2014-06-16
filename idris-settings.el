@@ -93,11 +93,6 @@
              turn-on-eldoc-mode)
   :group 'idris)
 
-(defcustom idris-use-yasnippet-expansions t
-  "Use yasnippet if available for completing interactive Idris commands"
-  :type 'boolean
-  :group 'idris)
-
 (defcustom idris-metavariable-show-on-load t
   "Show the current metavariables on successful load."
   :type 'boolean
