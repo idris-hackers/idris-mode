@@ -743,6 +743,153 @@ means to not ask for confirmation."
                 (t (message "%S" selection))))))
     map))
 
+(defun idris-make-term-menu (term)
+  "Make a menu for the widget for TERM"
+  (let ((menu (make-sparse-keymap)))
+    (define-key menu [idris-term-menu-normalize]
+      `(menu-item "Normalize"
+                  (lambda () (interactive))))
+    (define-key-after menu [idris-term-menu-show-implicits]
+      `(menu-item "Show implicits"
+                  (lambda () (interactive))))
+    (define-key-after menu [idris-term-menu-hide-implicits]
+      `(menu-item "Hide implicits"
+                  (lambda () (interactive))))
+    menu))
+
+(defun idris-insert-term-widget (term)
+  "Make a widget for interacting with the term represented by TERM beginning at START-POS in the current buffer."
+  (let ((inhibit-read-only t)
+        (start-pos (copy-marker (point)))
+        (end-pos (copy-marker (idris-find-term-end (point) 1)))
+        (buffer (current-buffer)))
+    (insert-before-markers
+     (propertize
+      "▶"
+      'face 'idris-active-term-face
+      'mouse-face 'highlight
+      'idris-term-widget term
+      'help-echo "<mouse-3>: term menu"
+      'keymap (let ((map (make-sparse-keymap)))
+                (define-key map [mouse-3]
+                  (lambda () (interactive)
+                    (let ((selection
+                           (x-popup-menu t
+                             (idris-make-term-menu term))))
+                      (cond ((equal selection
+                                    '(idris-term-menu-normalize))
+                             (idris-normalize-term start-pos buffer)
+                             (idris-remove-term-widgets))
+                            ((equal selection
+                                    '(idris-term-menu-show-implicits))
+                             (idris-show-term-implicits start-pos buffer)
+                             (idris-remove-term-widgets))
+                            ((equal selection
+                                    '(idris-term-menu-hide-implicits))
+                             (idris-hide-term-implicits start-pos buffer)
+                             (idris-remove-term-widgets))))))
+                map)))
+    (let ((term-overlay (make-overlay start-pos end-pos)))
+      ;; TODO: delete the markers now that they're not useful
+      (overlay-put term-overlay 'idris-term-widget term)
+      (overlay-put term-overlay 'face 'idris-active-term-face))))
+
+(defun idris-add-term-widgets ()
+  "Add interaction widgets to annotated terms."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (let (term)
+      (while (setq term (idris-search-property 'idris-tt-term))
+        (idris-insert-term-widget term)))))
+
+(defun idris-remove-term-widgets (&optional buffer)
+  "Remove interaction widgets from annotated terms."
+  (interactive)
+  (with-current-buffer (or buffer (current-buffer))
+    (save-excursion
+      (let ((inhibit-read-only t))
+        (mapc (lambda (overlay)
+                (when (overlay-get overlay 'idris-term-widget)
+                  (delete-overlay overlay)))
+              (overlays-in (point-min) (point-max)))
+        (goto-char (point-min))
+        (while (idris-search-property 'idris-term-widget)
+          (delete-char 1))))))
+
+(defun idris-show-term-implicits (position &optional buffer)
+  "Replace the term at POSITION with a fully-explicit version."
+  (interactive "d")
+  (idris-live-term-command position :show-term-implicits buffer))
+
+(defun idris-hide-term-implicits (position &optional buffer)
+  "Replace the term at POSITION with a fully-implicit version."
+  (interactive "d")
+  (idris-live-term-command position :hide-term-implicits buffer))
+
+(defun idris-normalize-term (position &optional buffer)
+  "Replace the term at POSITION with a normalized version."
+  (interactive "d")
+  (idris-live-term-command position :normalise-term buffer))
+
+
+(defun idris-live-term-command (position cmd &optional buffer)
+  "For the term at POSITION, Run the live term command CMD."
+  (unless (member cmd '(:show-term-implicits
+                        :hide-term-implicits
+                        :normalise-term))
+    (error "Invalid term command %s" cmd))
+  (with-current-buffer (or buffer (current-buffer))
+    (let ((term (plist-get (text-properties-at position) 'idris-tt-term)))
+      (if (null term)
+          (error "No term here")
+        (let* ((res (car (idris-eval (list cmd term))))
+               (new-term (car res))
+               (spans (cadr res))
+               (col (current-column))
+               (rendered
+                (with-temp-buffer
+                  (idris-propertize-spans (idris-repl-semantic-text-props spans)
+                    (insert new-term))
+                  (buffer-string))))
+          (idris-replace-term-at position rendered))))))
+
+(defun idris-find-term-end (pos step)
+  "Find an end of the term at POS, moving STEP positions in each iteration.
+Return the position found."
+  (unless (or (= step 1) (= step -1))
+    (error "Valid values for STEP are 1 or -1"))
+  ;; Can't use previous-single-property-change-position because it breaks if
+  ;; point is at the beginning of the term (likewise for next/end).
+  (let ((term (plist-get (text-properties-at pos) 'idris-tt-term)))
+    (when (null term)
+      (error "No term at %s" pos))
+    (save-excursion
+      (goto-char pos)
+      (while (and (string= term
+                           (plist-get (text-properties-at (point))
+                                      'idris-tt-term))
+                  (not (eobp))
+                  (not (bobp)))
+        (forward-char step))
+      (if (= step -1)
+          (1+ (point))
+        (point)))))
+
+(defun idris-replace-term-at (position new-term)
+  "Replace the term at POSITION with the new rendered term NEW-TERM.
+The idris-tt-term text property is used to determined the extent
+of the term to replace."
+  (when (null (plist-get (text-properties-at position) 'idris-tt-term))
+    (error "No term here"))
+  (let ((start (idris-find-term-end position -1))
+        (end (idris-find-term-end position 1))
+        (inhibit-read-only t))
+    (save-excursion
+      (delete-region start end)
+      (goto-char start)
+      (insert new-term))))
+
 (defun idris-prove-metavariable (name)
   "Launch the prover on the metavariable NAME."
   (idris-eval-async `(:interpret ,(concat ":p " name))

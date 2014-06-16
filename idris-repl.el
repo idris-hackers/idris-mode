@@ -59,7 +59,7 @@ If ALWAYS-INSERT is non-nil, always insert a prompt at the end of the buffer."
   (goto-char idris-prompt-start)
   (let ((inhibit-read-only 'idris-repl-prompt))
     (delete-region idris-prompt-start idris-input-start))
-  (unless (bolp) (newline))
+  (unless (bolp) (insert "\n"))
   (let ((prompt (if (and (equal idris-repl-prompt-style 'short)
                          (not idris-prover-currently-proving))
                     "λΠ> "
@@ -122,6 +122,9 @@ If ALWAYS-INSERT is non-nil, always insert a prompt at the end of the buffer."
     (define-key map (kbd "<C-down>") 'idris-repl-forward-history)
     (define-key map (kbd "C-c C-t") 'idris-type-at-point)
     (define-key map (kbd "C-c C-d") 'idris-docs-at-point)
+    (define-key map (kbd "C-c C-m n") 'idris-normalize-term)
+    (define-key map (kbd "C-c C-m i") 'idris-show-term-implicits)
+    (define-key map (kbd "C-c C-m h") 'idris-hide-term-implicits)
     map)
   "Keymap used in Idris REPL mode.")
 
@@ -137,6 +140,7 @@ If ALWAYS-INSERT is non-nil, always insert a prompt at the end of the buffer."
       :visible (not (idris-get-option :error-context))]
      ["Hide error context" (idris-set-option :error-context nil)
       :visible (idris-get-option :error-context)])
+    ["Show term interaction widgets" idris-add-term-widgets t]
     ["Customize idris-mode" (customize-group 'idris) t]
     ["Quit inferior idris process" idris-quit t]
     ))

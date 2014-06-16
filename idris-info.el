@@ -37,11 +37,15 @@
     (define-key map (kbd "q") 'idris-info-quit)
     (define-key map (kbd "C-c C-t") 'idris-type-at-point)
     (define-key map (kbd "C-c C-d") 'idris-docs-at-point)
+    (define-key map (kbd "C-c C-m n") 'idris-normalize-term)
+    (define-key map (kbd "C-c C-m i") 'idris-show-term-implicits)
+    (define-key map (kbd "C-c C-m h") 'idris-hide-term-implicits)
     map))
 
 (easy-menu-define idris-info-mode-menu idris-info-mode-map
   "Menu for the Idris info buffer"
   `("Idris Info"
+    ["Show term interaction widgets" idris-add-term-widgets t]
     ["Close Idris info buffer" idris-info-quit t]))
 
 (define-derived-mode idris-info-mode fundamental-mode "Idris Info"
