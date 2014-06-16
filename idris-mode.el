@@ -19,7 +19,6 @@
 (require 'idris-core)
 (require 'idris-settings)
 (require 'idris-syntax)
-(require 'idris-indentation)
 (require 'idris-simple-indent)
 (require 'idris-repl)
 (require 'idris-commands)

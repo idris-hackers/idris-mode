@@ -33,7 +33,7 @@ Since a request can take an arbitrary amount of time, and emacs is single-thread
 
 \section{Features}
 The idris-mode provides basic syntax highlighting for Idris, located in \texttt{idris-syntax.el} (not in scope of this document).
-Also indentation is handled in idris-mode, implemented in \texttt{idris-indentation.el}.
+Also indentation is handled in idris-mode, implemented in \texttt{idris-simple-indent.el}.
 
 The currently supported features which interact with the Idris compiler are a read-eval-print-loop (REPL), type checking of Idris files, processing and displaying of errors, a proof mode, case splitting, and other interactive features.
 
@@ -194,7 +194,7 @@ A dependency diagram of the various emacs lisp files is shown in Figure~\ref{fig
   \node (common) [below=of events] {idris-common-utils.el};
   \node (compat) [left=of commands] {idris-compat.el};
   \node (syntax) [right=of commands] {idris-syntax.el};
-  \node (indentation) [right=of syntax] {idris-indentation.el};
+  \node (indentation) [right=of syntax] {idris-simple-indent.el};
 
   \draw [->] (im) -- (syntax);
   \draw [->] (im) -- (indentation);

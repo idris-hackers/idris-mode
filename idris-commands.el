@@ -421,7 +421,7 @@ compiler-annotated output. Does not return a line number."
       (idris-load-file-sync)
       (let ((result (car (idris-eval `(:case-split ,(cdr what) ,(car what))))))
         (delete-region (line-beginning-position) (line-end-position))
-        (idris-insert-or-expand (substring result 0 (1- (length result))))))))
+        (insert (substring result 0 (1- (length result))))))))
 
 (defun idris-add-clause (proof)
   "Add clauses to the declaration at point"
@@ -454,7 +454,7 @@ compiler-annotated output. Does not return a line number."
           (forward-line))
         (insert prefix)
         (setq final-point (point)) ;; Save the location of the start of the clause
-        (idris-insert-or-expand result)
+        (insert result)
         (newline)
         (goto-char final-point))))) ;; Put the cursor on the start of the inserted clause
 
@@ -466,7 +466,7 @@ compiler-annotated output. Does not return a line number."
       (idris-load-file-sync)
       (let ((result (car (idris-eval `(:add-missing ,(cdr what) ,(car what))))))
         (forward-line 1)
-        (idris-insert-or-expand result)))))
+        (insert result)))))
 
 (defun idris-make-with-block ()
   "Add with block"
@@ -477,14 +477,7 @@ compiler-annotated output. Does not return a line number."
       (let ((result (car (idris-eval `(:make-with ,(cdr what) ,(car what))))))
         (beginning-of-line)
         (kill-line)
-        (idris-insert-or-expand result)))))
-
-(defun idris-insert-or-expand (str)
-  "If yasnippet is loaded, use it to expand Idris compiler output, otherwise fall back on inserting the output"
-  (if (and (fboundp 'yas-expand-snippet) idris-use-yasnippet-expansions)
-      (let ((snippet (idris-metavar-to-snippet str)))
-        (yas-expand-snippet snippet nil nil '((yas-indent-line nil))))
-    (insert str)))
+        (insert result)))))
 
 (defun idris-make-lemma ()
   "Extract a lemma from a metavariable"
@@ -552,18 +545,6 @@ compiler-annotated output. Does not return a line number."
   (idris-load-file-sync)
   (idris-eval '(:interpret ":exec")))
 
-
-(defun idris-metavar-to-snippet (str)
-  "Replace metavariables with yasnippet snippets"
-  (lexical-let ((n 0))
-    (replace-regexp-in-string "\\?[a-zA-Z0-9_]+\\|(_)"
-                              (lambda (metavar)
-                                 (cl-incf n)
-                                 (if (string= metavar "(_)")
-                                     (format "(${%s:_})" n)
-                                   (format "${%s:%s}" n metavar)))
-                               str)))
-
 (defun idris-proof-search (prefix-arg)
   "Invoke the proof search. A plain prefix argument causes the
 command to prompt for hints and recursion depth, while a numeric
@@ -588,7 +569,7 @@ prefix argument sets the recursion depth directly."
           (let ((start (progn (search-backward "?") (point)))
                 (end (progn (forward-char) (search-forward-regexp "[^a-zA-Z0-9_']") (backward-char) (point))))
             (delete-region start end))
-          (idris-insert-or-expand result))))))
+          (insert result))))))
 
 (defun idris-refine (name)
   "Refine by some name, without recursive proof search"
@@ -602,7 +583,7 @@ prefix argument sets the recursion depth directly."
         (let ((start (progn (search-backward "?") (point)))
               (end (progn (forward-char) (search-forward-regexp "[^a-zA-Z0-9_']") (backward-char) (point))))
           (delete-region start end))
-        (idris-insert-or-expand result)))))
+        (insert result)))))
 
 (defun idris-identifier-backwards-from-point ()
   (let ((identifier-start nil)
