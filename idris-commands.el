@@ -820,20 +820,20 @@ means to not ask for confirmation."
 (defun idris-show-term-implicits (position &optional buffer)
   "Replace the term at POSITION with a fully-explicit version."
   (interactive "d")
-  (idris-live-term-command position :show-term-implicits buffer))
+  (idris-active-term-command position :show-term-implicits buffer))
 
 (defun idris-hide-term-implicits (position &optional buffer)
   "Replace the term at POSITION with a fully-implicit version."
   (interactive "d")
-  (idris-live-term-command position :hide-term-implicits buffer))
+  (idris-active-term-command position :hide-term-implicits buffer))
 
 (defun idris-normalize-term (position &optional buffer)
   "Replace the term at POSITION with a normalized version."
   (interactive "d")
-  (idris-live-term-command position :normalise-term buffer))
+  (idris-active-term-command position :normalise-term buffer))
 
 
-(defun idris-live-term-command (position cmd &optional buffer)
+(defun idris-active-term-command (position cmd &optional buffer)
   "For the term at POSITION, Run the live term command CMD."
   (unless (member cmd '(:show-term-implicits
                         :hide-term-implicits
@@ -846,11 +846,19 @@ means to not ask for confirmation."
         (let* ((res (car (idris-eval (list cmd term))))
                (new-term (car res))
                (spans (cadr res))
-               (col (current-column))
+               (col (save-excursion (goto-char (idris-find-term-end position -1))
+                                    (current-column)))
                (rendered
                 (with-temp-buffer
                   (idris-propertize-spans (idris-repl-semantic-text-props spans)
                     (insert new-term))
+                  ;; Indent the new term properly, if it's annotated
+                  (let ((new-tt-term (plist-get (text-properties-at (point-min)) 'idris-tt-term)))
+                    (when new-tt-term
+                      (goto-char (point-min))
+                      (when (= (forward-line 1) 0)
+                          (indent-rigidly (point) (point-max) col))
+                      (put-text-property (point-min) (point-max) 'idris-tt-term new-tt-term)))
                   (buffer-string))))
           (idris-replace-term-at position rendered))))))
 
