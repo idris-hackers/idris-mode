@@ -85,12 +85,70 @@
 
 (defcustom idris-mode-hook '(turn-on-idris-simple-indent
                              idris-enable-clickable-imports
-                             turn-on-eldoc-mode)
+                             turn-on-eldoc-mode
+                             idris-define-loading-keys
+                             idris-define-docs-keys
+                             idris-define-editing-keys
+                             idris-define-general-keys
+                             idris-define-ipkg-keys
+                             idris-define-ipkg-opening-keys)
   "Hook to run upon entering Idris mode. You should choose at most one indentation style."
   :type 'hook
   :options '(turn-on-idris-simple-indent
              idris-enable-clickable-imports
-             turn-on-eldoc-mode)
+             turn-on-eldoc-mode
+             idris-define-loading-keys
+             idris-define-docs-keys
+             idris-define-editing-keys
+             idris-define-general-keys
+             idris-define-ipkg-keys
+             idris-define-ipkg-opening-keys)
+  :group 'idris)
+
+(defcustom idris-info-mode-hook '(idris-define-docs-keys
+                                  idris-define-general-keys
+                                  idris-define-active-term-keys)
+  "Hook to run when setting up Idris info buffers."
+  :type 'hook
+  :options '(idris-define-docs-keys
+             idris-define-general-keys
+             idris-define-active-term-keys)
+  :group 'idris)
+
+(defcustom idris-repl-mode-hook '(idris-define-docs-keys
+                                  idris-define-general-keys
+                                  idris-define-active-term-keys)
+  "Hook to run when setting up the Idris REPL."
+  :type 'hook
+  :options '(idris-define-docs-keys
+             idris-define-general-keys
+             idris-define-active-term-keys)
+  :group 'idris)
+
+(defcustom idris-compiler-notes-mode-hook '(idris-define-docs-keys
+                                            idris-define-general-keys
+                                            idris-define-active-term-keys)
+  "Hook to run when setting up the compiler notes buffers."
+  :type 'hook
+  :options '(idris-define-docs-keys
+             idris-define-general-keys
+             idris-define-active-term-keys)
+  :group 'idris)
+
+(defcustom idris-metavariable-list-mode-hook '(idris-define-docs-keys
+                                               idris-define-general-keys
+                                               idris-define-active-term-keys)
+  "Hook to run when setting up the list of metavariables."
+  :type 'hook
+  :options '(idris-define-docs-keys
+             idris-define-general-keys
+             idris-define-active-term-keys)
+  :group 'idris)
+
+(defcustom idris-ipkg-mode-hook '(idris-define-ipkg-keys idris-define-ipkg-editing-keys)
+  "Hook to run when setting up the mode for editing Idris packages."
+  :type 'hook
+  :options '(idris-define-ipkg-keys idris-define-ipkg-editing-keys)
   :group 'idris)
 
 (defcustom idris-metavariable-show-on-load t

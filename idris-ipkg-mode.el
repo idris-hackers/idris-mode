@@ -292,17 +292,18 @@ Invokes `idris-ipkg-build-mode-hook'.")
 
 ;;; Mode definition
 
-(defvar idris-ipkg-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c C-b b") 'idris-ipkg-build)
-    (define-key map (kbd "C-c C-b C-b") 'idris-ipkg-build)
-    (define-key map (kbd "C-c C-b c") 'idris-ipkg-clean)
-    (define-key map (kbd "C-c C-b C-c") 'idris-ipkg-clean)
-    (define-key map (kbd "C-c C-b i") 'idris-ipkg-install)
-    (define-key map (kbd "C-c C-b C-i") 'idris-ipkg-install)
-    (define-key map (kbd "C-c C-f") 'idris-ipkg-insert-field)
-    map)
+(defvar idris-ipkg-mode-map (make-sparse-keymap)
   "Keymap used for Idris package mode")
+
+(defun idris-define-ipkg-editing-keys ()
+  "Define keys used only for editing packages."
+  (local-set-key (kbd "C-c C-f") 'idris-ipkg-insert-field))
+
+(defun idris-define-ipkg-opening-keys ()
+  "Define keys used to find or open a package file."
+  (local-set-key (kbd "C-c C-b C-p") 'idris-open-package-file)
+  (local-set-key (kbd "C-c C-b p") 'idris-open-package-file))
+
 
 (easy-menu-define idris-ipkg-mode-menu idris-ipkg-mode-map
   "Menu for Idris package mode"
