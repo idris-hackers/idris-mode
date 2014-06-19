@@ -19,7 +19,7 @@
 (require 'idris-core)
 (require 'idris-settings)
 (require 'idris-common-utils)
-
+(require 'idris-keys)
 
 ;;; Faces
 
@@ -284,26 +284,20 @@ Invokes `idris-ipkg-build-mode-hook'.")
 
 (defgroup idris-ipkg nil "Idris package mode" :prefix 'idris-ipkg :group 'idris)
 
-(defcustom idris-ipkg-mode-hook '(idris-ipkg-enable-clickable-files)
-  "Functions to call when opening the Idris package mode"
+(defcustom idris-ipkg-mode-hook '(idris-ipkg-enable-clickable-files
+                                  idris-define-ipkg-keys
+                                  idris-define-ipkg-editing-keys)
+  "Hook to run when setting up the mode for editing Idris packages."
   :type 'hook
-  :options '(idris-ipkg-enable-clickable-files)
+  :options '(idris-ipkg-enable-clickable-files
+             idris-define-ipkg-keys
+             idris-define-ipkg-editing-keys)
   :group 'idris-ipkg)
 
 ;;; Mode definition
 
 (defvar idris-ipkg-mode-map (make-sparse-keymap)
   "Keymap used for Idris package mode")
-
-(defun idris-define-ipkg-editing-keys ()
-  "Define keys used only for editing packages."
-  (local-set-key (kbd "C-c C-f") 'idris-ipkg-insert-field))
-
-(defun idris-define-ipkg-opening-keys ()
-  "Define keys used to find or open a package file."
-  (local-set-key (kbd "C-c C-b C-p") 'idris-open-package-file)
-  (local-set-key (kbd "C-c C-b p") 'idris-open-package-file))
-
 
 (easy-menu-define idris-ipkg-mode-menu idris-ipkg-mode-map
   "Menu for Idris package mode"

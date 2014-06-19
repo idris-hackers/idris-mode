@@ -1007,60 +1007,6 @@ links in BUFFER. If BUFFER is nil, use the current buffer."
       (newline)
       (save-buffer))))
 
-;;; Keymap-construction hooks
-
-;; These are provided as hooks rather than being hard-coded to facilitate
-;; their replacement and cut down on copy-paste.
-
-(defun idris-define-loading-keys ()
-  "Define the keys related to loading files."
-  (local-set-key (kbd "C-c C-l") 'idris-load-file)
-  (local-set-key (kbd "C-c C-n") 'idris-load-forward-line)
-  (local-set-key (kbd "C-c C-p") 'idris-load-backward-line))
-
-(defun idris-define-docs-keys ()
-  "Define the keys related to documentation lookup."
-  (local-set-key (kbd "C-c C-t") 'idris-type-at-point)
-  (local-set-key (kbd "C-c C-d C-d") 'idris-docs-at-point)
-  (local-set-key (kbd "C-c C-d d") 'idris-docs-at-point)
-  (local-set-key (kbd "C-c C-d C-a") 'idris-apropos)
-  (local-set-key (kbd "C-c C-d a") 'idris-apropos)
-  (local-set-key (kbd "C-c C-d C-t") 'idris-type-search)
-  (local-set-key (kbd "C-c C-d t") 'idris-type-search))
-
-(defun idris-define-editing-keys ()
-  "Define the keys related to editing Idris code."
-  (local-set-key (kbd "C-c C-c") 'idris-case-split)
-  (local-set-key (kbd "C-c C-m") 'idris-add-missing)
-  (local-set-key (kbd "C-c C-e") 'idris-make-lemma)
-  (local-set-key (kbd "C-c C-s") 'idris-add-clause)
-  (local-set-key (kbd "C-c C-w") 'idris-make-with-block)
-  (local-set-key (kbd "C-c C-a") 'idris-proof-search)
-  (local-set-key (kbd "C-c C-r") 'idris-refine)
-  (local-set-key (kbd "C-c _") 'idris-insert-bottom)
-  (local-set-key (kbd "RET") 'idris-newline-and-indent)
-  (local-set-key (kbd "M-n") 'idris-next-error)
-  (local-set-key (kbd "M-p") 'idris-previous-error))
-
-(defun idris-define-general-keys ()
-  "Define keys that are generally useful, for all Idris modes."
-  (local-set-key (kbd "C-c C-z") 'idris-pop-to-repl))
-
-(defun idris-define-active-term-keys ()
-  "Define keys for manipulating active terms."
-  (local-set-key (kbd "C-c C-m n") 'idris-normalize-term)
-  (local-set-key (kbd "C-c C-m i") 'idris-show-term-implicits)
-  (local-set-key (kbd "C-c C-m h") 'idris-hide-term-implicits))
-
-(defun idris-define-ipkg-keys ()
-  "Define keys for working with the current package."
-  (local-set-key (kbd "C-c C-b b") 'idris-ipkg-build)
-  (local-set-key (kbd "C-c C-b C-b") 'idris-ipkg-build)
-  (local-set-key (kbd "C-c C-b c") 'idris-ipkg-clean)
-  (local-set-key (kbd "C-c C-b C-c") 'idris-ipkg-clean)
-  (local-set-key (kbd "C-c C-b i") 'idris-ipkg-install)
-  (local-set-key (kbd "C-c C-b C-i") 'idris-ipkg-install))
-
 
 (provide 'idris-commands)
 

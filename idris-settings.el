@@ -24,6 +24,7 @@
 ;; Boston, MA 02111-1307, USA.
 
 (require 'idris-core)
+(require 'idris-keys)
 
 ;;;; Main settings
 
@@ -143,12 +144,6 @@
   :options '(idris-define-docs-keys
              idris-define-general-keys
              idris-define-active-term-keys)
-  :group 'idris)
-
-(defcustom idris-ipkg-mode-hook '(idris-define-ipkg-keys idris-define-ipkg-editing-keys)
-  "Hook to run when setting up the mode for editing Idris packages."
-  :type 'hook
-  :options '(idris-define-ipkg-keys idris-define-ipkg-editing-keys)
   :group 'idris)
 
 (defcustom idris-metavariable-show-on-load t
