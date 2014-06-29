@@ -100,6 +100,7 @@
     (add-hook 'idris-event-hooks 'idris-warning-event-hook-function)
     (add-hook 'idris-event-hooks 'idris-prover-event-hook-function)
     (setq idris-currently-loaded-packages idris-packages)
+    (run-hooks 'idris-run-hook)
     (message "Connected. %s" (idris-random-words-of-encouragement))))
 
 (defun idris-sentinel (process msg)
