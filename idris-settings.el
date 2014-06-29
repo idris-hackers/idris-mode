@@ -46,6 +46,14 @@
   :type '(repeat symbol)
   :options '(warnings-tree warnings-repl))
 
+(defcustom idris-pretty-printer-width 100
+  "The default width to use for pretty-printing."
+  :group 'idris
+  :type '(choice (integer :tag "Columns")
+                 (const :tag "Unlimited" nil)))
+
+
+;;; Faces
 (defface idris-active-term-face
   '((((background light))
      :background "lightgray")
@@ -84,6 +92,7 @@
   "The face to use for the currently-loaded region of a buffer"
   :group 'idris-faces)
 
+;;; Mode hooks
 (defcustom idris-mode-hook '(turn-on-idris-simple-indent
                              idris-enable-clickable-imports
                              turn-on-eldoc-mode
@@ -156,6 +165,13 @@
 with lots of space for the metavariable buffer."
   :type 'boolean
   :group 'idris)
+
+;;;; Other hooks
+(defcustom idris-run-hook '(idris-set-current-pretty-print-width)
+  "A hook to run when Idris is started."
+  :type 'hook
+  :group 'idris
+  :options '(idris-set-current-pretty-print-width))
 
 ;;;; REPL settings
 

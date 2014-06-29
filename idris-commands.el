@@ -90,10 +90,12 @@
   (interactive)
   (when idris-metavariable-show-on-load (idris-list-metavariables)))
 
-(defcustom idris-load-file-success-hook '(idris-list-metavariables-on-load)
+(defcustom idris-load-file-success-hook '(idris-list-metavariables-on-load
+                                          idris-set-current-pretty-print-width)
   "Functions to call when loading a file is successful"
   :type 'hook
-  :options '(idris-list-metavariables-on-load)
+  :options '(idris-list-metavariables-on-load
+             idris-set-current-pretty-print-width)
   :group 'idris)
 
 (defvar idris-loaded-region-overlay nil
@@ -1006,6 +1008,17 @@ links in BUFFER. If BUFFER is nil, use the current buffer."
       (insert "module " first-mod)
       (newline)
       (save-buffer))))
+
+;;; Pretty-printer stuff
+
+(defun idris-set-current-pretty-print-width ()
+  "Send the current pretty-printer width to Idris, if there is a process."
+  (let ((command (format ":consolewidth %s"
+                         (or idris-pretty-printer-width
+                             "infinite"))))
+    (when (and idris-process
+               (not idris-prover-currently-proving))
+      (idris-eval `(:interpret ,command) t))))
 
 
 (provide 'idris-commands)
