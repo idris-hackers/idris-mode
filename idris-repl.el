@@ -214,7 +214,7 @@ Invokes `idris-repl-mode-hook'."
   "Completion of the current input"
   (let* ((input (idris-repl-current-input))
          (result (idris-eval `(:repl-completions ,input))))
-    (destructuring-bind (completions partial) (car result)
+    (cl-destructuring-bind (completions partial) (car result)
       (if (null completions)
           nil
         (list (+ idris-input-start (length partial)) (point-max) completions)))))
