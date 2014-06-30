@@ -1,4 +1,4 @@
-;;; idris-repl.el --- Run an Idris interpreter using S-Expression communication protocol
+;;; idris-repl.el --- Run an Idris interpreter using S-Expression communication protocol.-*- lexical-binding: t -*-
 
 ;; Copyright (C) 2013 Hannes Mehnert and David Raymond Christiansen
 
