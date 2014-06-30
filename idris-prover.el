@@ -124,7 +124,7 @@ prover, or nil if Idris is not proving anything.")
                  start
                  (point)))
          (result (idris-eval `(:repl-completions ,input))))
-    (destructuring-bind (completions partial) (car result)
+    (cl-destructuring-bind (completions partial) (car result)
       (if (null completions)
           nil
         (list start (point) completions)))))
@@ -350,7 +350,7 @@ the length reported by Idris."
        (run-hooks 'idris-prover-success-hook))
      t)
     ((:write-proof-state msg _target)
-     (destructuring-bind (script count) msg
+     (cl-destructuring-bind (script count) msg
        (idris-prover-write-script script count))
      t)
     ((:write-goal goal _target)

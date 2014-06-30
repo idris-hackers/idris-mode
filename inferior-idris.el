@@ -1,4 +1,4 @@
-;;; inferior-idris.el --- Run an Idris interpreter using S-Expression communication protocol
+;;; inferior-idris.el --- Run an Idris interpreter using S-Expression communication protocol -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2013 Hannes Mehnert
 
@@ -32,6 +32,8 @@
 (require 'idris-log)
 (require 'idris-warnings)
 (require 'idris-prover)
+
+;;; Make lexical-let
 
 ;;; Words of encouragement - strongly inspired by Slime
 (defun idris-user-first-name ()
@@ -210,10 +212,10 @@ Note: don't use backquote syntax for SEXP, because various Emacs
 versions cannot deal with that."
   (declare (indent 2))
   (let ((result (cl-gensym)))
-    `(lexical-let ,(loop for var in saved-vars
-                         collect (etypecase var
-                                   (symbol (list var var))
-                                   (cons var)))
+    `(lexical-let ,(cl-loop for var in saved-vars
+                            collect (cl-etypecase var
+                                      (symbol (list var var))
+                                      (cons var)))
        (idris-dispatch-event
         (list :emacs-rex ,sexp
               (lambda (,result)

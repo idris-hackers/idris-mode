@@ -62,7 +62,7 @@
 
 (defun get-region (line)
   (goto-char (point-min))
-  (values
+  (cl-values
    (line-beginning-position line)
    (line-end-position line)))
 
@@ -82,20 +82,20 @@ or the old format, used by Idris up to 0.9.10.1, which does not contain a column
 Since March 10th 2014 (commit 7437ebe5052250630ca52117dd50dbf3187807d5) - Idris 0.9.11.2
 WARNING is of form (filename (startline startcolumn) (endline endcolumn) message &optional highlighting-spans)
 "
-  (case (safe-length warning)
-    (3 (destructuring-bind (filename lineno message) warning
+  (cl-case (safe-length warning)
+    (3 (cl-destructuring-bind (filename lineno message) warning
          (idris-real-warning-overlay filename lineno 0 message)))
-    (4 (destructuring-bind (filename lineno col message) warning
+    (4 (cl-destructuring-bind (filename lineno col message) warning
          (idris-real-warning-overlay filename lineno col message)))
-    (5 (destructuring-bind (filename sl1 sl2 message highlighting) warning
+    (5 (cl-destructuring-bind (filename sl1 sl2 message highlighting) warning
          (if (listp sl1)
              (progn
-               (assert (listp sl2))
-               (assert (eq (safe-length sl1) 2))
-               (assert (eq (safe-length sl2) 2))
+               (cl-assert (listp sl2))
+               (cl-assert (eq (safe-length sl1) 2))
+               (cl-assert (eq (safe-length sl2) 2))
                (idris-real-warning-overlay filename (nth 0 sl1) (nth 1 sl1) message highlighting))
-           (assert (integerp sl1))
-           (assert (integerp sl2))
+           (cl-assert (integerp sl1))
+           (cl-assert (integerp sl2))
            (idris-real-warning-overlay filename sl1 sl2 message highlighting))))))
 
 (defun idris-real-warning-overlay (filename lineno col message &optional spans)
@@ -106,7 +106,7 @@ WARNING is of form (filename (startline startcolumn) (endline endcolumn) message
          (buffer (get-file-buffer fullpath)))
     (when (not (null buffer))
       (with-current-buffer buffer
-        (multiple-value-bind (start end) (get-region lineno)
+        (cl-multiple-value-bind (start end) (get-region lineno)
           (goto-char start)
           ; this is a hack to have warnings reported which point to empty lines
           (let ((rend (if (equal start end)

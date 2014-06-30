@@ -177,7 +177,7 @@ If PROP-VALUE-FN is non-nil use it to extract PROP's value."
 ;;; Dispatching of events and helpers
 (defmacro destructure-case (value &rest patterns)
   "Dispatch VALUE to one of PATTERNS.
-A cross between `case' and `destructuring-bind'.
+A cross between `cl-case' and `cl-destructuring-bind'.
 The pattern syntax is:
   ((HEAD . ARGS) . BODY)
 The list of patterns is searched for a HEAD `eq' to the car of

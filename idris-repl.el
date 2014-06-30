@@ -1,4 +1,4 @@
-;;; idris-repl.el --- Run an Idris interpreter using S-Expression communication protocol
+;;; idris-repl.el --- Run an Idris interpreter using S-Expression communication protocol.-*- lexical-binding: t -*-
 
 ;; Copyright (C) 2013 Hannes Mehnert and David Raymond Christiansen
 
@@ -214,7 +214,7 @@ Invokes `idris-repl-mode-hook'."
   "Completion of the current input"
   (let* ((input (idris-repl-current-input))
          (result (idris-eval `(:repl-completions ,input))))
-    (destructuring-bind (completions partial) (car result)
+    (cl-destructuring-bind (completions partial) (car result)
       (if (null completions)
           nil
         (list (+ idris-input-start (length partial)) (point-max) completions)))))
@@ -381,12 +381,12 @@ Return -1 resp. the length of the history if no item matches."
                  (backward 1)))
          (history idris-repl-input-history)
          (len (length history)))
-    (loop for pos = (+ start-pos step) then (+ pos step)
-          if (< pos 0) return -1
-          if (<= len pos) return len
-          for history-item = (nth pos history)
-          if (string-prefix-p prefix history-item)
-          return pos)))
+    (cl-loop for pos = (+ start-pos step) then (+ pos step)
+             if (< pos 0) return -1
+             if (<= len pos) return len
+             for history-item = (nth pos history)
+             if (string-prefix-p prefix history-item)
+             return pos)))
 
 (defun idris-repl-backward-history ()
   "Cycle backward through history."
