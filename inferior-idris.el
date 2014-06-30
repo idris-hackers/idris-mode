@@ -209,10 +209,10 @@ Note: don't use backquote syntax for SEXP, because various Emacs
 versions cannot deal with that."
   (declare (indent 2))
   (let ((result (cl-gensym)))
-    `(lexical-let ,(cl-loop for var in saved-vars
-                         collect (cl-etypecase var
-                                   (symbol (list var var))
-                                   (cons var)))
+    `(let ,(cl-loop for var in saved-vars
+                    collect (cl-etypecase var
+                              (symbol (list var var))
+                              (cons var)))
        (idris-dispatch-event
         (list :emacs-rex ,sexp
               (lambda (,result)
