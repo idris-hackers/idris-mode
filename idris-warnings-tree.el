@@ -138,7 +138,7 @@ Invokes `idris-compiler-notes-mode-hook'.")
     `(let ((,struct-var ,struct))
        (symbol-macrolet
            ,(mapcar (lambda (slot)
-                      (etypecase slot
+                      (cl-etypecase slot
                         (symbol `(,slot (,(intern (concat (symbol-name conc-name) (symbol-name slot))) ,struct-var)))
                         (cons `(,(first slot) (,(intern (concat (symbol-name conc-name) (symbol-name (second slot))))
                                                ,struct-var)))))
