@@ -381,12 +381,12 @@ Return -1 resp. the length of the history if no item matches."
                  (backward 1)))
          (history idris-repl-input-history)
          (len (length history)))
-    (loop for pos = (+ start-pos step) then (+ pos step)
-          if (< pos 0) return -1
-          if (<= len pos) return len
-          for history-item = (nth pos history)
-          if (string-prefix-p prefix history-item)
-          return pos)))
+    (cl-loop for pos = (+ start-pos step) then (+ pos step)
+             if (< pos 0) return -1
+             if (<= len pos) return len
+             for history-item = (nth pos history)
+             if (string-prefix-p prefix history-item)
+             return pos)))
 
 (defun idris-repl-backward-history ()
   "Cycle backward through history."

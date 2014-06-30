@@ -180,14 +180,14 @@ Invokes `idris-compiler-notes-mode-hook'.")
 
 (defun idris-tree-insert-list (list prefix)
   "Insert a list of trees."
-  (loop for (elt . rest) on list
-	do (cond (rest
-		  (insert prefix " |")
-		  (idris-tree-insert elt (concat prefix " |"))
-                  (insert "\n"))
-		 (t
-		  (insert prefix " `")
-		  (idris-tree-insert elt (concat prefix "  "))))))
+  (cl-loop for (elt . rest) on list
+           do (cond (rest
+                     (insert prefix " |")
+                     (idris-tree-insert elt (concat prefix " |"))
+                     (insert "\n"))
+                    (t
+                     (insert prefix " `")
+                     (idris-tree-insert elt (concat prefix "  "))))))
 
 (defun idris-tree-insert-decoration (tree)
   (with-struct (idris-tree. print-fn kids collapsed-p start-mark end-mark active-p) tree
