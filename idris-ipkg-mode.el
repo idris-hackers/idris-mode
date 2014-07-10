@@ -152,7 +152,8 @@
 (defun idris-ipkg-enable-clickable-files ()
   "Enable setting up clickable modules and makefiles on idle Emacs"
   (interactive)
-  (run-with-idle-timer 1 t 'idris-ipkg-make-files-clickable))
+  (add-hook 'after-save-hook 'idris-ipkg-make-files-clickable)
+  (idris-ipkg-make-files-clickable))
 
 ;;; finding ipkg files
 

@@ -909,27 +909,26 @@ of the term to replace."
           ;; Otherwise do nothing
           "")))))
 
-(defun idris-make-imports-clickable (&optional buffer)
+(defun idris-make-imports-clickable ()
   "Attempt to make imports in the current package into clickable
 links in BUFFER. If BUFFER is nil, use the current buffer."
   (interactive)
-  (with-current-buffer (or buffer (current-buffer))
-    (idris-clear-file-link-overlays 'idris-mode)
-    (let ((ipkg-src-dir (idris-ipkg-find-src-dir)))
-      (when ipkg-src-dir
-        (save-excursion
-          (goto-char (point-min))
-          (while (re-search-forward (if (idris-lidr-p)
-                                        "^> import\\s-+\\([a-zA-Z0-9\\.]+\\)"
-                                      "^import\\s-+\\([a-zA-Z0-9\\.]+\\)") nil t)
-            (let ((start (match-beginning 1)) (end (match-end 1)))
-              (idris-make-module-link start end ipkg-src-dir))))))))
+  (idris-clear-file-link-overlays 'idris-mode)
+  (let ((ipkg-src-dir (idris-ipkg-find-src-dir)))
+    (when ipkg-src-dir
+      (save-excursion
+        (goto-char (point-min))
+        (while (re-search-forward (if (idris-lidr-p)
+                                      "^> import\\s-+\\([a-zA-Z0-9\\.]+\\)"
+                                    "^import\\s-+\\([a-zA-Z0-9\\.]+\\)") nil t)
+          (let ((start (match-beginning 1)) (end (match-end 1)))
+            (idris-make-module-link start end ipkg-src-dir)))))))
 
 (defun idris-enable-clickable-imports ()
   "Enable the generation of clickable module imports for the current buffer"
   (interactive)
-  (let ((buffer (current-buffer)))
-    (run-with-idle-timer 1 t 'idris-make-imports-clickable buffer)))
+  (add-hook 'after-save-hook 'idris-make-imports-clickable)
+  (idris-make-imports-clickable))
 
 (defun idris-set-idris-packages ()
   "Interactively set the `idris-packages' variable"
