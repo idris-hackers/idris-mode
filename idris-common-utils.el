@@ -214,9 +214,9 @@ BUFFER is not supplied or is nil."
     (overlay-put overlay 'mouse-face 'highlight)
     (overlay-put overlay 'help-echo help-echo)))
 
-(defun idris-clear-file-link-overlays (mode)
+(defun idris-clear-file-link-overlays (&optional mode)
   "Remove all file link overlays from the current buffer"
-  (when (eq major-mode mode)
+  (when (or (not mode) (eq major-mode mode))
     (remove-overlays (point-min) (point-max) 'idris-file-link t)))
 
 (defun idris-make-module-link (start end src-dir)
