@@ -53,6 +53,12 @@
                  (const :tag "Unlimited" nil)))
 
 
+(defcustom idris-show-help-text t
+  "Show explanatory text in idris-mode's auxiliary buffers if
+  non-nil. Advanced users may wish to disable this."
+  :group 'idris
+  :type 'boolean)
+
 ;;; Faces
 (defface idris-active-term-face
   '((((background light))

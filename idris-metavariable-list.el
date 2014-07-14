@@ -69,6 +69,13 @@ Invoces `idris-metavariable-list-mode-hook'.")
       (setq buffer-read-only nil)
       (erase-buffer)
       (idris-metavariable-list-mode)
+      (when idris-show-help-text
+        (insert "This buffer displays the unsolved metavariables from the currently-loaded code. ")
+        (insert "Press the [P] buttons to solve the metavariables interactively in the prover.")
+        (let ((fill-column 80))
+          (fill-region (point-min) (point-max)))
+        (insert "\n\n"))
+
       (insert "Metavariables:\n")
       (let ((root (make-idris-tree :item (format "Metavariables (%d)" (length metavar-info))
                                    :kids (mapcar #'idris-tree-for-metavariable metavar-info))))
