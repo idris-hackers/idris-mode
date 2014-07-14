@@ -85,6 +85,9 @@ string and whose cadr is highlighting information."
   (with-current-buffer (idris-prover-obligations-buffer)
     (let ((buffer-read-only nil))
       (erase-buffer)
+      (when idris-show-help-text
+        (setq header-line-format
+              "This is a read-only view of your proof state. Prove the lemma in the script buffer."))
       (if (stringp goals)
           (insert goals)
         (let ((goals-string (car goals))
@@ -271,6 +274,16 @@ special prover state."
       (setq idris-prover-script-processing-overlay nil))
     (setq idris-prover-prove-step 0)
     (erase-buffer)
+    (when idris-show-help-text
+      (setq header-line-format
+            (let ((fwd (where-is-internal 'idris-prover-script-forward))
+                  (bak (where-is-internal 'idris-prover-script-backward)))
+            (concat " Write your proof script here."
+                    (if (and fwd bak)
+                        (format "Use %s to advance and %s to retract."
+                                (key-description (car fwd))
+                                (key-description (car bak)))
+                      "")))))
     (unless idris-prover-script-processing
       (setq idris-prover-script-processing (make-marker)))
     (unless idris-prover-script-processed
