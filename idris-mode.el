@@ -110,7 +110,10 @@ Invokes `idris-mode-hook'."
                     " "
                     (:eval (if (idris-current-buffer-dirty-p)
                                "(Not loaded)"
-                             "(Loaded)")))))
+                             "(Loaded)"))))
+  ; Extra hook for LIDR files (to set up extra highlighting, etc)
+  (when (idris-lidr-p)
+    (run-hooks 'idris-mode-lidr-hook)))
 
 ;; Automatically use idris-mode for .idr and .lidr files.
 ;;;###autoload

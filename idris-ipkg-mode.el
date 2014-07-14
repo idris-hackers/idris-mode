@@ -280,6 +280,26 @@ Invokes `idris-ipkg-build-mode-hook'.")
         (insert-file-contents ipkg-file)
         (idris-ipkg-buffer-src-dir ipkg-file)))))
 
+(defun idris-ipkg-buffer-cmdline-opts (basename)
+  (save-excursion
+    (goto-char (point-min))
+    (let ((found
+           (re-search-forward "^\\s-*opts\\s-*=\\s-*\"\\([^\"]*\\)\""
+                              nil
+                              t)))
+    (buffer-substring-no-properties (match-beginning 1) (match-end 1)))))
+
+(defun idris-ipkg-find-cmdline-opts (&optional ipkg-file)
+  (let ((found (or (and ipkg-file (list ipkg-file))
+                   (idris-find-file-upwards "ipkg"))))
+    (if (not found)
+        nil
+      (setq ipkg-file (car found))
+      ;; Now ipkg-file contains the path to the package
+      (with-temp-buffer
+        (insert-file-contents ipkg-file)
+        (idris-ipkg-buffer-cmdline-opts ipkg-file)))))
+
 
 ;;; Settings
 

@@ -115,6 +115,11 @@
              idris-define-ipkg-opening-keys)
   :group 'idris)
 
+(defcustom idris-mode-lidr-hook '()
+  "Hook to run after opening a literate Idris file. Use this to customize the display of non-code text."
+  :type 'hook
+  :group 'idris)
+
 (defcustom idris-info-mode-hook '(idris-define-docs-keys
                                   idris-define-general-keys
                                   idris-define-active-term-keys)
