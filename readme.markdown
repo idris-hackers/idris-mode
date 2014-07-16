@@ -52,7 +52,7 @@ The following error message commands are available:
 * `M-p`: Move the point to the previous comiler note
 
 ## Colors and fonts
-Idris mode displays output from the Idris compiler with full semantic highlighting. It is quite possible that this is ugly in your color scheme. If that is the case, you can use `M-x customize-group RET idris-faces RET` to modify them.
+Idris mode displays output from the Idris compiler with full semantic highlighting. It is quite possible that this is ugly in your color scheme. If that is the case, you can use `M-x customize-group RET idris-faces RET` to modify them. In particular, some users don't like the background color for the currently loaded region of the buffer. This is controlled by `idris-loaded-region-face`. Remove all it's properties to make it disappear.
 
 ## Interactive editing
 
