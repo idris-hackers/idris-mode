@@ -4,13 +4,13 @@
 
 EMACS=$(shell if [ -z "`which emacs`" ]; then echo "Emacs executable not found"; exit 1; else echo emacs; fi)
 
-BATCHEMACS=${EMACS} --batch --no-site-file -q
+BATCHEMACS=${EMACS} --batch --no-site-file -q -eval '(add-to-list (quote load-path) "${PWD}/")'
 
 EL=$(ls *.el)
 
 ELC=$(EL:.el=.elc)
 
-BYTECOMP = $(BATCHEMACS) -eval '(add-to-list (quote load-path) "${PWD}/")' -eval '(progn (require (quote bytecomp)) (setq byte-compile-warnings t) (setq byte-compile-error-on-warn t))' -f batch-byte-compile
+BYTECOMP = $(BATCHEMACS) -eval '(progn (require (quote bytecomp)) (setq byte-compile-warnings t) (setq byte-compile-error-on-warn t))' -f batch-byte-compile
 
 default:
 
@@ -22,6 +22,8 @@ clean:
 
 compile: clean idris-commands.elc idris-common-utils.elc idris-compat.elc idris-core.elc idris-events.elc idris-info.elc idris-ipkg-mode.elc idris-keys.elc idris-log.elc idris-metavariable-list.elc idris-mode.elc idris-prover.elc idris-repl.elc idris-settings.elc idris-simple-indent.elc idris-syntax.elc idris-tests.elc idris-warnings.elc idris-warnings-tree.elc inferior-idris.elc
 
+test:
+	$(BATCHEMACS) -l ert -l idris-tests.el -f ert-run-tests-batch-and-exit
 
 ### Rules for each file (done this way for BSD make compat)
 idris-commands.elc: idris-commands.el
