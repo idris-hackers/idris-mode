@@ -24,7 +24,10 @@
 ;; Boston, MA 02111-1307, USA.
 
 (require 'idris-core)
+(require 'idris-common-utils)
 (require 'idris-warnings)
+(require 'idris-settings)
+(require 'inferior-idris)
 
 ; consisting of three buffers:
 ; ------------------------------
@@ -138,7 +141,7 @@ string and whose cadr is highlighting information."
                  start
                  (point)))
          (result (idris-eval `(:repl-completions ,input))))
-    (cl-destructuring-bind (completions partial) (car result)
+    (cl-destructuring-bind (completions _partial) (car result)
       (if (null completions)
           nil
         (list start (point) completions)))))
@@ -179,17 +182,16 @@ left margin."
 
         (cons tactic-start tactic-end)))))
 
+
+
 (defun idris-prover-script-backward ()
   "Backward one piece of proof script"
   (interactive)
-  (idris-rex ()
-      ((list ':interpret "undo"))
-    ((:ok result)
-     t)
-    ((:error condition)
-     ;; put error overlay
-     (message (concat "fail: " condition))
-     t)))
+  (idris-eval-async '(:interpret "undo")
+    #'(lambda (_result) t)
+    #'(lambda (condition)
+        ;; TODO: put error overlay
+        (message (concat "fail: " condition)))))
 
 (defun idris-prover-script-forward ()
   "Forward one piece of proof script."
@@ -213,28 +215,32 @@ left margin."
                                      idris-prover-script-processing)))
           (overlay-put overlay 'face 'idris-prover-processing-face)
           (setq idris-prover-script-processing-overlay overlay))
-        (let ((tactic-cmd (replace-regexp-in-string
-                           "\\`[ \t\n]*" ""
-                           (replace-regexp-in-string "" " " tactic-text))))
-          (idris-rex () ((list ':interpret tactic-cmd))
-            ((:ok result)
-             (with-current-buffer (idris-prover-script-buffer)
-               (when idris-prover-script-processing-overlay
-                 (delete-overlay idris-prover-script-processing-overlay)
-                 (setq idris-prover-script-processing-overlay nil))
-               ;; Delete the region because it will be written with the proof
-               ;; state.
-               (delete-region idris-prover-script-processed
-                              idris-prover-script-processing)))
-            ((:error condition)
-             (with-current-buffer (idris-prover-script-buffer)
-               (when idris-prover-script-processing-overlay
-                 (delete-overlay idris-prover-script-processing-overlay)
-                 (setq idris-prover-script-processing-overlay nil))
-               (setq idris-prover-script-warning-overlay (idris-warning-create-overlay idris-prover-script-processed idris-prover-script-processing condition)))
-                    ; put error overlay
-             (message (concat "fail: " condition))
-             t)))))))
+        (with-no-warnings
+          (let ((tactic-cmd (replace-regexp-in-string
+                             "\\`[ \t\n]*" ""
+                             (replace-regexp-in-string "" " " tactic-text))))
+            (idris-rex () (list ':interpret tactic-cmd)
+              ((:ok _result)
+               (with-current-buffer (idris-prover-script-buffer)
+                 (when idris-prover-script-processing-overlay
+                   (delete-overlay idris-prover-script-processing-overlay)
+                   (setq idris-prover-script-processing-overlay nil))
+                 ;; Delete the region because it will be written with the proof
+                 ;; state.
+                 (delete-region idris-prover-script-processed
+                                idris-prover-script-processing)))
+              ((:error condition)
+               (with-current-buffer (idris-prover-script-buffer)
+                 (when idris-prover-script-processing-overlay
+                   (delete-overlay idris-prover-script-processing-overlay)
+                   (setq idris-prover-script-processing-overlay nil))
+                 (setq idris-prover-script-warning-overlay
+                       (idris-warning-create-overlay idris-prover-script-processed
+                                                     idris-prover-script-processing
+                                                     condition)))
+                                        ;; TODO:  put error overlay
+               (message (concat "fail: " condition))
+             t))))))))
 
 (defun idris-prover-script-ret ()
   "Insert a newline at the end of buffer, even if it's read-only."
@@ -352,10 +358,12 @@ the length reported by Idris."
     (set-window-configuration idris-prover-saved-window-configuration))
   (setq idris-prover-saved-window-configuration nil))
 
+
+(autoload 'idris-repl-write-string "idris-repl.el")
 (defun idris-prover-event-hook-function (event)
   "Process an EVENT returned from Idris when the prover is running."
-  (destructure-case event
-    ((:start-proof-mode name _target)
+  (pcase event
+    (`(:start-proof-mode ,name ,_target)
      (setq idris-prover-currently-proving name)
      (setq idris-prover-saved-window-configuration
            (current-window-configuration))
@@ -365,7 +373,7 @@ the length reported by Idris."
             (script-window (split-window obligations-window)))
        (set-window-buffer script-window (idris-prover-script-buffer)))
      t)
-    ((:end-proof-mode msg _target)
+    (`(:end-proof-mode ,msg ,_target)
      (let ((name (car msg))
            (proof (cadr msg)))
        (idris-perhaps-insert-proof-script proof)
@@ -373,18 +381,18 @@ the length reported by Idris."
        (idris-repl-write-string (concat "End proof of " name))
        (run-hooks 'idris-prover-success-hook))
      t)
-    ((:write-proof-state msg _target)
+    (`(:write-proof-state ,msg ,_target)
      (cl-destructuring-bind (script count) msg
        (idris-prover-write-script script count))
      t)
-    ((:write-goal goal _target)
+    (`(:write-goal ,goal ,_target)
      (idris-prover-write-goals goal)
      t)
-    ((:abandon-proof _msg _target)
+    (`(:abandon-proof ,_msg ,_target)
      (idris-prover-end)
      (idris-repl-write-string "Abandoned proof")
      t)
-    (t nil)))
+    (_ nil)))
 
 (defcustom idris-prover-success-hook '(idris-list-metavariables-on-load)
   "Functions to call when completing a proof"
@@ -418,8 +426,8 @@ the length reported by Idris."
     (save-excursion
       (goto-char (point-min))
       (unless (re-search-forward idris-proof-script-insertion-marker nil t)
-        (replace-regexp "\\(\\s-*\n\\)*\\'"
-                        (concat "\n\n" idris-proof-script-insertion-marker "\n")))
+        (when (re-search-forward "\\(\\s-*\n\\)*\\'")
+              (replace-match (concat "\n\n" idris-proof-script-insertion-marker "\n") nil nil)))
       (newline)
       (insert proof))))
 

@@ -31,9 +31,8 @@
 (require 'idris-events)
 (require 'idris-log)
 (require 'idris-warnings)
-(require 'idris-prover)
 
-;;; Make lexical-let
+(eval-when-compile (require 'cl)) ;; for lexical-let
 
 ;;; Words of encouragement - strongly inspired by Slime
 (defun idris-user-first-name ()
@@ -66,9 +65,6 @@
 (defvar idris-process nil
   "The Idris process.")
 
-(defvar idris-process-current-working-directory ""
-  "Working directory of Idris process")
-
 (defvar-local idris-packages nil
   "The list of packages to be loaded by Idris. Set using file or directory variables.")
 
@@ -76,6 +72,8 @@
   "The list of packages actually loaded by Idris. This is
   maintained to restart Idris when the package list changes.")
 
+(autoload 'idris-prover-event-hook-function "idris-prover.el")
+(autoload 'idris-quit "idris-commands.el")
 (defun idris-run ()
   "Run an inferior Idris process"
   (interactive)
@@ -105,16 +103,22 @@
     (run-hooks 'idris-run-hook)
     (message "Connected. %s" (idris-random-words-of-encouragement))))
 
-(defun idris-sentinel (process msg)
+(defun idris-sentinel (_process msg)
   (message "Idris quit unexpectly: %s" (substring msg 0 -1))
   (delete-process idris-process)
   (setq idris-process nil))
 
 (defun idris-output-filter (process string)
   "Accept output from the socket and process all complete messages"
-  (with-current-buffer (process-buffer process)
-    (goto-char (point-max))
-    (insert string))
+  (when (buffer-live-p (process-buffer process))
+    (with-current-buffer (process-buffer process)
+      (let ((moving (= (point) (process-mark process))))
+        (save-excursion
+          ;; Insert the text, advancing the process marker.
+          (goto-char (process-mark process))
+          (insert string)
+          (set-marker (process-mark process) (point)))
+        (if moving (goto-char (process-mark process))))))
   (idris-process-available-input process))
 
 (defun idris-process-available-input (process)
@@ -139,7 +143,7 @@
   (let* ((length (idris-decode-length))
          (start (+ 6 (point)))
          (end (+ start length)))
-    (cl-assert (plusp length))
+    (cl-assert (cl-plusp length))
     (prog1 (save-restriction
              (narrow-to-region start end)
              (read (current-buffer)))
@@ -192,7 +196,7 @@
                       (funcall (cdr rec) value))
                  (t (error "Unexpected reply: %S %S" id value))))))))
 
-(cl-defmacro idris-rex ((&rest saved-vars) (sexp) &rest continuations)
+(cl-defmacro idris-rex ((&rest saved-vars) sexp &rest continuations)
   "(idris-rex (VAR ...) (SEXP) CLAUSES ...)
 
 Remote EXecute SEXP.
@@ -225,12 +229,12 @@ versions cannot deal with that."
 (defun idris-eval-async (sexp cont &optional failure-cont)
   "Evaluate EXPR on the superior Idris and call CONT with the result, or FAILURE-CONT in failure case."
   (idris-rex (cont (buffer (current-buffer)) failure-cont)
-      (sexp)
+      sexp
     ((:ok result)
      (when cont
        (set-buffer buffer)
        (funcall cont result)))
-    ((:error condition &optional spans)
+    ((:error condition &optional _spans)
      (when failure-cont
        (set-buffer buffer)
        (funcall failure-cont condition))
@@ -244,6 +248,7 @@ versions cannot deal with that."
 (defvar idris-stack-eval-tags nil
   "List of stack-tags of continuations waiting on the stack.")
 
+(autoload 'idris-list-compiler-notes "idris-warnings-tree.el")
 (defun idris-eval (sexp &optional no-errors)
   "Evaluate EXPR on the inferior Idris and return the result. If
 `NO-ERRORS' is non-nil, don't trigger warning buffers and don't
@@ -255,13 +260,13 @@ call `ERROR' if there was an Idris error."
      #'funcall
      (catch tag
        (idris-rex (tag sexp)
-           (sexp)
+           sexp
          ((:ok value &optional spans)
           (unless (member tag idris-stack-eval-tags)
             (error "Reply to canceled synchronous eval request tag=%S sexp=%S"
                    tag sexp))
           (throw tag (list #'identity (cons value spans))))
-         ((:error condition &optional spans)
+         ((:error condition &optional _spans)
           (if no-errors
               (throw tag (list #'identity nil))
             (when (member 'warnings-tree idris-warnings-printing)
@@ -299,14 +304,14 @@ call `ERROR' if there was an Idris error."
 (defun idris-set-option (opt b)
   (let ((bi (if b :True :False)))
     (idris-rex ((buffer (current-buffer)) opt b bi)
-        (`(:set-option ,opt ,bi))
+        `(:set-option ,opt ,bi)
       ((:ok _res)
        (set-buffer buffer)
        (let ((cache-elt (assoc opt idris-options-cache)))
          (if cache-elt
              (setf (cadr cache-elt) bi)
            (add-to-list 'idris-options-cache (list opt bi)))))
-      ((:error condition &optional spans)
+      ((:error condition &optional _spans)
        (message "Setting option %s to %s returned an error: %s." opt b condition)))))
 
 (provide 'inferior-idris)

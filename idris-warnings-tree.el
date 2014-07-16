@@ -24,7 +24,7 @@
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA 02111-1307, USA.
 
-`
+(require 'cl-lib)
 (require 'idris-core)
 (require 'idris-warnings)
 (require 'idris-common-utils)
@@ -136,11 +136,11 @@ Invokes `idris-compiler-notes-mode-hook'.")
   (declare (indent 2))
   (let ((struct-var (cl-gensym "struct")))
     `(let ((,struct-var ,struct))
-       (symbol-macrolet
+       (cl-symbol-macrolet
            ,(mapcar (lambda (slot)
                       (cl-etypecase slot
                         (symbol `(,slot (,(intern (concat (symbol-name conc-name) (symbol-name slot))) ,struct-var)))
-                        (cons `(,(first slot) (,(intern (concat (symbol-name conc-name) (symbol-name (second slot))))
+                        (cons `(,(car slot) (,(intern (concat (symbol-name conc-name) (symbol-name (cadr slot))))
                                                ,struct-var)))))
                     slots)
          . ,body))))
@@ -163,7 +163,7 @@ Invokes `idris-compiler-notes-mode-hook'.")
   ;; Evaluate the kids to see if we are at a leaf
   (when (functionp (idris-tree.kids tree))
     (setf (idris-tree.kids tree) (funcall (idris-tree.kids tree))))
-  (assert (listp (idris-tree.kids tree)))
+  (cl-assert (listp (idris-tree.kids tree)))
   (null (idris-tree.kids tree)))
 
 (defun idris-tree-default-printer (tree)
@@ -225,7 +225,7 @@ This is used for labels spanning multiple lines."
       (when  (not collapsed-p)
         (when (functionp kids)
           (setf kids (funcall kids))
-          (assert (listp kids)))
+          (cl-assert (listp kids)))
         (when kids
           (terpri (current-buffer))
           (idris-tree-insert-list kids prefix)))

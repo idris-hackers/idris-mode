@@ -24,6 +24,7 @@
 ;; Boston, MA 02111-1307, USA.
 
 (require 'idris-core)
+(require 'idris-common-utils)
 (require 'cl-lib)
 
 (defface idris-warning-face
@@ -40,11 +41,11 @@
 (defvar idris-raw-warnings '() "All warnings from Idris")
 
 (defun idris-warning-event-hook-function (event)
-  (destructure-case event
-    ((:warning output _target)
+  (pcase event
+    (`(:warning ,output ,_target)
      (idris-warning-overlay output)
      t)
-    (t nil)))
+    (_ nil)))
 
 (defun idris-warning-reset-all ()
   (mapc #'idris-warning-reset-buffer idris-warnings-buffers)

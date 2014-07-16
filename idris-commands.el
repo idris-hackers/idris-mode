@@ -35,15 +35,13 @@
 (require 'idris-warnings-tree)
 (require 'idris-metavariable-list)
 (require 'idris-prover)
+(require 'idris-common-utils)
 
 (require 'cl-lib)
 (require 'thingatpt)
 
-(defvar-local idris-buffer-dirty-p t
-  "An Idris buffer is dirty if there have been modifications since it was last loaded")
-
-(defvar idris-currently-loaded-buffer nil
-  "The buffer currently loaded by the running Idris")
+(defvar-local idris-load-to-here nil
+  "The maximum position to load")
 
 (defun idris-make-dirty ()
   "Mark an Idris buffer as dirty and remove the loaded region."
@@ -98,10 +96,7 @@
              idris-set-current-pretty-print-width)
   :group 'idris)
 
-(defvar idris-loaded-region-overlay nil
-  "The region loaded by Idris, should such a thing exist")
-
-(defun idris-possibly-make-dirty (beginning end length)
+(defun idris-possibly-make-dirty (beginning end _length)
   ;; If there is a load-to-here marker and a currently loaded region, only
   ;; make the buffer dirty when the change overlaps the loaded region.
   (if (and idris-load-to-here idris-loaded-region-overlay)
@@ -131,7 +126,7 @@ out."
 (defun idris-update-loaded-region (fc)
   (let* ((end (assoc :end fc))
          (line (cadr end))
-         (col (caddr end)))
+         (col (cl-caddr end)))
     (when (overlayp idris-loaded-region-overlay)
       (delete-overlay idris-loaded-region-overlay))
     (with-current-buffer idris-currently-loaded-buffer
@@ -143,9 +138,6 @@ out."
                                           (point))
                           (current-buffer)))
       (overlay-put idris-loaded-region-overlay 'face 'idris-loaded-region-face))))
-
-(defvar-local idris-load-to-here nil
-  "The maximum position to load")
 
 (defun idris-load-to (&optional pos)
   (when (not pos) (setq pos (point)))
@@ -547,21 +539,21 @@ compiler-annotated output. Does not return a line number."
   (idris-load-file-sync)
   (idris-eval '(:interpret ":exec")))
 
-(defun idris-proof-search (prefix-arg)
+(defun idris-proof-search (arg)
   "Invoke the proof search. A plain prefix argument causes the
 command to prompt for hints and recursion depth, while a numeric
 prefix argument sets the recursion depth directly."
   (interactive "P")
-  (let ((hints (if (consp prefix-arg)
+  (let ((hints (if (consp arg)
                    (split-string (read-string "Hints: ") "[^a-zA-Z0-9']")
                  '()))
-        (depth (cond ((consp prefix-arg)
+        (depth (cond ((consp arg)
                       (let ((input (string-to-number (read-string "Search depth: "))))
                         (if (= input 0)
                             nil
                           (list input))))
-                     ((numberp prefix-arg)
-                      (list prefix-arg))
+                     ((numberp arg)
+                      (list arg))
                      (t nil)))
         (what (idris-thing-at-point)))
     (when (car what)
@@ -726,8 +718,8 @@ means to not ask for confirmation."
                 (t (message "%S" selection))))))
     map))
 
-(defun idris-make-term-menu (term)
-  "Make a menu for the widget for TERM"
+(defun idris-make-term-menu (_term)
+  "Make a menu for the widget for some term."
   (let ((menu (make-sparse-keymap)))
     (define-key menu [idris-term-menu-normalize]
       `(menu-item "Normalize"

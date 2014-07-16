@@ -20,6 +20,8 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (require 'idris-core)
+(require 'idris-common-utils)
+(require 'cl-lib)
 
 (defgroup idris-faces nil "Idris highlighting" :prefix 'idris :group 'idris)
 
