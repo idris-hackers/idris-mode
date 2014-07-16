@@ -23,6 +23,8 @@ The [extended abstract] for DTP14 gives overview of the features of idris-mode. 
 [extended abstract]: http://itu.dk/people/drc/pubs/dtp2014-idris-mode.pdf
 [pdf]: http://itu.dk/people/hame/idris-mode.pdf
 
+Certain areas of `idris-mode` show explanatory help text. When you've learned how to use `idris-mode`, you can turn these off by setting `idris-show-help-text` to `nil`.
+
 ## Inferior Idris
 
 There is now support for running an Idris interpreter in a buffer. Use
