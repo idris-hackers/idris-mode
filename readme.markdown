@@ -132,6 +132,8 @@ Idris mode is heavily dependent on the Idris compiler for its more advanced feat
 
 Customize various aspects of the mode using `M-x customize-group RET idris RET`.
 
+Additionally, you may want to update your Emacs configuration so that it does not open Idris bytecode files by default. You can do this by adding `".ibc"` to the variable `completion-ignored-extensions`, either in customize or by adding `(add-to-list 'completion-ignored-extensions ".ibc")` to your `init.el`. If you use `ido`, then you may also need to set `ido-ignore-extensions` to `t`.
+
 ## Keybinding conventions
 
 All three-letter keybindings are available in versions with and without `C-` on the final key, following the convention from SLIME.
