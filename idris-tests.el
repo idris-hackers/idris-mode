@@ -26,13 +26,31 @@
 
 (require 'idris-mode)
 (require 'idris-ipkg-mode)
+(require 'cl-lib)
 
 (ert-deftest trivial-test ()
   (should t))
 
 
-;; Test the metavariable-list-on-load setting
+(ert-deftest idris-test-idris-quit ()
+  "Ensure that running Idris and quitting doesn't leave behind
+unwanted buffers. In particular, only *idris-events* should
+remain."
+  (let ((before (buffer-list)))
+    (idris-repl)
+    (dotimes (_ 5) (accept-process-output nil 1))
+    (idris-quit)
+    (let* ((after (buffer-list))
+           (extra (cl-set-difference after before)))
+      (should (= (length extra) 1))
+      (should (string= (buffer-name (car extra)) idris-event-buffer-name )))
+
+    ;; Cleanup
+    (kill-buffer idris-event-buffer-name)))
+
+
 (ert-deftest idris-test-metavar-load ()
+  "Test the metavariable-list-on-load setting."
   (idris-quit)
   ;;; The default setting should be to show metavariables
   (should idris-metavariable-show-on-load)
@@ -64,7 +82,9 @@
     (kill-buffer))
 
   ;; More cleanup
-  (idris-quit))
+  (idris-quit)
+  (kill-buffer idris-event-buffer-name))
+
 
 
 (provide 'idris-tests)
