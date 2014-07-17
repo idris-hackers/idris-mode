@@ -28,6 +28,7 @@
 (require 'idris-ipkg-mode)
 (require 'cl-lib)
 
+
 (ert-deftest trivial-test ()
   (should t))
 
@@ -85,7 +86,29 @@ remain."
   (idris-quit)
   (kill-buffer idris-event-buffer-name))
 
+(ert-deftest idris-test-proof-search ()
+  "Test that proof search works"
+  (idris-quit)
 
+  (let ((buffer (find-file "test-data/ProofSearch.idr")))
+    (with-current-buffer buffer
+      (idris-load-file)
+      (dotimes (_ 5) (accept-process-output nil 1))
+      (goto-char (point-min))
+      (re-search-forward "search_here")
+      (goto-char (match-beginning 0))
+      (idris-proof-search)
+      (dotimes (_ 5) (accept-process-output nil 1))
+      (should (looking-at-p "lteSucc (lteSucc (lteSucc (lteSucc (lteSucc lteZero))))"))
+      (move-beginning-of-line nil)
+      (delete-region (point) (line-end-position))
+      (insert "prf = ?search_here")
+      (save-buffer)
+      (kill-buffer)))
+
+  ;; More cleanup
+  (idris-quit)
+  (kill-buffer idris-event-buffer-name))
 
 (provide 'idris-tests)
 ;;; idris-tests.el ends here

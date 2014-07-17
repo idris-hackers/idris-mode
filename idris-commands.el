@@ -539,7 +539,7 @@ compiler-annotated output. Does not return a line number."
   (idris-load-file-sync)
   (idris-eval '(:interpret ":exec")))
 
-(defun idris-proof-search (arg)
+(defun idris-proof-search (&optional arg)
   "Invoke the proof search. A plain prefix argument causes the
 command to prompt for hints and recursion depth, while a numeric
 prefix argument sets the recursion depth directly."
