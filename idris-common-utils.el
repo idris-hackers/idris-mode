@@ -26,6 +26,20 @@
 (require 'idris-core)
 (require 'cl-lib)
 
+
+;;; These variables are here because many things depend on them
+(defvar-local idris-buffer-dirty-p t
+  "An Idris buffer is dirty if there have been modifications since it was last loaded")
+
+(defvar idris-currently-loaded-buffer nil
+  "The buffer currently loaded by the running Idris")
+
+(defvar idris-loaded-region-overlay nil
+  "The region loaded by Idris, should such a thing exist")
+
+(defvar idris-process-current-working-directory ""
+  "Working directory of Idris process")
+
 (defun idris-buffer-name (type)
   (cl-assert (keywordp type))
   (concat (format "*idris-%s*" (substring (symbol-name type) 1))))
@@ -82,6 +96,10 @@ inserted text (that is, relative to point prior to insertion)."
                   do (add-text-properties (+ ,start begin)
                                           (+ ,start begin length)
                                           props))))))
+
+;;; Take care of circular dependency issue
+(autoload 'idris-make-ref-menu-keymap "idris-commands.el")
+(autoload 'idris-make-metavariable-keymap "idris-commands.el")
 
 (defun idris-repl-semantic-text-props (highlighting)
   (cl-loop for (start length props) in highlighting

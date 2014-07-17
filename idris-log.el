@@ -124,10 +124,10 @@ Invokes `idris-log-mode-hook'."
     (goto-char (point-max))))
 
 (defun idris-log-hook-function (event)
-  (destructure-case event
-    ((:log (level message) _target)
+  (pcase event
+    (`(:log (,level ,message) ,_target)
      (idris-log level message)
      t)
-    (t nil)))
+    (_ nil)))
 
 (provide 'idris-log)

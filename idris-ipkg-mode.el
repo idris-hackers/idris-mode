@@ -280,10 +280,10 @@ Invokes `idris-ipkg-build-mode-hook'.")
         (insert-file-contents ipkg-file)
         (idris-ipkg-buffer-src-dir ipkg-file)))))
 
-(defun idris-ipkg-buffer-cmdline-opts (basename)
+(defun idris-ipkg-buffer-cmdline-opts (_basename)
   (save-excursion
     (goto-char (point-min))
-    (let ((found
+    (let ((_found
            (re-search-forward "^\\s-*opts\\s-*=\\s-*\"\\([^\"]*\\)\""
                               nil
                               t)))

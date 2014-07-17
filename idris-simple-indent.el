@@ -193,11 +193,6 @@ column, `tab-to-tab-stop' is done instead."
                           (car start-end) (cdr start-end))))
         (newline)))))
 
-(defun idris-simple-indent-newline-indent ()
-  "Make a newline on the current column and indent on step."
-  (interactive)
-  (idris-simple-indent-newline-same-col)
-  (insert (make-string idris-indent-spaces ? )))
 
 ;;;###autoload
 (define-minor-mode idris-simple-indent-mode

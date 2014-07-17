@@ -23,9 +23,11 @@
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA 02111-1307, USA.
 
+(require 'cl-lib)
+
 (require 'idris-core)
 (require 'idris-warnings-tree)
-(require 'cl-lib)
+(require 'idris-settings)
 
 (defvar idris-metavariable-list-buffer-name (idris-buffer-name :metavariables)
   "The name of the buffer containing Idris metavariables")
@@ -77,17 +79,15 @@ Invoces `idris-metavariable-list-mode-hook'.")
         (insert "\n\n"))
 
       (insert "Metavariables:\n")
-      (let ((root (make-idris-tree :item (format "Metavariables (%d)" (length metavar-info))
-                                   :kids (mapcar #'idris-tree-for-metavariable metavar-info))))
-        (dolist (tree (mapcar #'idris-tree-for-metavariable metavar-info))
-          (idris-tree-insert tree "")
-          (insert "\n\n"))
+      (dolist (tree (mapcar #'idris-tree-for-metavariable metavar-info))
+        (idris-tree-insert tree "")
+        (insert "\n\n"))
 
-        ;(idris-tree-insert root "")
-        (insert "\n")
-        (message "Press q to close")
-        (setq buffer-read-only t)
-        (goto-char (point-min))))
+      ;(idris-tree-insert root "")
+      (insert "\n")
+      (message "Press q to close")
+      (setq buffer-read-only t)
+      (goto-char (point-min)))
     (display-buffer (idris-metavariable-list-buffer))))
 
 (defun idris-metavariable-tree-printer (tree)
@@ -99,6 +99,9 @@ Invoces `idris-metavariable-list-mode-hook'.")
     (apply #'insert-button (idris-tree.button tree))
     (insert (idris-tree.after-button tree))))
 
+
+;;; Prevent circularity error
+(autoload 'idris-prove-metavariable "idris-commands.el")
 
 (defun idris-tree-for-metavariable (metavar)
   "Generate a tree for METAVAR.

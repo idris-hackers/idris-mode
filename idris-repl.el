@@ -162,19 +162,19 @@ Invokes `idris-repl-mode-hook'."
   (remove-hook 'idris-event-hooks 'idris-repl-event-hook-function))
 
 (defun idris-repl-event-hook-function (event)
-  (destructure-case event
-    ((:write-string output _target)
+  (pcase event
+    (`(:write-string ,output ,_target)
      (idris-repl-write-string output)
      t)
-    ((:set-prompt prompt _target)
+    (`(:set-prompt ,prompt ,_target)
      (idris-repl-update-prompt prompt)
      t)
-    ((:warning output _target)
+    (`(:warning ,output ,_target)
      (when (member 'warnings-repl idris-warnings-printing)
        (idris-repl-write-string (format "Error: %s line %d (col %d):\n%s" (nth 0 output) (nth 1 output) (if (eq (safe-length output) 3) 0 (nth 2 output)) (car (last output))))))
-    ((:run-program file _target)
+    (`(:run-program ,file ,_target)
      (idris-execute-compiled-program file))
-    (t nil)))
+    (_ nil)))
 
 (defun idris-execute-compiled-program (filename)
   (let* ((name (concat "idris-" filename))
@@ -246,7 +246,7 @@ Invokes `idris-repl-mode-hook'."
 (defun idris-repl-eval-string (string)
   "Evaluate STRING on the inferior Idris."
   (idris-rex ()
-      ((list ':interpret string))
+      (list ':interpret string)
     ((:ok result &optional spans)
      (idris-repl-insert-result result spans))
     ((:error condition &optional spans)
@@ -437,12 +437,11 @@ It can be read either from FILENAME or `idris-repl-history-file' or
 from a user defined filename."
   (interactive (list (idris-repl-read-history-filename)))
   (let ((file (or filename idris-repl-history-file)))
-    (setq idris-repl-input-history (idris-repl-read-history file t))))
+    (setq idris-repl-input-history (idris-repl-read-history file))))
 
-(defun idris-repl-read-history (&optional filename noerrer)
+(defun idris-repl-read-history (&optional filename)
   "Read and return the history from FILENAME.
-The default value for FILENAME is `idris-repl-history-file'.
-If NOERROR is true return and the file doesn't exits return nil."
+The default value for FILENAME is `idris-repl-history-file'."
   (let ((file (or filename idris-repl-history-file)))
     (cond ((not (file-readable-p file)) '())
           (t (with-temp-buffer
