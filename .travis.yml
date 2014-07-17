@@ -22,6 +22,7 @@ before_install:
 
 # Install Idris
 install:
+      - pushd .
       - git clone https://github.com/idris-lang/Idris-dev.git /tmp/Idris-dev
       - cd /tmp/Idris-dev
       - cabal install -f FFI -f LLVM --only-dependencies --enable-tests
@@ -29,10 +30,14 @@ install:
       - cabal sdist
       - cd ..
       - tar -xf Idris-dev/dist/idris*.tar.gz
-      - make
+      - cd idris*
+      - cabal configure -f FFI -f LLVM
+      - cabal build
+      - cabal copy
 
 before_script: true
 
 script:
+      - popd
       - make compile
       - make test
