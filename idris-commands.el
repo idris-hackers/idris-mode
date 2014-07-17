@@ -162,15 +162,15 @@ out."
   (interactive)
   (idris-load-forward-line -1))
 
-(defun idris-load-file (set-line)
+(defun idris-load-file (&optional set-line)
   "Pass the current buffer's file to the inferior Idris process.
 A prefix argument restricts loading to the current
 line."
   (interactive "p")
   (save-buffer)
   (idris-ensure-process-and-repl-buffer)
-  (when (= set-line 4) (idris-load-to (point)))
-  (when (= set-line 16) (idris-no-load-to))
+  (when (and set-line (= set-line 4)) (idris-load-to (point)))
+  (when (and set-line (= set-line 16)) (idris-no-load-to))
   (if (buffer-file-name)
       (when (idris-current-buffer-dirty-p)
         (when idris-prover-currently-proving
@@ -539,7 +539,7 @@ compiler-annotated output. Does not return a line number."
   (idris-load-file-sync)
   (idris-eval '(:interpret ":exec")))
 
-(defun idris-proof-search (arg)
+(defun idris-proof-search (&optional arg)
   "Invoke the proof search. A plain prefix argument causes the
 command to prompt for hints and recursion depth, while a numeric
 prefix argument sets the recursion depth directly."
@@ -646,6 +646,7 @@ type-correct, so loading will fail."
          (pbuf (get-buffer pbufname)))
     (if pbuf
         (progn
+          (with-current-buffer pbuf (delete-process nil)) ; delete process without asking
           (kill-buffer pbuf)
           (unless (get-buffer pbufname) (idris-kill-buffers))
           (setq idris-rex-continuations '())

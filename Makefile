@@ -20,7 +20,7 @@ clean:
 %.elc : %.el
 	$(BYTECOMP) $<
 
-compile: clean idris-commands.elc idris-common-utils.elc idris-compat.elc idris-core.elc idris-events.elc idris-info.elc idris-ipkg-mode.elc idris-keys.elc idris-log.elc idris-metavariable-list.elc idris-mode.elc idris-prover.elc idris-repl.elc idris-settings.elc idris-simple-indent.elc idris-syntax.elc idris-tests.elc idris-warnings.elc idris-warnings-tree.elc inferior-idris.elc
+compile: clean idris-commands.elc idris-common-utils.elc idris-compat.elc idris-core.elc idris-events.elc idris-info.elc idris-ipkg-mode.elc idris-keys.elc idris-log.elc idris-metavariable-list.elc idris-mode.elc idris-prover.elc idris-repl.elc idris-settings.elc idris-simple-indent.elc idris-syntax.elc idris-warnings.elc idris-warnings-tree.elc inferior-idris.elc
 
 test:
 	$(BATCHEMACS) -l ert -l idris-tests.el -f ert-run-tests-batch-and-exit
