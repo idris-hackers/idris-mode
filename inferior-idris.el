@@ -262,10 +262,12 @@ call `ERROR' if there was an Idris error."
        (idris-rex (tag sexp)
            sexp
          ((:ok value &optional spans)
-          (unless (member tag idris-stack-eval-tags)
-            (error "Reply to canceled synchronous eval request tag=%S sexp=%S"
-                   tag sexp))
-          (throw tag (list #'identity (cons value spans))))
+          (if (member tag idris-stack-eval-tags)
+              (throw tag (list #'identity (cons value spans)))
+            (if no-errors
+                nil
+                (error "Reply to canceled synchronous eval request tag=%S sexp=%S"
+                       tag sexp))))
          ((:error condition &optional _spans)
           (if no-errors
               (throw tag (list #'identity nil))
