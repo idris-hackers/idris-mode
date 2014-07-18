@@ -6,6 +6,7 @@
 ;; URL: https://github.com/idris-hackers/idris-mode
 ;; Keywords: languages
 ;; Package-Requires: ((emacs "24"))
+;; Version: 0.9.14
 
 
 ;;; Commentary:
