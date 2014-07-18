@@ -40,6 +40,12 @@
 (defvar idris-process-current-working-directory ""
   "Working directory of Idris process")
 
+(defvar idris-command-line-option-functions nil
+  "A list of functions to call to compute the command-line arguments to Idris.
+Each function should take no arguments and return a list of
+strings that are suitable arguments to `start-process'.")
+
+
 (defun idris-buffer-name (type)
   (cl-assert (keywordp type))
   (concat (format "*idris-%s*" (substring (symbol-name type) 1))))

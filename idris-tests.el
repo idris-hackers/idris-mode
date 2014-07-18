@@ -110,5 +110,19 @@ remain."
   (idris-quit)
   (kill-buffer idris-event-buffer-name))
 
+(ert-deftest idris-test-find-cmdline-args ()
+  "Test that idris-mode calculates command line arguments from .ipkg files."
+  ;; Outside of a project, none are found
+  (let ((buffer (find-file "test-data/ProofSearch.idr")))
+    (with-current-buffer buffer
+      (should (null (idris-ipkg-flags-for-current-buffer)))
+      (kill-buffer)))
+  ;; Inside of a project, the correct ones are found
+  (let ((buffer (find-file "test-data/cmdline/src/Command/Line/Test.idr")))
+    (with-current-buffer buffer
+      (should (equal (idris-ipkg-flags-for-current-buffer)
+                     (list "-p" "effects")))
+      (kill-buffer))))
+
 (provide 'idris-tests)
 ;;; idris-tests.el ends here

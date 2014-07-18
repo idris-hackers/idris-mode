@@ -68,9 +68,9 @@
 (defvar-local idris-packages nil
   "The list of packages to be loaded by Idris. Set using file or directory variables.")
 
-(defvar idris-currently-loaded-packages nil
-  "The list of packages actually loaded by Idris. This is
-  maintained to restart Idris when the package list changes.")
+(defvar idris-current-flags nil
+  "The list of command-line-args actually passed to Idris. This
+  is maintained to restart Idris when the arguments change.")
 
 (autoload 'idris-prover-event-hook-function "idris-prover.el")
 (autoload 'idris-quit "idris-commands.el")
@@ -78,30 +78,37 @@
   "Run an inferior Idris process"
   (interactive)
 
-  ;; Kill Idris if the package list needs updating
-  (when (not (equal idris-packages idris-currently-loaded-packages))
-    (message "Idris package list updated, restarting Idris")
-    (idris-quit)
-    (sit-for 0.01)) ; allows the sentinel to run and reset idris-process
 
-  ;; Start Idris if necessary
-  (when (not idris-process)
-    (setq idris-process
-          (apply #'start-process "idris" (idris-buffer-name :process)
-                 idris-interpreter-path
-                 "--ideslave"
-                 (append (cl-loop for p in idris-packages collecting "-p" collecting p)
-                         idris-interpreter-flags)))
-    (set-process-filter idris-process 'idris-output-filter)
-    (set-process-sentinel idris-process 'idris-sentinel)
-    (set-process-query-on-exit-flag idris-process t)
-    (setq idris-process-current-working-directory "")
-    (add-hook 'idris-event-hooks 'idris-log-hook-function)
-    (add-hook 'idris-event-hooks 'idris-warning-event-hook-function)
-    (add-hook 'idris-event-hooks 'idris-prover-event-hook-function)
-    (setq idris-currently-loaded-packages idris-packages)
-    (run-hooks 'idris-run-hook)
-    (message "Connected. %s" (idris-random-words-of-encouragement))))
+  (let ((command-line-flags
+         (append (cl-loop for p in idris-packages collecting "-p" collecting p)
+                 idris-interpreter-flags
+                 (cl-mapcan #'funcall
+                            idris-command-line-option-functions))))
+
+    ;; Kill Idris if the package list needs updating
+    (when (not (equal command-line-flags idris-current-flags))
+      (message "Idris command line arguments changed, restarting Idris")
+      (idris-quit)
+      (sit-for 0.01)) ; allows the sentinel to run and reset idris-process
+
+
+    ;; Start Idris if necessary
+    (when (not idris-process)
+      (setq idris-process
+            (apply #'start-process "idris" (idris-buffer-name :process)
+                   idris-interpreter-path
+                   "--ideslave"
+                   command-line-flags))
+      (set-process-filter idris-process 'idris-output-filter)
+      (set-process-sentinel idris-process 'idris-sentinel)
+      (set-process-query-on-exit-flag idris-process t)
+      (setq idris-process-current-working-directory "")
+      (add-hook 'idris-event-hooks 'idris-log-hook-function)
+      (add-hook 'idris-event-hooks 'idris-warning-event-hook-function)
+      (add-hook 'idris-event-hooks 'idris-prover-event-hook-function)
+      (setq idris-current-flags command-line-flags)
+      (run-hooks 'idris-run-hook)
+      (message "Connected. %s" (idris-random-words-of-encouragement)))))
 
 (defun idris-sentinel (_process msg)
   (message "Idris quit unexpectly: %s" (substring msg 0 -1))

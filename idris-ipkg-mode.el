@@ -300,6 +300,13 @@ Invokes `idris-ipkg-build-mode-hook'.")
         (insert-file-contents ipkg-file)
         (idris-ipkg-buffer-cmdline-opts)))))
 
+(defun idris-ipkg-flags-for-current-buffer ()
+  (let ((opts (idris-ipkg-find-cmdline-opts)))
+    (if (stringp opts)
+        (split-string opts nil t)
+      nil)))
+
+(add-to-list 'idris-command-line-option-functions 'idris-ipkg-flags-for-current-buffer)
 
 ;;; Settings
 
