@@ -140,6 +140,27 @@ Additionally, you may want to update your Emacs configuration so that it does no
 
 All three-letter keybindings are available in versions with and without `C-` on the final key, following the convention from SLIME.
 
+## Evil mode support (Vim compatability)
+There is emulation for idris-vim commands in idris-mode. To enable this support please install the `evil` and `evil-leader` packages from MELPA (or your favorite source of packages).
+
+The following commands are supported (taken from idris-vim):
+
+* `<LocalLeader>r`: Reload file
+
+* `<LocalLeader>t`: Show type
+
+* `<LocalLeader>d`: Add initial pattern-match clause
+
+* `<LocalLeader>c`: Case split
+
+* `<LocalLeader>w`: Add `with` clause
+
+* `<LocalLeader>m`: Add missing pattern-match cases
+
+* `<LocalLeader>p`: Proof search
+
+* `<LocalLeader>h`: Show documentation
+
 ## Tests
 
 Before sending a patch or pull request, please run the automated tests for idris-mode and correct any errors that are found. There are two kinds of test:
