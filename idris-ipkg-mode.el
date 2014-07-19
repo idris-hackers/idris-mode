@@ -301,7 +301,7 @@ Invokes `idris-ipkg-build-mode-hook'."
         (insert-file-contents ipkg-file)
         (idris-ipkg-buffer-src-dir ipkg-file)))))
 
-(defun idris-ipkg-buffer-cmdline-opts (_basename)
+(defun idris-ipkg-buffer-cmdline-opts ()
   (save-excursion
     (goto-char (point-min))
     (let ((_found
@@ -319,8 +319,15 @@ Invokes `idris-ipkg-build-mode-hook'."
       ;; Now ipkg-file contains the path to the package
       (with-temp-buffer
         (insert-file-contents ipkg-file)
-        (idris-ipkg-buffer-cmdline-opts ipkg-file)))))
+        (idris-ipkg-buffer-cmdline-opts)))))
 
+(defun idris-ipkg-flags-for-current-buffer ()
+  (let ((opts (idris-ipkg-find-cmdline-opts)))
+    (if (stringp opts)
+        (split-string opts nil t)
+      nil)))
+
+(add-to-list 'idris-command-line-option-functions 'idris-ipkg-flags-for-current-buffer)
 
 ;;; Settings
 
