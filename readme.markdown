@@ -147,3 +147,9 @@ Before sending a patch or pull request, please run the automated tests for idris
 1. The Emacs byte code compiler can catch many issues. Running `make compile` will invode the byte code compiler, failing if there are any warnings. You may wish to run `make clean` after `make compile` to get rid of pesky `.elc` files.
 
 2. There is a test suite that can be invoked with `make test`. It requires a functioning `idris` executable.
+
+
+## Related packages
+
+[`helm-idris`](https://www.github.com/david-christiansen/helm-idris) builds on `idris-mode` to provide an alternative interface to looking up documentation.
+
