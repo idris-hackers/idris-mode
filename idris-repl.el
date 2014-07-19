@@ -47,7 +47,9 @@
   "Insert Idris banner into buffer"
   (when (zerop (buffer-size))
     (let ((welcome "Welcome to Idris REPL!"))
-      (insert welcome))))
+      (if idris-repl-animate
+          (animate-string welcome 0 0)
+        (insert welcome)))))
 
 (defun idris-repl-insert-prompt (&optional always-insert)
   "Insert or update Idris prompt in buffer.
@@ -91,10 +93,10 @@ If ALWAYS-INSERT is non-nil, always insert a prompt at the end of the buffer."
   (or (get-buffer idris-repl-buffer-name)
       (let ((buffer (get-buffer-create idris-repl-buffer-name)))
         (save-selected-window
+          (pop-to-buffer buffer t)
           (with-current-buffer buffer
             (idris-repl-mode)
             (idris-repl-buffer-init))
-          (pop-to-buffer buffer t)
           buffer))))
 
 (defun idris-switch-to-output-buffer ()
