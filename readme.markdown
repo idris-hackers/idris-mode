@@ -145,21 +145,21 @@ There is emulation for idris-vim commands in idris-mode. To enable this support 
 
 The following commands are supported (taken from idris-vim):
 
-* `<LocalLeader>r` reload file
+* `<LocalLeader>r`: Reload file
 
-* `<LocalLeader>t` show type
+* `<LocalLeader>t`: Show type
 
-* `<LocalLeader>d` add clause
+* `<LocalLeader>d`: Add initial pattern-match clause
 
-* `<LocalLeader>c` case split
+* `<LocalLeader>c`: Case split
 
-* `<LocalLeader>w` add with clause
+* `<LocalLeader>w`: Add `with` clause
 
-* `<LocalLeader>m` add missing clause
+* `<LocalLeader>m`: Add missing pattern-match cases
 
-* `<LocalLeader>p` proof search
+* `<LocalLeader>p`: Proof search
 
-* `<LocalLeader>h` show documentation
+* `<LocalLeader>h`: Show documentation
 
 ## Tests
 
