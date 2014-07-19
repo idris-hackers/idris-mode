@@ -2,9 +2,9 @@
 # Makefile for idris-mode, to run tests and ensure dependencies are in order
 # Portions based on the Makefile for Proof General
 
-EMACS=$(shell if [ -z "`which emacs`" ]; then echo "Emacs executable not found"; exit 1; else echo emacs; fi)
+EMACS=emacs
 
-BATCHEMACS=${EMACS} --batch --no-site-file -q -eval '(add-to-list (quote load-path) "${PWD}/")'
+BATCHEMACS=$(EMACS) --batch --no-site-file -q -eval '(add-to-list (quote load-path) "${PWD}/")'
 
 EL=$(ls *.el)
 
