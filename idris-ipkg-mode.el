@@ -15,6 +15,7 @@
 ;; Idris.
 
 ;;; Code:
+(require 'ansi-color)
 
 (require 'idris-core)
 (require 'idris-settings)
@@ -197,7 +198,22 @@ to the matching files, or nil if not found."
 (define-derived-mode idris-ipkg-build-mode fundamental-mode "Idris Build"
   "Major mode used for transient Idris build bufers
     \\{idris-ipkg-build-mode-map}
-Invokes `idris-ipkg-build-mode-hook'.")
+Invokes `idris-ipkg-build-mode-hook'."
+  ;;; Avoid font-lock messing up the ANSI colors
+  (setq font-lock-unfontify-region-function
+        'ansi-color-unfontify-region))
+
+(defun idris-ipkg-insert-ansi-filter (proc string)
+  (when (buffer-live-p (process-buffer proc))
+    (with-current-buffer (process-buffer proc)
+      (let ((moving (= (point) (process-mark proc))))
+        (save-excursion
+          ;; Insert the text, advancing the process marker.
+          (goto-char (process-mark proc))
+          (insert (ansi-color-apply string))
+          (set-marker (process-mark proc) (point)))
+        (if moving (goto-char (process-mark proc)))))))
+
 
 (defun idris-ipkg-command (ipkg-file command)
   "Run a command on ipkg-file. The command can be build, install, or clean."
@@ -210,9 +226,14 @@ Invokes `idris-ipkg-build-mode-hook'.")
                     (t (error "Invalid command name %s" command)))))
     (unless dir
       (error "Unable to determine directory for filename '%s'" ipkg-file))
-    (let ((default-directory dir)) ; default-directory is a special variable - this starts idris in dir
-      (start-process (concat "idris " cmd)
-                     idris-ipkg-build-buffer-name idris-interpreter-path cmd file)
+    (let* ((default-directory dir) ; default-directory is a special variable - this starts idris in dir
+           (process
+            (start-process (concat "idris " cmd)
+                           idris-ipkg-build-buffer-name
+                           idris-interpreter-path
+                           cmd
+                           file)))
+      (set-process-filter process 'idris-ipkg-insert-ansi-filter)
       (with-current-buffer idris-ipkg-build-buffer-name
         (idris-ipkg-build-mode))
       (pop-to-buffer idris-ipkg-build-buffer-name))))
