@@ -139,5 +139,17 @@ Invokes `idris-mode-hook'."
 
      (add-to-list 'flycheck-checkers 'idris)))
 
+;;; Bindings for evil-mode
+(eval-after-load 'evil-leader
+    '(evil-leader/set-key-for-mode 'idris-mode 
+       "r" 'idris-load-file
+       "t" 'idris-type-at-point
+       "d" 'idris-add-clause
+       "c" 'idris-case-split
+       "w" 'idris-make-with-block
+       "m" 'idris-add-missing
+       "p" 'idris-proof-search
+       "h" 'idris-docs-at-point))
+
 (provide 'idris-mode)
 ;;; idris-mode.el ends here
