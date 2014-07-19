@@ -141,7 +141,7 @@ Invokes `idris-mode-hook'."
 
 ;;; Bindings for evil-mode
 (eval-after-load 'evil-leader
-    (evil-leader/set-key-for-mode 'idris-mode 
+    '(evil-leader/set-key-for-mode 'idris-mode 
        "r" 'idris-load-file
        "t" 'idris-type-at-point
        "d" 'idris-add-clause
