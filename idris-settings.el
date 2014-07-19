@@ -188,6 +188,10 @@ with lots of space for the metavariable buffer."
 
 (defgroup idris-repl nil "Idris REPL" :prefix 'idris :group 'idris)
 
+(defcustom idris-repl-animate t
+  "Show a fancy animation when starting a new Idris REPL buffer"
+  :type 'boolean :group 'idris-repl)
+
 (defface idris-repl-prompt-face
   '((t (:inherit font-lock-keyword-face)))
   "Face for the prompt in the Idris REPL."
