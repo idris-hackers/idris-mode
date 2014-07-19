@@ -310,8 +310,12 @@ the length reported by Idris."
            ; in other words, we are undoing the final step.
            ; can the other case(s) happen??
            (goto-char idris-prover-script-processed)
-           (forward-line -1)
-           (end-of-line)
+           (if (= (forward-line -1) 0)
+               ;; we went back
+               (end-of-line)
+             ;; we did not go back - are thus at top of buffer and must
+             ;; retract whole script
+             (goto-char (point-min)))
            (set-marker idris-prover-script-processed (point)))
           ((> count idris-prover-prove-step)
            ;; Here we are inserting a newly-checked proof step.
