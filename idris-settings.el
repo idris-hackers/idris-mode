@@ -89,7 +89,7 @@
   :group 'idris-faces)
 
 (defface idris-semantic-implicit-face
-  '((t (:slant italic)))
+  '((t (:underline t)))
   "The face to be used to highlight implicit arguments"
   :group 'idris-faces)
 
