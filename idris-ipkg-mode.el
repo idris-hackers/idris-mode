@@ -304,11 +304,13 @@ Invokes `idris-ipkg-build-mode-hook'."
 (defun idris-ipkg-buffer-cmdline-opts ()
   (save-excursion
     (goto-char (point-min))
-    (let ((_found
+    (let ((found
            (re-search-forward "^\\s-*opts\\s-*=\\s-*\"\\([^\"]*\\)\""
                               nil
                               t)))
-    (buffer-substring-no-properties (match-beginning 1) (match-end 1)))))
+      (if found
+          (buffer-substring-no-properties (match-beginning 1) (match-end 1))
+        ""))))
 
 (defun idris-ipkg-find-cmdline-opts (&optional ipkg-file)
   (let ((found (or (and ipkg-file (list ipkg-file))
