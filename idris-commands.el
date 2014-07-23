@@ -162,6 +162,19 @@ out."
   (interactive)
   (idris-load-forward-line -1))
 
+(defun idris-filename-to-load ()
+  "Compute the working directory and filename to load in Idris, returning these as a cons."
+  (let* ((fn (buffer-file-name))
+         (ipkg-srcdir (idris-ipkg-find-src-dir))
+         (srcdir (if ipkg-srcdir
+                     ipkg-srcdir
+                   (file-name-directory fn))))
+    (when (and  ;; check that srcdir is prefix of filename - then load relative
+           (> (length fn) (length srcdir))
+           (string= (substring fn 0 (length srcdir)) srcdir))
+      (setq fn (file-relative-name fn srcdir)))
+    (cons srcdir fn)))
+
 (defun idris-load-file (&optional set-line)
   "Pass the current buffer's file to the inferior Idris process.
 A prefix argument restricts loading to the current
@@ -185,17 +198,11 @@ line."
           (with-current-buffer idris-notes-buffer-name
             (let ((inhibit-read-only t)) (erase-buffer))))
         ;; Actually do the loading
-        (let* ((fn (buffer-file-name))
-               (ipkg-srcdir (idris-ipkg-find-src-dir))
-               (srcdir (if ipkg-srcdir
-                           ipkg-srcdir
-                         (file-name-directory fn))))
-          (idris-switch-working-directory srcdir)
+        (let* ((dir-and-fn (idris-filename-to-load))
+               (fn (cdr dir-and-fn))
+               (srcdir (car dir-and-fn)))
           (setq idris-currently-loaded-buffer nil)
-          (when (and  ;; check that srcdir is prefix of filename - then load relative
-                 (> (length fn) (length srcdir))
-                 (string= (substring fn 0 (length srcdir)) srcdir))
-            (setq fn (file-relative-name fn srcdir)))
+          (idris-switch-working-directory srcdir)
           (idris-delete-ibc t) ;; delete the ibc to avoid interfering with partial loads
           (idris-eval-async (if idris-load-to-here
                                 `(:load-file ,fn ,(save-excursion
@@ -256,16 +263,18 @@ Idris process. This sets the load position to point, if there is one."
         (when (and idris-load-to-here
                    (< (marker-position idris-load-to-here) (point)))
           (idris-load-to (point)))
-        (let ((fn (buffer-file-name)))
-          (idris-switch-working-directory (file-name-directory fn))
+        (let* ((dir-and-fn (idris-filename-to-load))
+               (fn (cdr dir-and-fn))
+               (srcdir (car dir-and-fn)))
           (setq idris-currently-loaded-buffer nil)
+          (idris-switch-working-directory srcdir)
           (let ((result
                  (if idris-load-to-here
-                     (idris-eval `(:load-file ,(file-name-nondirectory fn)
+                     (idris-eval `(:load-file ,fn
                                               ,(save-excursion
                                                  (goto-char idris-load-to-here)
                                                  (idris-get-line-num))))
-                   (idris-eval `(:load-file ,(file-name-nondirectory fn))))))
+                   (idris-eval `(:load-file ,fn)))))
             (idris-update-options-cache)
             (setq idris-currently-loaded-buffer (current-buffer))
             (idris-make-clean)
