@@ -141,11 +141,11 @@
     st))
 
 (defconst idris-keywords
-  '("abstract" "applyTactic" "attack" "byReflection" "case" "compute" "covering" "do" "dsl" "else" "equiv"
-    "exact" "fill" "focus" "if" "implicit" "import" "in" "induction" "infix" "infixl" "infixr" "instance"
-    "intro"  "intros" "module" "mrefine" "mutual" "namespace" "of" "let" "parameters" "partial" "pattern"
-    "prefix" "private" "proof" "public" "qed" "refine" "reflect" "rewrite" "search" "solve" "state" "syntax"
-    "tactics" "term" "then" "total" "trivial" "try" "unify" "undo" "using" "where" "with"))
+  '("abstract" "applyTactic" "attack" "auto" "byReflection" "case" "compute" "covering" "default" "do" "dsl"
+    "else" "equiv" "exact" "fill" "focus" "if" "implicit" "import" "in" "induction" "infix" "infixl" "infixr"
+    "instance" "intro"  "intros" "module" "mrefine" "mutual" "namespace" "of" "let" "parameters" "partial"
+    "pattern" "prefix" "private" "proof" "public" "qed" "refine" "reflect" "rewrite" "search" "solve" "state"
+    "syntax" "tactics" "term" "then" "total" "trivial" "try" "unify" "undo" "using" "where" "with"))
 
 (defconst idris-basic-syntactic-keywords
   ;; Backslash \ is not escaping in \(x, y) -> x + y.
