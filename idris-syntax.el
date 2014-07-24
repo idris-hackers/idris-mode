@@ -230,7 +230,8 @@
          ;; Bottom
          ("_|_" . 'idris-bottom-face)
          ;; Other keywords
-         (,(regexp-opt idris-keywords 'words) . 'idris-keyword-face)
+         (, (concat "[^a-zA-Z%]\\(" (regexp-opt idris-keywords 'words) "\\)[^a-zA-Z]")
+          (1 'idris-keyword-face t))
          ;; Operators
          (,idris-operator-regexp . 'idris-operator-face)
          ;; Metavariables
