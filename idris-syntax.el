@@ -141,11 +141,11 @@
     st))
 
 (defconst idris-keywords
-  '("abstract" "attack" "case" "compute" "covering" "do" "dsl" "else" "exact" "focus" "if"
-    "implicit" "import" "in" "infix" "infixl" "infixr" "instance" "intros" "module"
-    "mutual" "namespace" "of" "let" "parameters" "partial" "pattern" "prefix"
-    "private" "public" "refine" "rewrite" "solve" "syntax" "term" "then" "total"
-    "trivial" "try" "using" "where" "with"))
+  '("abstract" "applyTactic" "attack" "auto" "byReflection" "case" "compute" "covering" "default" "do" "dsl"
+    "else" "equiv" "exact" "fill" "focus" "if" "implicit" "import" "in" "induction" "infix" "infixl" "infixr"
+    "instance" "intro"  "intros" "module" "mrefine" "mutual" "namespace" "of" "let" "parameters" "partial"
+    "pattern" "prefix" "private" "proof" "public" "qed" "refine" "reflect" "rewrite" "search" "solve" "state"
+    "syntax" "tactics" "term" "then" "total" "trivial" "try" "unify" "undo" "using" "where" "with"))
 
 (defconst idris-basic-syntactic-keywords
   ;; Backslash \ is not escaping in \(x, y) -> x + y.
@@ -230,7 +230,8 @@
          ;; Bottom
          ("_|_" . 'idris-bottom-face)
          ;; Other keywords
-         (,(regexp-opt idris-keywords 'words) . 'idris-keyword-face)
+         (, (concat "[^a-zA-Z%]\\(" (regexp-opt idris-keywords 'words) "\\)[^a-zA-Z]")
+          (1 'idris-keyword-face t))
          ;; Operators
          (,idris-operator-regexp . 'idris-operator-face)
          ;; Metavariables
