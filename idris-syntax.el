@@ -144,8 +144,8 @@
   '("abstract" "applyTactic" "attack" "byReflection" "case" "compute" "covering" "do" "dsl" "else" "equiv"
     "exact" "fill" "focus" "if" "implicit" "import" "in" "induction" "infix" "infixl" "infixr" "instance"
     "intro"  "intros" "module" "mrefine" "mutual" "namespace" "of" "let" "parameters" "partial" "pattern"
-    "prefix" "private" "public" "qed" "refine" "reflect" "rewrite" "search" "solve" "state" "syntax" "term"
-    "then" "total" "trivial" "try" "unify" "undo" "using" "where" "with"))
+    "prefix" "private" "proof" "public" "qed" "refine" "reflect" "rewrite" "search" "solve" "state" "syntax"
+    "tactics" "term" "then" "total" "trivial" "try" "unify" "undo" "using" "where" "with"))
 
 (defconst idris-basic-syntactic-keywords
   ;; Backslash \ is not escaping in \(x, y) -> x + y.
