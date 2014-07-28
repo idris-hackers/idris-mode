@@ -59,6 +59,9 @@
   (local-set-key (kbd "C-c C-r") 'idris-refine)
   (local-set-key (kbd "C-c _") 'idris-insert-bottom)
   (local-set-key (kbd "RET") 'idris-newline-and-indent)
+  ;; Not using `kbd' due to oddness about backspace and delete
+  (local-set-key [delete] 'idris-delete-forward-char)
+  (local-set-key (kbd "C-d") 'idris-delete-forward-char)
   (local-set-key (kbd "M-n") 'idris-next-error)
   (local-set-key (kbd "M-p") 'idris-previous-error))
 
