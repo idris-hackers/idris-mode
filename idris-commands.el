@@ -389,6 +389,44 @@ compiler-annotated output. Does not return a line number."
         (setq indent (match-string 1))))
     (insert "\n" indent)))
 
+(defun idris-delete-forward-char (n &optional killflag)
+  "Delete the following N characters (previous if N is negative).
+If the current buffer is in `idris-mode' and the file being
+edited is a literate Idris file, deleting the end of a line will
+take into account bird tracks.  If Transient Mark mode is
+enabled, the mark is active, and N is 1, delete the text in the
+region and deactivate the mark instead.  To disable this, set
+`delete-active-region' to nil.
+
+Optional second arg KILLFLAG non-nil means to kill (save in kill
+ring) instead of delete.  Interactively, N is the prefix arg, and
+KILLFLAG is set if N was explicitly specified."
+  (interactive "p\nP")
+  (unless (integerp n)
+    (signal 'wrong-type-argument (list 'integerp n)))
+   (cond
+    ;; Under the circumstances that `delete-forward-char' does something
+    ;; special, delegate to it. This was discovered by reading the source to
+    ;; it.
+    ((and (use-region-p)
+          delete-active-region
+          (= n 1))
+     (delete-forward-char n killflag))
+    ;; If in idris-mode and editing an LIDR file and at the end of a line,
+    ;; then delete the newline and a leading >, if it exists
+    ((and (eq major-mode 'idris-mode)
+          (idris-lidr-p)
+          (= n 1)
+          (eolp))
+     (delete-char 1 killflag)
+     (when (and (not (eolp)) (equal (following-char) ?\>))
+       (delete-char 1 killflag)
+       (when (and (not (eolp)) (equal (following-char) ?\ ))
+         (delete-char 1 killflag))))
+    ;; Nothing special to do - delegate to `delete-char', just as
+    ;; `delete-forward-char' does
+    (t (delete-char 1 killflag))))
+
 (defun idris-apropos (what)
   "Look up something in names, type signatures, and docstrings"
   (interactive "sSearch Idris docs for: ")
