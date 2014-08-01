@@ -39,5 +39,5 @@ before_script: true
 
 script:
       - popd
-      - make compile
+      - make build
       - make test
