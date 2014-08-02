@@ -65,6 +65,16 @@
 (defvar idris-process nil
   "The Idris process.")
 
+(defvar idris-protocol-version 0 "The protocol version")
+
+(defun idris-version-hook-function (event)
+  (pcase event
+    (`(:protocol-version ,version ,_target)
+     (setf idris-protocol-version version)
+     (remove-hook 'idris-event-hooks 'idris-version-hook-function)
+     t)))
+
+
 (defvar-local idris-packages nil
   "The list of packages to be loaded by Idris. Set using file or directory variables.")
 
@@ -99,13 +109,14 @@
                    idris-interpreter-path
                    "--ideslave"
                    command-line-flags))
+      (add-hook 'idris-event-hooks 'idris-version-hook-function)
+      (add-hook 'idris-event-hooks 'idris-log-hook-function)
+      (add-hook 'idris-event-hooks 'idris-warning-event-hook-function)
+      (add-hook 'idris-event-hooks 'idris-prover-event-hook-function)
       (set-process-filter idris-process 'idris-output-filter)
       (set-process-sentinel idris-process 'idris-sentinel)
       (set-process-query-on-exit-flag idris-process t)
       (setq idris-process-current-working-directory "")
-      (add-hook 'idris-event-hooks 'idris-log-hook-function)
-      (add-hook 'idris-event-hooks 'idris-warning-event-hook-function)
-      (add-hook 'idris-event-hooks 'idris-prover-event-hook-function)
       (setq idris-current-flags command-line-flags)
       (run-hooks 'idris-run-hook)
       (message "Connected. %s" (idris-random-words-of-encouragement)))))
