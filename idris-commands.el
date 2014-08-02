@@ -674,7 +674,7 @@ type-correct, so loading will fail."
   (idris-warning-reset-all)
   (setq idris-currently-loaded-buffer nil)
   ; not killing :events since it it tremendously useful for debuging
-  (let ((bufs (list :repl :proof-obligations :proof-shell :proof-script :log :info :notes :metavariables)))
+  (let ((bufs (list :connection :repl :proof-obligations :proof-shell :proof-script :log :info :notes :metavariables)))
     (dolist (b bufs) (idris-kill-buffer b))))
 
 (defun idris-pop-to-repl ()
