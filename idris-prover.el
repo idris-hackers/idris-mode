@@ -229,7 +229,7 @@ left margin."
                  ;; state.
                  (delete-region idris-prover-script-processed
                                 idris-prover-script-processing)))
-              ((:error condition)
+              ((:error condition &optional spans)
                (with-current-buffer (idris-prover-script-buffer)
                  (when idris-prover-script-processing-overlay
                    (delete-overlay idris-prover-script-processing-overlay)
