@@ -690,10 +690,12 @@ type-correct, so loading will fail."
   (interactive)
   (setq idris-prover-currently-proving nil)
   (let* ((pbufname (idris-buffer-name :process))
-         (pbuf (get-buffer pbufname)))
-    (when idris-connection
-      (delete-process idris-connection)
-      (setq idris-connection nil))
+         (pbuf (get-buffer pbufname))
+         (cbuf (get-buffer (idris-buffer-name :connection))))
+    (when cbuf
+      (when (get-buffer-process cbuf)
+        (with-current-buffer cbuf (delete-process nil))) ; delete connection without asking
+      (kill-buffer cbuf))
     (when pbuf
       (when (get-buffer-process pbuf)
         (with-current-buffer pbuf (delete-process nil))) ; delete process without asking

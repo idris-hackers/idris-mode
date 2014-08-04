@@ -108,6 +108,7 @@
                    "--ideslave-socket"
                    command-line-flags))
       (set-process-filter idris-process 'idris-process-filter)
+      (set-process-sentinel idris-process 'idris-sentinel)
       (setq idris-current-flags command-line-flags)
       (accept-process-output idris-process 3))))
 
@@ -128,11 +129,13 @@
     (message "Connected. %s" (idris-random-words-of-encouragement))))
 
 (defun idris-sentinel (_process msg)
-  (message "Idris quit unexpectly: %s" (substring msg 0 -1))
-  (delete-process idris-process)
-  (delete-process idris-connection)
-  (setq idris-process nil)
-  (setq idris-connection nil))
+  (message "Idris disconnected: %s" (substring msg 0 -1))
+  (when idris-connection
+    (delete-process idris-connection)
+    (setq idris-connection nil))
+  (when idris-process
+    (delete-process idris-process)
+    (setq idris-process nil)))
 
 (defun idris-process-filter (process string)
   "Accept output from the process"
