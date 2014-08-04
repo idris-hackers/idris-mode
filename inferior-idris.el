@@ -65,6 +65,19 @@
 (defvar idris-process nil
   "The Idris process.")
 
+(defvar idris-connection nil
+  "The Idris connection.")
+
+(defvar idris-protocol-version 0 "The protocol version")
+
+(defun idris-version-hook-function (event)
+  (pcase event
+    (`(:protocol-version ,version ,_target)
+     (setf idris-protocol-version version)
+     (remove-hook 'idris-event-hooks 'idris-version-hook-function)
+     t)))
+
+
 (defvar-local idris-packages nil
   "The list of packages to be loaded by Idris. Set using file or directory variables.")
 
@@ -77,58 +90,69 @@
 (defun idris-run ()
   "Run an inferior Idris process"
   (interactive)
-
-
   (let ((command-line-flags
          (append (cl-loop for p in idris-packages collecting "-p" collecting p)
                  idris-interpreter-flags
                  (cl-mapcan #'funcall
                             idris-command-line-option-functions))))
-
     ;; Kill Idris if the package list needs updating
     (when (not (equal command-line-flags idris-current-flags))
       (message "Idris command line arguments changed, restarting Idris")
       (idris-quit)
       (sit-for 0.01)) ; allows the sentinel to run and reset idris-process
-
-
     ;; Start Idris if necessary
     (when (not idris-process)
       (setq idris-process
             (apply #'start-process "idris" (idris-buffer-name :process)
                    idris-interpreter-path
-                   "--ideslave"
+                   "--ideslave-socket"
                    command-line-flags))
-      (set-process-filter idris-process 'idris-output-filter)
+      (set-process-filter idris-process 'idris-process-filter)
       (set-process-sentinel idris-process 'idris-sentinel)
-      (set-process-query-on-exit-flag idris-process t)
-      (setq idris-process-current-working-directory "")
-      (add-hook 'idris-event-hooks 'idris-log-hook-function)
-      (add-hook 'idris-event-hooks 'idris-warning-event-hook-function)
-      (add-hook 'idris-event-hooks 'idris-prover-event-hook-function)
       (setq idris-current-flags command-line-flags)
-      (run-hooks 'idris-run-hook)
-      (message "Connected. %s" (idris-random-words-of-encouragement)))))
+      (accept-process-output idris-process 3))))
+
+(defun idris-connect (port)
+  "Establish a connection with a Idris REPL."
+  (when (not idris-connection)
+    (setq idris-connection
+          (open-network-stream "Idris Ideslave" (idris-buffer-name :connection) "127.0.0.1" port))
+    (add-hook 'idris-event-hooks 'idris-version-hook-function)
+    (add-hook 'idris-event-hooks 'idris-log-hook-function)
+    (add-hook 'idris-event-hooks 'idris-warning-event-hook-function)
+    (add-hook 'idris-event-hooks 'idris-prover-event-hook-function)
+    (set-process-filter idris-connection 'idris-output-filter)
+    (set-process-sentinel idris-connection 'idris-sentinel)
+    (set-process-query-on-exit-flag idris-connection t)
+    (setq idris-process-current-working-directory "")
+    (run-hooks 'idris-run-hook)
+    (message "Connected. %s" (idris-random-words-of-encouragement))))
 
 (defun idris-sentinel (_process msg)
-  (message "Idris quit unexpectly: %s" (substring msg 0 -1))
-  (delete-process idris-process)
-  (setq idris-process nil))
+  (message "Idris disconnected: %s" (substring msg 0 -1))
+  (when idris-connection
+    (delete-process idris-connection)
+    (setq idris-connection nil))
+  (when idris-process
+    (delete-process idris-process)
+    (setq idris-process nil)))
+
+(defun idris-process-filter (process string)
+  "Accept output from the process"
+  (if idris-connection
+      (with-current-buffer (process-buffer process)
+        (goto-char (point-max))
+        (insert string))
+    (idris-connect (string-to-number (substring string 0 -1)))))
 
 (defun idris-output-filter (process string)
   "Accept output from the socket and process all complete messages"
-  (when (buffer-live-p (process-buffer process))
-    (with-current-buffer (process-buffer process)
-      (let ((moving (= (point) (process-mark process))))
-        (save-excursion
-          ;; Insert the text, advancing the process marker.
-          (goto-char (process-mark process))
-          (insert string)
-          (set-marker (process-mark process) (point)))
-        (if moving (goto-char (process-mark process))))))
-  (idris-process-available-input process))
+  (with-current-buffer (process-buffer process)
+    (goto-char (point-max))
+    (insert string))
+  (idris-connection-available-input process))
 
-(defun idris-process-available-input (process)
+(defun idris-connection-available-input (process)
   "Process all complete messages which arrived from Idris."
   (with-current-buffer (process-buffer process)
     (while (idris-have-input-p)
@@ -231,7 +255,7 @@ versions cannot deal with that."
         (list :emacs-rex ,sexp
               (lambda (,result)
                 (destructure-case ,result
-                  ,@continuations))) idris-process))))
+                  ,@continuations))) idris-connection))))
 
 (defun idris-eval-async (sexp cont &optional failure-cont)
   "Evaluate EXPR on the superior Idris and call CONT with the result, or FAILURE-CONT in failure case."
@@ -287,7 +311,7 @@ call `ERROR' if there was an Idris error."
          (while t
            (when (eq (process-status idris-process) 'exit)
              (error "Idris process exited unexpectedly"))
-           (accept-process-output idris-process 0.1)))))))
+           (accept-process-output idris-connection 0.1)))))))
 
 (defvar idris-options-cache '()
   "An alist caching the Idris interpreter options, to
