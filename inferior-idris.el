@@ -103,11 +103,19 @@
     ;; Start Idris if necessary
     (when (not idris-process)
       (setq idris-process
-            (apply #'start-process "idris" (idris-buffer-name :process)
-                   idris-interpreter-path
-                   "--ideslave-socket"
-                   command-line-flags))
-      (set-process-filter idris-process 'idris-process-filter)
+            (get-buffer-process
+             (apply #'make-comint-in-buffer
+                    "idris"
+                    (idris-buffer-name :process)
+                    idris-interpreter-path
+                    nil
+                    "--ideslave-socket"
+                    command-line-flags)))
+      (with-current-buffer (idris-buffer-name :process)
+        (add-hook 'comint-preoutput-filter-functions
+                  'idris-process-filter)
+        (add-hook 'comint-output-filter-functions
+                  'idris-show-process-buffer))
       (set-process-sentinel idris-process 'idris-sentinel)
       (setq idris-current-flags command-line-flags)
       (accept-process-output idris-process 3))))
@@ -137,13 +145,17 @@
     (delete-process idris-process)
     (setq idris-process nil)))
 
-(defun idris-process-filter (process string)
+(defun idris-process-filter (string)
   "Accept output from the process"
   (if idris-connection
-      (with-current-buffer (process-buffer process)
-        (goto-char (point-max))
-        (insert string))
-    (idris-connect (string-to-number (substring string 0 -1)))))
+      string
+    (idris-connect (string-to-number (substring string 0 -1)))
+    ""))
+
+(defun idris-show-process-buffer (string)
+  "Show the Idris process buffer if STRING is non-empty."
+  (when (> (length string) 0)
+    (pop-to-buffer (get-buffer (idris-buffer-name :process)))))
 
 (defun idris-output-filter (process string)
   "Accept output from the socket and process all complete messages"
