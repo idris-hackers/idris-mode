@@ -691,17 +691,20 @@ type-correct, so loading will fail."
   (setq idris-prover-currently-proving nil)
   (let* ((pbufname (idris-buffer-name :process))
          (pbuf (get-buffer pbufname)))
-    (if pbuf
-        (progn
-          (with-current-buffer pbuf (delete-process nil)) ; delete process without asking
-          (kill-buffer pbuf)
-          (unless (get-buffer pbufname) (idris-kill-buffers))
-          (setq idris-rex-continuations '())
-          (when idris-loaded-region-overlay
-            (delete-overlay idris-loaded-region-overlay)
-            (setq idris-loaded-region-overlay nil)))
-      (idris-prover-end)
-      (idris-kill-buffers))))
+    (when idris-connection
+      (delete-process idris-connection)
+      (setq idris-connection nil))
+    (when pbuf
+      (when (get-buffer-process pbuf)
+        (with-current-buffer pbuf (delete-process nil))) ; delete process without asking
+      (kill-buffer pbuf)
+      (unless (get-buffer pbufname) (idris-kill-buffers))
+      (setq idris-rex-continuations '())
+      (when idris-loaded-region-overlay
+        (delete-overlay idris-loaded-region-overlay)
+        (setq idris-loaded-region-overlay nil)))
+    (idris-prover-end)
+    (idris-kill-buffers)))
 
 (defun idris-delete-ibc (no-confirmation)
   "Delete the IBC file for the current buffer. A prefix argument
