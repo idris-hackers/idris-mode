@@ -83,20 +83,16 @@ prover, or nil if Idris is not proving anything.")
 If GOALS is a string, it is treated as undecorated text.
 Otherwise, it must be a two-element list whose car is a goal
 string and whose cadr is highlighting information."
-  ;;; COMPATIBILITY: Idris 0.9.13.1 and earlier sent a string here, later versions send
-  ;;; a pair of string and highlighting.
   (with-current-buffer (idris-prover-obligations-buffer)
     (let ((buffer-read-only nil))
       (erase-buffer)
       (when idris-show-help-text
         (setq header-line-format
               "This is a read-only view of your proof state. Prove the lemma in the script buffer."))
-      (if (stringp goals)
-          (insert goals)
-        (let ((goals-string (car goals))
-              (goals-spans (cadr goals)))
-          (idris-propertize-spans (idris-repl-semantic-text-props goals-spans)
-            (insert goals-string))))))
+      (let ((goals-string (car goals))
+            (goals-spans (cadr goals)))
+        (idris-propertize-spans (idris-repl-semantic-text-props goals-spans)
+          (insert goals-string)))))
   (idris-prover-show-obligations))
 
 (defvar idris-prover-saved-window-configuration nil
