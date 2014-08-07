@@ -79,12 +79,11 @@
   "Add a compiler warning to the buffer as an overlay.
 May merge overlays, if there's already one in the same location.
 WARNING is of form (filename (startline startcolumn) (endline endcolumn) message &optional highlighting-spans)
+As of 20140807 (Idris 0.9.14.1-git:abee538) (endline endcolumn) is the same as (startline startcolumn)
 "
   (cl-destructuring-bind (filename sl1 sl2 message spans) warning
     (let ((startline (nth 0 sl1))
-          (startcol (nth 1 sl1))
-          (endline (nth 0 sl2))
-          (endcol (nth 1 sl2)))
+          (startcol (nth 1 sl1)))
       (push (list filename startline startcol message spans) idris-raw-warnings)
       (let* ((fullpath (concat (file-name-as-directory idris-process-current-working-directory)
                                filename))
@@ -92,8 +91,7 @@ WARNING is of form (filename (startline startcolumn) (endline endcolumn) message
         (when (not (null buffer))
           (with-current-buffer buffer
             (goto-char (point-min))
-            (let ((start (+ (line-beginning-position startline) startcol))
-                  (end (+ (line-beginning-position endline) endcol)))
+              (cl-multiple-value-bind (start end) (get-region startline)
               (goto-char start)
               ;; this is a hack to have warnings reported which point to empty lines
               (let ((rend (if (equal start end)
@@ -103,7 +101,7 @@ WARNING is of form (filename (startline startcolumn) (endline endcolumn) message
                 (let ((overlay (idris-warning-overlay-at-point)))
                   (if overlay
                       (idris-warning-merge-overlays overlay message)
-                    (idris-warning-create-overlay start rend message)))))))))))
+                    (idris-warning-create-overlay (+ startcol start) rend message)))))))))))
 
 (defun idris-warning-merge-overlays (overlay message)
   (overlay-put overlay 'help-echo
