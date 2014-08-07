@@ -94,19 +94,19 @@ As of 20140807 (Idris 0.9.14.1-git:abee538) (endline endcolumn) is mostly the sa
           (with-current-buffer buffer
             (goto-char (point-min))
               (cl-multiple-value-bind (startp endp) (get-region startline)
-              (goto-char startp)
-              (let ((start (+ startp startcol))
-                    (end (if (and (= startline endline) (= startcol endcol))
-                             ;; this is a hack to have warnings reported which point to empty lines
-                             (if (= startp endp)
-                                 (progn (insert " ")
-                                        (1+ endp))
-                               endp)
-                           (+ (line-beginning-position endline) endcol))))
-                (let ((overlay (idris-warning-overlay-at-point)))
-                  (if overlay
-                      (idris-warning-merge-overlays overlay message)
-                    (idris-warning-create-overlay start end message)))))))))))
+                (goto-char startp)
+                (let ((start (+ startp startcol))
+                      (end (if (and (= startline endline) (= startcol endcol))
+                               ;; this is a hack to have warnings reported which point to empty lines
+                               (if (= startp endp)
+                                   (progn (insert " ")
+                                          (1+ endp))
+                                 endp)
+                             (+ (line-beginning-position endline) endcol))))
+                  (let ((overlay (idris-warning-overlay-at-point)))
+                    (if overlay
+                        (idris-warning-merge-overlays overlay message)
+                      (idris-warning-create-overlay start end message)))))))))))
 
 (defun idris-warning-merge-overlays (overlay message)
   (overlay-put overlay 'help-echo
