@@ -79,11 +79,13 @@
   "Add a compiler warning to the buffer as an overlay.
 May merge overlays, if there's already one in the same location.
 WARNING is of form (filename (startline startcolumn) (endline endcolumn) message &optional highlighting-spans)
-As of 20140807 (Idris 0.9.14.1-git:abee538) (endline endcolumn) is the same as (startline startcolumn)
+As of 20140807 (Idris 0.9.14.1-git:abee538) (endline endcolumn) is mostly the same as (startline startcolumn)
 "
   (cl-destructuring-bind (filename sl1 sl2 message spans) warning
     (let ((startline (nth 0 sl1))
-          (startcol (nth 1 sl1)))
+          (startcol (1- (nth 1 sl1)))
+          (endline (nth 0 sl2))
+          (endcol (1- (nth 1 sl2))))
       (push (list filename startline startcol message spans) idris-raw-warnings)
       (let* ((fullpath (concat (file-name-as-directory idris-process-current-working-directory)
                                filename))
@@ -91,17 +93,20 @@ As of 20140807 (Idris 0.9.14.1-git:abee538) (endline endcolumn) is the same as (
         (when (not (null buffer))
           (with-current-buffer buffer
             (goto-char (point-min))
-              (cl-multiple-value-bind (start end) (get-region startline)
-              (goto-char start)
-              ;; this is a hack to have warnings reported which point to empty lines
-              (let ((rend (if (equal start end)
-                              (progn (insert " ")
-                                     (1+ end))
-                            end)))
+              (cl-multiple-value-bind (startp endp) (get-region startline)
+              (goto-char startp)
+              (let ((start (+ startp startcol))
+                    (end (if (and (= startline endline) (= startcol endcol))
+                             ;; this is a hack to have warnings reported which point to empty lines
+                             (if (= startp endp)
+                                 (progn (insert " ")
+                                        (1+ endp))
+                               endp)
+                           (+ (line-beginning-position endline) endcol))))
                 (let ((overlay (idris-warning-overlay-at-point)))
                   (if overlay
                       (idris-warning-merge-overlays overlay message)
-                    (idris-warning-create-overlay (+ startcol start) rend message)))))))))))
+                    (idris-warning-create-overlay start end message)))))))))))
 
 (defun idris-warning-merge-overlays (overlay message)
   (overlay-put overlay 'help-echo
