@@ -124,5 +124,20 @@ remain."
                      (list "-p" "effects")))
       (kill-buffer))))
 
+(ert-deftest idris-test-error-buffer ()
+  "Test that loading a type-incorrect Idris buffer results in an error message buffer."
+  (let ((buffer (find-file "test-data/TypeError.idr")))
+    (with-current-buffer buffer
+      (idris-load-file)
+      (dotimes (_ 5) (accept-process-output nil 1))
+      (should (get-buffer idris-notes-buffer-name)))
+    (with-current-buffer (get-buffer idris-notes-buffer-name)
+      (goto-char (point-min))
+      (should (re-search-forward "Nat" nil t))) ;; check that the buffer has something error-like
+    (with-current-buffer buffer
+      (kill-buffer))
+    (idris-quit)
+    (kill-buffer idris-event-buffer-name)))
+
 (provide 'idris-tests)
 ;;; idris-tests.el ends here
