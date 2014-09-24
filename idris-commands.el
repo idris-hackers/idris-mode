@@ -441,6 +441,32 @@ KILLFLAG is set if N was explicitly specified."
           (insert (car signature)))
         (buffer-string)))))
 
+(defun idris-pretty-print ()
+  "Get a term or definition pretty-printed by Idris. Useful for writing papers or slides."
+  (interactive)
+  (let ((what (read-string "What should be pretty-printed? "))
+        (fmt (completing-read "What format? " '("html", "latex") nil t nil nil "latex"))
+        (width (read-string "How wide? " nil nil "80")))
+    (if (<= (string-to-number width) 0)
+        (error "Width must be positive")
+      (if (< (length what) 1)
+          (error "Nothing to pretty-print")
+        (let ((text (idris-eval `(:interpret ,(concat ":pprint " fmt " " width " " what)))))
+          (with-idris-info-buffer
+            (insert (car text))
+            (goto-char (point-min))
+            (re-search-forward (if (string= fmt "latex")
+                                   "% START CODE\n"
+                                 "<!-- START CODE -->"))
+            (push-mark nil t)
+            (re-search-forward (if (string= fmt "latex")
+                                   "% END CODE\n"
+                                 "<!-- END CODE -->"))
+            (goto-char (match-beginning 0))
+            (copy-region-as-kill (mark) (point))
+            (message "Code copied to kill ring")))))))
+
+
 (defun idris-case-split ()
   "Case split the pattern variable at point"
   (interactive)
