@@ -308,6 +308,14 @@ compiler-annotated output. Does not return a line number."
     (when name
       (idris-info-for-name :type-of name))))
 
+(defun idris-print-definition-of-name (thing)
+  "Display the definition of the function or type at point"
+  (interactive "P")
+  (let ((name (if thing (read-string "Print definition: ")
+                (idris-name-at-point))))
+    (when name
+      (idris-info-for-name :print-definition name))))
+
 (defun idris-who-calls-name (name)
   "Show the callers of NAME in a tree"
   (with-idris-info-buffer
@@ -709,6 +717,9 @@ means to not ask for confirmation."
     (define-key-after menu [idris-ref-menu-get-docs]
       `(menu-item "Get documentation"
                   (lambda () (interactive)))) ; x-popup-menu doesn't run cmds
+    (define-key-after menu [idris-ref-menu-print-definition]
+      `(menu-item "Get definition"
+                  (lambda () (interactive))))
     (define-key-after menu [idris-ref-menu-who-calls]
       `(menu-item "Who calls?"
                   (lambda () (interactive))))
@@ -726,6 +737,8 @@ means to not ask for confirmation."
                  (idris-info-for-name :type-of name))
                 ((equal selection '(idris-ref-menu-get-docs))
                  (idris-info-for-name :docs-for name))
+                ((equal selection '(idris-ref-menu-print-definition))
+                 (idris-info-for-name :print-definition name))
                 ((equal selection '(idris-ref-menu-who-calls))
                  (idris-who-calls-name name))
                 ((equal selection '(idris-ref-menu-calls-who))
