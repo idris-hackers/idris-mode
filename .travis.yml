@@ -18,7 +18,7 @@ before_install:
       - sudo apt-get install hscolour
       # test dependency
       - sudo apt-get install -qq expect
-
+      - cabal install alex
 
 # Install Idris
 install:
