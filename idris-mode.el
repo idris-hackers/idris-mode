@@ -59,6 +59,7 @@
     ["Get documentation" idris-docs-at-point t]
     ["Search for type" idris-type-search t]
     ["Apropos" idris-apropos t]
+    ["Pretty-print to HTML or LaTeX" idris-pretty-print t]
     "-----------------"
     ("Interpreter options" :active idris-process
      ["Show implicits" (idris-set-option :show-implicits t)
