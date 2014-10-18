@@ -28,11 +28,10 @@
 (require 'cl-lib)
 
 (defface idris-warning-face
-  `((((class color) (background light))
-     (:underline "orange"))
-    (((class color) (background dark))
-     (:underline "coral"))
-    (t (:underline t)))
+  '((((supports :underline (:style wave)))
+     :underline (:style wave :color "red"))
+    (t
+     :inherit warning))
   "Face for warnings from the compiler."
   :group 'idris-faces)
 
