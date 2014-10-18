@@ -106,6 +106,8 @@ inserted text (that is, relative to point prior to insertion)."
 ;;; Take care of circular dependency issue
 (autoload 'idris-make-ref-menu-keymap "idris-commands.el")
 (autoload 'idris-make-metavariable-keymap "idris-commands.el")
+(autoload 'idris-make-error-keymap "idris-commands.el")
+(autoload 'idris-eval "inferior-idris.el")
 
 (defun idris-repl-semantic-text-props (highlighting)
   (cl-loop for (start length props) in highlighting
@@ -142,14 +144,23 @@ inserted text (that is, relative to point prior to insertion)."
                                    (type (pcase (assoc :type props)
                                            (`(:type ,ty) (concat " : " ty))
                                            (_ "")))
-                                   (mousable-face (if (and (not (equal (cadr decor) :bound)) ;non-bound becomes clickable
-                                                           name)
-                                                      `((:inherit ,decor-face :box t :hack ,unique-val))
-                                                    nil))
-                                   (mouse-help (if (and (not (equal (cadr decor) :bound)) ;non-bound becomes clickable
-                                                        name)
-                                                   "\n<mouse-3> context menu"
-                                                 "")))
+                                   (idris-err (assoc :error props))
+                                   (err-face (if idris-err
+                                                 '(idris-warning-face)
+                                               ()))
+                                   (mousable-face
+                                    (cond ((and (not (equal (cadr decor) :bound)) ;non-bound becomes clickable
+                                                name)
+                                           `((:inherit ,decor-face :box t :hack ,unique-val)))
+                                          (idris-err
+                                           `((:inherit ('idris-warning-face highlight))))
+                                          (t nil)))
+                                   (mouse-help
+                                    (cond ((and (not (equal (cadr decor) :bound)) ;non-bound becomes clickable
+                                                name)
+                                           "\n<mouse-3> context menu")
+                                          (idris-err (idris-eval `(:error-string ,(cadr idris-err))))
+                                          (t ""))))
                               `(rear-nonsticky t
                                 ,@(if name
                                       (append `(help-echo (concat ,(cadr name)
@@ -171,9 +182,15 @@ inserted text (that is, relative to point prior to insertion)."
                                 ,@(if term
                                       (list 'idris-tt-term (cadr term))
                                     ())
+                                ,@(if idris-err
+                                      `(idris-tt-error ,(cadr idris-err)
+                                        help-echo ,@mouse-help
+                                        keymap ,(idris-make-error-keymap (cadr idris-err)))
+                                    ())
                                 ,@(let ((f (append text-face
                                                    implicit-face
-                                                   decor-face)))
+                                                   decor-face
+                                                   err-face)))
                                     (if f (list 'face f) ())))))))
 
 ;;; Was originally slime-search-property - thanks SLIME!

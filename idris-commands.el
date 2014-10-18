@@ -789,6 +789,25 @@ means to not ask for confirmation."
                 (t (message "%S" selection))))))
     map))
 
+(defun idris-make-error-menu (_err)
+  (let ((menu (make-sparse-keymap)))
+    (define-key menu [idris-err-menu-view]
+      `(menu-item "View error"
+                  (lambda () (interactive)))) ; x-popup-menu doesn't run cmds
+    menu))
+
+(defun idris-make-error-keymap (err)
+  (let ((map (make-sparse-keymap)))
+    (define-key map [mouse-3]
+      (lambda () (interactive)
+        (let ((selection (x-popup-menu t (idris-make-error-menu err))))
+          (cond ((equal selection '(idris-err-menu-view))
+                 (idris-info-for-name :error-pprint err))
+                (t (message "%S" selection))))))
+    (define-key map (kbd "RET")
+      (lambda () (interactive) (idris-info-for-name :error-pprint err)))
+    map))
+
 (defun idris-make-term-menu (_term)
   "Make a menu for the widget for some term."
   (let ((menu (make-sparse-keymap)))
