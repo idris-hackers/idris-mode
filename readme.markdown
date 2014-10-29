@@ -1,3 +1,5 @@
+[![MELPA Stable](http://stable.melpa.org/packages/idris-mode-badge.svg)](http://stable.melpa.org/#/idris-mode) [![MELPA](http://melpa.org/packages/idris-mode-badge.svg)](http://melpa.org/#/idris-mode)
+
 ![Interactive editing](http://itu.dk/people/drc/idris-mode.gif)
 
 # idris-mode for emacs
@@ -173,4 +175,3 @@ Before sending a patch or pull request, please run the automated tests for idris
 ## Related packages
 
 [`helm-idris`](https://www.github.com/david-christiansen/helm-idris) builds on `idris-mode` to provide an alternative interface to looking up documentation.
-
