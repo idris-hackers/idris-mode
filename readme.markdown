@@ -121,9 +121,9 @@ You can set this variable interactively using the command `M-x idris-set-idris-p
 
 Idris mode uses lexical binding and other features not available in versions of Emacs prior to 24. Thus, only Emacs 24 and up are supported.
 
-You can install pre-built packages from
-[MELPA](http://melpa.milkbox.net/): `idris-mode` will automatically be enabled
-in `.idr` files without any further configuration.
+You can install pre-built packages from [MELPA](http://melpa.org/) or [MELPA Stable](http://stable.melpa.org): `idris-mode` will automatically be enabled in `.idr` files without any further configuration. Please install a version corresponding to the version of Idris that you use. The current Git (and therefore MELPA) version of `idris-mode` will work with the current Git version of Idris, while the latest release on Hackage will work with the corresponding tagged version of `idris-mode`.
+
+If you are using Emacs 24.4 or newer with released versions of Idris, but you want other packages from MELPA, then you can pin the version of `idris-mode` to the one found in MELPA Stable. For details, please consult the documentation for `package-pinned-packages`.
 
 Alternatively, download the elisp files, and place them somewhere in your load
 path.
