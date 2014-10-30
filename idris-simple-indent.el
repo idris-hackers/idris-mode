@@ -141,13 +141,18 @@ column, `tab-to-tab-stop' is done instead."
                             (if (> this-indentation start-column)
                                 (setq invisible-from this-indentation)
                               (let ((end (line-beginning-position 2)))
-                                (move-to-column start-column)
-                                ;; Is start-column inside a tab on this line?
-                                (if (> (current-column) start-column)
-                                    (backward-char 1))
-                                (or (looking-at "[ \t]")
-                                    (skip-chars-forward "^ \t" end))
                                 (skip-chars-forward " \t" end)
+                                ;; Current indent + 2 is a valid stop
+                                (if (= (current-column) start-column)
+                                    (forward-char 2)
+                                  (progn
+                                    (move-to-column start-column)
+                                    ;; Is start-column inside a tab on this line?
+                                    (if (> (current-column) start-column)
+                                        (backward-char 1))
+                                    (or (looking-at "[ \t]")
+                                        (skip-chars-forward "^ \t" end))
+                                    (skip-chars-forward " \t" end)))
                                 (let ((col (current-column)))
                                   (throw 'idris-simple-indent-break
                                          (if (or (= (point) end)
