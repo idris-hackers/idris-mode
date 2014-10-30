@@ -142,9 +142,50 @@
     "pattern" "prefix" "private" "proof" "public" "qed" "refine" "reflect" "rewrite" "search" "solve" "state"
     "syntax" "tactics" "term" "then" "total" "trivial" "try" "unify" "undo" "using" "where" "with"))
 
-(defconst idris-basic-syntactic-keywords
-  ;; Backslash \ is not escaping in \(x, y) -> x + y.
-  '(("\\(\\\\\\)(" (1 "."))))
+
+(defconst idris-special-char-regexp
+  (let ((idris-special-chars
+         (cl-loop for code
+                  across "0abfnrtv\"'\\"
+                  collecting (concat "'\\" (string code) "'")))
+        (idris-ascii-escapes
+         (cl-loop for esc
+                  in '("NUL" "SOH" "STX" "ETX" "EOT" "ENQ"
+                       "ACK" "BEL" "BS" "HT" "LF" "VT" "FF"
+                       "CR" "SO" "SI" "DLE" "DC1" "DC2"
+                       "DC3" "DC4" "NAK" "SYN" "ETB" "CAN"
+                       "EM" "SUB" "ESC" "FS" "GS" "RS" "US"
+                       "SP" "DEL")
+                  collecting (concat "'\\" esc "'"))))
+    (concat "\\(?:'\"'\\)"
+            "\\|"
+            "\\(?:'\\\\[0-9]+'\\)"
+            "\\|"
+            "\\(?:'\\\\o[0-7]+'\\)"
+            "\\|"
+            "\\(?:'\\\\x[0-9a-fA-F]+'\\)"
+            "\\|"
+            "\\(?:'[^'\\]'\\)"
+            "\\|"
+            (regexp-opt (append idris-ascii-escapes idris-special-chars)))))
+
+(defun idris-syntax-propertize-function (begin end)
+  "Add syntax properties to a region of the buffer that the
+syntax table won't support, such as characters."
+  (save-excursion
+    (goto-char begin)
+    (message "%s-%s" begin end)
+    (while (re-search-forward idris-special-char-regexp end t)
+      (let ((open (match-beginning 0))
+            (close (match-end 0)))
+        (add-text-properties open (1+ open) '(syntax-table (7 . ?\')))
+        (add-text-properties (1- close) close '(syntax-table (7 . ?\')))))
+    ;; Backslash \ is not escaping in \(x, y) -> x + y.
+    (goto-char begin)
+    (while (re-search-forward "\\\\(" end t)
+      (let ((open (match-beginning 0)))
+        (add-text-properties open (1+ open) '(syntax-table (1 . nil)))))))
+
 
 ;; This should be a function so that it evaluates `idris-lidr-p` at the correct time
 (defun idris-font-lock-defaults ()
@@ -220,8 +261,6 @@
            (2 'idris-parameter-face)
            (3 'idris-keyword-face)
            (4 'idris-parameter-face))
-         ;; Character literals
-         ("'\\(?:[^']\\|\\\\.\\)'" . 'idris-char-face)
          ;; Other keywords
          (, (concat "[^a-zA-Z%]\\(" (regexp-opt idris-keywords 'words) "\\)[^a-zA-Z]")
           (1 'idris-keyword-face t))
@@ -236,10 +275,7 @@
           0 'idris-unsafe-face t)
          ;; TODO: operator definitions.
          ;; TODO: let ... in ...
-         )
-      nil nil nil nil
-      ;; Special font lock syntactic keywords
-      (font-lock-syntactic-keywords . idris-basic-syntactic-keywords))))
+         ))))
 
 
 
