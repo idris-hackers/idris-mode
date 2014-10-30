@@ -472,7 +472,7 @@ KILLFLAG is set if N was explicitly specified."
   (interactive)
   (let ((what (idris-thing-at-point)))
     (when (car what)
-      (idris-load-file-sync)
+      (save-excursion (idris-load-file-sync))
       (let ((result (car (idris-eval `(:case-split ,(cdr what) ,(car what))))))
         (delete-region (line-beginning-position) (line-end-position))
         (insert (substring result 0 (1- (length result))))))))
@@ -483,7 +483,7 @@ KILLFLAG is set if N was explicitly specified."
   (let ((what (idris-thing-at-point))
         (command (if proof :add-proof-clause :add-clause)))
     (when (car what)
-      (idris-load-file-sync)
+      (save-excursion (idris-load-file-sync))
       (let ((result (car (idris-eval `(,command ,(cdr what) ,(car what)))))
             final-point
             (prefix (save-excursion        ; prefix is the indentation to insert for the clause
@@ -517,7 +517,7 @@ KILLFLAG is set if N was explicitly specified."
   (interactive)
   (let ((what (idris-thing-at-point)))
     (when (car what)
-      (idris-load-file-sync)
+      (save-excursion (idris-load-file-sync))
       (let ((result (car (idris-eval `(:add-missing ,(cdr what) ,(car what))))))
         (forward-line 1)
         (insert result)))))
@@ -527,7 +527,7 @@ KILLFLAG is set if N was explicitly specified."
   (interactive)
   (let ((what (idris-thing-at-point)))
     (when (car what)
-      (idris-load-file-sync)
+      (save-excursion (idris-load-file-sync))
       (let ((result (car (idris-eval `(:make-with ,(cdr what) ,(car what))))))
         (beginning-of-line)
         (kill-line)
@@ -538,7 +538,7 @@ KILLFLAG is set if N was explicitly specified."
   (interactive)
   (let ((what (idris-thing-at-point)))
     (when (car what)
-      (idris-load-file-sync)
+      (save-excursion (idris-load-file-sync))
       (let* ((result (car (idris-eval `(:make-lemma ,(cdr what) ,(car what)))))
              (lemma-type (car result)))
         ;; There are two cases here: either a ?metavariable, or the {name} of a provisional defn.
@@ -617,7 +617,7 @@ prefix argument sets the recursion depth directly."
                      (t nil)))
         (what (idris-thing-at-point)))
     (when (car what)
-      (idris-load-file-sync)
+      (save-excursion (idris-load-file-sync))
       (let ((result (car (idris-eval `(:proof-search ,(cdr what) ,(car what) ,hints ,@depth)))))
         (save-excursion
           (let ((start (progn (search-backward "?") (point)))
@@ -631,7 +631,7 @@ prefix argument sets the recursion depth directly."
   (let ((what (idris-thing-at-point)))
     (unless (car what)
       (error "Could not find a metavariable at point to refine by"))
-    (idris-load-file-sync)
+    (save-excursion (idris-load-file-sync))
     (let ((result (car (idris-eval `(:refine ,(cdr what) ,(car what) ,name)))))
       (save-excursion
         (let ((start (progn (search-backward "?") (point)))
