@@ -102,7 +102,7 @@
   "A regular expression matching an Idris operator.")
 
 (defconst idris-syntax-table
-  (let ((st (make-syntax-table (standard-syntax-table))))
+  (let ((st (make-syntax-table)))
 
     ;; Matching parens
     (modify-syntax-entry ?\( "()" st)
