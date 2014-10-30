@@ -174,7 +174,6 @@
 syntax table won't support, such as characters."
   (save-excursion
     (goto-char begin)
-    (message "%s-%s" begin end)
     (while (re-search-forward idris-special-char-regexp end t)
       (let ((open (match-beginning 0))
             (close (match-end 0)))
