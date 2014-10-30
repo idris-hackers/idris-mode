@@ -127,7 +127,7 @@ Invokes `idris-mode-hook'."
 ;;; Handy utilities for other modes
 (eval-after-load 'flycheck
   '(progn
-     (flycheck-define-checker idris
+     (flycheck-define-checker idris-checker
        "An Idris syntax and type checker."
        :command ("idris" "--check" "--nocolor" "--warnpartial" source)
        :error-patterns
@@ -137,11 +137,11 @@ Invokes `idris-mode-hook'."
                (message (and (* nonl) (* "\n" (not (any "/" "~")) (* nonl))))))
        :modes idris-mode)
 
-     (add-to-list 'flycheck-checkers 'idris)))
+     (add-to-list 'flycheck-checkers 'idris-checher)))
 
 ;;; Bindings for evil-mode
 (eval-after-load 'evil-leader
-  '(evil-leader/set-key-for-mode 'idris-mode 
+  '(evil-leader/set-key-for-mode 'idris-mode
      "r" 'idris-load-file
      "t" 'idris-type-at-point
      "d" 'idris-add-clause
