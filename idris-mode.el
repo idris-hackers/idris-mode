@@ -86,6 +86,9 @@ Invokes `idris-mode-hook'."
   (set (make-local-variable 'indent-tabs-mode) nil)
   (set (make-local-variable 'comment-start) "--")
 
+  (set (make-local-variable 'parse-sexp-lookup-properties) t)
+  (set (make-local-variable 'syntax-propertize-function) 'idris-syntax-propertize-function)
+
   ; REPL completion for Idris source
   (set (make-local-variable 'completion-at-point-functions) '(idris-complete-symbol-at-point))
 
