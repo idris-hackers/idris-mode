@@ -185,7 +185,6 @@ syntax table won't support, such as characters."
       (let ((open (match-beginning 0)))
         (add-text-properties open (1+ open) '(syntax-table (1 . nil)))))))
 
-
 ;; This should be a function so that it evaluates `idris-lidr-p` at the correct time
 (defun idris-font-lock-defaults ()
   (cl-flet ((line-start (regexp)
@@ -193,8 +192,6 @@ syntax table won't support, such as characters."
                   (concat "^>" regexp)
                 (concat "^" regexp))))
     `('(
-         ;; {- Block comments -}
-
          ;; Documentation comments.
          (,(line-start "\\s-*\\(|||\\)\\(.+\\)$")
           (1 font-lock-comment-delimiter-face)
@@ -253,8 +250,8 @@ syntax table won't support, such as characters."
            (3 'idris-keyword-face)
            (4 'idris-parameter-face))
          ;; Other keywords
-         (, (concat "[^a-zA-Z%]\\(" (regexp-opt idris-keywords 'words) "\\)[^a-zA-Z]")
-          (1 'idris-keyword-face t))
+         (, (concat "\\(?:[^a-zA-Z%]\\|^\\)\\(" (regexp-opt idris-keywords 'words) "\\)\\(?:[^a-zA-Z]\\|$\\)")
+          (1 'idris-keyword-face))
          ;; Operators
          (,idris-operator-regexp . 'idris-operator-face)
          ;; Metavariables
