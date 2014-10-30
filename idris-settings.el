@@ -94,7 +94,11 @@
   :group 'idris-faces)
 
 (defface idris-loaded-region-face
-  '((t (:background "pale green")))
+  '((((background light) (min-colors 300)) (:background "#ccffcc"))
+    (((background light) (min-colors 256)) (:background "pale green"))
+    (((background dark) (min-colors 300))  (:background "#073642"))
+    (((background dark) (min-colors 256))  (:background "DarkSlateGrey"))
+    (t nil))
   "The face to use for the currently-loaded region of a buffer"
   :group 'idris-faces)
 
