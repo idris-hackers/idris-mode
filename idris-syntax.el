@@ -195,11 +195,7 @@ syntax table won't support, such as characters."
                 (concat "^" regexp))))
     `('(
          ;; {- Block comments -}
-         ("\\({-\\)\\(.*\\)\\(-}\\)"
-           (1 font-lock-comment-delimiter-face)
-           (2 font-lock-comment-face)
-           (3 font-lock-comment-delimiter-face))
-         ;; TODO: this doesn't let you do newlines
+
          ;; Documentation comments.
          (,(line-start "\\s-*\\(|||\\)\\(.+\\)$")
           (1 font-lock-comment-delimiter-face)
@@ -208,10 +204,6 @@ syntax table won't support, such as characters."
           (1 font-lock-comment-delimiter-face t)
           (2 font-lock-comment-delimiter-face t)
           (3 'idris-parameter-face t))
-          ;; Ordinary comments.
-         ("\\(--\\)\s*\\(.*\\)"
-           (1 font-lock-comment-delimiter-face)
-           (2 font-lock-comment-face))
          ;; %assert_total
          ("%assert_total" . 'idris-unsafe-face)
          ;; `%access`, `%default`, etc
