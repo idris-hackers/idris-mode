@@ -673,11 +673,6 @@ type-correct, so loading will fail."
                 nil
               (list start end completions))))))))
 
-(defun idris-insert-bottom ()
-  "Insert _|_ at point"
-  (interactive)
-  (insert "_|_"))
-
 (defun idris-list-metavariables ()
   "Get a list of currently-open metavariables"
   (interactive)

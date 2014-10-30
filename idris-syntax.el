@@ -1,4 +1,4 @@
-;;; idris-syntax.el --- idris syntax highlighting -*- lexical-binding: t -*-
+;; idris-syntax.el --- idris syntax highlighting -*- lexical-binding: t -*-
 ;;
 ;; Copyright (C) 2013 tim dixon, David Raymond Christiansen and Hannes Mehnert
 ;;
@@ -78,11 +78,6 @@
 (defface idris-operator-face
   '((t (:inherit font-lock-variable-name-face)))
   "The face to highlight operators with."
-  :group 'idris-faces)
-
-(defface idris-bottom-face
-  '((t (:inherit idris-identifier-face)))
-  "The face used to highlight _|_ in Idris"
   :group 'idris-faces)
 
 (defface idris-char-face
@@ -227,8 +222,6 @@
            (4 'idris-parameter-face))
          ;; Character literals
          ("'\\(?:[^']\\|\\\\.\\)'" . 'idris-char-face)
-         ;; Bottom
-         ("_|_" . 'idris-bottom-face)
          ;; Other keywords
          (, (concat "[^a-zA-Z%]\\(" (regexp-opt idris-keywords 'words) "\\)[^a-zA-Z]")
           (1 'idris-keyword-face t))
