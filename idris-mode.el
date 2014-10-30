@@ -125,7 +125,6 @@ Invokes `idris-mode-hook'."
 
 
 ;;; Handy utilities for other modes
-;;;###autoload
 (eval-after-load 'flycheck
   '(progn
      (flycheck-define-checker idris
