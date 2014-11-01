@@ -398,7 +398,7 @@ KILLFLAG is set if N was explicitly specified."
     ((and (use-region-p)
           delete-active-region
           (= n 1))
-     (delete-forward-char n killflag))
+     (call-interactively 'delete-forward-char n killflag))
     ;; If in idris-mode and editing an LIDR file and at the end of a line,
     ;; then delete the newline and a leading >, if it exists
     ((and (eq major-mode 'idris-mode)
@@ -1098,4 +1098,3 @@ links in BUFFER. If BUFFER is nil, use the current buffer."
 
 
 (provide 'idris-commands)
-

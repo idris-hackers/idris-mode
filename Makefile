@@ -36,7 +36,7 @@ test:
 	$(BATCHEMACS) -l ert -l idris-tests.el -f ert-run-tests-batch-and-exit
 
 clean:
-	-rm $(OBJS)
-	-rm test-data/*ibc
+	-rm -f $(OBJS)
+	-rm -f test-data/*ibc
 
 .PHONY: clean build test
