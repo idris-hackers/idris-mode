@@ -136,11 +136,7 @@ Invokes `idris-mode-hook'."
          :command ("idris"
                  "--check" "--nocolor" "--warnpartial"
                  ;; Compute the command-line options similarly to inferior-idris
-                 (eval (append (cl-loop for p in idris-packages
-                                        collecting "-p"
-                                        collecting p)
-                               (cl-mapcan #'funcall
-                                          idris-command-line-option-functions)))
+                 (eval (idris-compute-flags))
                  source)
          :error-patterns
          ((warning line-start (file-name) ":" line ":" column ":Warning - "
