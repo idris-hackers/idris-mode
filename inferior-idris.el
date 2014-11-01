@@ -112,9 +112,9 @@
                     "--ideslave-socket"
                     command-line-flags)))
       (with-current-buffer (idris-buffer-name :process)
-        (add-hook 'comint-preoutput-filter-functions
+        (add-hook (make-local-variable 'comint-preoutput-filter-functions)
                   'idris-process-filter)
-        (add-hook 'comint-output-filter-functions
+        (add-hook (make-local-variable 'comint-output-filter-functions)
                   'idris-show-process-buffer))
       (set-process-sentinel idris-process 'idris-sentinel)
       (setq idris-current-flags command-line-flags)
