@@ -77,6 +77,8 @@
      (remove-hook 'idris-event-hooks 'idris-version-hook-function)
      t)))
 
+(defvar-local idris-packages nil
+  "The list of packages to be loaded by Idris. Set using file or directory variables.")
 
 (defun idris-compute-flags ()
   "Calculate the command line options to use when running Idris."
@@ -86,9 +88,6 @@
           idris-interpreter-flags
           (cl-mapcan #'funcall
                      idris-command-line-option-functions)))
-
-(defvar-local idris-packages nil
-  "The list of packages to be loaded by Idris. Set using file or directory variables.")
 
 (defvar idris-current-flags nil
   "The list of command-line-args actually passed to Idris. This
