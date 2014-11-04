@@ -111,7 +111,8 @@
                              idris-define-editing-keys
                              idris-define-general-keys
                              idris-define-ipkg-keys
-                             idris-define-ipkg-opening-keys)
+                             idris-define-ipkg-opening-keys
+                             idris-define-evil-keys)
   "Hook to run upon entering Idris mode. You should choose at most one indentation style."
   :type 'hook
   :options '(turn-on-idris-simple-indent
@@ -122,7 +123,8 @@
              idris-define-editing-keys
              idris-define-general-keys
              idris-define-ipkg-keys
-             idris-define-ipkg-opening-keys)
+             idris-define-ipkg-opening-keys
+             idris-define-evil-keys)
   :group 'idris)
 
 (defcustom idris-mode-lidr-hook '()
