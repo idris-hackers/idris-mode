@@ -77,9 +77,17 @@
      (remove-hook 'idris-event-hooks 'idris-version-hook-function)
      t)))
 
-
 (defvar-local idris-packages nil
   "The list of packages to be loaded by Idris. Set using file or directory variables.")
+
+(defun idris-compute-flags ()
+  "Calculate the command line options to use when running Idris."
+  (append (cl-loop for p in idris-packages
+                   collecting "-p"
+                   collecting p)
+          idris-interpreter-flags
+          (cl-mapcan #'funcall
+                     idris-command-line-option-functions)))
 
 (defvar idris-current-flags nil
   "The list of command-line-args actually passed to Idris. This
@@ -90,11 +98,7 @@
 (defun idris-run ()
   "Run an inferior Idris process"
   (interactive)
-  (let ((command-line-flags
-         (append (cl-loop for p in idris-packages collecting "-p" collecting p)
-                 idris-interpreter-flags
-                 (cl-mapcan #'funcall
-                            idris-command-line-option-functions))))
+  (let ((command-line-flags (idris-compute-flags)))
     ;; Kill Idris if the package list needs updating
     (when (not (equal command-line-flags idris-current-flags))
       (message "Idris command line arguments changed, restarting Idris")

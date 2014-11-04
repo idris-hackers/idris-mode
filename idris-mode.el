@@ -133,7 +133,11 @@ Invokes `idris-mode-hook'."
     '(progn
        (flycheck-define-checker idris
          "An Idris syntax and type checker."
-         :command ("idris" "--check" "--nocolor" "--warnpartial" source)
+         :command ("idris"
+                 "--check" "--nocolor" "--warnpartial"
+                 ;; Compute the command-line options similarly to inferior-idris
+                 (eval (idris-compute-flags))
+                 source)
          :error-patterns
          ((warning line-start (file-name) ":" line ":" column ":Warning - "
                    (message (and (* nonl) (* "\n" (not (any "/" "~")) (* nonl)))))
