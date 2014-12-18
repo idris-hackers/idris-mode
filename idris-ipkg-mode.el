@@ -168,7 +168,7 @@ to the matching files, or nil if not found."
       ((find-file-r (path)
          (let* ((parent (file-name-directory path))
                 (matching (if parent
-                              (directory-files parent t (concat suffix "$"))
+                              (idris-try-directory-files parent t (concat suffix "$"))
                             nil)))
            (cond
             (matching matching)
@@ -181,6 +181,12 @@ to the matching files, or nil if not found."
                       (and (not allow-hidden)
                            (string-prefix-p "." (file-name-nondirectory f))))
                   (find-file-r default-directory))))
+
+(defun idris-try-directory-files (dir flag str)
+	   "Try to find-files and return nil instead of errors."
+	   (condition-case nil
+	(directory-files dir flag str)
+  (error nil)))
 
 (defvar idris-ipkg-build-buffer-name "*idris-build*")
 
