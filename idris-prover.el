@@ -66,6 +66,10 @@ the prover."
   "The metavariable that Idris has open in the interactive
 prover, or nil if Idris is not proving anything.")
 
+(defconst idris-prover-error-message-prefix "Prover error: "
+  "A prefix to show on minibuffer error messages that originate
+  in the prover.")
+
 (defun idris-prover-obligations-buffer ()
   (or (get-buffer idris-prover-obligations-buffer-name)
       (let ((buffer (get-buffer-create idris-prover-obligations-buffer-name)))
@@ -183,10 +187,9 @@ left margin."
   "Backward one piece of proof script"
   (interactive)
   (idris-eval-async '(:interpret "undo")
-    #'(lambda (_result) t)
-    #'(lambda (condition)
-        ;; TODO: put error overlay
-        (message (concat "fail: " condition)))))
+                    #'(lambda (_result) t)
+                    #'(lambda (condition)
+                        (message (concat idris-prover-error-message-prefix condition)))))
 
 (defun idris-prover-script-forward ()
   "Forward one piece of proof script."
@@ -238,7 +241,7 @@ left margin."
                  ;; the processed region to prevent Emacs and Idris
                  ;; from getting out of sync RE proof script contents
                  (set-marker idris-prover-script-processed prior-processed-position))
-               (message (concat "fail: " condition))
+               (message (concat idris-prover-error-message-prefix condition))
                t))))))))
 
 (defun idris-prover-script-ret ()
