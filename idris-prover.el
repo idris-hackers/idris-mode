@@ -224,10 +224,16 @@ left margin."
                  (when idris-prover-script-processing-overlay
                    (delete-overlay idris-prover-script-processing-overlay)
                    (setq idris-prover-script-processing-overlay nil))
-                 ;; Delete the region because it will be written with the proof
-                 ;; state.
+                 ;; Delete the region because it will be or has been
+                 ;; written with the proof state.
                  (delete-region idris-prover-script-processed
-                                idris-prover-script-processing)))
+                                idris-prover-script-processing)
+                 ;; Put point at a useful spot for the next tactic
+                 (when (eql (marker-position idris-prover-script-processed) (point-max))
+                   (goto-char idris-prover-script-processed)
+                   (let ((inhibit-read-only t)) (insert "\n")))
+                 (goto-char (1+ (marker-position idris-prover-script-processed)))
+                 (recenter)))
               ((:error condition &optional _spans)
                (with-current-buffer (idris-prover-script-buffer)
                  (when idris-prover-script-processing-overlay
@@ -286,12 +292,12 @@ special prover state."
       (setq header-line-format
             (let ((fwd (where-is-internal 'idris-prover-script-forward))
                   (bak (where-is-internal 'idris-prover-script-backward)))
-            (concat " Write your proof script here."
-                    (if (and fwd bak)
-                        (format "Use %s to advance and %s to retract."
-                                (key-description (car fwd))
-                                (key-description (car bak)))
-                      "")))))
+              (concat " Write your proof script here."
+                      (if (and fwd bak)
+                          (format "Use %s to advance and %s to retract."
+                                  (key-description (car fwd))
+                                  (key-description (car bak)))
+                        "")))))
     (unless idris-prover-script-processing
       (setq idris-prover-script-processing (make-marker)))
     (unless idris-prover-script-processed
@@ -308,9 +314,9 @@ the length reported by Idris."
     (let ((inhibit-read-only t))
       (put-text-property (point-min) (point-max) 'read-only nil))
     (cond ((< count idris-prover-prove-step)
-           ; this is actually the (count - 1) == Idris-prover-prove-step case!
-           ; in other words, we are undoing the final step.
-           ; can the other case(s) happen??
+           ;; this is actually the (count - 1) == Idris-prover-prove-step case!
+           ;; in other words, we are undoing the final step.
+           ;; can the other case(s) happen??
            (goto-char idris-prover-script-processed)
            (if (= (forward-line -1) 0)
                ;; we went back
@@ -329,17 +335,13 @@ the length reported by Idris."
              (setq idris-prover-prove-step (1+ idris-prover-prove-step))))
           (t nil))
     (setq idris-prover-prove-step count)
-    (when (eql (marker-position idris-prover-script-processed) (point-max))
-      (goto-char idris-prover-script-processed)
-      (insert "\n"))
     (unless (null idris-prover-script-processed-overlay)
       (delete-overlay idris-prover-script-processed-overlay))
     (let ((overlay (make-overlay 0 idris-prover-script-processed)))
       (overlay-put overlay 'face 'idris-prover-processed-face)
       (setq idris-prover-script-processed-overlay overlay))
     (let ((inhibit-read-only t))
-      (put-text-property (point-min) idris-prover-script-processed 'read-only t))
-    (goto-char (1+ (marker-position idris-prover-script-processed)))))
+      (put-text-property (point-min) idris-prover-script-processed 'read-only t))))
 
 (defun idris-prover-abandon ()
   "Abandon an in-progress proof."
