@@ -166,27 +166,35 @@ looking for a file with name ending in suffix.  Returns the paths
 to the matching files, or nil if not found."
   (cl-labels
       ((find-file-r (path)
-         (let* ((parent (file-name-directory path))
-                (matching (if parent
-                              (idris-try-directory-files parent t (concat suffix "$"))
-                            nil)))
-           (cond
-            (matching matching)
-            ;; The parent of ~ is nil and the parent of / is itself.
-            ;; Thus the terminating condition for not finding the file
-            ;; accounts for both.
-            ((or (null parent) (equal parent (directory-file-name parent))) nil) ; Not found
-            (t (find-file-r (directory-file-name parent))))))) ; Continue
+                    (let* ((parent (file-name-directory path))
+                           (matching (if parent
+                                         (idris-try-directory-files parent t (concat suffix "$"))
+                                       nil)))
+                      (cond
+                       (matching matching)
+                       ;; The parent of ~ is nil and the parent of / is itself.
+                       ;; Thus the terminating condition for not finding the file
+                       ;; accounts for both.
+                       ((or (null parent) (equal parent (directory-file-name parent))) nil) ; Not found
+                       (t (find-file-r (directory-file-name parent))))))) ; Continue
     (cl-remove-if #'(lambda (f)
                       (and (not allow-hidden)
                            (string-prefix-p "." (file-name-nondirectory f))))
                   (find-file-r default-directory))))
 
-(defun idris-try-directory-files (dir flag str)
-	   "Try to find-files and return nil instead of errors."
-	   (condition-case nil
-	(directory-files dir flag str)
-  (error nil)))
+(defun idris-try-directory-files (directory &optional full match nosort)
+  "Call `directory-files' with arguments DIRECTORY, FULL, MATCH,
+and NOSORT, but return the empty list on failure instead of
+throwing an error.
+
+See the docstring for `directory-files' for the meaning of the
+arguments."
+  ;; This wrapper is useful because some users can't read all the
+  ;; directories above the current working directory. In particular,
+  ;; /home is sometimes not readable.
+  (condition-case nil
+      (directory-files directory full match nosort)
+    (error nil)))
 
 (defvar idris-ipkg-build-buffer-name "*idris-build*")
 
