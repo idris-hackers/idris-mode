@@ -238,7 +238,6 @@ left margin."
                  ;; the processed region to prevent Emacs and Idris
                  ;; from getting out of sync RE proof script contents
                  (set-marker idris-prover-script-processed prior-processed-position))
-               ;; TODO:  put error overlay
                (message (concat "fail: " condition))
                t))))))))
 
