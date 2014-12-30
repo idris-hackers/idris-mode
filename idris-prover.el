@@ -1,8 +1,7 @@
 ;;; idris-prover.el --- Prover mode for Idris -*- lexical-binding: t -*-
 
-;; Copyright (C) 2013 Hannes Mehnert
-
-;; Author: Hannes Mehnert <hannes@mehnert.org>
+;; Copyright (C) 2013-2014, Hannes Mehnert and David Raymond Christiansen
+;; Author: Hannes Mehnert <hannes@mehnert.org>, David Raymond Christiansen <david@davidchristiansen.dk>
 
 ;; License:
 ;; Inspiration is taken from SLIME/DIME (http://common-lisp.net/project/slime/) (https://github.com/dylan-lang/dylan-mode)
@@ -197,7 +196,8 @@ left margin."
     (delete-overlay idris-prover-script-warning-overlay)
     (setq idris-prover-script-warning-overlay nil))
   (goto-char (+ 1 idris-prover-script-processed))
-  (let ((next-tactic (idris-prover-find-tactic
+  (let ((prior-processed-position (marker-position idris-prover-script-processed)) ; to restore on error
+        (next-tactic (idris-prover-find-tactic
                       idris-prover-script-processed)))
     (if (null next-tactic)
         (error "At the end of the proof script")
@@ -233,10 +233,14 @@ left margin."
                  (setq idris-prover-script-warning-overlay
                        (idris-warning-create-overlay idris-prover-script-processed
                                                      idris-prover-script-processing
-                                                     condition)))
-                                        ;; TODO:  put error overlay
+                                                     condition))
+                 ;; Restore the original position of the marker for
+                 ;; the processed region to prevent Emacs and Idris
+                 ;; from getting out of sync RE proof script contents
+                 (set-marker idris-prover-script-processed prior-processed-position))
+               ;; TODO:  put error overlay
                (message (concat "fail: " condition))
-             t))))))))
+               t))))))))
 
 (defun idris-prover-script-ret ()
   "Insert a newline at the end of buffer, even if it's read-only."
