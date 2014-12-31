@@ -185,7 +185,28 @@ syntax table won't support, such as characters."
       (let ((open (match-beginning 0)))
         (add-text-properties open (1+ open) '(syntax-table (1 . nil)))))))
 
-;; This should be a function so that it evaluates `idris-lidr-p` at the correct time
+(defconst idris-font-lock-keyword-regexp
+  (concat "\\(?:[^a-zA-Z%]\\|^\\)\\("
+          (regexp-opt idris-keywords 'words)
+          "\\)\\(?:[^a-zA-Z]\\|$\\)")
+  "A regexp for matching Idris keywords")
+
+(defun idris-font-lock-literate-search (regexp lidr limit)
+  "Find REGEXP in Idris source between point and LIMIT, where LIDR is non-nil for literate files..
+
+See the documentation for search-based fontification,
+esp. `font-lock-defaults', for details."
+  (if (re-search-forward regexp limit t)
+      (if (or (not lidr)
+              (save-excursion
+                (move-beginning-of-line nil)
+                (looking-at-p "^> ")))
+          t
+        (idris-font-lock-literate-search regexp lidr limit))
+    nil))
+
+
+;; This should be a function so that it evaluates `idris-lidr-p' at the correct time
 (defun idris-font-lock-defaults ()
   (cl-flet ((line-start (regexp)
                         (if (idris-lidr-p)
@@ -241,7 +262,7 @@ syntax table won't support, such as characters."
          (3 'idris-equals-face)
          (5 'idris-metavariable-face))
         ;; Vanilla definitions with = (and optionally let ... in ...)
-        (,(line-start "\\s-*\\(\\w+\\|(\\s_+)\\)\s-*\\(.*?\\)\\(=\\)")
+        (,(line-start "\\s-*\\(\\w+\\|(\\s_+)\\)\s-*\\(.*?\\)\\(=\\)[^>]")
          (1 'idris-definition-face)
          (2 'idris-parameter-face)
          (3 'idris-equals-face))
@@ -256,16 +277,18 @@ syntax table won't support, such as characters."
          (3 'idris-keyword-face)
          (4 'idris-parameter-face))
         ;; Other keywords
-        (, (concat "\\(?:[^a-zA-Z%]\\|^\\)\\(" (regexp-opt idris-keywords 'words) "\\)\\(?:[^a-zA-Z]\\|$\\)")
-           (1 'idris-keyword-face))
+        (,(apply-partially #'idris-font-lock-literate-search idris-font-lock-keyword-regexp (idris-lidr-p))
+         (1 'idris-keyword-face))
         ;; Operators
-        (,idris-operator-regexp . 'idris-operator-face)
+        (,(apply-partially #'idris-font-lock-literate-search idris-operator-regexp (idris-lidr-p)) . 'idris-operator-face)
         ;; Metavariables
-        ("\\?[a-zA-Z_]\\w*" . 'idris-metavariable-face)
+        (,(apply-partially #'idris-font-lock-literate-search "\\?[a-zA-Z_]\\w*" (idris-lidr-p)) . 'idris-metavariable-face)
         ;; Identifiers
-        ("[a-zA-Z_]\\w*" . 'idris-identifier-face)
+        (,(apply-partially #'idris-font-lock-literate-search "[a-zA-Z_]\\w*" (idris-lidr-p)) . 'idris-identifier-face)
         ;; Scary stuff
-        (,(regexp-opt '("believe_me" "really_believe_me" "assert_total" "assert_smaller" "prim__believe_me"))
+        (,(apply-partially #'idris-font-lock-literate-search
+                           (regexp-opt '("believe_me" "really_believe_me" "assert_total" "assert_smaller" "prim__believe_me"))
+                           (idris-lidr-p))
          0 'idris-unsafe-face t)
         ;; TODO: operator definitions.
         ;; TODO: let ... in ...
