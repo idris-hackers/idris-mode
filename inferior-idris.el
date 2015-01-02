@@ -96,11 +96,12 @@
 (autoload 'idris-prover-event-hook-function "idris-prover.el")
 (autoload 'idris-quit "idris-commands.el")
 (defun idris-run ()
-  "Run an inferior Idris process"
+  "Run an inferior Idris process."
   (interactive)
   (let ((command-line-flags (idris-compute-flags)))
-    ;; Kill Idris if the package list needs updating
-    (when (not (equal command-line-flags idris-current-flags))
+    ;; Kill the running Idris if the command-line flags need updating
+    (when (and (get-buffer-process (get-buffer (idris-buffer-name :connection)))
+               (not (equal command-line-flags idris-current-flags)))
       (message "Idris command line arguments changed, restarting Idris")
       (idris-quit)
       (sit-for 0.01)) ; allows the sentinel to run and reset idris-process
