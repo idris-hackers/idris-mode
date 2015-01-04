@@ -210,7 +210,6 @@ esp. `font-lock-defaults', for details."
         (idris-font-lock-literate-search regexp lidr limit))
     nil))
 
-
 ;; This should be a function so that it evaluates `idris-lidr-p' at the correct time
 (defun idris-font-lock-defaults ()
   (cl-flet ((line-start (regexp)
@@ -219,7 +218,7 @@ esp. `font-lock-defaults', for details."
                           (concat "^" regexp))))
     `('(
         ;; Documentation comments.
-        (,(line-start "\\s-*\\(|||\\)\\(.+\\)$")
+        (,(line-start "\\s-*\\(|||\\)\\(.*\\)$")
          (1 font-lock-comment-delimiter-face)
          (2 font-lock-doc-face))
         (,(line-start "\\s-*\\(|||\\)\\s-*\\(@\\)\\s-*\\(\\sw+\\)")
