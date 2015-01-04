@@ -197,10 +197,15 @@ syntax table won't support, such as characters."
 See the documentation for search-based fontification,
 esp. `font-lock-defaults', for details."
   (if (re-search-forward regexp limit t)
-      (if (or (not lidr)
-              (save-excursion
-                (move-beginning-of-line nil)
-                (looking-at-p "^> ")))
+      (if (or (and (not lidr) ;; normal syntax - ensure not in docs
+                   (save-excursion
+                     (move-beginning-of-line nil)
+                     (not (looking-at-p "^\\s-*|||"))))
+              (and lidr
+                   (save-excursion ;; LIDR syntax - ensure in code, not in docs
+                     (move-beginning-of-line nil)
+                     (and (looking-at-p "^> ")
+                          (not (looking-at-p "^>\\s-*|||"))))))
           t
         (idris-font-lock-literate-search regexp lidr limit))
     nil))
