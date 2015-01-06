@@ -175,3 +175,17 @@ Before sending a patch or pull request, please run the automated tests for idris
 ## Related packages
 
 [`helm-idris`](https://www.github.com/david-christiansen/helm-idris) builds on `idris-mode` to provide an alternative interface to looking up documentation.
+
+## Pop Win
+
+If you haven't already, you should look into [Pop Win](http://www.emacswiki.org/emacs/PopWin). It gets rid of those pesky `*Completions*` or `*compile*` windows that take up half of the Emacs frame. It doesn't work out of the box with idris-mode, but you can add these configuration lines to `~/.emacs` to make it work:
+
+```elisp
+(push 'idris-compiler-notes-mode popwin:special-display-config)
+(push '(idris-repl-mode
+        :height 0.2
+        :noselect nil
+        :position bottom
+        :stick t)
+      popwin:special-display-config)
+```
