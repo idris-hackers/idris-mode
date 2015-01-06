@@ -163,6 +163,11 @@ The following commands are supported (taken from idris-vim):
 
 * `<LocalLeader>h`: Show documentation
 
+## Troubleshooting
+
+### None of the default keybindings work
+For ease of customization, `idris-mode` defines all of its keybindings in a collection of hooks. If you have replaced the default contents of `idris-mode-hook` completely, or if you have added a hook that throws an error, then the keybindings may not be defined. Try `idris-mode` with the default contents of `idris-mode-hook` as a first step in troubleshooting this issue.
+
 ## Tests
 
 Before sending a patch or pull request, please run the automated tests for idris-mode and correct any errors that are found. There are two kinds of test:
