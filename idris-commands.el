@@ -534,7 +534,7 @@ KILLFLAG is set if N was explicitly specified."
         (insert result)))))
 
 (defun idris-make-lemma ()
-  "Extract a lemma from a metavariable"
+  "Extract lemma from metavariable"
   (interactive)
   (let ((what (idris-thing-at-point)))
     (when (car what)

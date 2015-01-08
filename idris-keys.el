@@ -99,6 +99,7 @@
       "r" 'idris-load-file
       "t" 'idris-type-at-point
       "d" 'idris-add-clause
+      "l" 'idris-make-lemma
       "c" 'idris-case-split
       "w" 'idris-make-with-block
       "m" 'idris-add-missing
