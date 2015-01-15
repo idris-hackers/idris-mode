@@ -48,6 +48,7 @@
     ["Add missing cases" idris-add-missing t]
     ["Case split pattern variable" idris-case-split t]
     ["Add with block" idris-make-with-block t]
+    ["Extract lemma from metavariable" idris-make-lemma t]
     ["Attempt to solve metavariable" idris-proof-search t]
     ["Display type" idris-type-at-point t]
     "-----------------"
