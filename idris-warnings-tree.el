@@ -76,9 +76,11 @@
 (defvar idris-compiler-notes-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "q") 'idris-notes-quit)
-    (define-key map (kbd "C-c C-m n") 'idris-normalize-term)
-    (define-key map (kbd "C-c C-m i") 'idris-show-term-implicits)
-    (define-key map (kbd "C-c C-m h") 'idris-hide-term-implicits)
+    (cl-loop for keyer
+             in '(idris-define-docs-keys
+                  idris-define-general-keys
+                  idris-define-active-term-keys)
+             do (funcall keyer map))
     map)
   "Keymap used in Idris Compiler Notes mode.")
 

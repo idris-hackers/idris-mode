@@ -122,6 +122,11 @@ If ALWAYS-INSERT is non-nil, always insert a prompt at the end of the buffer."
     (define-key map (kbd "<C-up>") 'idris-repl-backward-history)
     (define-key map (kbd "M-n") 'idris-repl-forward-history)
     (define-key map (kbd "<C-down>") 'idris-repl-forward-history)
+    (cl-loop for keyer
+             in '(idris-define-docs-keys
+                  idris-define-general-keys
+                  idris-define-active-term-keys)
+             do (funcall keyer map))
     map)
   "Keymap used in Idris REPL mode.")
 

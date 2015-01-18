@@ -26,6 +26,7 @@
 (require 'cl-lib)
 
 (require 'idris-core)
+(require 'idris-keys)
 (require 'idris-warnings-tree)
 (require 'idris-settings)
 
@@ -43,6 +44,11 @@
     (define-key map (kbd "q") 'idris-metavariable-list-quit)
     (define-key map (kbd "RET") 'idris-compiler-notes-default-action-or-show-details)
     (define-key map (kbd "<mouse-2>") 'idris-compiler-notes-default-action-or-show-details/mouse)
+    (cl-loop for keyer
+             in '(idris-define-docs-keys
+                  idris-define-general-keys
+                  idris-define-active-term-keys)
+             do (funcall keyer map))
     map))
 
 (easy-menu-define idris-metavariable-list-mode-menu idris-metavariable-list-mode-map

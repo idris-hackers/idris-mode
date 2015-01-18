@@ -29,8 +29,20 @@
 (require 'eldoc)
 
 
-(defvar idris-mode-map (make-sparse-keymap)
+(defvar idris-mode-map (let ((map (make-sparse-keymap)))
+                         (cl-loop for keyer
+                                  in '(idris-define-loading-keys
+                                       idris-define-docs-keys
+                                       idris-define-editing-keys
+                                       idris-define-general-keys
+                                       idris-define-ipkg-keys
+                                       idris-define-ipkg-opening-keys)
+                                  do (funcall keyer map))
+                         (idris-define-evil-keys)
+                         map)
   "Keymap used in Idris mode.")
+
+
 
 (easy-menu-define idris-mode-menu idris-mode-map
   "Menu for the Idris major mode"
