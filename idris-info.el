@@ -35,6 +35,11 @@
   (let ((map (make-keymap)))
     (suppress-keymap map) ; remove the self-inserting char commands
     (define-key map (kbd "q") 'idris-info-quit)
+    (cl-loop for keyer
+             in '(idris-define-docs-keys
+                  idris-define-general-keys
+                  idris-define-active-term-keys)
+             do (funcall keyer map))
     map))
 
 (easy-menu-define idris-info-mode-menu idris-info-mode-map

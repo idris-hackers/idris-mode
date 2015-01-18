@@ -349,19 +349,20 @@ Invokes `idris-ipkg-build-mode-hook'."
 
 (defgroup idris-ipkg nil "Idris package mode" :prefix 'idris-ipkg :group 'idris)
 
-(defcustom idris-ipkg-mode-hook '(idris-ipkg-enable-clickable-files
-                                  idris-define-ipkg-keys
-                                  idris-define-ipkg-editing-keys)
+(defcustom idris-ipkg-mode-hook '(idris-ipkg-enable-clickable-files)
   "Hook to run when setting up the mode for editing Idris packages."
   :type 'hook
-  :options '(idris-ipkg-enable-clickable-files
-             idris-define-ipkg-keys
-             idris-define-ipkg-editing-keys)
+  :options '(idris-ipkg-enable-clickable-files)
   :group 'idris-ipkg)
 
 ;;; Mode definition
 
-(defvar idris-ipkg-mode-map (make-sparse-keymap)
+(defvar idris-ipkg-mode-map (let ((map (make-sparse-keymap)))
+                              (cl-loop for keyer
+                                       in '(idris-define-ipkg-keys
+                                            idris-define-ipkg-editing-keys)
+                                       do (funcall keyer map))
+                              map)
   "Keymap used for Idris package mode")
 
 (easy-menu-define idris-ipkg-mode-menu idris-ipkg-mode-map
