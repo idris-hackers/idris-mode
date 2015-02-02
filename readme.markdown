@@ -165,29 +165,26 @@ The following commands are supported (taken from idris-vim):
 
 ## Tests
 
-Before sending a patch or pull request, please run the automated tests for idris-mode and correct any errors that are found. There are two kinds of test:
+Before sending a patch or pull request, please run the automated tests for `idris-mode` and correct any errors that are found. There are two kinds of test:
 
 1. The Emacs byte code compiler can catch many issues. Running `make compile` will invode the byte code compiler, failing if there are any warnings. You may wish to run `make clean` after `make compile` to get rid of pesky `.elc` files.
 
 2. There is a test suite that can be invoked with `make test`. It requires a functioning `idris` executable.
 
 
-## Related packages
+## Integration with other Emacs packages
 
-[`helm-idris`](https://www.github.com/david-christiansen/helm-idris) builds on `idris-mode` to provide an alternative interface to looking up documentation.
+### Helm
 
-## Pop Win
+[`helm-idris`](https://www.github.com/david-christiansen/helm-idris) builds on `idris-mode` to provide an alternative interface to looking up documentation. It supports incremental searching in documentation and names, similar to the built-in `:apropos` and `idris-apropos` commands.
 
-If you haven't already, you should look into
-[Pop Win](http://www.emacswiki.org/emacs/PopWin). It helps with the management
-those pesky `*Completions*` or `*compile*` windows that take up half of the
-Emacs frame. It can make the window smaller, position it on the page, disable
-selection of it, close it automatically, etc. Pop Win doesn't work out of the
-box with idris-mode, but you can add these configuration lines to `~/.emacs` to
-make it work:
+### Pop Win
+
+[Pop Win](http://www.emacswiki.org/emacs/PopWin) is an Emacs utility to manage ephemeral buffers, such as completion and compilation buffers. It provides tools for controlling their position and lifetime. Pop Win requires configuration to work with `idris-mode`. An incomplete example configuration follows:
 
 ```elisp
-(push 'idris-compiler-notes-mode popwin:special-display-config)
+(push 'idris-compiler-notes-mode
+      popwin:special-display-config)
 (push '(idris-repl-mode
         :height 0.2
         :noselect nil
@@ -196,5 +193,3 @@ make it work:
       popwin:special-display-config)
 ```
 
-Note that this is an incomplete configuration, I've only documented what I've
-encountered thus far.
