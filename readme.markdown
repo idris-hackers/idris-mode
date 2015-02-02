@@ -142,7 +142,18 @@ Additionally, you may want to update your Emacs configuration so that it does no
 
 All three-letter keybindings are available in versions with and without `C-` on the final key, following the convention from SLIME.
 
-## Evil mode support (Vim compatability)
+## Tests
+
+Before sending a patch or pull request, please run the automated tests for `idris-mode` and correct any errors that are found. There are two kinds of test:
+
+1. The Emacs byte code compiler can catch many issues. Running `make compile` will invode the byte code compiler, failing if there are any warnings. You may wish to run `make clean` after `make compile` to get rid of pesky `.elc` files.
+
+2. There is a test suite that can be invoked with `make test`. It requires a functioning `idris` executable.
+
+
+## Integration with other Emacs packages
+
+### Evil mode support (Vim compatability)
 There is emulation for idris-vim commands in idris-mode. To enable this support please install the `evil` and `evil-leader` packages from MELPA (or your favorite source of packages).
 
 The following commands are supported (taken from idris-vim):
@@ -162,17 +173,6 @@ The following commands are supported (taken from idris-vim):
 * `<LocalLeader>p`: Proof search
 
 * `<LocalLeader>h`: Show documentation
-
-## Tests
-
-Before sending a patch or pull request, please run the automated tests for `idris-mode` and correct any errors that are found. There are two kinds of test:
-
-1. The Emacs byte code compiler can catch many issues. Running `make compile` will invode the byte code compiler, failing if there are any warnings. You may wish to run `make clean` after `make compile` to get rid of pesky `.elc` files.
-
-2. There is a test suite that can be invoked with `make test`. It requires a functioning `idris` executable.
-
-
-## Integration with other Emacs packages
 
 ### Helm
 
