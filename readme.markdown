@@ -142,7 +142,18 @@ Additionally, you may want to update your Emacs configuration so that it does no
 
 All three-letter keybindings are available in versions with and without `C-` on the final key, following the convention from SLIME.
 
-## Evil mode support (Vim compatability)
+## Tests
+
+Before sending a patch or pull request, please run the automated tests for `idris-mode` and correct any errors that are found. There are two kinds of test:
+
+1. The Emacs byte code compiler can catch many issues. Running `make compile` will invode the byte code compiler, failing if there are any warnings. You may wish to run `make clean` after `make compile` to get rid of pesky `.elc` files.
+
+2. There is a test suite that can be invoked with `make test`. It requires a functioning `idris` executable.
+
+
+## Integration with other Emacs packages
+
+### Evil mode support (Vim compatability)
 There is emulation for idris-vim commands in idris-mode. To enable this support please install the `evil` and `evil-leader` packages from MELPA (or your favorite source of packages).
 
 The following commands are supported (taken from idris-vim):
@@ -163,15 +174,22 @@ The following commands are supported (taken from idris-vim):
 
 * `<LocalLeader>h`: Show documentation
 
-## Tests
+### Helm
 
-Before sending a patch or pull request, please run the automated tests for idris-mode and correct any errors that are found. There are two kinds of test:
+[`helm-idris`](https://www.github.com/david-christiansen/helm-idris) builds on `idris-mode` to provide an alternative interface to looking up documentation. It supports incremental searching in documentation and names, similar to the built-in `:apropos` and `idris-apropos` commands.
 
-1. The Emacs byte code compiler can catch many issues. Running `make compile` will invode the byte code compiler, failing if there are any warnings. You may wish to run `make clean` after `make compile` to get rid of pesky `.elc` files.
+### Pop Win
 
-2. There is a test suite that can be invoked with `make test`. It requires a functioning `idris` executable.
+[Pop Win](http://www.emacswiki.org/emacs/PopWin) is an Emacs utility to manage ephemeral buffers, such as completion and compilation buffers. It provides tools for controlling their position and lifetime. Pop Win requires configuration to work with `idris-mode`. An incomplete example configuration follows:
 
+```elisp
+(push 'idris-compiler-notes-mode
+      popwin:special-display-config)
+(push '(idris-repl-mode
+        :height 0.2
+        :noselect nil
+        :position bottom
+        :stick t)
+      popwin:special-display-config)
+```
 
-## Related packages
-
-[`helm-idris`](https://www.github.com/david-christiansen/helm-idris) builds on `idris-mode` to provide an alternative interface to looking up documentation.
