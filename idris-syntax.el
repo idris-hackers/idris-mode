@@ -217,6 +217,10 @@ esp. `font-lock-defaults', for details."
                             (concat "^>" regexp)
                           (concat "^" regexp))))
     `('(
+        ;; Imports
+        (,(line-start "\\(import\\)\\s-+\\(public\\)")
+         (1 'idris-keyword-face)
+         (2 'idris-keyword-face))
         ;; Documentation comments.
         (,(line-start "\\s-*\\(|||\\)\\(.*\\)$")
          (1 font-lock-comment-delimiter-face)
