@@ -42,14 +42,28 @@
 (defvar-local idris-input-start nil
   "Marker for the start of user input for Idris.")
 
+(defun idris-repl-get-logo ()
+  "Return the path to the Idris logo if it exists, or `nil' if not."
+  (let ((logo-path (concat idris-mode-path "logo-small.png")))
+    (if (file-readable-p logo-path)
+        logo-path
+      nil)))
+
 ; TODO: insert version number / protocol version / last changed date!?
 (defun idris-repl-insert-banner ()
   "Insert Idris banner into buffer"
   (when (zerop (buffer-size))
-    (let ((welcome "Welcome to Idris REPL!"))
-      (if idris-repl-animate
-          (animate-string welcome 0 0)
-        (insert welcome)))))
+    (let ((welcome "Welcome to Idris REPL!")
+          (logo (idris-repl-get-logo)))
+      (cond ((and (eq idris-repl-banner 'image)
+                  (display-graphic-p)
+                  (member 'png image-types)
+                  logo)
+             (insert-image (create-image logo) welcome))
+            ((eq idris-repl-banner 'animate)
+             (animate-string welcome 0 0))
+            ((eq idris-repl-banner 'text)
+             (insert welcome))))))
 
 (defun idris-repl-insert-prompt (&optional always-insert)
   "Insert or update Idris prompt in buffer.
