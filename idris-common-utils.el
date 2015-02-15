@@ -45,6 +45,12 @@
 Each function should take no arguments and return a list of
 strings that are suitable arguments to `start-process'.")
 
+(defvar idris-mode-path nil
+  "Directory containing the `idris-mode' package.
+This is used to load resource files such as images.  The default
+value is automatically computed from the location of the Emacs
+Lisp package.")
+(setq idris-mode-path (file-name-directory load-file-name))
 
 (defun idris-buffer-name (type)
   (cl-assert (keywordp type))

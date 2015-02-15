@@ -164,9 +164,17 @@ with lots of space for the metavariable buffer."
 
 (defgroup idris-repl nil "Idris REPL" :prefix 'idris :group 'idris)
 
-(defcustom idris-repl-animate t
-  "Show a fancy animation when starting a new Idris REPL buffer"
-  :type 'boolean :group 'idris-repl)
+(defcustom idris-repl-banner 'image
+  "What kind of Idris banner to show in the REPL.
+
+Valid values: `image' means to show the Idris logo, `animate'
+means to insert the text with an animation, `text' means to show
+the text without an animation, and `none' means to not use a
+banner."
+  :type 'symbol
+  :group 'idris-repl
+  :options '(image animate text none))
+
 
 (defface idris-repl-prompt-face
   '((t (:inherit font-lock-keyword-face)))
