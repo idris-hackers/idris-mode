@@ -42,6 +42,10 @@
 (defvar-local idris-input-start nil
   "Marker for the start of user input for Idris.")
 
+(defun idris-repl-welcome-message ()
+  "The message to display as part of the Idris banner, if applicable."
+  "Welcome to Idris REPL!")
+
 (defun idris-repl-get-logo ()
   "Return the path to the Idris logo if it exists, or `nil' if not."
   (let ((logo-path (concat idris-mode-path "logo-small.png")))
@@ -49,21 +53,35 @@
         logo-path
       nil)))
 
-; TODO: insert version number / protocol version / last changed date!?
+(defun idris-repl-insert-logo ()
+  "Attempt to insert a graphical logo.
+Returns non-`nil' on success, `nil' on failure."
+  (let ((logo (idris-repl-get-logo)))
+    (if (and (display-graphic-p)
+             (member 'png image-types)
+             logo)
+        (progn (insert-image (create-image logo)
+                             (idris-repl-welcome-message))
+               t)
+      nil)))
+
+(defun idris-repl-animate-banner ()
+  "Insert a text banner using animation.
+Returns non-`nil' on success, `nil' on failure."
+  (animate-string (idris-repl-welcome-message) 0 0)
+  t)
+
+(defun idris-repl-text-banner ()
+  "Insert a text banner with no animation.
+Returns non-`nil' on success, `nil' on failure."
+  (insert (idris-repl-welcome-message))
+  t)
+
+;; TODO: insert version number / protocol version / last changed date!?
 (defun idris-repl-insert-banner ()
   "Insert Idris banner into buffer"
   (when (zerop (buffer-size))
-    (let ((welcome "Welcome to Idris REPL!")
-          (logo (idris-repl-get-logo)))
-      (cond ((and (eq idris-repl-banner 'image)
-                  (display-graphic-p)
-                  (member 'png image-types)
-                  logo)
-             (insert-image (create-image logo) welcome))
-            ((eq idris-repl-banner 'animate)
-             (animate-string welcome 0 0))
-            ((eq idris-repl-banner 'text)
-             (insert welcome))))))
+    (run-hook-with-args-until-success 'idris-repl-banner-functions)))
 
 (defun idris-repl-insert-prompt (&optional always-insert)
   "Insert or update Idris prompt in buffer.
@@ -83,11 +101,11 @@ If ALWAYS-INSERT is non-nil, always insert a prompt at the end of the buffer."
     (set-marker idris-prompt-start (point))
     (idris-propertize-region
         `(face idris-repl-prompt-face
-          read-only idris-repl-prompt
-          intangible t
-          idris-repl-prompt t
-          help-echo ,idris-prompt-string
-          rear-nonsticky (idris-repl-prompt read-only face intangible))
+               read-only idris-repl-prompt
+               intangible t
+               idris-repl-prompt t
+               help-echo ,idris-prompt-string
+               rear-nonsticky (idris-repl-prompt read-only face intangible))
       (let ((inhibit-read-only t))
         (insert prompt)))
     (set-marker idris-input-start (point))
