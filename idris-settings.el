@@ -164,17 +164,25 @@ with lots of space for the metavariable buffer."
 
 (defgroup idris-repl nil "Idris REPL" :prefix 'idris :group 'idris)
 
-(defcustom idris-repl-banner 'image
-  "What kind of Idris banner to show in the REPL.
-
-Valid values: `image' means to show the Idris logo, `animate'
-means to insert the text with an animation, `text' means to show
-the text without an animation, and `none' means to not use a
-banner."
-  :type 'symbol
+(defcustom idris-repl-banner-functions '(idris-repl-insert-logo
+                                         idris-repl-animate-banner
+                                         idris-repl-text-banner)
+  "A list of functions that can attempt to insert a banner into
+the REPL. If a function cannot insert a banner (for instance, if
+it is supposed to insert a graphical banner but the current Emacs
+has no image support), it returns `nil'. The functions in this
+list are run in order, until one returns non-`nil'.
+Set to `nil' for no banner."
+  :type 'hook
   :group 'idris-repl
-  :options '(image animate text none))
+  :options '(idris-repl-insert-logo
+             idris-repl-animate-banner
+             idris-repl-text-banner))
 
+(defcustom idris-repl-show-idris-version t
+  "Whether to show the Idris version on REPL startup."
+  :type 'boolean
+  :group 'idris-repl)
 
 (defface idris-repl-prompt-face
   '((t (:inherit font-lock-keyword-face)))
