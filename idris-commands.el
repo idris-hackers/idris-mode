@@ -74,8 +74,8 @@
 
 (defun idris-ensure-process-and-repl-buffer ()
   "Ensure that an Idris process is running and the Idris REPL buffer exists."
-  (idris-repl-buffer)
-  (idris-run))
+  (idris-run)
+  (idris-repl-buffer))
 
 (defun idris-switch-working-directory (new-working-directory)
   (unless (string= idris-process-current-working-directory new-working-directory)

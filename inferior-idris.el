@@ -368,4 +368,29 @@ call `ERROR' if there was an Idris error."
       ((:error condition &optional _spans)
        (message "Setting option %s to %s returned an error: %s." opt b condition)))))
 
+(defun idris-get-idris-version ()
+  "Ask the Idris compiler for its version information.
+Returns a cons cell whose car is a list of version number
+components and whose cdr is a list of prerelease identifiers, if
+applicable. Returns nil if the version of Idris used doesn't
+support asking for versions."
+  (pcase (idris-eval :version t)
+    (`((,version ,prerelease)) (cons version prerelease))
+    (t nil)))
+
+(defun idris-get-idris-version-string ()
+  "Ask the Idris compiler for its version information, and return the result as a user-friendly string.
+Returns nil if the version of Idris used doesn't support asking
+for versions."
+  (let ((version (idris-get-idris-version)))
+    (if (consp version) ; returns nil on older versions of Idris
+        (let* ((version-number (car version))
+               (version-prerelease (cdr version)))
+          (concat (mapconcat #'number-to-string version-number ".")
+                  (if version-prerelease
+                      (concat "-" (mapconcat #'identity version-prerelease "-"))
+                    "")))
+      nil)))
+
+
 (provide 'inferior-idris)

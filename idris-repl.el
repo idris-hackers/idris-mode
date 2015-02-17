@@ -44,7 +44,7 @@
 
 (defun idris-repl-welcome-message ()
   "The message to display as part of the Idris banner, if applicable."
-  "Welcome to Idris REPL!")
+  "Welcome to the Idris REPL!")
 
 (defun idris-repl-get-logo ()
   "Return the path to the Idris logo if it exists, or `nil' if not."
@@ -77,11 +77,18 @@ Returns non-`nil' on success, `nil' on failure."
   (insert (idris-repl-welcome-message))
   t)
 
-;; TODO: insert version number / protocol version / last changed date!?
 (defun idris-repl-insert-banner ()
-  "Insert Idris banner into buffer"
+  "Insert Idris banner into buffer."
   (when (zerop (buffer-size))
-    (run-hook-with-args-until-success 'idris-repl-banner-functions)))
+    ;; If a banner is inserted, add a newline too
+    (when (run-hook-with-args-until-success 'idris-repl-banner-functions)
+      (insert "\n"))
+    (let ((version-string (idris-get-idris-version-string)))
+      (when (and idris-repl-show-idris-version
+                 version-string)
+        (insert (propertize (concat "Idris " version-string)
+                            'face 'italic)
+                "\n\n")))))
 
 (defun idris-repl-insert-prompt (&optional always-insert)
   "Insert or update Idris prompt in buffer.
@@ -108,7 +115,7 @@ If ALWAYS-INSERT is non-nil, always insert a prompt at the end of the buffer."
                rear-nonsticky (idris-repl-prompt read-only face intangible))
       (let ((inhibit-read-only t))
         (insert prompt)))
-    (set-marker idris-input-start (point))
+    (set-marker idris-input-start (point-max))
     (goto-char idris-input-start)))
 
 
