@@ -136,11 +136,11 @@
     st))
 
 (defconst idris-keywords
-  '("abstract" "applyTactic" "attack" "auto" "byReflection" "case" "compute" "covering" "default" "do" "dsl"
-    "else" "equiv" "exact" "fill" "focus" "if" "implicit" "import" "in" "induction" "infix" "infixl" "infixr"
-    "instance" "intro"  "intros" "module" "mrefine" "mutual" "namespace" "of" "let" "parameters" "partial"
-    "pattern" "prefix" "private" "proof" "public" "qed" "refine" "reflect" "rewrite" "search" "solve" "state"
-    "syntax" "tactics" "term" "then" "total" "trivial" "try" "unify" "undo" "using" "where" "with"))
+  '("abstract" "case" "covering" "default" "do" "dsl" "else" "if"
+    "implicit" "import" "in" "infix" "infixl" "infixr" "instance"
+    "module" "mutual" "namespace" "of" "let" "parameters" "partial"
+    "pattern" "prefix" "private" "proof" "public" "rewrite" "syntax"
+    "tactics" "then" "total" "using" "where" "with"))
 
 
 (defconst idris-special-char-regexp
