@@ -106,21 +106,33 @@
     ;; Otherwise just make it dirty.
     (idris-make-dirty)))
 
+
 (defun idris-update-loaded-region (fc)
-  (let* ((end (assoc :end fc))
-         (line (cadr end))
-         (col (cl-caddr end)))
-    (when (overlayp idris-loaded-region-overlay)
-      (delete-overlay idris-loaded-region-overlay))
-    (with-current-buffer idris-currently-loaded-buffer
-      (setq idris-loaded-region-overlay
-            (make-overlay (point-min)
-                          (save-excursion (goto-char (point-min))
-                                          (forward-line (1- line))
-                                          (move-to-column (1- col))
-                                          (point))
-                          (current-buffer)))
-      (overlay-put idris-loaded-region-overlay 'face 'idris-loaded-region-face))))
+  (if fc
+      (let* ((end (assoc :end fc))
+             (line (cadr end))
+             (col (cl-caddr end)))
+        (when (overlayp idris-loaded-region-overlay)
+          (delete-overlay idris-loaded-region-overlay))
+        (with-current-buffer idris-currently-loaded-buffer
+          (setq idris-loaded-region-overlay
+                (make-overlay (point-min)
+                              (save-excursion (goto-char (point-min))
+                                              (forward-line (1- line))
+                                              (move-to-column (1- col))
+                                              (point))
+                              (current-buffer)))
+          (overlay-put idris-loaded-region-overlay 'face 'idris-loaded-region-face)))
+
+    ;; HACK: Some versions of Idris don't properly return a span for
+    ;; some modules, returning () instead. Remove this (and the
+    ;; surrounding (if fc)) after Idris 0.9.17, which contains a fix.
+    (idris-update-loaded-region
+     `((:filename ,(cdr (idris-filename-to-load)))
+       (:start 1 1)
+       ,(save-excursion
+          (goto-char (point-max))
+          `(:end ,(idris-get-line-num) 1))))))
 
 (defun idris-load-to (&optional pos)
   (when (not pos) (setq pos (point)))
