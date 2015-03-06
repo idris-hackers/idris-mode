@@ -91,7 +91,9 @@ As of 20140807 (Idris 0.9.14.1-git:abee538) (endline endcolumn) is mostly the sa
              (buffer (get-file-buffer fullpath)))
         (when (not (null buffer))
           (with-current-buffer buffer
-            (goto-char (point-min))
+            (save-restriction
+              (widen) ;; Show errors at the proper location in narrowed buffers
+              (goto-char (point-min))
               (cl-multiple-value-bind (startp endp) (get-region startline)
                 (goto-char startp)
                 (let ((start (+ startp startcol))
@@ -101,11 +103,11 @@ As of 20140807 (Idris 0.9.14.1-git:abee538) (endline endcolumn) is mostly the sa
                                    (progn (insert " ")
                                           (1+ endp))
                                  endp)
-                             (+ (line-beginning-position endline) endcol))))
-                  (let ((overlay (idris-warning-overlay-at-point)))
-                    (if overlay
-                        (idris-warning-merge-overlays overlay message)
-                      (idris-warning-create-overlay start end message)))))))))))
+                             (+ (line-beginning-position endline) endcol)))
+                      (overlay (idris-warning-overlay-at-point)))
+                  (if overlay
+                      (idris-warning-merge-overlays overlay message)
+                    (idris-warning-create-overlay start end message)))))))))))
 
 (defun idris-warning-merge-overlays (overlay message)
   (overlay-put overlay 'help-echo
