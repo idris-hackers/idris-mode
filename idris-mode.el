@@ -102,10 +102,12 @@ Invokes `idris-mode-hook'."
   (set (make-local-variable 'parse-sexp-lookup-properties) t)
   (set (make-local-variable 'syntax-propertize-function) 'idris-syntax-propertize-function)
 
-  ; REPL completion for Idris source
-  (set (make-local-variable 'completion-at-point-functions) '(idris-complete-symbol-at-point))
+  ;; REPL completion for Idris source
+  (set (make-local-variable 'completion-at-point-functions)
+       (list 'idris-complete-symbol-at-point
+             'idris-complete-keyword-at-point))
 
-  ; imenu support
+  ;; imenu support
   (set (make-local-variable 'imenu-case-fold-search) nil)
   (set (make-local-variable 'imenu-generic-expression)
        '(("Data" "^\\s-*data\\s-+\\(\\sw+\\)" 1)
@@ -116,12 +118,12 @@ Invokes `idris-mode-hook'."
          (nil "^\\s-*\\(\\sw+\\)\\s-*:" 1)
          ("Namespaces" "^\\s-*namespace\\s-+\\(\\sw\\|\\.\\)" 1)))
 
-  ; eldoc support
+  ;; eldoc support
   (set (make-local-variable 'eldoc-documentation-function) 'idris-eldoc-lookup)
 
-  ; Filling of comments and docs
+  ;; Filling of comments and docs
   (set (make-local-variable 'fill-paragraph-function) 'idris-fill-paragraph)
-  ; Make dirty if necessary
+  ;; Make dirty if necessary
   (add-hook (make-local-variable 'after-change-functions) 'idris-possibly-make-dirty)
   (setq mode-name `("Idris"
                     (:eval (if idris-rex-continuations "!" ""))
@@ -129,7 +131,7 @@ Invokes `idris-mode-hook'."
                     (:eval (if (idris-current-buffer-dirty-p)
                                "(Not loaded)"
                              "(Loaded)"))))
-  ; Extra hook for LIDR files (to set up extra highlighting, etc)
+  ;; Extra hook for LIDR files (to set up extra highlighting, etc)
   (when (idris-lidr-p)
     (run-hooks 'idris-mode-lidr-hook)))
 
