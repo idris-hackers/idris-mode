@@ -692,14 +692,15 @@ type-correct, so loading will fail."
   (pcase-let* ((all-idris-keywords
                 (append idris-keywords idris-definition-keywords))
                (`(,identifier ,start ,end)
-                (idris-identifier-backwards-from-point))
-               (candidates (cl-remove-if-not
-                            (apply-partially #'string-prefix-p identifier)
-                            all-idris-keywords)))
-    (if (null candidates)
-        nil
-      (list start end candidates
-            :exclusive 'no))))
+                (idris-identifier-backwards-from-point)))
+    (when identifier
+      (let ((candidates (cl-remove-if-not
+                         (apply-partially #'string-prefix-p identifier)
+                         all-idris-keywords)))
+        (if (null candidates)
+            nil
+          (list start end candidates
+                :exclusive 'no))))))
 
 (defun idris-list-metavariables ()
   "Get a list of currently-open metavariables"
