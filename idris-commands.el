@@ -36,6 +36,7 @@
 (require 'idris-metavariable-list)
 (require 'idris-prover)
 (require 'idris-common-utils)
+(require 'idris-syntax)
 
 (require 'cl-lib)
 (require 'thingatpt)
@@ -683,7 +684,22 @@ type-correct, so loading will fail."
           (cl-destructuring-bind (completions _partial) result
             (if (null completions)
                 nil
-              (list start end completions))))))))
+              (list start end completions
+                    :exclusive 'no))))))))
+
+(defun idris-complete-keyword-at-point ()
+  "Attempt to complete the symbol at point as an Idris keyword."
+  (pcase-let* ((all-idris-keywords
+                (append idris-keywords idris-definition-keywords))
+               (`(,identifier ,start ,end)
+                (idris-identifier-backwards-from-point))
+               (candidates (cl-remove-if-not
+                            (apply-partially #'string-prefix-p identifier)
+                            all-idris-keywords)))
+    (if (null candidates)
+        nil
+      (list start end candidates
+            :exclusive 'no))))
 
 (defun idris-list-metavariables ()
   "Get a list of currently-open metavariables"
