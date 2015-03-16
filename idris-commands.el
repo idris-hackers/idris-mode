@@ -844,6 +844,9 @@ means to not ask for confirmation."
     (define-key-after menu [idris-term-menu-hide-implicits]
       `(menu-item "Hide implicits"
                   (lambda () (interactive))))
+    (define-key-after menu [idris-term-menu-core]
+      `(menu-item "Show core"
+                  (lambda () (interactive))))
     menu))
 
 (defun idris-insert-term-widget (term)
@@ -863,8 +866,7 @@ means to not ask for confirmation."
                 (define-key map [mouse-3]
                   (lambda () (interactive)
                     (let ((selection
-                           (x-popup-menu t
-                             (idris-make-term-menu term))))
+                           (x-popup-menu t (idris-make-term-menu term))))
                       (cond ((equal selection
                                     '(idris-term-menu-normalize))
                              (idris-normalize-term start-pos buffer)
@@ -876,6 +878,10 @@ means to not ask for confirmation."
                             ((equal selection
                                     '(idris-term-menu-hide-implicits))
                              (idris-hide-term-implicits start-pos buffer)
+                             (idris-remove-term-widgets))
+                            ((equal selection
+                                    '(idris-term-menu-core))
+                             (idris-show-core-term start-pos buffer)
                              (idris-remove-term-widgets))))))
                 map)))
     (let ((term-overlay (make-overlay start-pos end-pos)))
@@ -921,12 +927,17 @@ means to not ask for confirmation."
   (interactive "d")
   (idris-active-term-command position :normalise-term buffer))
 
+(defun idris-show-core-term (position &optional buffer)
+  "Replace the term at POSITION with the corresponding core term."
+  (interactive "d")
+  (idris-active-term-command position :elaborate-term buffer))
 
 (defun idris-active-term-command (position cmd &optional buffer)
   "For the term at POSITION, Run the live term command CMD."
   (unless (member cmd '(:show-term-implicits
                         :hide-term-implicits
-                        :normalise-term))
+                        :normalise-term
+                        :elaborate-term))
     (error "Invalid term command %s" cmd))
   (with-current-buffer (or buffer (current-buffer))
     (let ((term (plist-get (text-properties-at position) 'idris-tt-term)))
@@ -946,7 +957,7 @@ means to not ask for confirmation."
                     (when new-tt-term
                       (goto-char (point-min))
                       (when (= (forward-line 1) 0)
-                          (indent-rigidly (point) (point-max) col))
+                        (indent-rigidly (point) (point-max) col))
                       (put-text-property (point-min) (point-max) 'idris-tt-term new-tt-term)))
                   (buffer-string))))
           (idris-replace-term-at position rendered))))))
