@@ -75,7 +75,8 @@
   "Define keys for manipulating active terms in the keymap MAP."
   (define-key map (kbd "C-c C-m n") 'idris-normalize-term)
   (define-key map (kbd "C-c C-m i") 'idris-show-term-implicits)
-  (define-key map (kbd "C-c C-m h") 'idris-hide-term-implicits))
+  (define-key map (kbd "C-c C-m h") 'idris-hide-term-implicits)
+  (define-key map (kbd "C-c C-m c") 'idris-show-core-term))
 
 (defun idris-define-ipkg-keys (map)
   "Define keys for working with the current package in the keymap MAP."

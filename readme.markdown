@@ -98,6 +98,7 @@ The following keybindings are available:
 * `C-c C-m n`: Normalize the term at point (`M-x idris-normalize-term`)
 * `C-c C-m i`: Show implicits for the term at point (`M-x idris-show-term-implicits`)
 * `C-c C-m h`: Hide implicits for the term at point (`M-x idris-hide-term-implicits`)
+* `C-c C-m c`: Show the core language for the term at point (`M-x idris-show-core-term`)
 
 ## Package files
 Idris's build system, which consists of package files ending in `.ipkg`, has rudimentary support from `idris-mode`. The following commands are available in Idris buffers or package buffers; if they are run from an Idris buffer, then `idris-mode` will attempt to locate the package file automatically. The mnemonic for `C-b` in the prefix is "build".
