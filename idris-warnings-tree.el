@@ -121,13 +121,30 @@ Invokes `idris-compiler-notes-mode-hook'.")
         (find-file-noselect fullpath))))
 
 (defun idris-goto-source-location (filename lineno col)
-  "Move to the source location FILENAME LINENO COL."
+  "Move to the source location FILENAME LINENO COL. If the buffer
+containing the file is narrowed and the location is hidden, show
+a preview and offer to widen."
   (let ((buf (idris-goto-location filename)))
     (set-buffer buf)
     (pop-to-buffer buf t)
-    (goto-char (point-min))
-    (let ((start (line-beginning-position lineno)))
-      (goto-char (+ start col)))))
+    (pcase-let* ((old-start (point-min)) ; The start and end taking
+                 (old-end (point-max))   ; narrowing into account
+                 (`(,new-location . ,widen-p)
+                  (save-excursion
+                    (save-restriction
+                      (widen)
+                      (goto-char (point-min))
+                      (let* ((start (line-beginning-position lineno))
+                             (location (goto-char (+ start col))))
+                        ;; If the location is invisible, offer to make it visible
+                        (if (or (< location old-start) (> location old-end))
+                            (if (y-or-n-p "Location is not visible. Widen? ")
+                                (cons location t)
+                              (cons nil nil))
+                          (cons location nil)))))))
+      (when new-location
+        (when widen-p (widen))
+        (goto-char new-location)))))
 
 
 ;;;;;; Tree Widget
