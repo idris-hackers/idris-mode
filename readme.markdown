@@ -36,7 +36,7 @@ if idris reports any. Pressing C-c C-l again will reload that buffer - if you
 switch to a different buffer and press C-c C-l, that buffer will be loaded
 instead.
 
-Customize `inferior-idris-path` if idris is not on your default path.
+Customize `idris-interpreter-path` if idris is not on your default path.
 
 [Idris]: http://www.idris-lang.org
 
