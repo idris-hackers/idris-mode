@@ -76,6 +76,8 @@
 (defvar idris-compiler-notes-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "q") 'idris-notes-quit)
+    ;;; Allow buttons to be clicked with the left mouse button in the compiler notes
+    (define-key map [follow-link] 'mouse-face)
     (cl-loop for keyer
              in '(idris-define-docs-keys
                   idris-define-general-keys
