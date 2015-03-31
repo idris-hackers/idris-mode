@@ -28,6 +28,42 @@
 (require 'idris-core)
 (require 'idris-common-utils)
 
+
+(defvar idris-info-history (list () nil ())
+  "A zipper into the history for idris-info-mode.
+It is a three-element list whose first element is the history,
+whose second element is the current item if applicable or NIL
+otherwise, and whose third element is the future.")
+
+(defun idris-info-history-clear ()
+  "Reset the history for Idris info buffers."
+  (setq idris-info-history (list () nil ())))
+
+(defun idris-info-history-insert (contents)
+  "Insert CONTENTS into the Idris info history as the current node.
+Following the behavior of Emacs help buffers, the future is deleted."
+  (pcase-let ((`(,past ,present ,future) idris-info-history))
+    (setq idris-info-history
+          (if present
+              (list (cons present past) contents ())
+            (list past contents ())))))
+
+(defun idris-info-history-back ()
+  "Move back in the Idris info history."
+  (setq idris-info-history
+        (pcase idris-info-history
+          (`((,prev . ,past) ,present ,future)
+           (list past prev (cons present future)))
+          (`(() ,present ,future) (list () present future)))))
+
+(defun idris-info-history-forward ()
+  "Move forward in the Idris info history."
+  (setq idris-info-history
+        (pcase idris-info-history
+          (`(,past ,present (,next . ,future))
+           (list (cons present past) next future))
+          (`(,past ,present ()) (list past present ())))))
+
 (defvar idris-info-buffer-name (idris-buffer-name :info)
   "The name of the buffer containing Idris help information")
 
@@ -65,26 +101,44 @@ Invokes `idris-info-mode-hook'.")
 (defun idris-info-buffer-visible-p ()
   (if (get-buffer-window idris-info-buffer-name 'visible) t nil))
 
+(defun idris-info-show ()
+  "Show the Idris info buffer."
+  (interactive)
+  (with-current-buffer (idris-info-buffer)
+    (setq buffer-read-only t)
+    (pcase-let ((inhibit-read-only t)
+                (`(,past ,present ,future) idris-info-history))
+      (erase-buffer)
+      (when present
+        (insert present)
+        (insert "\n\n"))
+      (when past
+        (insert-button "[back]" 'action #'(lambda (_) (interactive) (idris-info-history-back) (idris-info-show))))
+      (when (and past future) (insert "\t"))
+      (when future
+        (insert-button "[forward]" 'action #'(lambda (_) (interactive) (idris-info-history-forward) (idris-info-show))))
+      (when (or past future) (newline))
+      (goto-char (point-min))))
+  (unless (idris-info-buffer-visible-p)
+    (pop-to-buffer (idris-info-buffer))
+    (message "Press q to close the Idris info buffer.")))
+
 (defmacro with-idris-info-buffer (&rest cmds)
   "Execute `CMDS' in a fresh Idris info buffer, then display it to the user."
   (declare (indent defun))
-  `(progn (with-current-buffer (idris-info-buffer)
-            (idris-info-mode)
-            (setq buffer-read-only nil)
-            (erase-buffer)
-            ,@cmds
-            (setq buffer-read-only t))
-          (unless (idris-info-buffer-visible-p)
-            (pop-to-buffer (idris-info-buffer))
-            (message "Press q to close the Idris info buffer."))))
+  (let ((str-info (cl-gensym "STR-INFO")))
+    `(let ((,str-info (with-temp-buffer
+                        ,@cmds
+                        (buffer-string))))
+       (idris-info-history-insert ,str-info)
+       (idris-info-show))))
 
 
 (defun idris-show-info (info-string &optional spans)
   "Show INFO-STRING in the Idris info buffer, obliterating its previous contents."
   (with-idris-info-buffer
     (idris-propertize-spans (idris-repl-semantic-text-props spans)
-       (insert info-string))
-    (insert "\n\n"))
+      (insert info-string)))
   info-string)
 
 
