@@ -42,7 +42,7 @@ otherwise, and whose third element is the future.")
 (defun idris-info-history-insert (contents)
   "Insert CONTENTS into the Idris info history as the current node.
 Following the behavior of Emacs help buffers, the future is deleted."
-  (pcase-let ((`(,past ,present ,future) idris-info-history))
+  (pcase-let ((`(,past ,present ,_future) idris-info-history))
     (setq idris-info-history
           (if present
               (list (cons present past) contents ())
@@ -93,8 +93,13 @@ Invokes `idris-info-mode-hook'.")
 ; if we use view-mode here, our key binding q would be shadowed.
 
 (defun idris-info-buffer ()
-  "Return the Idris info buffer, creating one if there is not one"
-  (get-buffer-create idris-info-buffer-name))
+  "Return the Idris info buffer, creating one if there is not one.
+Ensure that the buffer is in `idris-info-mode'."
+  (let ((buffer (get-buffer-create idris-info-buffer-name)))
+    (with-current-buffer buffer
+      (when (not (eq major-mode 'idris-info-mode))
+        (idris-info-mode)))
+    buffer))
 
 (defun idris-info-quit ()
   (interactive)
