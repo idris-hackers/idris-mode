@@ -42,7 +42,7 @@ otherwise, and whose third element is the future.")
 (defun idris-info-history-insert (contents)
   "Insert CONTENTS into the Idris info history as the current node.
 Following the behavior of Emacs help buffers, the future is deleted."
-  (pcase-let ((`(,past ,present ,future) idris-info-history))
+  (pcase-let ((`(,past ,present ,_future) idris-info-history))
     (setq idris-info-history
           (if present
               (list (cons present past) contents ())
