@@ -44,6 +44,8 @@
     (define-key map (kbd "q") 'idris-metavariable-list-quit)
     (define-key map (kbd "RET") 'idris-compiler-notes-default-action-or-show-details)
     (define-key map (kbd "<mouse-2>") 'idris-compiler-notes-default-action-or-show-details/mouse)
+    ;;; Allow buttons to be clicked with the left mouse button in the metavariable list
+    (define-key map [follow-link] 'mouse-face)
     (cl-loop for keyer
              in '(idris-define-docs-keys
                   idris-define-general-keys

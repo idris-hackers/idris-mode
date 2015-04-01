@@ -71,6 +71,8 @@ Following the behavior of Emacs help buffers, the future is deleted."
   (let ((map (make-keymap)))
     (suppress-keymap map) ; remove the self-inserting char commands
     (define-key map (kbd "q") 'idris-info-quit)
+    ;;; Allow buttons to be clicked with the left mouse button in info buffers
+    (define-key map [follow-link] 'mouse-face)
     (cl-loop for keyer
              in '(idris-define-docs-keys
                   idris-define-general-keys
