@@ -102,6 +102,11 @@
   "The face to use for the currently-loaded region of a buffer"
   :group 'idris-faces)
 
+(defface idris-info-title-face
+  '((t :inherit header-line))
+  "Face for Idris headers and titles."
+  :group 'idris-faces)
+
 ;;; Mode hooks
 (defcustom idris-mode-hook '(turn-on-idris-simple-indent
                              idris-enable-clickable-imports
