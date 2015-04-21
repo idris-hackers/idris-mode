@@ -363,6 +363,12 @@ compiler-annotated output. Does not return a line number."
     (when name
       (idris-name-calls-who name))))
 
+(defun idris-browse-namespace (namespace)
+  "Show the contents of NAMESPACE in a tree info buffer."
+  (interactive "sBrowse namespace: ")
+  (idris-tree-info-show (idris-namespace-tree namespace)
+                        "Browse Namespace"))
+
 (defun idris-caller-tree (caller cmd)
   "Display a tree from an IDESlave caller list, lazily retrieving a few levels at a time"
   (pcase caller
@@ -377,9 +383,43 @@ compiler-annotated output. Does not return a line number."
                                (if child-name
                                    (list (idris-caller-tree child-name cmd))
                                  nil)))
-                      children))))
+                         children))))
     (t (error "failed to make tree from %s" caller))))
 
+(defun idris-namespace-tree (namespace &optional recursive)
+  "Create a tree of the contents of NAMESPACE, lazily retrieving children when RECURSIVE is non-nil."
+  (cl-flet*
+      ;; Show names as childless trees with decorated roots
+      ((name-tree (n) (make-idris-tree :item (car n)
+                                       :highlighting (cadr n)
+                                       :kids nil))
+       ;; The children of a tree are the namespaces followed by the names.
+       (get-children (sub-namespaces names)
+                     (append (mapcar #'(lambda (ns)
+                                         (idris-namespace-tree ns t))
+                                     sub-namespaces)
+                             (mapcar #'name-tree names))))
+    (if recursive
+        ;; In the recursive case, generate a collapsed tree and lazily
+        ;; get the contents as expansion is requested
+        (make-idris-tree
+         :item (concat "Namespace " namespace)
+         :collapsed-p t
+         :kids (lambda ()
+                 (pcase (idris-eval `(:browse-namespace ,namespace))
+                   (`((,sub-namespaces ,names . ,_))
+                    (get-children sub-namespaces names))
+                   (t nil))))
+      ;; In the non-recursive case, generate an expanded tree with the
+      ;; first level available, but only if the namespace actually makes
+      ;; sense
+      (pcase (idris-eval `(:browse-namespace ,namespace))
+        (`((,sub-namespaces ,names . ,_))
+         (make-idris-tree
+          :item (concat "Namespace " namespace)
+          :collapsed-p nil
+          :kids (get-children sub-namespaces names)))
+        (t (error "Invalid namespace %s" namespace))))))
 
 (defun idris-newline-and-indent ()
   "Indent a new line like the current one by default"
