@@ -22,6 +22,7 @@ OBJS =	idris-commands.elc		\
 	idris-repl.elc			\
 	idris-settings.elc		\
 	idris-simple-indent.elc		\
+        idris-tree-info.elc             \
 	idris-syntax.elc		\
 	idris-warnings.elc		\
 	idris-warnings-tree.elc		\

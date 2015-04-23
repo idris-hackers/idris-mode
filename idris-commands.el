@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2013 Hannes Mehnert
 
-;; Author: Hannes Mehnert <hannes@mehnert.org>
+;; Author: Hannes Mehnert <hannes@mehnert.org> and David Raymond Christiansen <david@davidchristiansen.dk>
 
 ;; License:
 ;; Inspiration is taken from SLIME/DIME (http://common-lisp.net/project/slime/) (https://github.com/dylan-lang/dylan-mode)
@@ -30,6 +30,7 @@
 (require 'idris-warnings)
 (require 'idris-compat)
 (require 'idris-info)
+(require 'idris-tree-info)
 (require 'idris-log)
 (require 'idris-ipkg-mode)
 (require 'idris-warnings-tree)
@@ -330,13 +331,14 @@ compiler-annotated output. Does not return a line number."
       (idris-info-for-name :print-definition name))))
 
 (defun idris-who-calls-name (name)
-  "Show the callers of NAME in a tree"
-  (with-idris-info-buffer
-   (insert "Callers\n")
-   (let* ((callers (idris-eval `(:who-calls ,name)))
-          (roots (mapcar #'(lambda (c) (idris-caller-tree c :who-calls)) (car callers))))
-     (dolist (r roots) (idris-tree-insert r "")))
-   (goto-char (point-min))))
+  "Show the callers of NAME in a tree."
+  (let* ((callers (idris-eval `(:who-calls ,name)))
+         (roots (mapcar #'(lambda (c) (idris-caller-tree c :who-calls))
+                        (car callers))))
+    (if (not (null roots))
+        (idris-tree-info-show-multiple roots "Callers")
+      (message "The name %s was not found." name))
+    nil))
 
 (defun idris-who-calls-name-at-point (thing)
   (interactive "P")
@@ -346,13 +348,13 @@ compiler-annotated output. Does not return a line number."
       (idris-who-calls-name name))))
 
 (defun idris-name-calls-who (name)
-  "Show the callees of NAME in a tree"
-  (with-idris-info-buffer
-   (insert "Callees\n")
-   (let* ((callees (idris-eval `(:calls-who ,name)))
-          (roots (mapcar #'(lambda (c) (idris-caller-tree c :calls-who)) (car callees))))
-     (dolist (r roots) (idris-tree-insert r "")))
-   (goto-char (point-min))))
+  "Show the callees of NAME in a tree."
+  (let* ((callees (idris-eval `(:calls-who ,name)))
+         (roots (mapcar #'(lambda (c) (idris-caller-tree c :calls-who)) (car callees))))
+    (if (not (null roots))
+        (idris-tree-info-show-multiple roots "Callees")
+      (message "The name %s was not found." name))
+    nil))
 
 (defun idris-name-calls-who-at-point (thing)
   (interactive "P")
