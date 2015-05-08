@@ -92,7 +92,7 @@
 
 
 (defvar idris-definition-keywords
-  '("data" "class" "codata" "record" "postulate")
+  '("data" "class" "codata" "constructor" "record" "postulate")
   "Keywords that introduce some identifier.")
 
 (defvar idris-operator-regexp
