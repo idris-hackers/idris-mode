@@ -241,6 +241,11 @@
          (let ((id (incf idris-continuation-counter)))
            (idris-send `(,form ,id) process)
            (push (cons id continuation) idris-rex-continuations)))
+        ((:output value id)
+         (let ((rec (assq id idris-rex-continuations)))
+           (if rec
+               (funcall (cdr rec) value)
+             (error "Unexpected reply: %S %S" id value))))
         ((:return value id)
          (let ((rec (assq id idris-rex-continuations)))
            (cond (rec (setf idris-rex-continuations
