@@ -218,7 +218,7 @@ left margin."
           (let ((tactic-cmd (replace-regexp-in-string
                              "\\`[ \t\n]*" ""
                              (replace-regexp-in-string "" " " tactic-text))))
-            (idris-rex () (list ':interpret tactic-cmd)
+            (idris-rex () (list ':interpret tactic-cmd) nil
               ((:ok _result)
                (with-current-buffer (idris-prover-script-buffer)
                  (when idris-prover-script-processing-overlay

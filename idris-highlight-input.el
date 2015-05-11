@@ -26,6 +26,7 @@
 ;;; Code:
 
 (require 'idris-common-utils)
+(require 'idris-settings)
 
 (defun idris-highlight-remove-overlays (&optional buffer)
   "Remove all Idris highlighting overlays from BUFFER, or the current buffer if it's nil."

@@ -227,7 +227,10 @@
       (buffer-string))))
 
 (defvar idris-rex-continuations '()
-  "List of (ID . FUNCTION) continuations waiting for RPC results.")
+  "List of (ID FUNCTION [FUNCTION]) continuations waiting for RPC
+  results. The first function will be called with a final result,
+  and the second (if present) will be called with intermediate
+  output results.")
 
 (defvar idris-continuation-counter 1
   "Continuation serial number counter.")
@@ -237,24 +240,27 @@
 (defun idris-dispatch-event (event process)
   (or (run-hook-with-args-until-success 'idris-event-hooks event)
       (destructure-case event
-        ((:emacs-rex form continuation)
+        ((:emacs-rex form continuation &optional output-continuation)
          (let ((id (incf idris-continuation-counter)))
            (idris-send `(,form ,id) process)
-           (push (cons id continuation) idris-rex-continuations)))
+           (push (if output-continuation
+                     (list id continuation output-continuation)
+                   (list id continuation))
+                 idris-rex-continuations)))
         ((:output value id)
          (let ((rec (assq id idris-rex-continuations)))
-           (if rec
-               (funcall (cdr rec) value)
-             (error "Unexpected reply: %S %S" id value))))
+           ;; Commands that don't ask for :output don't get it
+           (when (and rec (nth 2 rec))
+             (funcall (nth 2 rec) value))))
         ((:return value id)
          (let ((rec (assq id idris-rex-continuations)))
            (cond (rec (setf idris-rex-continuations
                             (remove rec idris-rex-continuations))
-                      (funcall (cdr rec) value))
+                      (funcall (cadr rec) value))
                  (t (error "Unexpected reply: %S %S" id value))))))))
 
-(cl-defmacro idris-rex ((&rest saved-vars) sexp &rest continuations)
-  "(idris-rex (VAR ...) (SEXP) CLAUSES ...)
+(cl-defmacro idris-rex ((&rest saved-vars) sexp intermediate &rest continuations)
+  "(idris-rex (VAR ...) (SEXP) INTERMEDIATE CLAUSES ...)
 
 Remote EXecute SEXP.
 
@@ -262,6 +268,8 @@ VARs are a list of saved variables visible in the other forms.  Each
 VAR is either a symbol or a list (VAR INIT-VALUE).
 
 SEXP is evaluated and the princed version is sent to Idris.
+
+If INTERMEDIATE is non-nil, also register for intermediate results.
 
 CLAUSES is a list of patterns with same syntax as
 `destructure-case'.  The result of the evaluation of SEXP is
@@ -271,7 +279,7 @@ asynchronously.
 
 Note: don't use backquote syntax for SEXP, because various Emacs
 versions cannot deal with that."
-  (declare (indent 2))
+  (declare (indent 3))
   (let ((result (cl-gensym)))
     `(lexical-let ,(cl-loop for var in saved-vars
                             collect (cl-etypecase var
@@ -281,12 +289,17 @@ versions cannot deal with that."
         (list :emacs-rex ,sexp
               (lambda (,result)
                 (destructure-case ,result
-                  ,@continuations))) idris-connection))))
+                  ,@continuations))
+              ,@(when intermediate
+                  `((lambda (,result)
+                      (destructure-case ,result
+                        ,@continuations)))))
+        idris-connection))))
 
 (defun idris-eval-async (sexp cont &optional failure-cont)
   "Evaluate EXPR on the superior Idris and call CONT with the result, or FAILURE-CONT in failure case."
   (idris-rex (cont (buffer (current-buffer)) failure-cont)
-      sexp
+      sexp t
     ((:ok result)
      (when cont
        (set-buffer buffer)
@@ -307,24 +320,25 @@ versions cannot deal with that."
 
 (autoload 'idris-list-compiler-notes "idris-warnings-tree.el")
 (defun idris-eval (sexp &optional no-errors)
-  "Evaluate EXPR on the inferior Idris and return the result. If
-`NO-ERRORS' is non-nil, don't trigger warning buffers and don't
-call `ERROR' if there was an Idris error."
+  "Evaluate EXPR on the inferior Idris and return the result,
+ignoring intermediate output. If `NO-ERRORS' is non-nil, don't
+trigger warning buffers and don't call `ERROR' if there was an
+Idris error."
   (let* ((tag (cl-gensym (format "idris-result-%d-"
-                              (1+ idris-continuation-counter))))
+                                 (1+ idris-continuation-counter))))
 	 (idris-stack-eval-tags (cons tag idris-stack-eval-tags)))
     (apply
      #'funcall
      (catch tag
        (idris-rex (tag sexp)
-           sexp
+           sexp nil
          ((:ok value &optional spans)
           (if (member tag idris-stack-eval-tags)
               (throw tag (list #'identity (cons value spans)))
             (if no-errors
                 nil
-                (error "Reply to canceled synchronous eval request tag=%S sexp=%S"
-                       tag sexp))))
+              (error "Reply to canceled synchronous eval request tag=%S sexp=%S"
+                     tag sexp))))
          ((:error condition &optional _spans)
           (if no-errors
               (throw tag (list #'identity nil))
@@ -363,7 +377,7 @@ call `ERROR' if there was an Idris error."
 (defun idris-set-option (opt b)
   (let ((bi (if b :True :False)))
     (idris-rex ((buffer (current-buffer)) opt b bi)
-        `(:set-option ,opt ,bi)
+        `(:set-option ,opt ,bi) nil
       ((:ok _res)
        (set-buffer buffer)
        (let ((cache-elt (assoc opt idris-options-cache)))

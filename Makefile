@@ -12,6 +12,7 @@ OBJS =	idris-commands.elc		\
 	idris-compat.elc		\
 	idris-core.elc			\
 	idris-events.elc		\
+	idris-highlight-input.elc	\
 	idris-info.elc			\
 	idris-ipkg-mode.elc		\
 	idris-keys.elc			\
