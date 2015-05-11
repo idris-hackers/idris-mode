@@ -38,6 +38,12 @@
         (when (overlay-get overlay 'idris-source-highlight)
           (delete-overlay overlay))))))
 
+(defun idris-highlight-column (idris-col)
+  "Compute the Emacs position offset of the Idris column IDRIS-COL, for highlighting.
+
+In particular, this takes bird tracks into account in literate Idris."
+  (+ idris-col (if (idris-lidr-p) 1 -1)))
+
 (defun idris-highlight-input-region (buffer start-line start-col end-line end-col highlight)
   "Highight in BUFFER using an overlay from START-LINE and START-COL to END-LINE and END-COL and the semantic properties specified in HIGHLIGHT."
   (when idris-semantic-source-highlighting
@@ -48,8 +54,10 @@
           (message "Not highlighting absurd span %s:%s-%s:%s with %s" start-line start-col end-line end-col highlight ))
       (save-excursion
         (goto-char (point-min))
-        (let* ((start-pos (1- (+ (line-beginning-position start-line) start-col)))
-               (end-pos (1- (+ (line-beginning-position end-line) end-col)))
+        (let* ((start-pos (+ (line-beginning-position start-line)
+                             (idris-highlight-column start-col)))
+               (end-pos (+ (line-beginning-position end-line)
+                           (idris-highlight-column end-col)))
                (highlight-overlay (make-overlay start-pos end-pos buffer)))
           (overlay-put highlight-overlay 'idris-source-highlight t)
           (idris-add-overlay-properties highlight-overlay
