@@ -28,6 +28,7 @@
 (require 'inferior-idris)
 (require 'idris-common-utils)
 (require 'idris-prover)
+(require 'idris-highlight-input)
 (require 'cl-lib)
 
 (defvar idris-prompt-string "Idris"
@@ -317,7 +318,7 @@ Invokes `idris-repl-mode-hook'."
             ;; Compute positions relative to the input start for
             ;; semantic highlighting
             (pcase h
-              (`(((:filename ,fn)
+              (`(((:filename ,_fn)
                   (:start ,start-line ,start-col)
                   (:end ,end-line ,end-col))
                  ,props)
