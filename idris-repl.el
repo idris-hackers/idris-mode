@@ -247,14 +247,15 @@ Invokes `idris-repl-mode-hook'."
     (idris-repl-add-to-input-history (buffer-substring idris-input-start end))
     (let ((overlay (make-overlay idris-input-start end)))
       (overlay-put overlay 'face 'idris-repl-input-face)))
-  (let ((input (idris-repl-current-input)))
+  (let ((input (idris-repl-current-input))
+        (input-start (marker-position idris-input-start)))
     (goto-char (point-max))
     (if (string-match-p "^\\s-*$" input)
         (delete-region (point) idris-input-start)
       (insert "\n")
       (set-marker idris-prompt-start (point))
       (set-marker idris-input-start (point))
-      (idris-repl-eval-string input))))
+      (idris-repl-eval-string input input-start))))
 
 (defun idris-repl-complete ()
   "Completion of the current input"
@@ -289,11 +290,40 @@ Invokes `idris-repl-mode-hook'."
   "Return the current input as string."
   (buffer-substring-no-properties idris-input-start (point-max)))
 
-(defun idris-repl-eval-string (string)
-  "Evaluate STRING on the inferior Idris."
-  (idris-rex () (list ':interpret string) nil ;; TODO: highlight REPL input
+(defun idris-repl-highlight-input (start-pos start-line start-col end-line end-col props)
+  "Apply semantic highlighting to the REPL input beginning at START-POS using the Idris location information START-LINE, START-COL, END-LINE, and END-COL and semantic annotations PROPS."
+  (let* ((input-line (line-number-at-pos start-pos))
+         (input-col (save-excursion
+                      (goto-char start-pos)
+                      (current-column)))
+         (start-line-repl (+ input-line start-line -1))
+         (start-col-repl (+ input-col start-col))
+         (end-line-repl (+ input-line end-line -1))
+         (end-col-repl (+ input-col end-col))
+         (buffer (get-buffer (idris-buffer-name :repl))))
+    (idris-highlight-input-region buffer
+                                  start-line-repl start-col-repl
+                                  end-line-repl end-col-repl
+                                  props)))
+
+(defun idris-repl-eval-string (string &optional start)
+  "Evaluate STRING on the inferior Idris, where input was at position START."
+  (idris-rex (start) (list :interpret string) t ;; TODO: highlight REPL input
     ((:ok result &optional spans)
-     (idris-repl-insert-result result spans))
+     (pcase result
+       (`(:highlight-source ,hs) ;; Semantic highlighting
+        (when start
+          (dolist (h hs)
+            ;; Compute positions relative to the input start for
+            ;; semantic highlighting
+            (pcase h
+              (`(((:filename ,fn)
+                  (:start ,start-line ,start-col)
+                  (:end ,end-line ,end-col))
+                 ,props)
+               (idris-repl-highlight-input
+                start start-line start-col end-line end-col props))))))
+       (t (idris-repl-insert-result result spans)))) ;; The actual result
     ((:error condition &optional spans)
      (idris-repl-show-abort condition spans))))
 

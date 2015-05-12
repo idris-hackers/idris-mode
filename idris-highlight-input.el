@@ -45,21 +45,23 @@ In particular, this takes bird tracks into account in literate Idris."
   (+ idris-col (if (idris-lidr-p) 1 -1)))
 
 (defun idris-highlight-input-region (buffer start-line start-col end-line end-col highlight)
-  "Highight in BUFFER using an overlay from START-LINE and START-COL to END-LINE and END-COL and the semantic properties specified in HIGHLIGHT."
+  "Highlight in BUFFER using an overlay from START-LINE and START-COL to END-LINE and END-COL and the semantic properties specified in HIGHLIGHT."
   (when idris-semantic-source-highlighting
     (if (or (> end-line start-line)
             (and (= end-line start-line)
                  (> end-col start-col)))
-        (save-excursion
-          (goto-char (point-min))
-          (let* ((start-pos (+ (line-beginning-position start-line)
-                               (idris-highlight-column start-col)))
-                 (end-pos (+ (line-beginning-position end-line)
-                             (idris-highlight-column end-col)))
-                 (highlight-overlay (make-overlay start-pos end-pos buffer)))
-            (overlay-put highlight-overlay 'idris-source-highlight t)
-            (idris-add-overlay-properties highlight-overlay
-                                          (idris-semantic-properties highlight))))
+        (with-current-buffer buffer
+          (save-excursion
+            (goto-char (point-min))
+            (let* ((start-pos (+ (line-beginning-position start-line)
+                                 (idris-highlight-column start-col)))
+                   (end-pos (+ (line-beginning-position end-line)
+                               (idris-highlight-column end-col)))
+                   (highlight-overlay (make-overlay start-pos end-pos
+                                                    (get-buffer buffer))))
+              (overlay-put highlight-overlay 'idris-source-highlight t)
+              (idris-add-overlay-properties highlight-overlay
+                                            (idris-semantic-properties highlight)))))
       (when (eq idris-semantic-source-highlighting 'debug)
         (message "Not highlighting absurd span %s:%s-%s:%s with %s"
                  start-line start-col
