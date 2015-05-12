@@ -291,8 +291,7 @@ Invokes `idris-repl-mode-hook'."
 
 (defun idris-repl-eval-string (string)
   "Evaluate STRING on the inferior Idris."
-  (idris-rex ()
-      (list ':interpret string)
+  (idris-rex () (list ':interpret string) nil ;; TODO: highlight REPL input
     ((:ok result &optional spans)
      (idris-repl-insert-result result spans))
     ((:error condition &optional spans)

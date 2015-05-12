@@ -40,6 +40,9 @@ Customize `idris-interpreter-path` if idris is not on your default path.
 
 [Idris]: http://www.idris-lang.org
 
+## Highlighting
+`idris-mode` provides two forms of source code highlighting, that work together: convential Emacs `font-lock` to highlight things like keywords and code that has not yet been type checked, and compiler-supported semantic highlighting of identifiers (as known from Agda). Semantic highlighting is controlled by the variable `idris-semantic-source-highlighting`.
+
 ## Keybindings
 `idris-mode` follows conventions from SLIME whenever possible. In particular:
 

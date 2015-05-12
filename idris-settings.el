@@ -59,6 +59,14 @@
   :group 'idris
   :type 'boolean)
 
+(defcustom idris-semantic-source-highlighting t
+  "If non-nil, use the Idris compiler's semantic source
+  information to highlight Idris code. If `debug', log failed
+  highlighting to buffer `*Messages*'."
+  :group 'idris
+  :type '(choice (boolean :tag "Enable")
+                 (const :tag "Debug" debug)))
+
 ;;; Faces
 (defface idris-active-term-face
   '((((background light))
@@ -93,13 +101,11 @@
   "The face to be used to highlight implicit arguments"
   :group 'idris-faces)
 
-(defface idris-loaded-region-face
-  '((((background light) (min-colors 300)) (:background "#ccffcc"))
-    (((background light) (min-colors 256)) (:background "pale green"))
-    (((background dark) (min-colors 300))  (:background "#073642"))
-    (((background dark) (min-colors 256))  (:background "DarkSlateGrey"))
-    (t nil))
-  "The face to use for the currently-loaded region of a buffer"
+(defface idris-loaded-region-face nil
+  "The face to use for the currently-loaded region of a
+buffer. Since semantic highlighting has been added, this face
+defaults to nothing, but is provided for users who prefer the old
+behavior."
   :group 'idris-faces)
 
 (defface idris-info-title-face

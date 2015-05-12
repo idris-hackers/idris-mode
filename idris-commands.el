@@ -38,6 +38,7 @@
 (require 'idris-prover)
 (require 'idris-common-utils)
 (require 'idris-syntax)
+(require 'idris-highlight-input)
 
 (require 'cl-lib)
 (require 'thingatpt)
@@ -194,6 +195,8 @@ line."
         (when (get-buffer idris-notes-buffer-name)
           (with-current-buffer idris-notes-buffer-name
             (let ((inhibit-read-only t)) (erase-buffer))))
+        ;; Remove stale semantic highlighting
+        (idris-highlight-remove-overlays (current-buffer))
         ;; Actually do the loading
         (let* ((dir-and-fn (idris-filename-to-load))
                (fn (cdr dir-and-fn))
@@ -201,24 +204,39 @@ line."
           (setq idris-currently-loaded-buffer nil)
           (idris-switch-working-directory srcdir)
           (idris-delete-ibc t) ;; delete the ibc to avoid interfering with partial loads
-          (idris-eval-async (if idris-load-to-here
-                                `(:load-file ,fn ,(save-excursion
-                                                    (goto-char idris-load-to-here)
-                                                    (idris-get-line-num)))
-                              `(:load-file ,fn))
-                          (lambda (result)
-                            (idris-make-clean)
-                            (idris-update-options-cache)
+          (idris-eval-async
+           (if idris-load-to-here
+               `(:load-file ,fn ,(save-excursion
+                                   (goto-char idris-load-to-here)
+                                   (idris-get-line-num)))
+             `(:load-file ,fn))
+           (lambda (result)
+             (pcase result
+               (`(:highlight-source ,hs)
+                (cl-loop
+                 for h in hs
+                 do (pcase h
+                      (`(((:filename ,fn)
+                          (:start ,start-line ,start-col)
+                          (:end ,end-line ,end-col))
+                         ,props)
+                       (when (string-suffix-p fn (buffer-file-name))
+                         (idris-highlight-input-region (current-buffer)
+                                                       start-line start-col
+                                                       end-line end-col
+                                                       props))))))
+               (t (idris-make-clean)
+                  (idris-update-options-cache)
 
-                            (setq idris-currently-loaded-buffer (current-buffer))
-                            (when (member 'warnings-tree idris-warnings-printing)
-                              (idris-list-compiler-notes))
-                            (run-hooks 'idris-load-file-success-hook)
-                            (idris-update-loaded-region result))
-                          (lambda (_condition)
-                            (when (member 'warnings-tree idris-warnings-printing)
-                              (idris-list-compiler-notes)
-                              (pop-to-buffer (idris-buffer-name :notes)))))))
+                  (setq idris-currently-loaded-buffer (current-buffer))
+                  (when (member 'warnings-tree idris-warnings-printing)
+                    (idris-list-compiler-notes))
+                  (run-hooks 'idris-load-file-success-hook)
+                  (idris-update-loaded-region result))))
+           (lambda (_condition)
+             (when (member 'warnings-tree idris-warnings-printing)
+               (idris-list-compiler-notes)
+               (pop-to-buffer (idris-buffer-name :notes)))))))
     (error "Cannot find file for current buffer")))
 
 (defun idris-view-compiler-log ()
