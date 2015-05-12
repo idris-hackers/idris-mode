@@ -186,9 +186,9 @@ syntax table won't support, such as characters."
         (add-text-properties open (1+ open) '(syntax-table (1 . nil)))))))
 
 (defconst idris-font-lock-keyword-regexp
-  (concat "\\(?:[^a-zA-Z%]\\|^\\)\\("
-          (regexp-opt idris-keywords 'words)
-          "\\)\\(?:[^a-zA-Z]\\|$\\)")
+  (regexp-opt (append idris-definition-keywords
+                      idris-keywords)
+              'words)
   "A regexp for matching Idris keywords")
 
 (defun idris-font-lock-literate-search (regexp lidr limit)
@@ -235,56 +235,7 @@ esp. `font-lock-defaults', for details."
         (,(line-start "\\s-*\\(%\\w+\\)\\s-*\\(.*\\)")
          (1 'idris-directive-face)
          (2 'idris-directive-argument-face))
-        ;; Definitions with keywords.
-        (,(format "\\(%s\\) \\(\\w+\\)" (regexp-opt idris-definition-keywords))
-         (1 'idris-keyword-face)
-         (2 'idris-definition-face))
-        ;; Type declarations
-        ;; TODO: this won't match, e.g. f:a
-        (,(line-start "\\s-*\\(\\w+\\|(\\s_+)\\)\\s-+\\(:\\)\\s-+")
-         (1 'idris-definition-face)
-         (2 'idris-colon-face))
-        (,(line-start "\\s-*\\(total\\|partial\\)\\s-+\\(\\w+\\)\\s-+\\(:\\)\\s-+")
-         (1 'idris-keyword-face)
-         (2 'idris-definition-face)
-         (3 'idris-colon-face))
-        ;; "where"-blocks
-        (,(line-start "\\s-+\\(where\\)\\s-+\\(\\w+\\)\s-*\\(.?*\\)\\(=\\)")
-         (1 'idris-keyword-face)
-         (2 'idris-definition-face)
-         (3 'idris-parameter-face)
-         (4 'idris-equals-face))
-        (,(line-start "\\s-+\\(where\\)\\s-+\\(\\w+\\|(\\s_+)\\)\s-*\\(:\\)\\s-*")
-         (1 'idris-keyword-face)
-         (2 'idris-definition-face)
-         (3 'idris-colon-face))
-        (,(line-start "\\s-+\\(where\\)\\s-+\\(total\\|partial\\)\\s-+\\(\\w+\\)\s-*\\(:\\)\\s-*")
-         (1 'idris-keyword-face)
-         (2 'idris-keyword-face)
-         (3 'idris-definition-face)
-         (4 'idris-colon-face))
-        ;; Provisional definitions with ?=
-        (,(line-start "\\s-*\\(\\w+\\|(\\s_+)\\)\s-*\\(.*?\\)\\(\\?=\\)\\(\\s-*{\\([a-zA-Z_][a-zA-Z_0-9']*\\)}\\)?")
-         (1 'idris-definition-face)
-         (2 'idris-parameter-face)
-         (3 'idris-equals-face)
-         (5 'idris-metavariable-face))
-        ;; Vanilla definitions with = (and optionally let ... in ...)
-        (,(line-start "\\s-*\\(\\w+\\|(\\s_+)\\)\s-*\\(.*?\\)\\(=\\)[^>]")
-         (1 'idris-definition-face)
-         (2 'idris-parameter-face)
-         (3 'idris-equals-face))
-        (,(line-start "\\s-*\\(\\w+\\|(\\s_+)\\)\\s-+\\(.*?\\)\\s-*\\(impossible\\)")
-         (1 'idris-definition-face)
-         (2 'idris-parameter-face)
-         (3 'idris-keyword-face))
-        ;; Definitions using "with"
-        (,(line-start "\\s-*\\(\\w+\\)\s-*\\(.?*\\)\\(with\\)\\(.?*\\)")
-         (1 'idris-definition-face)
-         (2 'idris-parameter-face)
-         (3 'idris-keyword-face)
-         (4 'idris-parameter-face))
-        ;; Other keywords
+        ;; Keywords
         (,(apply-partially #'idris-font-lock-literate-search idris-font-lock-keyword-regexp (idris-lidr-p))
          (1 'idris-keyword-face))
         ;; Operators
@@ -298,8 +249,6 @@ esp. `font-lock-defaults', for details."
                            (regexp-opt '("believe_me" "really_believe_me" "assert_total" "assert_smaller" "prim__believe_me"))
                            (idris-lidr-p))
          0 'idris-unsafe-face t)
-        ;; TODO: operator definitions.
-        ;; TODO: let ... in ...
         ))))
 
 
