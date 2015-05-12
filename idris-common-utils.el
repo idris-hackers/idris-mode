@@ -113,6 +113,7 @@ inserted text (that is, relative to point prior to insertion)."
 (autoload 'idris-make-ref-menu-keymap "idris-commands.el")
 (autoload 'idris-make-metavariable-keymap "idris-commands.el")
 (autoload 'idris-make-error-keymap "idris-commands.el")
+(autoload 'idris-make-namespace-keymap "idris-commands.el")
 (autoload 'idris-eval "inferior-idris.el")
 
 (defun idris-semantic-properties (props)
