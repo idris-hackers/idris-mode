@@ -417,27 +417,32 @@ compiler-annotated output. Does not return a line number."
                                          (idris-namespace-tree ns t))
                                      sub-namespaces)
                              (mapcar #'name-tree names))))
-    (if recursive
-        ;; In the recursive case, generate a collapsed tree and lazily
-        ;; get the contents as expansion is requested
-        (make-idris-tree
-         :item (concat "Namespace " namespace)
-         :collapsed-p t
-         :kids (lambda ()
-                 (pcase (idris-eval `(:browse-namespace ,namespace))
-                   (`((,sub-namespaces ,names . ,_))
-                    (get-children sub-namespaces names))
-                   (t nil))))
-      ;; In the non-recursive case, generate an expanded tree with the
-      ;; first level available, but only if the namespace actually makes
-      ;; sense
-      (pcase (idris-eval `(:browse-namespace ,namespace))
-        (`((,sub-namespaces ,names . ,_))
-         (make-idris-tree
-          :item (concat "Namespace " namespace)
-          :collapsed-p nil
-          :kids (get-children sub-namespaces names)))
-        (t (error "Invalid namespace %s" namespace))))))
+    (let ((highlight `((0 ,(length namespace)
+                          ((:decor :namespace)
+                           (:namespace ,namespace))))))
+      (if recursive
+          ;; In the recursive case, generate a collapsed tree and lazily
+          ;; get the contents as expansion is requested
+          (make-idris-tree
+           :item namespace
+           :highlighting highlight
+           :collapsed-p t
+           :kids (lambda ()
+                   (pcase (idris-eval `(:browse-namespace ,namespace))
+                     (`((,sub-namespaces ,names . ,_))
+                      (get-children sub-namespaces names))
+                     (t nil))))
+        ;; In the non-recursive case, generate an expanded tree with the
+        ;; first level available, but only if the namespace actually makes
+        ;; sense
+        (pcase (idris-eval `(:browse-namespace ,namespace))
+          (`((,sub-namespaces ,names . ,_))
+           (make-idris-tree
+            :item namespace
+            :highlighting highlight
+            :collapsed-p nil
+            :kids (get-children sub-namespaces names)))
+          (t (error "Invalid namespace %s" namespace)))))))
 
 (defun idris-newline-and-indent ()
   "Indent a new line like the current one by default"
@@ -819,7 +824,37 @@ means to not ask for confirmation."
           (delete-file ibc)
           (message "%s deleted" ibc))))))
 
-(defun idris-make-ref-menu (_name)
+(defun idris-make-namespace-menu (namespace &optional file)
+  "Create a right-click menu for NAMESPACE (optionally with source FILE)."
+  (let ((menu (make-sparse-keymap)))
+    (define-key menu [idris-namespace-menu-browse-namespace]
+      `(menu-item ,(concat "Browse " namespace)
+                  (lambda () (interactive))))
+    (when (stringp file)
+      (define-key menu [idris-namespace-menu-visit-file]
+        `(menu-item ,(concat "Edit " file)
+                    (lambda () (interactive)))))
+    menu))
+
+
+(defun idris-make-namespace-keymap (namespace &optional file)
+  "Create a keymap that shows a right-click menu for NAMESPACE (optionally pointing at FILE)."
+  (let ((map (make-sparse-keymap)))
+    (define-key map [mouse-3]
+      (lambda ()
+        (interactive)
+        (let* ((menu (idris-make-namespace-menu namespace file))
+               (selection (x-popup-menu t menu)))
+          (cond ((and (equal selection '(idris-namespace-menu-browse-namespace))
+                      namespace)
+                 (idris-browse-namespace namespace))
+                ((and (equal selection '(idris-namespace-menu-visit-file))
+                      (stringp file))
+                 (find-file file))
+                (t (message "%S" selection))))))
+    map))
+
+(defun idris-make-ref-menu (_name &optional namespace)
   (let ((menu (make-sparse-keymap)))
     (define-key menu [idris-ref-menu-get-type]
       `(menu-item "Get type"
@@ -836,13 +871,18 @@ means to not ask for confirmation."
     (define-key-after menu [idris-ref-menu-calls-who]
       `(menu-item "Calls who?"
                   (lambda () (interactive))))
+    (when (stringp namespace)
+      (define-key-after menu [idris-ref-menu-browse-namespace]
+        `(menu-item ,(concat "Browse " namespace)
+                    (lambda () (interactive)))))
     menu))
 
-(defun idris-make-ref-menu-keymap (name)
+(defun idris-make-ref-menu-keymap (name &optional namespace)
+  "Create a keymap that shows a right-click menu for a reference to NAME (optionally in namespace NAMESPACE)."
   (let ((map (make-sparse-keymap)))
     (define-key map [mouse-3]
       (lambda () (interactive)
-        (let ((selection (x-popup-menu t (idris-make-ref-menu name))))
+        (let ((selection (x-popup-menu t (idris-make-ref-menu name namespace))))
           (cond ((equal selection '(idris-ref-menu-get-type))
                  (idris-info-for-name :type-of name))
                 ((equal selection '(idris-ref-menu-get-docs))
@@ -853,6 +893,9 @@ means to not ask for confirmation."
                  (idris-who-calls-name name))
                 ((equal selection '(idris-ref-menu-calls-who))
                  (idris-name-calls-who name))
+                ((and (equal selection '(idris-ref-menu-browse-namespace))
+                      namespace)
+                 (idris-browse-namespace namespace))
                 (t (message "%S" selection))))))
     map))
 
