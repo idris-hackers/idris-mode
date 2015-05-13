@@ -113,14 +113,18 @@ inserted text (that is, relative to point prior to insertion)."
 (autoload 'idris-make-ref-menu-keymap "idris-commands.el")
 (autoload 'idris-make-metavariable-keymap "idris-commands.el")
 (autoload 'idris-make-error-keymap "idris-commands.el")
+(autoload 'idris-make-namespace-keymap "idris-commands.el")
 (autoload 'idris-eval "inferior-idris.el")
 
 (defun idris-semantic-properties (props)
   "Compute how to highlight with Idris compiler properties PROPS."
-  (let* ((name (assoc :name props))
+  (let* ((clickable-decors '(:type :data :function :metavar :module :namespace))
+         (name (assoc :name props))
          (implicit (assoc :implicit props))
          (decor (assoc :decor props))
          (term (assoc :tt-term props))
+         (namespace (assoc :namespace props))
+         (source-file (assoc :source-file props))
          (unique-val (cl-gensym)) ; HACK to stop consecutive mouse-faces from interfering
          (implicit-face (if (and implicit (equal (cadr implicit) :True))
                             '(idris-semantic-implicit-face)
@@ -140,7 +144,9 @@ inserted text (that is, relative to point prior to insertion)."
                                        (:function idris-semantic-function-face)
                                        (:keyword idris-keyword-face)
                                        (:metavar idris-metavariable-face)
-                                       (:bound idris-semantic-bound-face))))
+                                       (:bound idris-semantic-bound-face)
+                                       (:namespace idris-semantic-namespace-face)
+                                       (:module idris-semantic-module-face))))
                        nil))
          (doc-overview (pcase (assoc :doc-overview props)
                          (`(:doc-overview ,docs) (concat "\n" docs))
@@ -153,15 +159,13 @@ inserted text (that is, relative to point prior to insertion)."
                        '(idris-warning-face)
                      ()))
          (mousable-face
-          (cond ((and (not (equal (cadr decor) :bound)) ;non-bound becomes clickable
-                      name)
+          (cond ((member (cadr decor) clickable-decors)
                  `((:inherit ,decor-face :box t :hack ,unique-val)))
                 (idris-err
                  `((:inherit ('idris-warning-face highlight))))
                 (t nil)))
          (mouse-help
-          (cond ((and (not (equal (cadr decor) :bound)) ;non-bound becomes clickable
-                      name)
+          (cond ((member (cadr decor) clickable-decors)
                  "\n<mouse-3> context menu")
                 (idris-err (idris-eval `(:error-string ,(cadr idris-err))))
                 (t ""))))
@@ -172,15 +176,31 @@ inserted text (that is, relative to point prior to insertion)."
                                       type
                                       doc-overview
                                       mouse-help))
-                        (cond ((and (not (member (cadr decor) '(:bound :metavar)))
+                        (cond ((and (member (cadr decor)
+                                            '(:type :data :function))
                                     name)
-                               `(idris-ref ,(cadr name)
-                                           keymap ,(idris-make-ref-menu-keymap (cadr name))))
+                               (list 'idris-ref (cadr name)
+                                     'keymap (idris-make-ref-menu-keymap
+                                              (cadr name)
+                                              (if namespace
+                                                  (cadr namespace)
+                                                nil))))
                               ((equal (cadr decor) :metavar)
-                               `(idris-ref ,(cadr name)
-                                           keymap ,(idris-make-metavariable-keymap (cadr name))))
+                               (list 'idris-ref (cadr name)
+                                     'keymap (idris-make-metavariable-keymap (cadr name))))
                               (t nil)))
               nil)
+            (if namespace
+                (append (list 'help-echo
+                              (concat (cadr namespace) "\n" mouse-help))
+                        (cond ((or (equal (cadr decor) :module)
+                                   (equal (cadr decor) :namespace))
+                               (list 'keymap (idris-make-namespace-keymap
+                                              (cadr namespace)
+                                              (if source-file
+                                                  (cadr source-file)
+                                                nil))))
+                              (t nil))))
             (if mousable-face
                 (list 'mouse-face mousable-face)
               ())

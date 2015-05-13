@@ -101,6 +101,16 @@
   "The face to be used to highlight implicit arguments"
   :group 'idris-faces)
 
+(defface idris-semantic-namespace-face
+  '((t (:italic t)))
+  "The face to be used to highlight namespace declarations"
+  :group 'idris-faces)
+
+(defface idris-semantic-module-face
+  '((t :inherit idris-semantic-namespace-face))
+  "The face to be used to highlight namespace declarations"
+  :group 'idris-faces)
+
 (defface idris-loaded-region-face nil
   "The face to use for the currently-loaded region of a
 buffer. Since semantic highlighting has been added, this face
