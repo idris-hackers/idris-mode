@@ -170,37 +170,37 @@ inserted text (that is, relative to point prior to insertion)."
                 (idris-err (idris-eval `(:error-string ,(cadr idris-err))))
                 (t ""))))
     (append '(rear-nonsticky t)
-            (if name
-                (append (list 'help-echo
-                              (concat (cadr name)
-                                      type
-                                      doc-overview
-                                      mouse-help))
-                        (cond ((and (member (cadr decor)
-                                            '(:type :data :function))
-                                    name)
-                               (list 'idris-ref (cadr name)
-                                     'keymap (idris-make-ref-menu-keymap
-                                              (cadr name)
-                                              (if namespace
-                                                  (cadr namespace)
-                                                nil))))
-                              ((equal (cadr decor) :metavar)
-                               (list 'idris-ref (cadr name)
-                                     'keymap (idris-make-metavariable-keymap (cadr name))))
-                              (t nil)))
-              nil)
-            (if namespace
-                (append (list 'help-echo
-                              (concat (cadr namespace) "\n" mouse-help))
-                        (cond ((or (equal (cadr decor) :module)
-                                   (equal (cadr decor) :namespace))
-                               (list 'keymap (idris-make-namespace-keymap
-                                              (cadr namespace)
-                                              (if source-file
-                                                  (cadr source-file)
-                                                nil))))
-                              (t nil))))
+            (cond (name
+                   (append (list 'help-echo
+                                 (concat (cadr name)
+                                         type
+                                         doc-overview
+                                         mouse-help))
+                           (cond ((and (member (cadr decor)
+                                               '(:type :data :function))
+                                       name)
+                                  (list 'idris-ref (cadr name)
+                                        'keymap (idris-make-ref-menu-keymap
+                                                 (cadr name)
+                                                 (if namespace
+                                                     (cadr namespace)
+                                                   nil))))
+                                 ((equal (cadr decor) :metavar)
+                                  (list 'idris-ref (cadr name)
+                                        'keymap (idris-make-metavariable-keymap (cadr name))))
+                                 (t nil))))
+                  (namespace
+                   (append (list 'help-echo
+                                 (concat (cadr namespace) "\n" mouse-help))
+                           (cond ((or (equal (cadr decor) :module)
+                                      (equal (cadr decor) :namespace))
+                                  (list 'keymap (idris-make-namespace-keymap
+                                                 (cadr namespace)
+                                                 (if source-file
+                                                     (cadr source-file)
+                                                   nil))))
+                                 (t nil))))
+                  (t nil))
             (if mousable-face
                 (list 'mouse-face mousable-face)
               ())
