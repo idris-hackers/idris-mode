@@ -38,14 +38,14 @@
 (defgroup idris-prover nil "Idris Prover" :prefix 'idris :group 'idris)
 
 (defface idris-prover-processed-face
-  '((t (:background "spring green")))
+  '((t (:background "PaleGreen1")))
   "Face for Idris proof script which is already processed."
-  :group 'idris-prover)
+  :group 'idris-faces)
 
 (defface idris-prover-processing-face
   '((t (:background "gold")))
   "Face for Idris proof script which is currently processing."
-  :group 'idris-prover)
+  :group 'idris-faces)
 
 (defcustom idris-prover-restore-window-configuration t
   "When non-nil, restore the window configuration after exiting

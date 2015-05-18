@@ -87,7 +87,7 @@
   :group 'idris-faces)
 
 (defface idris-semantic-function-face
-  '((t (:foreground "green")))
+  '((t (:foreground "darkgreen")))
   "The face to be used to highlight defined functions"
   :group 'idris-faces)
 

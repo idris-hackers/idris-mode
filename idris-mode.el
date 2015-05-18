@@ -85,6 +85,7 @@
      ["Hide error context" (idris-set-option :error-context nil)
       :visible (idris-get-option :error-context)])
     ["Customize idris-mode" (customize-group 'idris) t]
+    ["Customize fonts and colors" (customize-group 'idris-faces) t]
     ))
 
 
