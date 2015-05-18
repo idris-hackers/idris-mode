@@ -12,7 +12,7 @@
 \begin{abstract}
 This document describes the interaction of the Idris compiler with the editor emacs, to facilitate a lightweight development environment for Idris programs in emacs.
 
-The goal of the ideslave mode is to provide from Idris a structured input and output command processor, which supports all features available in the command line version of the Idris compiler.
+The goal of the IDE mode is to provide from Idris a structured input and output command processor, which supports all features available in the command line version of the Idris compiler.
 \end{abstract}
 
 \section{Introduction}
@@ -20,9 +20,9 @@ Getting dependently typed programs right is harder than usual statically typed p
 Actually, the type checker of a dependently typed programming language can assist the programmer to develop a type correct program.
 
 In this document we explain the interaction between Idris and emacs, this not a user guide for idris-mode.
-The goal is to enable developers to extend idris-mode, as well as use Idris ideslave mode for other editors or tools.
+The goal is to enable developers to extend idris-mode, as well as use Idris's IDE mode for other editors or tools.
 
-The motivation for ideslave is to provide an interface for Idris with structured input and output.
+The motivation for IDE mode is to provide an interface for Idris with structured input and output.
 The motivation for idris-mode is to have a lightweight development environment for Idris within emacs.
 
 A lot of inspiration for the interaction between Idris and emacs comes from SLIME, the superior LISP interaction mode for emacs~\footnote{not the German punk band ;)}.
@@ -95,10 +95,10 @@ The syntax is given in Figure~\ref{fig:syntax}.
 The state of the Idris process is mainly the active file, which needs to be kept synchronized between the editor and Idris.
 This is achieved by the already seen \emph{LoadFile} command.
 
-The full list of supported commands is the data structure \emph{IdeSlaveCommand} in \texttt{Idris/IdeSlave.hs}, and explained in further detail in the following.
+The full list of supported commands is the data structure \emph{IdeModeCommand} in \texttt{Idris/IdeMode.hs}, and explained in further detail in the following.
 
 \begin{verbatim}
-data IdeSlaveCommand = REPLCompletions String
+data IdeModeCommand  = REPLCompletions String
                      | Interpret String
                      | TypeOf String
                      | CaseSplit Int String
@@ -155,9 +155,9 @@ Specially for proof mode
 The implementation of these features are twofold: the emacs side and the Idris side.
 
 \subsection{Idris side}
-On the Idris side, the marshaling and unmarshaling of sexps is done in \texttt{IdeSlave.hs}.
-The main entry point is \emph{ideslaveStart}, called by \emph{idrisMain} (both in \texttt{REPL.hs}).
-Also, the \emph{idris\_outputmode} field in the \emph{IState} record (in \texttt{AbsSyntaxTree.hs}) is set to \emph{IdeSlave 0} (by a call \emph{setIdeSlave True} from \emph{idrisMain}).
+On the Idris side, the marshaling and unmarshaling of sexps is done in \texttt{IdeMode.hs}.
+The main entry point is \emph{idemodeStart}, called by \emph{idrisMain} (both in \texttt{REPL.hs}).
+Also, the \emph{idris\_outputmode} field in the \emph{IState} record (in \texttt{AbsSyntaxTree.hs}) is set to \emph{IdeMode 0} (by a call \emph{setIdeMode True} from \emph{idrisMain}).
 
 In the Idris source base, instead of writing raw data to standard output (eg by using \emph{putStrLn}), which violates the protocol presented in Section~\ref{sec:protocol}, Idris uses \emph{ihputStrLn :: Handle $\rightarrow$ String $\rightarrow$ Idris ()}.
 This function does a case analysis of the \emph{idris\_outputmode} field in the \emph{IState} record, and either uses \emph{putStrLn} for \emph{RawOutput} (actually \emph{hPutStrLn}) or first converts the message to a sexp by using \emph{convSExp} and wraps it into a \emph{:write-string} message, as seen on line 2 of our example.
@@ -165,7 +165,7 @@ This function does a case analysis of the \emph{idris\_outputmode} field in the 
 To display a result for a command, \emph{ihPrintError} and \emph{ihPrintResult} are available (for failure and success).
 Furthermore, the function \emph{ihWarn} produces a warning message, given a source location (\emph{FC} from \texttt{Core/TT.hs}) and a message.
 
-Most of Idris works via ideslave, for the time being setting the log level greater 5 results in calls to \emph{Debug.Trace.trace} from \texttt{Core}, which uses \emph{unsafePerformIO} and thus is not encapsulated in a sexp.
+Most of Idris works via IDE mode, for the time being setting the log level greater 5 results in calls to \emph{Debug.Trace.trace} from \texttt{Core}, which uses \emph{unsafePerformIO} and thus is not encapsulated in a sexp.
 Also not supported is the execution of programs (\emph{Execute}), to support this the input and output streams of the executed program will need to be wrapped into sexps.
 
 \subsection{Emacs side}
@@ -237,7 +237,7 @@ This is achieved by \emph{idris-eval} (as well in \texttt{inferior-idris.el}), w
 Both methods of interaction use the same underlying mechanism, namely sending a sexp via \emph{idris-rex} using the dispatcher \emph{idris-dispatch-event}.
 
 The main entry for interaction between emacs and Idris is the method \emph{idris-run} in the \texttt{inferior-idris.el} file.
-It starts the idris binary with the \emph{--ideslave} command line option, and additional customizable flags \emph{idris-interpreter-flags}.
+It starts the idris binary with the \emph{--ide-mode} command line option, and additional customizable flags \emph{idris-interpreter-flags}.
 The output of the idris process is connected to \emph{idris-output-filter}, which inserts the received string into the \emph{*idris-process*} buffer.
 This buffer is read by \emph{idris-process-available-input}, which validates the string and constructs a sexp (s-expression), which is then logged (to the \emph{*idris-events*} buffer via \emph{idris-event-log} in \texttt{idris-events.el}) and passed to the main dispatcher in \emph{idris-dispatch-event}.
 
@@ -288,7 +288,7 @@ The spans emitted by Idris may completely contain another span, but they will ne
 Presently, spans only overlap in output from documentation strings, but this may change in the future.
 
 \section{Conclusion}
-The ideslave mode provides a structured output of the Idris compiler.
+The IDE mode provides a structured output of the Idris compiler.
 This is especially useful for interfacing Idris to use for interactive development.
 It exposes some internals of the Idris compiler which are useful for interactive development environments.
 
@@ -299,14 +299,13 @@ It should be more interactive and not reformat proof script typed in by a user.
 The interactive commands also depend heavily on lines and just insert or rewrite the next line.
 This should be prevented to avoid brittleness.
 
-As mentioned in the implementation section, not all commands of the Idris REPL are available in ideslave mode:
+As mentioned in the implementation section, not all commands of the Idris REPL are available in IDE mode:
 \begin{itemize}
 \item Setting the log level greater 5 results in calls to \emph{Debug.Trace.trace}, which uses \emph{unsafePerformIO} and thus is not encapsulated into a sexp.
 \item The execution of programs (\emph{Execute}) is not supported, because the input and output streams of the executed program are not wrapped into sexps.
 \end{itemize}
 
 \subsection{Future}
-Semantic highlighting would be nice to have, in order to do that the Idris compiler should expose the regions and kinds of names.
 
 Also, navigation in the source code and further support for the developer.
 \end{document}

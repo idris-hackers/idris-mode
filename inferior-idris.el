@@ -114,7 +114,7 @@
                     (idris-buffer-name :process)
                     idris-interpreter-path
                     nil
-                    "--ideslave-socket"
+                    "--ide-mode-socket"
                     command-line-flags)))
       (with-current-buffer (idris-buffer-name :process)
         (add-hook 'comint-preoutput-filter-functions
@@ -133,7 +133,7 @@
   "Establish a connection with a Idris REPL."
   (when (not idris-connection)
     (setq idris-connection
-          (open-network-stream "Idris Ideslave" (idris-buffer-name :connection) "127.0.0.1" port))
+          (open-network-stream "Idris IDE support" (idris-buffer-name :connection) "127.0.0.1" port))
     (add-hook 'idris-event-hooks 'idris-version-hook-function)
     (add-hook 'idris-event-hooks 'idris-log-hook-function)
     (add-hook 'idris-event-hooks 'idris-warning-event-hook-function)

@@ -389,7 +389,7 @@ compiler-annotated output. Does not return a line number."
                         "Browse Namespace"))
 
 (defun idris-caller-tree (caller cmd)
-  "Display a tree from an IDESlave caller list, lazily retrieving a few levels at a time"
+  "Display a tree from an IDE caller list, lazily retrieving a few levels at a time"
   (pcase caller
     (`((,name ,highlight) ,children)
      (make-idris-tree
