@@ -231,6 +231,11 @@ esp. `font-lock-defaults', for details."
          (3 'idris-parameter-face t))
         ;; %assert_total
         ("%assert_total" . 'idris-unsafe-face)
+        ;; Expression-like directives: %runElab and %unify_log
+        (,(apply-partially #'idris-font-lock-literate-search
+                           (regexp-opt '("%runElab" "%unify_log"))
+                           (idris-lidr-p))
+         (0 'idris-directive-face))
         ;; `%access`, `%default`, etc
         (,(line-start "\\s-*\\(%\\w+\\)\\s-*\\(.*\\)")
          (1 'idris-directive-face)
