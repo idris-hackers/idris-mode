@@ -398,9 +398,10 @@ the length reported by Idris."
      (idris-prover-write-goals goal)
      t)
     (`(:abandon-proof ,_msg ,_target)
-     (with-current-buffer idris-prover-script-buffer-name
-       (copy-region-as-kill (point-min) (point-max))
-       (message "Proof saved to kill ring"))
+     (when (get-buffer idris-prover-script-buffer-name)
+       (with-current-buffer idris-prover-script-buffer-name
+         (copy-region-as-kill (point-min) (point-max))
+         (message "Proof saved to kill ring")))
      (idris-prover-end)
      (idris-repl-write-string "Abandoned proof")
      t)

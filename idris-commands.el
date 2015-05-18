@@ -1109,9 +1109,11 @@ of the term to replace."
   ;; The timer is necessary because of the async nature of starting the prover
   (run-with-timer 0.25 nil
                   #'(lambda ()
-                      (let ((window (get-buffer-window idris-prover-script-buffer-name)))
-                        (when window
-                          (select-window window))))))
+                      (let ((buffer (get-buffer idris-prover-script-buffer-name)))
+                        (when buffer
+                          (let ((window (get-buffer-window buffer)))
+                            (when window
+                              (select-window window))))))))
 
 (defun idris-fill-paragraph (justify)
   ;; In literate Idris files, allow filling non-code paragraphs
