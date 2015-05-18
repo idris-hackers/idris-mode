@@ -23,7 +23,15 @@
 (require 'idris-common-utils)
 (require 'cl-lib)
 
-(defgroup idris-faces nil "Idris highlighting" :prefix 'idris :group 'idris)
+(defgroup idris-faces nil
+  "Fonts and colors for Idris code.
+
+Because Idris's highlighting is semantic rather than syntactic,
+there aren't really very good defaults to appeal to from
+font-lock. You may need to change these settings to work well
+with your favorite theme. If you do so, please consider
+contributing the settings upstream to the theme maintainer."
+  :prefix 'idris :group 'idris)
 
 (defface idris-identifier-face
   '((t (:inherit default)))
