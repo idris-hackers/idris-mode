@@ -232,7 +232,7 @@ esp. `font-lock-defaults', for details."
         ;; Documentation comments.
         (,(line-start "\\s-*\\(|||\\)\\(.*\\)$")
          (1 font-lock-comment-delimiter-face)
-         (2 font-lock-doc-face))
+         (2 'idris-inline-doc-face))
         (,(line-start "\\s-*\\(|||\\)\\s-*\\(@\\)\\s-*\\(\\sw+\\)")
          (1 font-lock-comment-delimiter-face t)
          (2 font-lock-comment-delimiter-face t)
