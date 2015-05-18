@@ -125,12 +125,10 @@ behavior."
 
 ;;; Mode hooks
 (defcustom idris-mode-hook '(turn-on-idris-simple-indent
-                             idris-enable-clickable-imports
                              turn-on-eldoc-mode)
   "Hook to run upon entering Idris mode. You should choose at most one indentation style."
   :type 'hook
   :options '(turn-on-idris-simple-indent
-             idris-enable-clickable-imports
              turn-on-eldoc-mode)
   :group 'idris)
 
