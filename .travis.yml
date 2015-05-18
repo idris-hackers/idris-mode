@@ -35,7 +35,7 @@ install:
       - git clone https://github.com/idris-lang/Idris-dev.git /tmp/Idris-dev
       - cd /tmp/Idris-dev
       - cabal install -f FFI -f LLVM --only-dependencies --enable-tests
-      - cabal configure -f FFI -f LLVM
+      - cabal configure -f FFI -f LLVM --max-backjumps=-1
       - cabal sdist
       - cd ..
       - tar -xf Idris-dev/dist/idris*.tar.gz
