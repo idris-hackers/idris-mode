@@ -60,7 +60,7 @@
   (setq idris-warnings '())
   (delq (current-buffer) idris-warnings-buffers))
 
-(defun get-region (line)
+(defun idris-get-line-region (line)
   (goto-char (point-min))
   (cl-values
    (line-beginning-position line)
@@ -94,7 +94,7 @@ As of 20140807 (Idris 0.9.14.1-git:abee538) (endline endcolumn) is mostly the sa
             (save-restriction
               (widen) ;; Show errors at the proper location in narrowed buffers
               (goto-char (point-min))
-              (cl-multiple-value-bind (startp endp) (get-region startline)
+              (cl-multiple-value-bind (startp endp) (idris-get-line-region startline)
                 (goto-char startp)
                 (let ((start (+ startp startcol))
                       (end (if (and (= startline endline) (= startcol endcol))
@@ -103,7 +103,10 @@ As of 20140807 (Idris 0.9.14.1-git:abee538) (endline endcolumn) is mostly the sa
                                    (progn (insert " ")
                                           (1+ endp))
                                  endp)
-                             (+ (line-beginning-position endline) endcol)))
+                             (+ (save-excursion
+                                  (goto-char (point-min))
+                                  (line-beginning-position endline))
+                                endcol)))
                       (overlay (idris-warning-overlay-at-point)))
                   (if overlay
                       (idris-warning-merge-overlays overlay message)
