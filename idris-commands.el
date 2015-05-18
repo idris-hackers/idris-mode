@@ -220,7 +220,8 @@ line."
                           (:start ,start-line ,start-col)
                           (:end ,end-line ,end-col))
                          ,props)
-                       (when (string-suffix-p fn (buffer-file-name))
+                       (when (string= (file-name-nondirectory fn)
+                                      (file-name-nondirectory (buffer-file-name)))
                          (idris-highlight-input-region (current-buffer)
                                                        start-line start-col
                                                        end-line end-col
