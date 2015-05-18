@@ -118,6 +118,11 @@ defaults to nothing, but is provided for users who prefer the old
 behavior."
   :group 'idris-faces)
 
+(defface idris-inline-doc-face
+  '((t :inherit font-lock-doc-face))
+  "The face shown for IdrisDoc while editing Idris files."
+  :group 'idris-faces)
+
 (defface idris-info-title-face
   '((t :inherit header-line))
   "Face for Idris headers and titles."
