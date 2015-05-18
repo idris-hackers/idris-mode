@@ -161,9 +161,11 @@
 ;; Based on http://www.emacswiki.org/emacs/EmacsTags section "Finding tags files"
 ;; That page is GPL, so this is OK to include
 (defun idris-find-file-upwards (suffix &optional allow-hidden)
-  "Recursively searches each parent directory starting from the default-directory.
-looking for a file with name ending in suffix.  Returns the paths
-to the matching files, or nil if not found."
+  "Recursively searches each parent directory starting from the
+directory of the current buffer filename or from
+`default-directory' if that's not found, looking for a file with
+name ending in SUFFIX.  Returns the paths to the matching files,
+or nil if not found."
   (cl-labels
       ((find-file-r (path)
                     (let* ((parent (file-name-directory path))
@@ -177,10 +179,13 @@ to the matching files, or nil if not found."
                        ;; accounts for both.
                        ((or (null parent) (equal parent (directory-file-name parent))) nil) ; Not found
                        (t (find-file-r (directory-file-name parent))))))) ; Continue
-    (cl-remove-if #'(lambda (f)
-                      (and (not allow-hidden)
-                           (string-prefix-p "." (file-name-nondirectory f))))
-                  (find-file-r default-directory))))
+    (let* ((file (buffer-file-name (current-buffer)))
+           (dir (if file (file-name-directory file) default-directory)))
+      (when dir
+        (cl-remove-if #'(lambda (f)
+                          (and (not allow-hidden)
+                               (string-prefix-p "." (file-name-nondirectory f))))
+                      (find-file-r dir))))))
 
 (defun idris-try-directory-files (directory &optional full match nosort)
   "Call `directory-files' with arguments DIRECTORY, FULL, MATCH,
