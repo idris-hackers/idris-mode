@@ -96,9 +96,15 @@
   (define-key map (kbd "C-c C-b C-p") 'idris-open-package-file)
   (define-key map (kbd "C-c C-b p") 'idris-open-package-file))
 
+(defcustom idris-automatically-define-evil-keys t
+  "Whether to define keys for evil mode when available"
+  :type 'boolean
+  :group 'idris)
+
 (defun idris-define-evil-keys ()
   "Define keys for evil-mode."
-  (when (fboundp 'evil-leader/set-key-for-mode)
+  (when (and idris-automatically-define-evil-keys
+             (fboundp 'evil-leader/set-key-for-mode))
     (evil-leader/set-key-for-mode 'idris-mode
                                   "r" 'idris-load-file
                                   "t" 'idris-type-at-point
