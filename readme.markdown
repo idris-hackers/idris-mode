@@ -158,7 +158,7 @@ Before sending a patch or pull request, please run the automated tests for `idri
 ## Integration with other Emacs packages
 
 ### Evil mode support (Vim compatability)
-There is emulation for idris-vim commands in idris-mode. To enable this support please install the `evil` and `evil-leader` packages from MELPA (or your favorite source of packages).
+There is emulation for idris-vim commands in idris-mode. To enable this support please install the `evil` and `evil-leader` packages from MELPA (or your favorite source of packages) and then add `(idris-define-evil-keys)` to `init.el`.
 
 The following commands are supported (taken from idris-vim):
 
