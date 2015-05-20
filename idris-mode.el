@@ -38,7 +38,6 @@
                                        idris-define-ipkg-keys
                                        idris-define-ipkg-opening-keys)
                                   do (funcall keyer map))
-                         (idris-define-evil-keys)
                          map)
   "Keymap used in Idris mode.")
 
