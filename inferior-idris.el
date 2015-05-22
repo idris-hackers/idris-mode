@@ -52,7 +52,7 @@
     ,(format "%s, this could be the start of a beautiful proof."
              (idris-user-first-name))
     "The terms have seized control of the means of computation - a glorious future awaits!"
-    "Ship if it typechecks!"
+    "It typechecks! Ship it!"
     "Do you know 'Land of My Fathers'?"
     "Constructors are red / Types are blue / Your code always works / Because Idris loves you"))
 
