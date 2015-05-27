@@ -24,6 +24,7 @@
 ;; Boston, MA 02111-1307, USA.
 
 (require 'idris-core)
+(require 'idris-settings)
 (require 'cl-lib)
 
 
@@ -116,20 +117,35 @@ inserted text (that is, relative to point prior to insertion)."
 (autoload 'idris-make-namespace-keymap "idris-commands.el")
 (autoload 'idris-eval "inferior-idris.el")
 
-(defun idris-semantic-properties (props)
-  "Compute how to highlight with Idris compiler properties PROPS."
-  (let* ((clickable-decors '(:type :data :function :metavar :module :namespace))
-         (name (assoc :name props))
+(defconst idris-semantic-properties-clickable-decors
+  '(:type :data :function :metavar :module :namespace)
+  "The decors that should light up as responsive to mouse clicks.")
+
+(defun idris-semantic-properties-face (props)
+  "Compute the text property `face' from the Idris properties for a region."
+  (let* ((decor (assoc :decor props))
          (implicit (assoc :implicit props))
-         (decor (assoc :decor props))
-         (term (assoc :tt-term props))
-         (namespace (assoc :namespace props))
-         (source-file (assoc :source-file props))
-         (unique-val (cl-gensym)) ; HACK to stop consecutive mouse-faces from interfering
+         (text-format (assoc :text-formatting props))
+         (idris-err (assoc :error props))
+         (decor-face (if decor
+                         (pcase (cadr decor)
+                           (:type '(idris-semantic-type-face))
+                           (:data '(idris-semantic-data-face))
+                           (:function '(idris-semantic-function-face))
+                           (:keyword '(idris-keyword-face))
+                           (:metavar '(idris-metavariable-face))
+                           (:bound '(idris-semantic-bound-face))
+                           (:namespace '(idris-semantic-namespace-face))
+                           (:module '(idris-semantic-module-face))
+                           (_ nil))
+                       nil))
          (implicit-face (if (and implicit (equal (cadr implicit) :True))
                             '(idris-semantic-implicit-face)
                           nil))
-         (text-face (pcase (assoc :text-formatting props)
+         (err-face (if idris-err
+                       '(idris-warning-face)
+                     ()))
+         (text-face (pcase text-format
                       (`(:text-formatting :bold)
                        '(bold))
                       (`(:text-formatting :italic)
@@ -137,73 +153,82 @@ inserted text (that is, relative to point prior to insertion)."
                       (`(:text-formatting :underline)
                        '(underline))
                       (_ nil)))
-         (decor-face (if decor
-                         (cdr (assoc (cadr decor)
-                                     '((:type idris-semantic-type-face)
-                                       (:data idris-semantic-data-face)
-                                       (:function idris-semantic-function-face)
-                                       (:keyword idris-keyword-face)
-                                       (:metavar idris-metavariable-face)
-                                       (:bound idris-semantic-bound-face)
-                                       (:namespace idris-semantic-namespace-face)
-                                       (:module idris-semantic-module-face))))
-                       nil))
-         (doc-overview (pcase (assoc :doc-overview props)
-                         (`(:doc-overview ,docs) (concat "\n" docs))
-                         (_ "")))
-         (type (pcase (assoc :type props)
-                 (`(:type ,ty) (concat " : " ty))
-                 (_ "")))
-         (idris-err (assoc :error props))
-         (err-face (if idris-err
-                       '(idris-warning-face)
-                     ()))
+         (unique-val (cl-gensym)) ; HACK to stop consecutive mouse-faces from interfering
          (mousable-face
-          (cond ((member (cadr decor) clickable-decors)
+          (cond ((member (cadr decor) idris-semantic-properties-clickable-decors)
                  `((:inherit ,decor-face :box t :hack ,unique-val)))
                 (idris-err
                  `((:inherit ('idris-warning-face highlight))))
                 (t nil)))
+         (computed-face (append text-face
+                                implicit-face
+                                decor-face
+                                err-face)))
+    (append (if computed-face (list 'face computed-face) ())
+            (if mousable-face (list 'mouse-face mousable-face) ()))))
+
+(defun idris-semantic-properties-help-echo (props)
+  (let* ((name (assoc :name props))
+         (decor (assoc :decor props))
+         (namespace (assoc :namespace props))
+         (idris-err (assoc :error props))
+         (type (pcase (assoc :type props)
+                 (`(:type ,ty) (concat " : " ty))
+                 (_ "")))
+         (doc-overview (pcase (assoc :doc-overview props)
+                         (`(:doc-overview ,docs) (concat "\n" docs))
+                         (_ "")))
          (mouse-help
-          (cond ((member (cadr decor) clickable-decors)
+          (cond ((member (cadr decor) idris-semantic-properties-clickable-decors)
+                 "\n<mouse-3> context menu")
+                (idris-err (idris-eval `(:error-string ,(cadr idris-err))))
+                (t ""))))
+    (cond (name (list 'help-echo
+                      (concat (cadr name)
+                              type
+                              doc-overview
+                              mouse-help)))
+          (namespace (list 'help-echo (concat (cadr namespace) "\n" mouse-help)))
+          (t nil))))
+
+(defun idris-semantic-properties (props)
+  "Compute how to highlight with Idris compiler properties PROPS."
+  (let* ((name (assoc :name props))
+         (decor (assoc :decor props))
+         (term (assoc :tt-term props))
+         (namespace (assoc :namespace props))
+         (source-file (assoc :source-file props))
+         (idris-err (assoc :error props))
+         (mouse-help
+          (cond ((member (cadr decor) idris-semantic-properties-clickable-decors)
                  "\n<mouse-3> context menu")
                 (idris-err (idris-eval `(:error-string ,(cadr idris-err))))
                 (t ""))))
     (append '(rear-nonsticky t)
             (cond (name
-                   (append (list 'help-echo
-                                 (concat (cadr name)
-                                         type
-                                         doc-overview
-                                         mouse-help))
-                           (cond ((and (member (cadr decor)
-                                               '(:type :data :function))
-                                       name)
-                                  (list 'idris-ref (cadr name)
-                                        'keymap (idris-make-ref-menu-keymap
-                                                 (cadr name)
-                                                 (if namespace
-                                                     (cadr namespace)
-                                                   nil))))
-                                 ((equal (cadr decor) :metavar)
-                                  (list 'idris-ref (cadr name)
-                                        'keymap (idris-make-metavariable-keymap (cadr name))))
-                                 (t nil))))
+                   (cond ((and (member (cadr decor)
+                                       '(:type :data :function))
+                               name)
+                          (list 'idris-ref (cadr name)
+                                'keymap (idris-make-ref-menu-keymap
+                                         (cadr name)
+                                         (if namespace
+                                             (cadr namespace)
+                                           nil))))
+                         ((equal (cadr decor) :metavar)
+                          (list 'idris-ref (cadr name)
+                                'keymap (idris-make-metavariable-keymap (cadr name))))
+                         (t nil)))
                   (namespace
-                   (append (list 'help-echo
-                                 (concat (cadr namespace) "\n" mouse-help))
-                           (cond ((or (equal (cadr decor) :module)
-                                      (equal (cadr decor) :namespace))
-                                  (list 'keymap (idris-make-namespace-keymap
-                                                 (cadr namespace)
-                                                 (if source-file
-                                                     (cadr source-file)
-                                                   nil))))
-                                 (t nil))))
+                   (cond ((or (equal (cadr decor) :module)
+                              (equal (cadr decor) :namespace))
+                          (list 'keymap (idris-make-namespace-keymap
+                                         (cadr namespace)
+                                         (if source-file
+                                             (cadr source-file)
+                                           nil))))
+                         (t nil)))
                   (t nil))
-            (if mousable-face
-                (list 'mouse-face mousable-face)
-              ())
             (if term
                 (list 'idris-tt-term (cadr term))
               ())
@@ -212,11 +237,8 @@ inserted text (that is, relative to point prior to insertion)."
                                  help-echo ,@mouse-help
                                  keymap ,(idris-make-error-keymap (cadr idris-err)))
               ())
-            (let ((f (append text-face
-                             implicit-face
-                             decor-face
-                             err-face)))
-              (if f (list 'face f) ())))))
+            (idris-semantic-properties-help-echo props)
+            (idris-semantic-properties-face props))))
 
 (defun idris-repl-semantic-text-props (highlighting)
   (cl-loop for (start length props) in highlighting
