@@ -20,10 +20,10 @@ same face as functions and values defined with `=`.
 There are some docstrings spread around the mode, thus C-h m is helpful and returns the available key bindings.
 The REPL also supports tab completion, thus pressing tab opens a buffer with the available completions.
 
-The [extended abstract] for DTP14 gives overview of the features of idris-mode. Some preliminary notes are available in the [pdf]
+The [extended abstract] for DTP14 gives overview of the features of idris-mode. The underlying [protocol] is described in the Idris documentation.
 
 [extended abstract]: http://itu.dk/people/drc/pubs/dtp2014-idris-mode.pdf
-[pdf]: http://itu.dk/people/hame/idris-mode.pdf
+[protocol]: http://docs.idris-lang.org/en/latest/reference/ide-protocol.html
 
 Certain areas of `idris-mode` show explanatory help text. When you've learned how to use `idris-mode`, you can turn these off by setting `idris-show-help-text` to `nil`.
 
