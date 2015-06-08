@@ -301,7 +301,7 @@ Invokes `idris-ipkg-build-mode-hook'."
   (save-excursion
     (goto-char (point-min))
     (let ((found
-           (re-search-forward "^\\s-*sourcedir\\s-*=\\s-*\\(\\sw+\\)"
+           (re-search-forward "^\\s-*sourcedir\\s-*=\\s-*\\(\\S-+\\)"
                               nil
                               t)))
       (if found
