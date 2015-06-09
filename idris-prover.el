@@ -126,6 +126,8 @@ string and whose cadr is highlighting information."
     (define-key map (kbd "RET") 'idris-prover-script-ret)
     (define-key map (kbd "M-n") 'idris-prover-script-forward)
     (define-key map (kbd "M-p") 'idris-prover-script-backward)
+    (define-key map (kbd "C-c C-q") 'idris-prover-script-qed)
+    (define-key map (kbd "C-c C-k") 'idris-prover-script-qed)
     ;; Using (kbd "<TAB>") in place of "\t" makes emacs angry, and suggests
     ;; using the latter form.
     (define-key map "\t" 'completion-at-point)
@@ -186,7 +188,7 @@ left margin."
 (defun idris-prover-script-backward ()
   "Backward one piece of proof script"
   (interactive)
-  (idris-eval-async '(:interpret "undo")
+  (idris-eval-async (list :interpret (if idris-enable-elab-prover ":undo" "undo"))
                     #'(lambda (_result) t)
                     #'(lambda (condition)
                         (message (concat idris-prover-error-message-prefix condition)))))
@@ -219,7 +221,7 @@ left margin."
                              "\\`[ \t\n]*" ""
                              ;; replace Windows newlines with a space
                              (replace-regexp-in-string "" " " tactic-text))))
-            (idris-rex () (list ':interpret tactic-cmd) nil
+            (idris-rex () (list :interpret tactic-cmd) nil
               ((:ok _result)
                (with-current-buffer (idris-prover-script-buffer)
                  (when idris-prover-script-processing-overlay
@@ -258,12 +260,32 @@ left margin."
       (let ((inhibit-read-only t)) (insert "\n"))
     (newline)))
 
+(defun idris-prover-script-qed ()
+  "Send a QED command to Idris."
+  (interactive)
+  (if idris-prover-currently-proving
+      (idris-eval-async (list :interpret (if idris-enable-elab-prover ":qed" "qed"))
+                        #'(lambda (_result) t)
+                        #'(lambda (condition)
+                            (message (concat idris-prover-error-message-prefix condition))))
+    (error "No proof in progress")))
+
+(easy-menu-define idris-prover-script-mode-menu idris-prover-script-mode-map
+  "Menu for Idris prover scripts"
+  `("Idris Proof"
+    ["Advance" idris-prover-script-forward t]
+    ["Retract" idris-prover-script-backward t]
+    ["QED" idris-prover-script-qed t]
+    ["Abandon" idris-prover-abandon t])
+  )
+
 (define-derived-mode idris-prover-script-mode prog-mode "Idris-Proof-Script"
   "Major mode for interacting with Idris proof script.
     \\{idris-prover-script-mode-map}
 Invokes `idris-prover-script-mode-hook'."
   :group 'idris-prover
-  (set (make-local-variable 'completion-at-point-functions) '(idris-prover-complete))
+  (set (make-local-variable 'completion-at-point-functions)
+       '(idris-prover-complete))
   (set (make-local-variable 'indent-tabs-mode) nil))
 
 (defun idris-prover-script-buffer ()
@@ -292,12 +314,14 @@ special prover state."
     (when idris-show-help-text
       (setq header-line-format
             (let ((fwd (where-is-internal 'idris-prover-script-forward))
-                  (bak (where-is-internal 'idris-prover-script-backward)))
+                  (bak (where-is-internal 'idris-prover-script-backward))
+                  (qed (where-is-internal 'idris-prover-script-qed)))
               (concat " Write your proof script here."
-                      (if (and fwd bak)
-                          (format "Use %s to advance and %s to retract."
+                      (if (and fwd bak qed)
+                          (format "Use %s to advance and %s to retract.  %s saves a completed proof."
                                   (key-description (car fwd))
-                                  (key-description (car bak)))
+                                  (key-description (car bak))
+                                  (key-description (car qed)))
                         "")))))
     (unless idris-prover-script-processing
       (setq idris-prover-script-processing (make-marker)))
@@ -347,9 +371,12 @@ the length reported by Idris."
 (defun idris-prover-abandon ()
   "Abandon an in-progress proof."
   (interactive)
-  (if idris-prover-currently-proving
-      (idris-eval (list :interpret "abandon") t)
-    (error "No proof in progress")))
+  ;; Ask for confirmation when called interactively
+  (when (or (not (called-interactively-p 'interactive))
+            (yes-or-no-p "Abandon proof and discard script? "))
+    (if idris-prover-currently-proving
+        (idris-eval (list :interpret (if idris-enable-elab-prover ":abandon" "abandon")) t)
+      (error "No proof in progress"))))
 
 (defun idris-prover-end ()
   "Get rid of left over buffers from proof mode and unset global state related to the prover."

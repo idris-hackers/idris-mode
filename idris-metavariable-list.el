@@ -81,7 +81,9 @@ Invoces `idris-metavariable-list-mode-hook'.")
       (idris-metavariable-list-mode)
       (when idris-show-help-text
         (insert "This buffer displays the unsolved metavariables from the currently-loaded code. ")
-        (insert "Press the [P] buttons to solve the metavariables interactively in the prover.")
+        (insert (concat "Press the "
+                        (if idris-enable-elab-prover "[E]" "[P]")
+                        "buttons to solve the metavariables interactively in the prover."))
         (let ((fill-column 80))
           (fill-region (point-min) (point-max)))
         (insert "\n\n"))
@@ -115,11 +117,17 @@ METAVAR should be a three-element list consisting of the
 metavariable name, its premises, and its conclusion."
   (cl-destructuring-bind (name premises conclusion) metavar
     (make-idris-tree :item name
-                     :button `("[P]"
-                               help-echo "Open in prover"
-                               action ,#'(lambda (_)
-                                           (interactive)
-                                           (idris-prove-metavariable name)))
+                     :button (if idris-enable-elab-prover
+                                 `("[E]"
+                                   help-echo "Elaborate interactively"
+                                   action ,#'(lambda (_)
+                                               (interactive)
+                                               (idris-prove-metavariable name t)))
+                               `("[P]"
+                                 help-echo "Open in prover"
+                                 action ,#'(lambda (_)
+                                             (interactive)
+                                             (idris-prove-metavariable name))))
                      :highlighting `((0 ,(length name) ((:decor :metavar))))
                      :print-fn #'idris-metavariable-tree-printer
                      :collapsed-p (not idris-metavariable-list-show-expanded) ; from customize

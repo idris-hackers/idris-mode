@@ -177,6 +177,13 @@ with lots of space for the metavariable buffer."
   :type 'boolean
   :group 'idris)
 
+(defcustom idris-enable-elab-prover nil
+  "Whether or not to enable the interactive prover for elaborator reflection.
+Disabled by default until Idris 0.9.19 because it requires a
+change to ordinary prover interaction."
+  :type 'boolean
+  :group 'idris)
+
 ;;;; Other hooks
 (defcustom idris-run-hook '(idris-set-current-pretty-print-width)
   "A hook to run when Idris is started."
