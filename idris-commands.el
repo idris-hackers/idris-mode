@@ -905,6 +905,10 @@ means to not ask for confirmation."
     (define-key menu [idris-metavariable-menu-prover]
       `(menu-item "Launch prover"
                   (lambda () (interactive))))
+    (when idris-enable-elab-prover
+      (define-key menu [idris-metavariable-menu-elab]
+        `(menu-item "Launch interactive elaborator"
+                    (lambda () (interactive)))))
     menu))
 
 (defun idris-make-metavariable-keymap (name)
@@ -914,6 +918,8 @@ means to not ask for confirmation."
         (let ((selection (x-popup-menu t (idris-make-metavariable-menu name))))
           (cond ((equal selection '(idris-metavariable-menu-prover))
                  (idris-prove-metavariable name))
+                ((equal selection '(idris-metavariable-menu-elab))
+                 (idris-prove-metavariable name t))
                 (t (message "%S" selection))))))
     map))
 
@@ -1102,9 +1108,9 @@ of the term to replace."
       (goto-char start)
       (insert new-term))))
 
-(defun idris-prove-metavariable (name)
-  "Launch the prover on the metavariable NAME."
-  (idris-eval-async `(:interpret ,(concat ":p " name))
+(defun idris-prove-metavariable (name &optional elab)
+  "Launch the prover on the metavariable NAME, using Elab mode if ELAB is non-nil."
+  (idris-eval-async `(:interpret ,(concat (if elab ":elab " ":p ") name))
                     (lambda (_) t))
   ;; The timer is necessary because of the async nature of starting the prover
   (run-with-timer 0.25 nil
