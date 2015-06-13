@@ -553,8 +553,10 @@ KILLFLAG is set if N was explicitly specified."
     (when (car what)
       (save-excursion (idris-load-file-sync))
       (let ((result (car (idris-eval `(:case-split ,(cdr what) ,(car what))))))
-        (delete-region (line-beginning-position) (line-end-position))
-        (insert (substring result 0 (1- (length result))))))))
+        (if (<= (length result) 2)
+            (message "Can't case split %s" (car what))
+          (delete-region (line-beginning-position) (line-end-position))
+          (insert (substring result 0 (1- (length result)))))))))
 
 (defun idris-add-clause (proof)
   "Add clauses to the declaration at point"
