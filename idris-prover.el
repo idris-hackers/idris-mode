@@ -127,7 +127,7 @@ string and whose cadr is highlighting information."
     (define-key map (kbd "M-n") 'idris-prover-script-forward)
     (define-key map (kbd "M-p") 'idris-prover-script-backward)
     (define-key map (kbd "C-c C-q") 'idris-prover-script-qed)
-    (define-key map (kbd "C-c C-k") 'idris-prover-script-qed)
+    (define-key map (kbd "C-c C-k") 'idris-prover-abandon)
     ;; Using (kbd "<TAB>") in place of "\t" makes emacs angry, and suggests
     ;; using the latter form.
     (define-key map "\t" 'completion-at-point)
