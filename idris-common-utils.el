@@ -118,7 +118,7 @@ inserted text (that is, relative to point prior to insertion)."
 (autoload 'idris-eval "inferior-idris.el")
 
 (defconst idris-semantic-properties-clickable-decors
-  '(:type :data :function :metavar :module :namespace)
+  '(:type :data :function :metavar :module :namespace :postulate)
   "The decors that should light up as responsive to mouse clicks.")
 
 (defun idris-semantic-properties-face (props)
@@ -136,6 +136,7 @@ inserted text (that is, relative to point prior to insertion)."
                            (:metavar '(idris-metavariable-face))
                            (:bound '(idris-semantic-bound-face))
                            (:namespace '(idris-semantic-namespace-face))
+                           (:postulate '(idris-semantic-postulate-face))
                            (:module '(idris-semantic-module-face))
                            (_ nil))
                        nil))

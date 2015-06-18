@@ -91,6 +91,11 @@
   "The face to be used to highlight defined functions"
   :group 'idris-faces)
 
+(defface idris-semantic-postulate-face
+  '((t (:foreground "darkgreen" :underline t)))
+  "The face to be used to highlight postulated values"
+  :group 'idris-faces)
+
 (defface idris-semantic-bound-face
   '((t (:foreground "purple")))
   "The face to be used to highlight bound variables"
