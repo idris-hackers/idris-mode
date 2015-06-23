@@ -112,7 +112,7 @@ inserted text (that is, relative to point prior to insertion)."
 
 ;;; Take care of circular dependency issue
 (autoload 'idris-make-ref-menu-keymap "idris-commands.el")
-(autoload 'idris-make-metavariable-keymap "idris-commands.el")
+(autoload 'idris-make-hole-keymap "idris-commands.el")
 (autoload 'idris-make-error-keymap "idris-commands.el")
 (autoload 'idris-make-namespace-keymap "idris-commands.el")
 (autoload 'idris-eval "inferior-idris.el")
@@ -133,7 +133,7 @@ inserted text (that is, relative to point prior to insertion)."
                            (:data '(idris-semantic-data-face))
                            (:function '(idris-semantic-function-face))
                            (:keyword '(idris-keyword-face))
-                           (:metavar '(idris-metavariable-face))
+                           (:metavar '(idris-hole-face))
                            (:bound '(idris-semantic-bound-face))
                            (:namespace '(idris-semantic-namespace-face))
                            (:postulate '(idris-semantic-postulate-face))
@@ -218,7 +218,7 @@ inserted text (that is, relative to point prior to insertion)."
                                            nil))))
                          ((equal (cadr decor) :metavar)
                           (list 'idris-ref (cadr name)
-                                'keymap (idris-make-metavariable-keymap (cadr name))))
+                                'keymap (idris-make-hole-keymap (cadr name))))
                          (t nil)))
                   (namespace
                    (cond ((or (equal (cadr decor) :module)

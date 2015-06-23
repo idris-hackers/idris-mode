@@ -34,7 +34,7 @@
 (require 'idris-log)
 (require 'idris-ipkg-mode)
 (require 'idris-warnings-tree)
-(require 'idris-metavariable-list)
+(require 'idris-hole-list)
 (require 'idris-prover)
 (require 'idris-common-utils)
 (require 'idris-syntax)
@@ -86,16 +86,16 @@
     (idris-eval `(:interpret ,(concat ":cd " new-working-directory)))
     (setq idris-process-current-working-directory new-working-directory)))
 
-(defun idris-list-metavariables-on-load ()
-  "Use the user's settings from customize to determine whether to list the metavariables."
+(defun idris-list-holes-on-load ()
+  "Use the user's settings from customize to determine whether to list the holes."
   (interactive)
-  (when idris-metavariable-show-on-load (idris-list-metavariables)))
+  (when idris-hole-show-on-load (idris-list-holes)))
 
-(defcustom idris-load-file-success-hook '(idris-list-metavariables-on-load
+(defcustom idris-load-file-success-hook '(idris-list-holes-on-load
                                           idris-set-current-pretty-print-width)
   "Functions to call when loading a file is successful"
   :type 'hook
-  :options '(idris-list-metavariables-on-load
+  :options '(idris-list-holes-on-load
              idris-set-current-pretty-print-width)
   :group 'idris)
 
@@ -615,19 +615,19 @@ KILLFLAG is set if N was explicitly specified."
         (insert result)))))
 
 (defun idris-make-lemma ()
-  "Extract lemma from metavariable"
+  "Extract lemma from hole"
   (interactive)
   (let ((what (idris-thing-at-point)))
     (when (car what)
       (save-excursion (idris-load-file-sync))
       (let* ((result (car (idris-eval `(:make-lemma ,(cdr what) ,(car what)))))
              (lemma-type (car result)))
-        ;; There are two cases here: either a ?metavariable, or the {name} of a provisional defn.
+        ;; There are two cases here: either a ?hole, or the {name} of a provisional defn.
         (cond ((equal lemma-type :metavariable-lemma)
                (let ((lem-app (cadr (assoc :replace-metavariable (cdr result))))
                      (type-decl (cadr (assoc :definition-type (cdr result)))))
-                 ;; replace the metavariable
-                 ;; assume point is on the metavar right now!
+                 ;; replace the hole
+                 ;; assume point is on the hole right now!
                  (while (not (looking-at "\\?[a-zA-Z0-9?_]+"))
                    (backward-char 1))
                  ;; now we're on the ? - we just matched the metavar
@@ -711,7 +711,7 @@ prefix argument sets the recursion depth directly."
   (interactive "MRefine by: ")
   (let ((what (idris-thing-at-point)))
     (unless (car what)
-      (error "Could not find a metavariable at point to refine by"))
+      (error "Could not find a hole at point to refine by"))
     (save-excursion (idris-load-file-sync))
     (let ((result (car (idris-eval `(:refine ,(cdr what) ,(car what) ,name)))))
       (save-excursion
@@ -770,16 +770,16 @@ type-correct, so loading will fail."
           (list start end candidates
                 :exclusive 'no))))))
 
-(defun idris-list-metavariables ()
-  "Get a list of currently-open metavariables"
+(defun idris-list-holes ()
+  "Get a list of currently-open holes"
   (interactive)
-  (idris-metavariable-list-show (car (idris-eval '(:metavariables 80)))))
+  (idris-hole-list-show (car (idris-eval '(:metavariables 80)))))
 
 (defun idris-kill-buffers ()
   (idris-warning-reset-all)
   (setq idris-currently-loaded-buffer nil)
   ;; not killing :events since it it tremendously useful for debuging
-  (let ((bufs (list :connection :repl :proof-obligations :proof-shell :proof-script :log :info :notes :metavariables :tree-viewer)))
+  (let ((bufs (list :connection :repl :proof-obligations :proof-shell :proof-script :log :info :notes :holes :tree-viewer)))
     (dolist (b bufs) (idris-kill-buffer b))))
 
 (defun idris-pop-to-repl ()
@@ -902,26 +902,26 @@ means to not ask for confirmation."
                 (t (message "%S" selection))))))
     map))
 
-(defun idris-make-metavariable-menu (_name)
+(defun idris-make-hole-menu (_name)
   (let ((menu (make-sparse-keymap)))
-    (define-key menu [idris-metavariable-menu-prover]
+    (define-key menu [idris-hole-menu-prover]
       `(menu-item "Launch prover"
                   (lambda () (interactive))))
     (when idris-enable-elab-prover
-      (define-key menu [idris-metavariable-menu-elab]
+      (define-key menu [idris-hole-menu-elab]
         `(menu-item "Launch interactive elaborator"
                     (lambda () (interactive)))))
     menu))
 
-(defun idris-make-metavariable-keymap (name)
+(defun idris-make-hole-keymap (name)
   (let ((map (make-sparse-keymap)))
     (define-key map [mouse-3]
       (lambda () (interactive)
-        (let ((selection (x-popup-menu t (idris-make-metavariable-menu name))))
-          (cond ((equal selection '(idris-metavariable-menu-prover))
-                 (idris-prove-metavariable name))
-                ((equal selection '(idris-metavariable-menu-elab))
-                 (idris-prove-metavariable name t))
+        (let ((selection (x-popup-menu t (idris-make-hole-menu name))))
+          (cond ((equal selection '(idris-hole-menu-prover))
+                 (idris-prove-hole name))
+                ((equal selection '(idris-hole-menu-elab))
+                 (idris-prove-hole name t))
                 (t (message "%S" selection))))))
     map))
 
@@ -1110,8 +1110,8 @@ of the term to replace."
       (goto-char start)
       (insert new-term))))
 
-(defun idris-prove-metavariable (name &optional elab)
-  "Launch the prover on the metavariable NAME, using Elab mode if ELAB is non-nil."
+(defun idris-prove-hole (name &optional elab)
+  "Launch the prover on the hole NAME, using Elab mode if ELAB is non-nil."
   (idris-eval-async `(:interpret ,(concat (if elab ":elab " ":p ") name))
                     (lambda (_) t))
   ;; The timer is necessary because of the async nature of starting the prover

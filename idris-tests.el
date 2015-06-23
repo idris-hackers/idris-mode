@@ -50,35 +50,35 @@ remain."
     (kill-buffer idris-event-buffer-name)))
 
 
-(ert-deftest idris-test-metavar-load ()
-  "Test the metavariable-list-on-load setting."
+(ert-deftest idris-test-hole-load ()
+  "Test the hole-list-on-load setting."
   (idris-quit)
-  ;;; The default setting should be to show metavariables
-  (should idris-metavariable-show-on-load)
+  ;;; The default setting should be to show holes
+  (should idris-hole-show-on-load)
 
   (let ((buffer (find-file "test-data/MetavarTest.idr")))
     ;;; Check that the file was loaded
     (should (bufferp buffer))
 
-    ;;; Check that it shows the metavar list with the option turned on
+    ;;; Check that it shows the hole list with the option turned on
     (with-current-buffer buffer
       (idris-load-file))
     ;;; Allow async stuff to happen
     (dotimes (_ 5) (accept-process-output nil 1))
-    (let ((mv-buffer (get-buffer idris-metavariable-list-buffer-name)))
+    (let ((mv-buffer (get-buffer idris-hole-list-buffer-name)))
       ;; The buffer exists and contains characters
       (should (bufferp mv-buffer))
       (should (> (buffer-size mv-buffer) 10)))
     (idris-quit)
 
     ;; Now check that it works with the setting the other way
-     (let ((idris-metavariable-show-on-load nil))
-       (with-current-buffer buffer
-         (idris-load-file))
-       (dotimes (_ 5) (accept-process-output nil 1))
-       (let ((mv-buffer (get-buffer idris-metavariable-list-buffer-name)))
-         (should-not (bufferp mv-buffer))
-         (should (null mv-buffer))))
+    (let ((idris-hole-show-on-load nil))
+      (with-current-buffer buffer
+        (idris-load-file))
+      (dotimes (_ 5) (accept-process-output nil 1))
+      (let ((mv-buffer (get-buffer idris-hole-list-buffer-name)))
+        (should-not (bufferp mv-buffer))
+        (should (null mv-buffer))))
     ;; Clean up
     (kill-buffer))
 
