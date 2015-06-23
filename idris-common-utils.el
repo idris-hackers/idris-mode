@@ -192,6 +192,7 @@ inserted text (that is, relative to point prior to insertion)."
          (namespace (assoc :namespace props))
          (idris-err (assoc :error props))
          (link-href (assoc :link-href props))
+         (image (assoc :image props))
          (type (pcase (assoc :type props)
                  (`(:type ,ty) (concat " : " ty))
                  (_ "")))
@@ -210,6 +211,7 @@ inserted text (that is, relative to point prior to insertion)."
                               mouse-help)))
           (namespace (list 'help-echo (concat (cadr namespace) "\n" mouse-help)))
           (link-href (list 'help-echo (concat "<mouse-1> browse " (cadr link-href))))
+          (image (list 'help-echo (cadr image)))
           (t nil))))
 
 (defun idris-semantic-properties (props)
@@ -220,7 +222,8 @@ inserted text (that is, relative to point prior to insertion)."
          (namespace (assoc :namespace props))
          (source-file (assoc :source-file props))
          (idris-err (assoc :error props))
-         (link-href (assoc :link-href props)))
+         (link-href (assoc :link-href props))
+         (image (assoc :image props)))
     (append '(rear-nonsticky t)
             (cond (name
                    (cond ((and (member (cadr decor)
@@ -247,14 +250,18 @@ inserted text (that is, relative to point prior to insertion)."
                          (t nil)))
                   (link-href
                    (list 'keymap (idris-make-link-keymap (cadr link-href))))
+                  (image
+                   (list 'display
+                         `(image :type imagemagick
+                                 :file ,(expand-file-name (cl-caddr image)
+                                                          (file-name-directory idris-process-current-working-directory)))))
                   (t nil))
             (if term
                 (list 'idris-tt-term (cadr term))
               ())
             (if idris-err
-                `(idris-tt-error ,(cadr idris-err)
-                                 help-echo ,@mouse-help
-                                 keymap ,(idris-make-error-keymap (cadr idris-err)))
+                (list 'idris-tt-error (cadr idris-err)
+                      'keymap (idris-make-error-keymap (cadr idris-err)))
               ())
             (idris-semantic-properties-help-echo props)
             (idris-semantic-properties-face props))))
