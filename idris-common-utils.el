@@ -23,6 +23,11 @@
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA 02111-1307, USA.
 
+;;; Commentary
+;; This file contains various useful things that are employed
+;; throughout idris-mode.
+
+;;; Code:
 (require 'idris-core)
 (require 'idris-settings)
 (require 'cl-lib)
@@ -117,6 +122,15 @@ inserted text (that is, relative to point prior to insertion)."
 (autoload 'idris-make-namespace-keymap "idris-commands.el")
 (autoload 'idris-eval "inferior-idris.el")
 
+(defun idris-make-link-keymap (url)
+  "Compute the keymap for a clickable link to URL."
+  (let ((map (make-sparse-keymap))
+        (browse (lambda () (interactive) (browse-url url))))
+    (define-key map [mouse-1] browse)
+    (define-key map [mouse-2] browse)
+    (define-key map (kbd "RET") browse)
+    map))
+
 (defconst idris-semantic-properties-clickable-decors
   '(:type :data :function :metavar :module :namespace :postulate)
   "The decors that should light up as responsive to mouse clicks.")
@@ -127,6 +141,7 @@ inserted text (that is, relative to point prior to insertion)."
          (implicit (assoc :implicit props))
          (text-format (assoc :text-formatting props))
          (idris-err (assoc :error props))
+         (link-href (assoc :link-href props))
          (decor-face (if decor
                          (pcase (cadr decor)
                            (:type '(idris-semantic-type-face))
@@ -154,17 +169,21 @@ inserted text (that is, relative to point prior to insertion)."
                       (`(:text-formatting :underline)
                        '(underline))
                       (_ nil)))
+         (link-face (if link-href '(idris-link-face) ()))
          (unique-val (cl-gensym)) ; HACK to stop consecutive mouse-faces from interfering
          (mousable-face
           (cond ((member (cadr decor) idris-semantic-properties-clickable-decors)
                  `((:inherit ,decor-face :box t :hack ,unique-val)))
                 (idris-err
                  `((:inherit ('idris-warning-face highlight))))
+                (link-href
+                 '(highlight))
                 (t nil)))
          (computed-face (append text-face
                                 implicit-face
                                 decor-face
-                                err-face)))
+                                err-face
+                                link-face)))
     (append (if computed-face (list 'face computed-face) ())
             (if mousable-face (list 'mouse-face mousable-face) ()))))
 
@@ -173,6 +192,8 @@ inserted text (that is, relative to point prior to insertion)."
          (decor (assoc :decor props))
          (namespace (assoc :namespace props))
          (idris-err (assoc :error props))
+         (link-href (assoc :link-href props))
+         (image (assoc :image props))
          (type (pcase (assoc :type props)
                  (`(:type ,ty) (concat " : " ty))
                  (_ "")))
@@ -190,6 +211,8 @@ inserted text (that is, relative to point prior to insertion)."
                               doc-overview
                               mouse-help)))
           (namespace (list 'help-echo (concat (cadr namespace) "\n" mouse-help)))
+          (link-href (list 'help-echo (concat "<mouse-1> browse " (cadr link-href))))
+          (image (list 'help-echo (cadr image)))
           (t nil))))
 
 (defun idris-semantic-properties (props)
@@ -200,11 +223,8 @@ inserted text (that is, relative to point prior to insertion)."
          (namespace (assoc :namespace props))
          (source-file (assoc :source-file props))
          (idris-err (assoc :error props))
-         (mouse-help
-          (cond ((member (cadr decor) idris-semantic-properties-clickable-decors)
-                 "\n<mouse-3> context menu")
-                (idris-err (idris-eval `(:error-string ,(cadr idris-err))))
-                (t ""))))
+         (link-href (assoc :link-href props))
+         (image (assoc :image props)))
     (append '(rear-nonsticky t)
             (cond (name
                    (cond ((and (member (cadr decor)
@@ -229,14 +249,20 @@ inserted text (that is, relative to point prior to insertion)."
                                              (cadr source-file)
                                            nil))))
                          (t nil)))
+                  (link-href
+                   (list 'keymap (idris-make-link-keymap (cadr link-href))))
+                  (image
+                   (list 'display
+                         `(image :type imagemagick
+                                 :file ,(expand-file-name (cl-caddr image)
+                                                          (file-name-directory idris-process-current-working-directory)))))
                   (t nil))
             (if term
                 (list 'idris-tt-term (cadr term))
               ())
             (if idris-err
-                `(idris-tt-error ,(cadr idris-err)
-                                 help-echo ,@mouse-help
-                                 keymap ,(idris-make-error-keymap (cadr idris-err)))
+                (list 'idris-tt-error (cadr idris-err)
+                      'keymap (idris-make-error-keymap (cadr idris-err)))
               ())
             (idris-semantic-properties-help-echo props)
             (idris-semantic-properties-face props))))

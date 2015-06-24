@@ -128,6 +128,11 @@ behavior."
   "The face shown for IdrisDoc while editing Idris files."
   :group 'idris-faces)
 
+(defface idris-link-face
+  '((t :inherit button))
+  "The face shown for Web links in Idris documentation."
+  :group 'idris-faces)
+
 (defface idris-info-title-face
   '((t :inherit header-line))
   "Face for Idris headers and titles."
