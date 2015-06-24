@@ -38,9 +38,9 @@ contributing the settings upstream to the theme maintainer."
   "The face to highlight Idris identifiers with."
   :group 'idris-faces)
 
-(defface idris-metavariable-face
+(defface idris-hole-face
   '((t (:inherit idris-identifier-face)))
-  "The face to highlight Idris metavariables with."
+  "The face to highlight Idris holes with."
   :group 'idris-faces)
 
 (defface idris-keyword-face
@@ -253,8 +253,8 @@ esp. `font-lock-defaults', for details."
          (1 'idris-keyword-face))
         ;; Operators
         (,(apply-partially #'idris-font-lock-literate-search idris-operator-regexp (idris-lidr-p)) . 'idris-operator-face)
-        ;; Metavariables
-        (,(apply-partially #'idris-font-lock-literate-search "\\?[a-zA-Z_]\\w*" (idris-lidr-p)) . 'idris-metavariable-face)
+        ;; Holes
+        (,(apply-partially #'idris-font-lock-literate-search "\\?[a-zA-Z_]\\w*" (idris-lidr-p)) . 'idris-hole-face)
         ;; Identifiers
         (,(apply-partially #'idris-font-lock-literate-search "[a-zA-Z_]\\w*" (idris-lidr-p)) . 'idris-identifier-face)
         ;; Scary stuff

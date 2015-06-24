@@ -1,4 +1,4 @@
-;;; idris-metavariable-list.el --- List Idris metavariables in a buffer -*- lexical-binding: t -*-
+;;; idris-hole-list.el --- List Idris holes in a buffer -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2014 David Raymond Christiansen
 
@@ -30,21 +30,21 @@
 (require 'idris-warnings-tree)
 (require 'idris-settings)
 
-(defvar idris-metavariable-list-buffer-name (idris-buffer-name :metavariables)
-  "The name of the buffer containing Idris metavariables")
+(defvar idris-hole-list-buffer-name (idris-buffer-name :holes)
+  "The name of the buffer containing Idris holes")
 
-(defun idris-metavariable-list-quit ()
-  "Quit the Idris metavariable list"
+(defun idris-hole-list-quit ()
+  "Quit the Idris hole list"
   (interactive)
-  (idris-kill-buffer idris-metavariable-list-buffer-name))
+  (idris-kill-buffer idris-hole-list-buffer-name))
 
-(defvar idris-metavariable-list-mode-map
+(defvar idris-hole-list-mode-map
   (let ((map (make-keymap)))
     (suppress-keymap map)
-    (define-key map (kbd "q") 'idris-metavariable-list-quit)
+    (define-key map (kbd "q") 'idris-hole-list-quit)
     (define-key map (kbd "RET") 'idris-compiler-notes-default-action-or-show-details)
     (define-key map (kbd "<mouse-2>") 'idris-compiler-notes-default-action-or-show-details/mouse)
-    ;;; Allow buttons to be clicked with the left mouse button in the metavariable list
+    ;;; Allow buttons to be clicked with the left mouse button in the hole list
     (define-key map [follow-link] 'mouse-face)
     (cl-loop for keyer
              in '(idris-define-docs-keys
@@ -53,52 +53,52 @@
              do (funcall keyer map))
     map))
 
-(easy-menu-define idris-metavariable-list-mode-menu idris-metavariable-list-mode-map
-  "Menu for the Idris metavariable list buffer"
-  `("Idris Metavars"
+(easy-menu-define idris-hole-list-mode-menu idris-hole-list-mode-map
+  "Menu for the Idris hole list buffer"
+  `("Idris Holes"
     ["Show term interaction widgets" idris-add-term-widgets t]
-    ["Close metavariable list buffer" idris-metavariable-list-quit t]))
+    ["Close hole list buffer" idris-hole-list-quit t]))
 
-(define-derived-mode idris-metavariable-list-mode fundamental-mode "Idris Metavars"
-  "Major mode used for transient Idris metavariable list buffers
-   \\{idris-metavariable-list-mode-map}
-Invoces `idris-metavariable-list-mode-hook'.")
+(define-derived-mode idris-hole-list-mode fundamental-mode "Idris Holes"
+  "Major mode used for transient Idris hole list buffers
+   \\{idris-hole-list-mode-map}
+Invoces `idris-hole-list-mode-hook'.")
 
-(defun idris-metavariable-list-buffer ()
-  "Return the Idris metavariable buffer, creating one if there is not one"
-  (get-buffer-create idris-metavariable-list-buffer-name))
+(defun idris-hole-list-buffer ()
+  "Return the Idris hole buffer, creating one if there is not one"
+  (get-buffer-create idris-hole-list-buffer-name))
 
-(defun idris-metavariable-list-buffer-visible-p ()
-  (if (get-buffer-window idris-metavariable-list-buffer-name 'visible) t nil))
+(defun idris-hole-list-buffer-visible-p ()
+  (if (get-buffer-window idris-hole-list-buffer-name 'visible) t nil))
 
-(defun idris-metavariable-list-show (metavar-info)
-  (if (null metavar-info)
-      (progn (message "No metavariables found!")
-             (idris-metavariable-list-quit))
-    (with-current-buffer (idris-metavariable-list-buffer)
+(defun idris-hole-list-show (hole-info)
+  (if (null hole-info)
+      (progn (message "No holes found!")
+             (idris-hole-list-quit))
+    (with-current-buffer (idris-hole-list-buffer)
       (setq buffer-read-only nil)
       (erase-buffer)
-      (idris-metavariable-list-mode)
+      (idris-hole-list-mode)
+      (insert (propertize "Holes" 'face 'idris-info-title-face) "\n\n")
       (when idris-show-help-text
-        (insert "This buffer displays the unsolved metavariables from the currently-loaded code. ")
+        (insert "This buffer displays the unsolved holes from the currently-loaded code. ")
         (insert (concat "Press the "
                         (if idris-enable-elab-prover "[E]" "[P]")
-                        "buttons to solve the metavariables interactively in the prover."))
+                        " buttons to solve the holes interactively in the prover."))
         (let ((fill-column 80))
           (fill-region (point-min) (point-max)))
         (insert "\n\n"))
 
-      (insert (propertize "Metavariables" 'face 'idris-info-title-face) "\n")
-      (dolist (tree (mapcar #'idris-tree-for-metavariable metavar-info))
+      (dolist (tree (mapcar #'idris-tree-for-hole hole-info))
         (idris-tree-insert tree "")
         (insert "\n\n"))
       (message "Press q to close")
       (setq buffer-read-only t)
       (goto-char (point-min)))
-    (display-buffer (idris-metavariable-list-buffer))))
+    (display-buffer (idris-hole-list-buffer))))
 
-(defun idris-metavariable-tree-printer (tree)
-  "Print TREE, formatted for metavariables."
+(defun idris-hole-tree-printer (tree)
+  "Print TREE, formatted for holes."
   (idris-propertize-spans (idris-repl-semantic-text-props (idris-tree.highlighting tree))
     (insert (idris-tree.item tree)))
   (when (idris-tree.button tree)
@@ -108,32 +108,32 @@ Invoces `idris-metavariable-list-mode-hook'.")
 
 
 ;;; Prevent circularity error
-(autoload 'idris-prove-metavariable "idris-commands.el")
+(autoload 'idris-prove-hole "idris-commands.el")
 
-(defun idris-tree-for-metavariable (metavar)
-  "Generate a tree for METAVAR.
+(defun idris-tree-for-hole (hole)
+  "Generate a tree for HOLE.
 
-METAVAR should be a three-element list consisting of the
-metavariable name, its premises, and its conclusion."
-  (cl-destructuring-bind (name premises conclusion) metavar
+HOLE should be a three-element list consisting of the
+hole name, its premises, and its conclusion."
+  (cl-destructuring-bind (name premises conclusion) hole
     (make-idris-tree :item name
                      :button (if idris-enable-elab-prover
                                  `("[E]"
                                    help-echo "Elaborate interactively"
                                    action ,#'(lambda (_)
                                                (interactive)
-                                               (idris-prove-metavariable name t)))
+                                               (idris-prove-hole name t)))
                                `("[P]"
                                  help-echo "Open in prover"
                                  action ,#'(lambda (_)
                                              (interactive)
-                                             (idris-prove-metavariable name))))
+                                             (idris-prove-hole name))))
                      :highlighting `((0 ,(length name) ((:decor :metavar))))
-                     :print-fn #'idris-metavariable-tree-printer
-                     :collapsed-p (not idris-metavariable-list-show-expanded) ; from customize
-                     :kids (list (idris-tree-for-metavariable-details name premises conclusion)))))
+                     :print-fn #'idris-hole-tree-printer
+                     :collapsed-p (not idris-hole-list-show-expanded) ; from customize
+                     :kids (list (idris-tree-for-hole-details name premises conclusion)))))
 
-(defun idris-tree-for-metavariable-details (name premises conclusion)
+(defun idris-tree-for-hole-details (name premises conclusion)
   (let* ((name-width (1+ (apply #'max 0 (length name)
                                 (mapcar #'(lambda (h) (length (car h)))
                                         premises))))
@@ -172,4 +172,4 @@ metavariable name, its premises, and its conclusion."
                      :highlighting '())))
 
 
-(provide 'idris-metavariable-list)
+(provide 'idris-hole-list)

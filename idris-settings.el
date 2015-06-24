@@ -165,20 +165,20 @@ behavior."
   :options ()
   :group 'idris)
 
-(defcustom idris-metavariable-list-mode-hook ()
-  "Hook to run when setting up the list of metavariables."
+(defcustom idris-hole-list-mode-hook ()
+  "Hook to run when setting up the list of holes."
   :type 'hook
   :options ()
   :group 'idris)
 
-(defcustom idris-metavariable-show-on-load t
-  "Show the current metavariables on successful load."
+(defcustom idris-hole-show-on-load t
+  "Show the current holes on successful load."
   :type 'boolean
   :group 'idris)
 
-(defcustom idris-metavariable-list-show-expanded nil
-  "Show the metavariable list fully expanded by default. This may be useful on wide monitors
-with lots of space for the metavariable buffer."
+(defcustom idris-hole-list-show-expanded nil
+  "Show the hole list fully expanded by default. This may be useful on wide monitors
+with lots of space for the hole buffer."
   :type 'boolean
   :group 'idris)
 

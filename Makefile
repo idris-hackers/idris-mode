@@ -17,7 +17,7 @@ OBJS =	idris-commands.elc		\
 	idris-ipkg-mode.elc		\
 	idris-keys.elc			\
 	idris-log.elc			\
-	idris-metavariable-list.elc	\
+	idris-hole-list.elc		\
 	idris-mode.elc			\
 	idris-prover.elc		\
 	idris-repl.elc			\

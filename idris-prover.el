@@ -63,8 +63,8 @@ the prover."
   "The name of the Idris proof script buffer.")
 
 (defvar idris-prover-currently-proving nil
-  "The metavariable that Idris has open in the interactive
-prover, or nil if Idris is not proving anything.")
+  "The hole that Idris has open in the interactive prover, or nil
+if Idris is not proving anything.")
 
 (defconst idris-prover-error-message-prefix "Prover error: "
   "A prefix to show on minibuffer error messages that originate
@@ -434,10 +434,10 @@ the length reported by Idris."
      t)
     (_ nil)))
 
-(defcustom idris-prover-success-hook '(idris-list-metavariables-on-load)
+(defcustom idris-prover-success-hook '(idris-list-holes-on-load)
   "Functions to call when completing a proof"
   :type 'hook
-  :options '(idris-list-metavariables-on-load)
+  :options '(idris-list-holes-on-load)
   :group 'idris-prover)
 
 (defun idris-perhaps-insert-proof-script (proof)
