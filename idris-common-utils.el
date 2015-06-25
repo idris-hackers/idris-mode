@@ -173,7 +173,7 @@ inserted text (that is, relative to point prior to insertion)."
          (unique-val (cl-gensym)) ; HACK to stop consecutive mouse-faces from interfering
          (mousable-face
           (cond ((member (cadr decor) idris-semantic-properties-clickable-decors)
-                 `((:inherit ,decor-face :box t :hack ,unique-val)))
+                 `((:inherit (,decor-face highlight) :hack ,unique-val)))
                 (idris-err
                  `((:inherit ('idris-warning-face highlight))))
                 (link-href
