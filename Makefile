@@ -3,7 +3,7 @@
 
 EMACS=emacs24
 
-BATCHEMACS=$(EMACS) --batch --no-site-file -q -eval '(add-to-list (quote load-path) "${PWD}/")' -eval '(add-to-list (quote package-archives) (quote ("melpa" . "http://melpa.org/packages/")) t)' -eval '(package-initialize)'
+BATCHEMACS=$(EMACS) --batch --no-site-file -q -eval '(add-to-list (quote load-path) "${PWD}/")' -eval '(require (quote package))' -eval '(add-to-list (quote package-archives) (quote ("melpa" . "http://melpa.org/packages/")) t)' -eval '(package-initialize)'
 
 BYTECOMP = $(BATCHEMACS) -eval '(progn (require (quote bytecomp)) (setq byte-compile-warnings t) (setq byte-compile-error-on-warn t))' -f batch-byte-compile
 
