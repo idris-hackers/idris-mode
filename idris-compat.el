@@ -1,7 +1,9 @@
 ;;; idris-compat.el --- compatibility functions for Emacs 24.1 -*- lexical-binding: t -*-
 
+;;; Commentary:
 ;; This file defines defvar-local, which was introduced in Emacs 24.3, and string-suffix-p, from Emacs 24.4.
 
+;;; Code:
 (unless (fboundp 'defvar-local)
   (defmacro defvar-local (var val &optional docstring)
     `(progn
@@ -20,3 +22,4 @@ attention to case differences."
                                   string start-pos nil ignore-case))))))
 
 (provide 'idris-compat)
+;;; idris-compat.el ends here

@@ -23,13 +23,18 @@
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA 02111-1307, USA.
 
+;;; Code:
+
+(require 'cl-lib)
+(require 'prop-menu)
+
 (require 'idris-core)
 (require 'idris-settings)
 (require 'inferior-idris)
 (require 'idris-common-utils)
 (require 'idris-prover)
 (require 'idris-highlight-input)
-(require 'cl-lib)
+
 
 (defvar idris-prompt-string "Idris"
   "The prompt shown in the REPL.")
@@ -191,7 +196,7 @@ If ALWAYS-INSERT is non-nil, always insert a prompt at the end of the buffer."
   "Major mode for interacting with Idris.
     \\{idris-repl-mode-map}
 Invokes `idris-repl-mode-hook'."
-  ;syntax-table?
+                                        ;syntax-table?
   :group 'idris-repl
   (set (make-local-variable 'indent-tabs-mode) nil)
   (add-hook 'idris-event-hooks 'idris-repl-event-hook-function)
@@ -202,7 +207,9 @@ Invokes `idris-repl-mode-hook'."
               'idris-repl-safe-save-history nil t))
   (add-hook 'kill-emacs-hook 'idris-repl-save-all-histories)
   (set (make-local-variable 'completion-at-point-functions) '(idris-repl-complete))
-  (setq mode-name `("Idris-REPL" (:eval (if idris-rex-continuations "!" "")))))
+  (setq mode-name `("Idris-REPL" (:eval (if idris-rex-continuations "!" ""))))
+  (set (make-local-variable 'prop-menu-item-functions)
+       '(idris-context-menu-items)))
 
 (defun idris-repl-remove-event-hook-function ()
   (setq idris-prompt-string "Idris")
@@ -545,3 +552,4 @@ files and this function is sufficient."
           (prin1 (mapcar #'substring-no-properties hist) (current-buffer)))))))
 
 (provide 'idris-repl)
+;;; idris-repl.el ends here

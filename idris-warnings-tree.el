@@ -24,7 +24,10 @@
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA 02111-1307, USA.
 
+;;; Code:
 (require 'cl-lib)
+(require 'prop-menu)
+
 (require 'idris-core)
 (require 'idris-warnings)
 (require 'idris-common-utils)
@@ -99,7 +102,8 @@
 (define-derived-mode idris-compiler-notes-mode fundamental-mode "Compiler-Notes"
   "Idris compiler notes
      \\{idris-compiler-notes-mode-map}
-Invokes `idris-compiler-notes-mode-hook'.")
+Invokes `idris-compiler-notes-mode-hook'."
+  (setq-local prop-menu-item-functions '(idris-context-menu-items)))
 
 (defun idris-compiler-notes-show-details ()
   (interactive)

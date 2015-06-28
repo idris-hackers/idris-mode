@@ -50,10 +50,13 @@ script:
       - popd
 
       # emacs 24.3
+      - make getdeps
       - make build
       - make test
       - make clean
 
       # emacs 24.4
+      - make getdeps EMACS=/usr/local/emacs-24.4/bin/emacs
       - make build EMACS=/usr/local/emacs-24.4/bin/emacs
       - make test EMACS=/usr/local/emacs-24.4/bin/emacs
+      - make clean

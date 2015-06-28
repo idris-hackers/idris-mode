@@ -24,6 +24,7 @@
 ;; Boston, MA 02111-1307, USA.
 
 (require 'cl-lib)
+(require 'prop-menu)
 
 (require 'idris-core)
 (require 'idris-keys)
@@ -62,7 +63,8 @@
 (define-derived-mode idris-hole-list-mode fundamental-mode "Idris Holes"
   "Major mode used for transient Idris hole list buffers
    \\{idris-hole-list-mode-map}
-Invoces `idris-hole-list-mode-hook'.")
+Invoces `idris-hole-list-mode-hook'."
+  (setq-local prop-menu-item-functions '(idris-context-menu-items)))
 
 (defun idris-hole-list-buffer ()
   "Return the Idris hole buffer, creating one if there is not one"
