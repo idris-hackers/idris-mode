@@ -16,6 +16,7 @@
 
 ;;; Code:
 (require 'ansi-color)
+(require 'compile)
 
 (require 'idris-core)
 (require 'idris-settings)
@@ -203,59 +204,34 @@ arguments."
 
 (defvar idris-ipkg-build-buffer-name "*idris-build*")
 
-(defvar idris-ipkg-build-mode-map
-  (let ((map (make-keymap)))
-    (suppress-keymap map) ; remove the self-inserting char commands
-    (define-key map (kbd "q") 'idris-ipkg-build-quit)
-    map))
+(defun idris-ipkg--compilation-buffer-name-function (_mode)
+  "Compute a buffer name for the idris-mode compilation buffer."
+  idris-ipkg-build-buffer-name)
 
-(easy-menu-define idris-ipkg-build-mode-menu idris-ipkg-build-mode-map
-  "Menu for the Idris build mode buffer"
-  `("Idris Building"
-    ["Close Idris build buffer" idris-ipkg-build-quit t]))
-
-(define-derived-mode idris-ipkg-build-mode fundamental-mode "Idris Build"
-  "Major mode used for transient Idris build bufers
-    \\{idris-ipkg-build-mode-map}
-Invokes `idris-ipkg-build-mode-hook'."
-  ;;; Avoid font-lock messing up the ANSI colors
-  (setq font-lock-unfontify-region-function
-        'ansi-color-unfontify-region))
-
-(defun idris-ipkg-insert-ansi-filter (proc string)
-  (when (buffer-live-p (process-buffer proc))
-    (with-current-buffer (process-buffer proc)
-      (let ((moving (= (point) (process-mark proc))))
-        (save-excursion
-          ;; Insert the text, advancing the process marker.
-          (goto-char (process-mark proc))
-          (insert (ansi-color-apply string))
-          (set-marker (process-mark proc) (point)))
-        (if moving (goto-char (process-mark proc)))))))
-
+(defun idris-ipkg--ansi-compile-filter (start)
+  "Apply ANSI formatting to the region of the buffer from START to point."
+  (save-excursion
+    (let ((buffer-read-only nil))
+      (ansi-color-apply-on-region start (point)))))
 
 (defun idris-ipkg-command (ipkg-file command)
   "Run a command on ipkg-file. The command can be build, install, or clean."
   ;; Idris must have its working directory in the same place as the ipkg file
   (let ((dir (file-name-directory ipkg-file))
         (file (file-name-nondirectory ipkg-file))
-        (cmd (cond ((equal command 'build) "--build")
-                    ((equal command 'install) "--install")
-                    ((equal command 'clean) "--clean")
-                    (t (error "Invalid command name %s" command)))))
+        (opt (cond ((equal command 'build) "--build")
+                   ((equal command 'install) "--install")
+                   ((equal command 'clean) "--clean")
+                   (t (error "Invalid command name %s" command)))))
     (unless dir
       (error "Unable to determine directory for filename '%s'" ipkg-file))
     (let* ((default-directory dir) ; default-directory is a special variable - this starts idris in dir
-           (process
-            (start-process (concat "idris " cmd)
-                           idris-ipkg-build-buffer-name
-                           idris-interpreter-path
-                           cmd
-                           file)))
-      (set-process-filter process 'idris-ipkg-insert-ansi-filter)
-      (with-current-buffer idris-ipkg-build-buffer-name
-        (idris-ipkg-build-mode))
-      (pop-to-buffer idris-ipkg-build-buffer-name))))
+           (compilation-buffer-name-function
+            'idris-ipkg--compilation-buffer-name-function)
+           (command (concat "idris " opt " " file))
+           (compilation-filter-hook
+            (cons 'idris-ipkg--ansi-compile-filter compilation-filter-hook)))
+      (compile command))))
 
 (defun idris-ipkg-build (ipkg-file)
   (interactive (list
@@ -390,6 +366,13 @@ Invokes `idris-ipkg-mode-hook'."
        idris-ipkg-font-lock-defaults)
   (set (make-local-variable 'completion-at-point-functions)
        '(idris-ipkg-complete-keyword)))
+
+;; Make filenames clickable
+(add-to-list 'compilation-error-regexp-alist-alist
+             `(idris-type-checking
+               "Type checking \\(.+\\)$" 1 nil nil 0 1))
+
+(cl-pushnew 'idris-type-checking compilation-error-regexp-alist)
 
 (push '("\\.ipkg$" . idris-ipkg-mode) auto-mode-alist)
 
