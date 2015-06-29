@@ -42,6 +42,6 @@ clean:
 	-rm -f test-data/*ibc
 
 getdeps:
-	$(BATCHEMACS) -eval '(package-install (quote prop-menu))'
+	$(BATCHEMACS) -eval '(progn (package-refresh-contents) (package-install (quote prop-menu)))'
 
 .PHONY: clean build test
