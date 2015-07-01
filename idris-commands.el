@@ -23,6 +23,8 @@
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA 02111-1307, USA.
 
+;;; Code:
+
 (require 'idris-core)
 (require 'idris-settings)
 (require 'inferior-idris)
@@ -52,7 +54,6 @@
   (when idris-loaded-region-overlay
     (delete-overlay idris-loaded-region-overlay))
   (setq idris-loaded-region-overlay nil))
-
 
 (defun idris-make-clean ()
   (setq idris-buffer-dirty-p nil))
@@ -827,122 +828,6 @@ means to not ask for confirmation."
           (delete-file ibc)
           (message "%s deleted" ibc))))))
 
-(defun idris-make-namespace-menu (namespace &optional file)
-  "Create a right-click menu for NAMESPACE (optionally with source FILE)."
-  (let ((menu (make-sparse-keymap)))
-    (define-key menu [idris-namespace-menu-browse-namespace]
-      `(menu-item ,(concat "Browse " namespace)
-                  (lambda () (interactive))))
-    (when (and (stringp file) (file-exists-p file))
-      (define-key menu [idris-namespace-menu-visit-file]
-        `(menu-item ,(concat "Edit " file)
-                    (lambda () (interactive)))))
-    menu))
-
-
-(defun idris-make-namespace-keymap (namespace &optional file)
-  "Create a keymap that shows a right-click menu for NAMESPACE (optionally pointing at FILE)."
-  (let ((map (make-sparse-keymap)))
-    (define-key map [mouse-3]
-      (lambda ()
-        (interactive)
-        (let* ((menu (idris-make-namespace-menu namespace file))
-               (selection (x-popup-menu t menu)))
-          (cond ((and (equal selection '(idris-namespace-menu-browse-namespace))
-                      namespace)
-                 (idris-browse-namespace namespace))
-                ((and (equal selection '(idris-namespace-menu-visit-file))
-                      (stringp file))
-                 (find-file file))
-                (t (message "%S" selection))))))
-    map))
-
-(defun idris-make-ref-menu (_name &optional namespace)
-  (let ((menu (make-sparse-keymap)))
-    (define-key menu [idris-ref-menu-get-type]
-      `(menu-item "Get type"
-                  (lambda () (interactive)))) ; x-popup-menu doesn't run cmds
-    (define-key-after menu [idris-ref-menu-get-docs]
-      `(menu-item "Get documentation"
-                  (lambda () (interactive)))) ; x-popup-menu doesn't run cmds
-    (define-key-after menu [idris-ref-menu-print-definition]
-      `(menu-item "Get definition"
-                  (lambda () (interactive))))
-    (define-key-after menu [idris-ref-menu-who-calls]
-      `(menu-item "Who calls?"
-                  (lambda () (interactive))))
-    (define-key-after menu [idris-ref-menu-calls-who]
-      `(menu-item "Calls who?"
-                  (lambda () (interactive))))
-    (when (stringp namespace)
-      (define-key-after menu [idris-ref-menu-browse-namespace]
-        `(menu-item ,(concat "Browse " namespace)
-                    (lambda () (interactive)))))
-    menu))
-
-(defun idris-make-ref-menu-keymap (name &optional namespace)
-  "Create a keymap that shows a right-click menu for a reference to NAME (optionally in namespace NAMESPACE)."
-  (let ((map (make-sparse-keymap)))
-    (define-key map [mouse-3]
-      (lambda () (interactive)
-        (let ((selection (x-popup-menu t (idris-make-ref-menu name namespace))))
-          (cond ((equal selection '(idris-ref-menu-get-type))
-                 (idris-info-for-name :type-of name))
-                ((equal selection '(idris-ref-menu-get-docs))
-                 (idris-info-for-name :docs-for name))
-                ((equal selection '(idris-ref-menu-print-definition))
-                 (idris-info-for-name :print-definition name))
-                ((equal selection '(idris-ref-menu-who-calls))
-                 (idris-who-calls-name name))
-                ((equal selection '(idris-ref-menu-calls-who))
-                 (idris-name-calls-who name))
-                ((and (equal selection '(idris-ref-menu-browse-namespace))
-                      namespace)
-                 (idris-browse-namespace namespace))
-                (t (message "%S" selection))))))
-    map))
-
-(defun idris-make-hole-menu (_name)
-  (let ((menu (make-sparse-keymap)))
-    (define-key menu [idris-hole-menu-prover]
-      `(menu-item "Launch prover"
-                  (lambda () (interactive))))
-    (when idris-enable-elab-prover
-      (define-key menu [idris-hole-menu-elab]
-        `(menu-item "Launch interactive elaborator"
-                    (lambda () (interactive)))))
-    menu))
-
-(defun idris-make-hole-keymap (name)
-  (let ((map (make-sparse-keymap)))
-    (define-key map [mouse-3]
-      (lambda () (interactive)
-        (let ((selection (x-popup-menu t (idris-make-hole-menu name))))
-          (cond ((equal selection '(idris-hole-menu-prover))
-                 (idris-prove-hole name))
-                ((equal selection '(idris-hole-menu-elab))
-                 (idris-prove-hole name t))
-                (t (message "%S" selection))))))
-    map))
-
-(defun idris-make-error-menu (_err)
-  (let ((menu (make-sparse-keymap)))
-    (define-key menu [idris-err-menu-view]
-      `(menu-item "View error"
-                  (lambda () (interactive)))) ; x-popup-menu doesn't run cmds
-    menu))
-
-(defun idris-make-error-keymap (err)
-  (let ((map (make-sparse-keymap)))
-    (define-key map [mouse-3]
-      (lambda () (interactive)
-        (let ((selection (x-popup-menu t (idris-make-error-menu err))))
-          (cond ((equal selection '(idris-err-menu-view))
-                 (idris-info-for-name :error-pprint err))
-                (t (message "%S" selection))))))
-    (define-key map (kbd "RET")
-      (lambda () (interactive) (idris-info-for-name :error-pprint err)))
-    map))
 
 (defun idris-make-term-menu (_term)
   "Make a menu for the widget for some term."
@@ -1230,5 +1115,58 @@ of the term to replace."
                (not idris-prover-currently-proving))
       (idris-eval `(:interpret ,command) t))))
 
+;;; Computing a menu with these commands
+(defun idris-context-menu-items (plist)
+  "Compute a contextual menu based on the Idris semantic decorations in PLIST."
+  (let ((ref (plist-get plist 'idris-ref))
+        (ref-style (plist-get plist 'idris-ref-style))
+        (namespace (plist-get plist 'idris-namespace))
+        (source-file (plist-get plist 'idris-source-file)))
+    (append
+     (when ref
+       (append (list (list "Get type"
+                           (lambda ()
+                             (interactive)
+                             (idris-info-for-name :type-of ref))))
+               (cond ((member ref-style
+                              '(:type :data :function))
+                      (list
+                       (list "Get docs"
+                             (lambda ()
+                               (interactive)
+                               (idris-info-for-name :docs-for ref)))
+                       (list "Get definition"
+                             (lambda ()
+                               (interactive)
+                               (idris-info-for-name :print-definition ref)))
+                       (list "Who calls?"
+                             (lambda ()
+                               (interactive)
+                               (idris-who-calls-name ref)))
+                       (list "Calls who?"
+                             (lambda ()
+                               (interactive)
+                               (idris-name-calls-who ref)))))
+                     ((equal ref-style :metavar)
+                      (cons (list "Launch prover"
+                                  (lambda ()
+                                    (interactive)
+                                    (idris-prove-hole ref)))
+                            (when idris-enable-elab-prover
+                              (list (list "Launch interactive elaborator"
+                                          (lambda ()
+                                            (interactive)
+                                            (idris-prove-hole ref t))))))))))
+     (when namespace
+       (list (list (concat "Browse " namespace)
+                   (lambda ()
+                     (interactive)
+                     (idris-browse-namespace namespace)))))
+     (when (and namespace source-file)
+       (list (list (concat "Edit " source-file)
+                   (lambda ()
+                     (interactive)
+                     (find-file source-file))))))))
 
 (provide 'idris-commands)
+;;; idris-commands.el ends here

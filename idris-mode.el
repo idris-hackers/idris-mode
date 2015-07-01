@@ -5,8 +5,8 @@
 ;; Author:
 ;; URL: https://github.com/idris-hackers/idris-mode
 ;; Keywords: languages
-;; Package-Requires: ((emacs "24"))
-;; Version: 0.9.14
+;; Package-Requires: ((emacs "24") (prop-menu "0.1") (cl-lib "0.5")
+;; Version: 0.9.18
 
 
 ;;; Commentary:
@@ -17,6 +17,9 @@
 
 ;;; Code:
 
+(require 'prop-menu)
+(require 'eldoc)
+
 (require 'idris-core)
 (require 'idris-settings)
 (require 'idris-syntax)
@@ -26,8 +29,20 @@
 (require 'idris-warnings)
 (require 'idris-common-utils)
 (require 'idris-ipkg-mode)
-(require 'eldoc)
 
+
+(defun idris-mode-context-menu-items (plist)
+  "Compute menu items from PLIST that are specific to editing text in `idris-mode'."
+  (let ((ref (plist-get plist 'idris-ref))
+        (ref-style (plist-get plist 'idris-ref-style)))
+    (when (and ref (equal ref-style :metavar))
+      (list (list "Extract lemma"
+                  (let ((location (point)))
+                    (lambda ()
+                      (interactive)
+                      (save-excursion
+                        (goto-char location)
+                        (idris-make-lemma)))))))))
 
 (defvar idris-mode-map (let ((map (make-sparse-keymap)))
                          (cl-loop for keyer
@@ -134,7 +149,9 @@ Invokes `idris-mode-hook'."
                              "(Loaded)"))))
   ;; Extra hook for LIDR files (to set up extra highlighting, etc)
   (when (idris-lidr-p)
-    (run-hooks 'idris-mode-lidr-hook)))
+    (run-hooks 'idris-mode-lidr-hook))
+  (set (make-local-variable 'prop-menu-item-functions)
+       '(idris-context-menu-items idris-mode-context-menu-items)))
 
 ;; Automatically use idris-mode for .idr and .lidr files.
 ;;;###autoload

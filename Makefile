@@ -1,9 +1,9 @@
 # Makefile for idris-mode, to run tests and ensure dependencies are in order
 # Portions based on the Makefile for Proof General
 
-EMACS=emacs
+EMACS=emacs24
 
-BATCHEMACS=$(EMACS) --batch --no-site-file -q -eval '(add-to-list (quote load-path) "${PWD}/")'
+BATCHEMACS=$(EMACS) --batch --no-site-file -q -eval '(add-to-list (quote load-path) "${PWD}/")' -eval '(require (quote package))' -eval '(add-to-list (quote package-archives) (quote ("melpa" . "http://melpa.org/packages/")) t)' -eval '(package-initialize)'
 
 BYTECOMP = $(BATCHEMACS) -eval '(progn (require (quote bytecomp)) (setq byte-compile-warnings t) (setq byte-compile-error-on-warn t))' -f batch-byte-compile
 
@@ -40,5 +40,8 @@ test:
 clean:
 	-rm -f $(OBJS)
 	-rm -f test-data/*ibc
+
+getdeps:
+	$(BATCHEMACS) -eval '(progn (package-refresh-contents) (package-install (quote prop-menu)))'
 
 .PHONY: clean build test

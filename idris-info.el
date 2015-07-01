@@ -25,6 +25,7 @@
 ;; that buffer to a minimum.
 
 ;;; Code:
+(require 'prop-menu)
 (require 'idris-core)
 (require 'idris-common-utils)
 
@@ -89,7 +90,8 @@ Following the behavior of Emacs help buffers, the future is deleted."
 (define-derived-mode idris-info-mode fundamental-mode "Idris Info"
   "Major mode used for transient Idris information buffers
     \\{idris-info-mode-map}
-Invokes `idris-info-mode-hook'.")
+Invokes `idris-info-mode-hook'."
+  (set (make-local-variable 'prop-menu-item-functions) '(idris-context-menu-items)))
 ; if we use view-mode here, our key binding q would be shadowed.
 
 (defun idris-info-buffer ()

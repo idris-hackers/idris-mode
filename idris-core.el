@@ -23,11 +23,14 @@
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA 02111-1307, USA.
 
+;;; Code:
 (require 'idris-compat)
-(provide 'idris-core)
 
 (defun idris-is-ident-char-p (ch)
   (or (and (<= ?a ch) (<= ch ?z))
       (and (<= ?A ch) (<= ch ?Z))
       (and (<= ?0 ch) (<= ch ?9))
       (= ch ?_)))
+
+(provide 'idris-core)
+;;; idris-core.el ends here

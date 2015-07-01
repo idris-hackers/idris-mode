@@ -1,8 +1,8 @@
 ;;; idris-common-utils.el --- Useful utilities -*- lexical-binding: t -*-
 
-;; Copyright (C) 2013 Hannes Mehnert
+;; Copyright (C) 2013-2015 Hannes Mehnert and David Raymond Christiansen
 
-;; Author: Hannes Mehnert <hannes@mehnert.org>
+;; Author: Hannes Mehnert <hannes@mehnert.org> and David Raymond Christiansen <david@davidchristiansen.dk>
 
 ;; License:
 ;; Inspiration is taken from SLIME/DIME (http://common-lisp.net/project/slime/) (https://github.com/dylan-lang/dylan-mode)
@@ -56,7 +56,8 @@ strings that are suitable arguments to `start-process'.")
 This is used to load resource files such as images.  The default
 value is automatically computed from the location of the Emacs
 Lisp package.")
-(setq idris-mode-path (file-name-directory load-file-name))
+(when load-file-name ;; guard to allow M-x eval-buffer
+  (setq idris-mode-path (file-name-directory load-file-name)))
 
 (defun idris-buffer-name (type)
   (cl-assert (keywordp type))
@@ -115,11 +116,7 @@ inserted text (that is, relative to point prior to insertion)."
                                           (+ ,start begin length)
                                           props))))))
 
-;;; Take care of circular dependency issue
-(autoload 'idris-make-ref-menu-keymap "idris-commands.el")
-(autoload 'idris-make-hole-keymap "idris-commands.el")
-(autoload 'idris-make-error-keymap "idris-commands.el")
-(autoload 'idris-make-namespace-keymap "idris-commands.el")
+;;; TODO: Take care of circular dependency issue
 (autoload 'idris-eval "inferior-idris.el")
 
 (defun idris-make-link-keymap (url)
@@ -227,30 +224,22 @@ inserted text (that is, relative to point prior to insertion)."
          (image (assoc :image props)))
     (append '(rear-nonsticky t)
             (cond (name
-                   (cond ((and (member (cadr decor)
-                                       '(:type :data :function))
-                               name)
-                          (list 'idris-ref (cadr name)
-                                'keymap (idris-make-ref-menu-keymap
-                                         (cadr name)
-                                         (if namespace
-                                             (cadr namespace)
-                                           nil))))
-                         ((equal (cadr decor) :metavar)
-                          (list 'idris-ref (cadr name)
-                                'keymap (idris-make-hole-keymap (cadr name))))
-                         (t nil)))
+                   (if (and (member (cadr decor)
+                                    '(:type :data :function :metavar))
+                            name)
+                       (list 'idris-ref (cadr name)
+                             'idris-ref-style (cadr decor))
+                     ()))
                   (namespace
-                   (cond ((or (equal (cadr decor) :module)
-                              (equal (cadr decor) :namespace))
-                          (list 'keymap (idris-make-namespace-keymap
-                                         (cadr namespace)
-                                         (if source-file
-                                             (cadr source-file)
-                                           nil))))
-                         (t nil)))
+                   (if (or (equal (cadr decor) :module)
+                           (equal (cadr decor) :namespace))
+                       (append (list 'idris-namespace (cadr namespace))
+                               (when source-file
+                                 (list 'idris-source-file (cadr source-file))))
+                     ()))
                   (link-href
-                   (list 'keymap (idris-make-link-keymap (cadr link-href))))
+                   (list 'keymap (idris-make-link-keymap (cadr link-href))
+                         'idris-url (cadr link-href)))
                   (image
                    (list 'display
                          `(image :type imagemagick
@@ -261,8 +250,7 @@ inserted text (that is, relative to point prior to insertion)."
                 (list 'idris-tt-term (cadr term))
               ())
             (if idris-err
-                (list 'idris-tt-error (cadr idris-err)
-                      'keymap (idris-make-error-keymap (cadr idris-err)))
+                (list 'idris-tt-error (cadr idris-err))
               ())
             (idris-semantic-properties-help-echo props)
             (idris-semantic-properties-face props))))

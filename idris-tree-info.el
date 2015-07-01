@@ -26,6 +26,8 @@
 
 ;;; Code:
 (require 'cl-lib)
+(require 'prop-menu)
+
 (require 'idris-core)
 (require 'idris-common-utils)
 (require 'idris-settings)
@@ -67,7 +69,8 @@ Invokes `idris-tree-info-mode-hook'.
 This mode should be used to display tree-structured output,
 because the history feature of `idris-info-mode' is incompatible
 with overlays and markers, which the trees need.."
-  (setq-local buffer-read-only t))
+  (setq-local buffer-read-only t)
+  (setq-local prop-menu-item-functions '(idris-context-menu-items)))
 
 (defun idris-tree-info-buffer ()
   "Return the Idris tree viewer buffer, creating one if it does not exist.

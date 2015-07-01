@@ -50,6 +50,9 @@ Customize `idris-interpreter-path` if idris is not on your default path.
 * Documentation-related commands are prefixed with `C-c C-d`.
 * Commands related to **b**uilding packages are prefixed with `C-c C-b`.
 
+## Contextual menus
+`idris-mode` makes use of semantic information from the Idris compiler to display contextual menus. By default, the graphical contextual menu is bound to the right mouse button and the textual contextual menu is bound to `C-c C-SPC`. Using these commands will display commands that are available based on what is under the mouse pointer or what is at point, respectively.
+
 ## Error messages
 
 When loading a buffer, `idris-mode` will decorate errors from the Idris compiler with underlines. Tooltips show the error message.
