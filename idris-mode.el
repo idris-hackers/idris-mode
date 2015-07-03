@@ -5,7 +5,7 @@
 ;; Author:
 ;; URL: https://github.com/idris-hackers/idris-mode
 ;; Keywords: languages
-;; Package-Requires: ((emacs "24") (prop-menu "0.1") (cl-lib "0.5")
+;; Package-Requires: ((emacs "24") (prop-menu "0.1") (cl-lib "0.5"))
 ;; Version: 0.9.18
 
 
