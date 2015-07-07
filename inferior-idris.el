@@ -77,12 +77,12 @@
      (remove-hook 'idris-event-hooks 'idris-version-hook-function)
      t)))
 
-(defvar-local idris-packages nil
+(defvar-local idris-load-packages nil
   "The list of packages to be loaded by Idris. Set using file or directory variables.")
 
 (defun idris-compute-flags ()
   "Calculate the command line options to use when running Idris."
-  (append (cl-loop for p in idris-packages
+  (append (cl-loop for p in idris-load-packages
                    collecting "-p"
                    collecting p)
           idris-interpreter-flags

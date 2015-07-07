@@ -1026,8 +1026,8 @@ of the term to replace."
           "")))))
 
 
-(defun idris-set-idris-packages ()
-  "Interactively set the `idris-packages' variable"
+(defun idris-set-idris-load-packages ()
+  "Interactively set the `idris-load-packages' variable"
   (interactive)
   (let* ((idris-libdir (replace-regexp-in-string
                         "[\r\n]*\\'" ""   ; remove trailing newline junk
@@ -1043,9 +1043,9 @@ of the term to replace."
                                                                idris-libs))))
     (when (y-or-n-p (format "Use the packages %s for this session?"
                             (cl-reduce #'(lambda (x y) (concat x ", " y)) packages)))
-      (setq idris-packages packages)
+      (setq idris-load-packages packages)
       (when (y-or-n-p "Save package list for future sessions? ")
-        (add-file-local-variable 'idris-packages packages)))))
+        (add-file-local-variable 'idris-load-packages packages)))))
 
 (defun idris-open-package-file ()
   "Provide easy access to package files."
