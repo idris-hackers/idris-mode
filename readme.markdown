@@ -117,9 +117,9 @@ When a package is present, `idris-mode` gains a few convenience features. In par
 Additionally, the command `M-x idris-start-project` will create a directory structure and initial package file for a new project.
 
 ## Using packages
-`idris-mode` supports setting the packages to be loaded by the Idris process. Specifically, the buffer-local variable `idris-packages` is expected to contain a list of package names to be loaded. When the buffer is loaded, if the current packages loaded by the Idris process don't agree with the contents of the variable, Idris is restarted with the correct `-p` options.
+`idris-mode` supports setting the packages to be loaded by the Idris process. Specifically, the buffer-local variable `idris-load-packages` is expected to contain a list of package names to be loaded. When the buffer is loaded, if the current packages loaded by the Idris process don't agree with the contents of the variable, Idris is restarted with the correct `-p` options.
 
-You can set this variable interactively using the command `M-x idris-set-idris-packages`. This will add the variable as a file-local variable, so that it will be set automatically when the file is loaded in the future.
+You can set this variable interactively using the command `M-x idris-set-idris-load-packages`. This will add the variable as a file-local variable, so that it will be set automatically when the file is loaded in the future.
 
 ## Installation
 
