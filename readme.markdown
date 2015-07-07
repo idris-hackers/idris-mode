@@ -15,6 +15,11 @@ same face as functions and values defined with `=`.
 
 ![Screenshot](http://itu.dk/~hame/idris-emacs.png)
 
+## Changes
+
+See the file CHANGES.markdown in the repository root for user-visible
+changes between versions, starting at version 0.9.18.
+
 ## Documentation
 
 There are some docstrings spread around the mode, thus C-h m is helpful and returns the available key bindings.
