@@ -139,6 +139,8 @@ inserted text (that is, relative to point prior to insertion)."
          (text-format (assoc :text-formatting props))
          (idris-err (assoc :error props))
          (link-href (assoc :link-href props))
+         (qquote (assoc :quasiquotation props))
+         (aquote (assoc :antiquotation props))
          (decor-face (if decor
                          (pcase (cadr decor)
                            (:type '(idris-semantic-type-face))
@@ -176,11 +178,15 @@ inserted text (that is, relative to point prior to insertion)."
                 (link-href
                  '(highlight))
                 (t nil)))
+         (qquote-face (when qquote '(idris-quasiquotation-face)))
+         (aquote-face (when aquote '(idris-antiquotation-face)))
          (computed-face (append text-face
                                 implicit-face
                                 decor-face
                                 err-face
-                                link-face)))
+                                link-face
+                                qquote-face
+                                aquote-face)))
     (append (if computed-face (list 'face computed-face) ())
             (if mousable-face (list 'mouse-face mousable-face) ()))))
 

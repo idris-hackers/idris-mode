@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2013 Hannes Mehnert and David Raymond Christiansen
 
-;; Author: Hannes Mehnert <hannes@mehnert.org>
+;; Author: Hannes Mehnert <hannes@mehnert.org> and David Raymond Christiansen <david@davidchristiansen.dk>
 
 ;; License:
 ;; Inspiration is taken from SLIME/DIME (http://common-lisp.net/project/slime/) (https://github.com/dylan-lang/dylan-mode)
@@ -114,6 +114,14 @@
 (defface idris-semantic-module-face
   '((t :inherit idris-semantic-namespace-face))
   "The face to be used to highlight namespace declarations"
+  :group 'idris-faces)
+
+(defface idris-quasiquotation-face nil
+  "The face to be used to highlight quasiquotations in Idris source code"
+  :group 'idris-faces)
+
+(defface idris-antiquotation-face nil
+  "The face to be used to highlight antiquotations in Idris source code"
   :group 'idris-faces)
 
 (defface idris-loaded-region-face nil
