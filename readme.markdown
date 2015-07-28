@@ -137,8 +137,7 @@ You can install pre-built packages from [MELPA](http://melpa.org/) or [MELPA Sta
 
 If you are using Emacs 24.4 or newer with released versions of Idris, but you want other packages from MELPA, then you can pin the version of `idris-mode` to the one found in MELPA Stable. For details, please consult the documentation for `package-pinned-packages` (`C-h v package-pinned-packages RET`).
 
-Alternatively, download the elisp files, and place them somewhere in your load
-path.
+Alternatively, download the elisp files, and place them somewhere in your load path. If you're installing manually, then you also need to install the [`prop-menu` package](https://github.com/david-christiansen/prop-menu-el), which `idris-mode` uses to create contextual menus. Installation from MELPA will automatically install dependencies.
 
 If you want `idris-mode` to be enabled by default, add the line `(require 'idris-mode)` to your `~/.emacs` or `~/.emacs.d/init.el` file.
 
