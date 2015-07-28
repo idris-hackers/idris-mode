@@ -178,22 +178,26 @@ behavior."
   :options ()
   :group 'idris)
 
+(defgroup idris-hole-list nil
+  "Options related to the Idris hole list buffer."
+  :group 'idris)
+
 (defcustom idris-hole-list-mode-hook ()
   "Hook to run when setting up the list of holes."
   :type 'hook
   :options ()
-  :group 'idris)
+  :group 'idris-hole-list)
 
 (defcustom idris-hole-show-on-load t
   "Show the current holes on successful load."
   :type 'boolean
   :group 'idris)
 
-(defcustom idris-hole-list-show-expanded nil
+(defcustom idris-hole-list-show-expanded t
   "Show the hole list fully expanded by default. This may be useful on wide monitors
 with lots of space for the hole buffer."
   :type 'boolean
-  :group 'idris)
+  :group 'idris-hole-list)
 
 (defcustom idris-enable-elab-prover nil
   "Whether or not to enable the interactive prover for elaborator reflection.
