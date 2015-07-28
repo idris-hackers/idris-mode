@@ -58,7 +58,10 @@
   "Menu for the Idris hole list buffer"
   `("Idris Holes"
     ["Show term interaction widgets" idris-add-term-widgets t]
-    ["Close hole list buffer" idris-hole-list-quit t]))
+    ["Close hole list buffer" idris-hole-list-quit t]
+    "------------------"
+    ["Customize idris-hole-list-mode" (customize-group 'idris-hole-list) t]
+    ["Customize fonts and colors" (customize-group 'idris-faces) t]))
 
 (define-derived-mode idris-hole-list-mode fundamental-mode "Idris Holes"
   "Major mode used for transient Idris hole list buffers
