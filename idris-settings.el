@@ -181,7 +181,7 @@ behavior."
   :type 'boolean
   :group 'idris)
 
-(defcustom idris-hole-list-show-expanded nil
+(defcustom idris-hole-list-show-expanded t
   "Show the hole list fully expanded by default. This may be useful on wide monitors
 with lots of space for the hole buffer."
   :type 'boolean
