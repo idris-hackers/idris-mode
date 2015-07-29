@@ -279,4 +279,9 @@ Set to `nil' for no banner."
   :type 'symbol
   :group 'idris-repl)
 
+(defcustom idris-repl-show-repl-on-startup t
+  "If non-`nil', show the REPL window when Idris starts. If `nil', only do this when `idris-repl' was called interactively."
+  :type 'boolean
+  :group 'idris-repl)
+
 (provide 'idris-settings)
