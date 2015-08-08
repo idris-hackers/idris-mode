@@ -42,7 +42,14 @@
                       (interactive)
                       (save-excursion
                         (goto-char location)
-                        (idris-make-lemma)))))))))
+                        (idris-make-lemma)))))
+            (list "Fill with case block"
+                  (let ((location (point)))
+                    (lambda ()
+                      (interactive)
+                      (save-excursion
+                        (goto-char location)
+                        (idris-make-cases-from-hole)))))))))
 
 (defvar idris-mode-map (let ((map (make-sparse-keymap)))
                          (cl-loop for keyer
@@ -75,6 +82,7 @@
     ["Case split pattern variable" idris-case-split t]
     ["Add with block" idris-make-with-block t]
     ["Extract lemma from hole" idris-make-lemma t]
+    ["Solve hole with case expression" idris-make-cases-from-hole t]
     ["Attempt to solve hole" idris-proof-search t]
     ["Display type" idris-type-at-point t]
     "-----------------"
@@ -99,8 +107,7 @@
      ["Hide error context" (idris-set-option :error-context nil)
       :visible (idris-get-option :error-context)])
     ["Customize idris-mode" (customize-group 'idris) t]
-    ["Customize fonts and colors" (customize-group 'idris-faces) t]
-    ))
+    ["Customize fonts and colors" (customize-group 'idris-faces) t]))
 
 
 ;;;###autoload

@@ -559,6 +559,26 @@ KILLFLAG is set if N was explicitly specified."
           (delete-region (line-beginning-position) (line-end-position))
           (insert (substring result 0 (1- (length result)))))))))
 
+(defun idris-make-cases-from-hole ()
+  "Make a case expression from the metavariable at point."
+  (interactive)
+  (let ((what (idris-thing-at-point)))
+    (when (car what)
+      (save-excursion (idris-load-file-sync))
+      (let ((result (car (idris-eval `(:make-case ,(cdr what) ,(car what))))))
+        (if (<= (length result) 2)
+            (message "Can't make cases from %s" (car what))
+          (delete-region (line-beginning-position) (line-end-position))
+          (insert (substring result 0 (1- (length result)))))))))
+
+(defun idris-case-dwim ()
+  "If point is on a hole name, make it into a case expression. Otherwise, case split as a pattern variable."
+  (interactive)
+  (if (or (looking-at-p "\\?[a-zA-Z]+")
+          (looking-back "\\?[a-zA-Z0-9]+"))
+      (idris-make-cases-from-hole)
+    (idris-case-split)))
+
 (defun idris-add-clause (proof)
   "Add clauses to the declaration at point"
   (interactive "P")
