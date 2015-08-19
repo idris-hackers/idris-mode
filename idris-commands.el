@@ -385,7 +385,15 @@ compiler-annotated output. Does not return a line number."
 
 (defun idris-browse-namespace (namespace)
   "Show the contents of NAMESPACE in a tree info buffer."
-  (interactive "sBrowse namespace: ")
+  (interactive
+   ;; Compute a default namespace for the prompt based on the text
+   ;; annotations at point when called interactively. Overlays are
+   ;; preferred over text properties.
+   (let ((default
+           (or (cl-some #'(lambda (o) (overlay-get o 'idris-namespace))
+                        (overlays-at (point)))
+               (get-text-property (point) 'idris-namespace))))
+     (list (read-string "Browse namespace: " default))))
   (idris-tree-info-show (idris-namespace-tree namespace)
                         "Browse Namespace"))
 
