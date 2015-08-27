@@ -467,8 +467,9 @@ the length reported by Idris."
       (goto-char (point-min))
       (unless (re-search-forward idris-proof-script-insertion-marker nil t)
         (when (re-search-forward "\\(\\s-*\n\\)*\\'")
-              (replace-match (concat "\n\n" idris-proof-script-insertion-marker "\n") nil nil)))
+          (replace-match (concat "\n\n" idris-proof-script-insertion-marker "\n") nil nil)))
       (newline)
-      (insert proof))))
+      (insert proof)
+      (newline))))
 
 (provide 'idris-prover)
