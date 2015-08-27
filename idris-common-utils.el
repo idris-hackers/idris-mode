@@ -233,8 +233,10 @@ inserted text (that is, relative to point prior to insertion)."
                    (if (and (member (cadr decor)
                                     '(:type :data :function :metavar))
                             name)
-                       (list 'idris-ref (cadr name)
-                             'idris-ref-style (cadr decor))
+                       (append (list 'idris-ref (cadr name)
+                                     'idris-ref-style (cadr decor))
+                               (when namespace
+                                 (list 'idris-namespace (cadr namespace))))
                      ()))
                   (namespace
                    (if (or (equal (cadr decor) :module)
