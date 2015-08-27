@@ -856,6 +856,21 @@ means to not ask for confirmation."
           (delete-file ibc)
           (message "%s deleted" ibc))))))
 
+(defun idris--active-term-beginning (term pos)
+  "Find the beginning of active term TERM that occurs at POS.
+
+It is an error if POS is not in the specified term. TERM should
+be Idris's own serialization of the term in question."
+  (unless (equal (get-char-property pos 'idris-tt-term) term)
+    (error "Term not present at %s" pos))
+  (save-excursion
+    ;; Find the beginning of the active term
+    (goto-char pos)
+    (while (equal (get-char-property (point) 'idris-tt-term)
+                  term)
+      (backward-char 1))
+    (forward-char 1)
+    (point)))
 
 (defun idris-make-term-menu (_term)
   "Make a menu for the widget for some term."
@@ -1149,7 +1164,8 @@ of the term to replace."
   (let ((ref (plist-get plist 'idris-ref))
         (ref-style (plist-get plist 'idris-ref-style))
         (namespace (plist-get plist 'idris-namespace))
-        (source-file (plist-get plist 'idris-source-file)))
+        (source-file (plist-get plist 'idris-source-file))
+        (tt-term (plist-get plist 'idris-tt-term)))
     (append
      (when ref
        (append (list (list "Get type"
@@ -1194,7 +1210,36 @@ of the term to replace."
        (list (list (concat "Edit " source-file)
                    (lambda ()
                      (interactive)
-                     (find-file source-file))))))))
+                     (find-file source-file)))))
+     (when tt-term
+       (list (list "Normalize term"
+                   (let ((pos (point)))
+                     (lambda ()
+                       (interactive)
+                       (save-excursion
+                         (idris-normalize-term
+                          (idris--active-term-beginning tt-term pos))))))
+             (list "Show term implicits"
+                   (let ((pos (point)))
+                     (lambda ()
+                       (interactive)
+                       (save-excursion
+                         (idris-show-term-implicits
+                          (idris--active-term-beginning tt-term pos))))))
+             (list "Hide term implicits"
+                   (let ((pos (point)))
+                     (lambda ()
+                       (interactive)
+                       (save-excursion
+                         (idris-hide-term-implicits
+                          (idris--active-term-beginning tt-term pos))))))
+             (list "Show core"
+                   (let ((pos (point)))
+                     (lambda ()
+                       (interactive)
+                       (save-excursion
+                         (idris-show-core-term
+                          (idris--active-term-beginning tt-term pos)))))))))))
 
 (provide 'idris-commands)
 ;;; idris-commands.el ends here
