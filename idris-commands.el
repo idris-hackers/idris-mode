@@ -522,12 +522,7 @@ KILLFLAG is set if N was explicitly specified."
 
 (defun idris-eldoc-lookup ()
   "Support for showing type signatures in the modeline when there's a running Idris"
-  (let ((signature (ignore-errors (idris-eval (list :type-of (idris-name-at-point)) t))))
-    (when signature
-      (with-temp-buffer
-        (idris-propertize-spans (idris-repl-semantic-text-props (cdr signature))
-          (insert (car signature)))
-        (buffer-string)))))
+  (get-char-property (point) 'idris-eldoc))
 
 (defun idris-pretty-print ()
   "Get a term or definition pretty-printed by Idris. Useful for writing papers or slides."
