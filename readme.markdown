@@ -95,6 +95,8 @@ The Idris compiler supports documentation. The following commands access it:
 * `C-c C-d a`: Search the documentation for a string (`:apropos` at the REPL).
 * `C-c C-d t`: Search for documentation regarding a particular type (`:search` at the REPL).
 
+Additionally, `idris-mode` integrates with `eldoc-mode`, which shows documentation overviews and type signatures in the minibuffer.
+
 ## Completion
 
 `M-Tab` or whatever you have `completion-at-point` bound to will ask the running Idris process for completions for the current identifier. Note that this command requires that the Idris interpreter is already running, because attempting to load an incomplete buffer would probably not work.
