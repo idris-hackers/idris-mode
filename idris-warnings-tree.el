@@ -60,21 +60,23 @@
 (defun idris-tree-for-note (note)
   (let* ((buttonp (> (length (nth 0 note)) 0)) ;; if empty source location
          (button-text `(,(format "%s line %s col %s:" (nth 0 note) (nth 1 note) (nth 2 note))
-                               help-echo "go to source location"
-                               action ,#'(lambda (_)
-                                           (idris-show-source-location (nth 0 note)
-                                                                       (nth 1 note)
-                                                                       (nth 2 note))))))
+                        help-echo "go to source location"
+                        action ,#'(lambda (_)
+                                    (idris-show-source-location (nth 0 note)
+                                                                (nth 1 note)
+                                                                (nth 2 note))))))
     (make-idris-tree :item (nth 3 note)
                      :highlighting (if (> (length note) 4) (nth 4 note) '())
                      :button (if buttonp button-text nil)
                      :after-button (if buttonp "\n" nil)
                      :plist (list 'note note)
-                     :print-fn idris-tree-printer)))
+                     :print-fn idris-tree-printer
+                     :preserve-properties '(idris-tt-term))))
 
 (defun idris-compiler-notes-to-tree (notes)
   (make-idris-tree :item (format "Errors (%d)" (length notes))
-                   :kids (mapcar #'idris-tree-for-note notes)))
+                   :kids (mapcar #'idris-tree-for-note notes)
+                   :preserve-properties '(idris-tt-term)))
 
 (defvar idris-compiler-notes-mode-map
   (let ((map (make-sparse-keymap)))
@@ -182,7 +184,8 @@ a preview and offer to widen."
   (plist '() :type list)
   (active-p t :type boolean)
   (button nil :type list)
-  (after-button "" :type string))
+  (after-button "" :type string)
+  (preserve-properties '() :type list))
 
 (defun idris-tree-leaf-p (tree)
   ;; Evaluate the kids to see if we are at a leaf
@@ -226,25 +229,31 @@ a preview and offer to widen."
         (insert deco))
       (insert " "))))
 
-(defun idris-tree-indent-item (start end prefix)
-  "Insert PREFIX at the beginning of each but the first line.
+(defun idris-tree-indent-item (start end prefix &optional preserve-props)
+  "Insert PREFIX at the beginning of each but the first line between START and END, copying the text properties in PRESERVE-PROPS.
 This is used for labels spanning multiple lines."
   (save-excursion
     (goto-char end)
     (beginning-of-line)
     (while (< start (point))
-      (insert-before-markers prefix)
-      (forward-line -1))))
+      (let* ((props-here (text-properties-at (point)))
+             (props (cl-loop for p in preserve-props
+                             for val = (plist-get props-here p)
+                             when val
+                             append(list p val))))
+        (insert-before-markers (apply #'propertize prefix props))
+        (forward-line -1)))))
 
 (defun idris-tree-insert (tree prefix)
   "Insert TREE prefixed with PREFIX at point."
   (unless (idris-tree-p tree) (error "%s is not an idris-tree" tree))
-  (with-struct (idris-tree. print-fn kids collapsed-p start-mark end-mark active-p) tree
+  (with-struct (idris-tree. print-fn kids collapsed-p start-mark end-mark active-p preserve-properties)
+      tree
     (let ((line-start (line-beginning-position)))
       (setf start-mark (point-marker))
       (idris-tree-insert-decoration tree)
       (funcall print-fn tree)
-      (idris-tree-indent-item start-mark (point) (concat prefix "   "))
+      (idris-tree-indent-item start-mark (point) (concat prefix "   ") preserve-properties)
       (add-text-properties line-start (point) (list 'idris-tree tree))
       (set-marker-insertion-type start-mark t)
       (when  (not collapsed-p)
