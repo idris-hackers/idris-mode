@@ -136,6 +136,7 @@ hole name, its premises, and its conclusion."
                      :highlighting `((0 ,(length name) ((:decor :metavar))))
                      :print-fn #'idris-hole-tree-printer
                      :collapsed-p (not idris-hole-list-show-expanded) ; from customize
+                     :preserve-properties '(idris-tt-term)
                      :kids (list (idris-tree-for-hole-details name premises conclusion)))))
 
 (defun idris-tree-for-hole-details (name premises conclusion)
@@ -151,9 +152,23 @@ hole name, its premises, and its conclusion."
                                                   `((0 ,(length name) ((:decor :bound)))))
                            (insert name))
                          (insert " : ")
-                         (idris-propertize-spans (idris-repl-semantic-text-props formatting)
-                           (insert type))
-                         (insert "\n")))
+                         (let ((start (point)))
+                           (idris-propertize-spans (idris-repl-semantic-text-props formatting)
+                             (insert type))
+                           (insert "\n")
+                           ;; Indent the term to match the tree and
+                           ;; its binder, if it is more than one line.
+                           (let ((term-end-marker (copy-marker (point))))
+                             (beginning-of-line)
+                             (forward-line -1)
+                             (while (< start (point))
+                               ;; Preserve the term annotation, to not break active terms
+                               (let ((tm (get-text-property (point) 'idris-tt-term)))
+                                 (insert-before-markers
+                                  (propertize (make-string (+ 3 name-width) ? )
+                                              'idris-tt-term tm)))
+                               (forward-line -1))
+                             (goto-char term-end-marker)))))
                      (setq divider-marker (point-marker))
                      (cl-destructuring-bind (type formatting) conclusion
                        (when premises
@@ -174,7 +189,8 @@ hole name, its premises, and its conclusion."
                      (buffer-string))))
     (make-idris-tree :item contents
                      :active-p nil
-                     :highlighting '())))
+                     :highlighting '()
+                     :preserve-properties '(idris-tt-term))))
 
 
 (provide 'idris-hole-list)
