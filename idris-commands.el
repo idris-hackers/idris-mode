@@ -321,10 +321,14 @@ Idris process. This sets the load position to point, if there is one."
   "Return the name at point, taking into account semantic
 annotations. Use this in Idris source buffers or in
 compiler-annotated output. Does not return a line number."
-  (let ((ref (get-text-property (point) 'idris-ref)))
+  (let ((ref (cl-remove-if
+              #'null
+              (cons (get-text-property (point) 'idris-ref)
+                    (cl-loop for overlay in (overlays-at (point))
+                             collecting (overlay-get overlay 'idris-ref))))))
     (if (null ref)
         (car (idris-thing-at-point))
-      ref)))
+      (car ref))))
 
 (defun idris-info-for-name (what name)
   "Display the type for a name"
@@ -411,7 +415,8 @@ compiler-annotated output. Does not return a line number."
                                (if child-name
                                    (list (idris-caller-tree child-name cmd))
                                  nil)))
-                         children))))
+                         children))
+      :preserve-properties '(idris-tt-tree)))
     (t (error "failed to make tree from %s" caller))))
 
 (defun idris-namespace-tree (namespace &optional recursive)
@@ -420,7 +425,8 @@ compiler-annotated output. Does not return a line number."
       ;; Show names as childless trees with decorated roots
       ((name-tree (n) (make-idris-tree :item (car n)
                                        :highlighting (cadr n)
-                                       :kids nil))
+                                       :kids nil
+                                       :preserve-properties '(idris-tt-tree)))
        ;; The children of a tree are the namespaces followed by the names.
        (get-children (sub-namespaces names)
                      (append (mapcar #'(lambda (ns)
@@ -441,7 +447,8 @@ compiler-annotated output. Does not return a line number."
                    (pcase (idris-eval `(:browse-namespace ,namespace))
                      (`((,sub-namespaces ,names . ,_))
                       (get-children sub-namespaces names))
-                     (t nil))))
+                     (t nil)))
+           :preserve-properties '(idris-tt-term))
         ;; In the non-recursive case, generate an expanded tree with the
         ;; first level available, but only if the namespace actually makes
         ;; sense
@@ -451,7 +458,8 @@ compiler-annotated output. Does not return a line number."
             :item namespace
             :highlighting highlight
             :collapsed-p nil
-            :kids (get-children sub-namespaces names)))
+            :kids (get-children sub-namespaces names)
+            :preserve-properties '(idris-tt-term)))
           (t (error "Invalid namespace %s" namespace)))))))
 
 (defun idris-newline-and-indent ()
