@@ -77,17 +77,26 @@
   :group 'idris-faces)
 
 (defface idris-semantic-type-face
-  '((t (:foreground "blue")))
+  '((((background light))
+      :foreground "blue")
+    (((background dark))
+      :foreground "cornflower blue"))
   "The face to be used to highlight types"
   :group 'idris-faces)
 
 (defface idris-semantic-data-face
-  '((t (:foreground "red")))
+  '((((background light))
+      :foreground "red")
+    (((background dark))
+      :foreground "firebrick1"))
   "The face to be used to highlight data and constructors"
   :group 'idris-faces)
 
 (defface idris-semantic-function-face
-  '((t (:foreground "darkgreen")))
+  '((((background light))
+      :foreground "darkgreen")
+    (((background dark))
+      :foreground "#A6E22E"))
   "The face to be used to highlight defined functions"
   :group 'idris-faces)
 
@@ -97,7 +106,10 @@
   :group 'idris-faces)
 
 (defface idris-semantic-bound-face
-  '((t (:foreground "purple")))
+  '((((background light))
+     :foreground "purple")
+    (((background dark))
+     :foreground "MediumPurple1"))
   "The face to be used to highlight bound variables"
   :group 'idris-faces)
 
