@@ -228,7 +228,7 @@ arguments."
     (let* ((default-directory dir) ; default-directory is a special variable - this starts idris in dir
            (compilation-buffer-name-function
             'idris-ipkg--compilation-buffer-name-function)
-           (command (concat "idris " opt " " file))
+           (command (concat idris-interpreter-path " " opt " " file))
            (compilation-filter-hook
             (cons 'idris-ipkg--ansi-compile-filter compilation-filter-hook)))
       (compile command))))
