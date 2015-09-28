@@ -53,7 +53,7 @@
     st))
 
 (defconst idris-ipkg-keywords
-  '("package" "opts" "modules" "sourcedir" "makefile" "objs" "executable" "main" "libs"))
+  '("package" "opts" "modules" "sourcedir" "makefile" "objs" "executable" "main" "libs" "pkgs"))
 
 (defconst idris-ipkg-font-lock-defaults
   `(,idris-ipkg-keywords))
@@ -319,12 +319,40 @@ arguments."
         (idris-ipkg-buffer-cmdline-opts)))))
 
 (defun idris-ipkg-flags-for-current-buffer ()
+  "Extract the command line options field from the current .ipk buffer."
   (let ((opts (idris-ipkg-find-cmdline-opts)))
     (if (stringp opts)
         (split-string opts nil t)
       nil)))
 
+(defun idris-ipkg-pkgs-for-current-buffer ()
+  "Find the explicit list of packages for the current .ipkg buffer."
+  (let ((file (idris-find-file-upwards "ipkg")))
+    (when file
+      (with-temp-buffer
+        (let ((pkgs nil))
+          (cl-flet
+              ((get-pkg ()
+                        (re-search-forward "[a-zA-Z0-9\\.]+" nil t)
+                        (let ((beg (match-beginning 0))
+                              (end (match-end 0)))
+                          (push (buffer-substring-no-properties beg end) pkgs))))
+            (insert-file-contents (car file))
+            (goto-char (point-min))
+            (when (re-search-forward "^\\s-*pkgs\\s-*=\\s-*")
+              (cl-loop initially (get-pkg)
+                       while (looking-at-p "\\s-*,\\s-*")
+                       do (progn (skip-chars-forward " ,\n")
+                                 (get-pkg)))))
+          pkgs)))))
+
+(defun idris-ipkg-pkgs-flags-for-current-buffer ()
+  "Compute a list of Idris command line options based on the pkgs field of the .ipkg file."
+  (let ((pkgs (idris-ipkg-pkgs-for-current-buffer)))
+    (cl-loop for pkg in pkgs appending (list "-p" pkg))))
+
 (add-to-list 'idris-command-line-option-functions 'idris-ipkg-flags-for-current-buffer)
+(add-to-list 'idris-command-line-option-functions 'idris-ipkg-pkgs-flags-for-current-buffer)
 
 ;;; Settings
 
