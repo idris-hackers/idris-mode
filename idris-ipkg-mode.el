@@ -339,7 +339,7 @@ arguments."
                           (push (buffer-substring-no-properties beg end) pkgs))))
             (insert-file-contents (car file))
             (goto-char (point-min))
-            (when (re-search-forward "^\\s-*pkgs\\s-*=\\s-*")
+            (when (re-search-forward "^\\s-*pkgs\\s-*=\\s-*" nil t)
               (cl-loop initially (get-pkg)
                        while (looking-at-p "\\s-*,\\s-*")
                        do (progn (skip-chars-forward " ,\n")
