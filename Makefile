@@ -35,7 +35,7 @@ OBJS =	idris-commands.elc		\
 build: $(OBJS)
 
 test:
-	$(BATCHEMACS) -l ert -l idris-tests.el -f ert-run-tests-batch-and-exit
+	$(BATCHEMACS) -L . -l ert -l idris-tests.el -f ert-run-tests-batch-and-exit
 
 clean:
 	-rm -f $(OBJS)

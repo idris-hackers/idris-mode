@@ -154,12 +154,23 @@
     (delete-process idris-process)
     (setq idris-process nil)))
 
+(defvar idris-process-port-output-regexp (rx (? (group (+ any (not num)))) (group (+ (any num))))
+  "Regexp used to match the port of an Idris process.")
+
 (defun idris-process-filter (string)
   "Accept output from the process"
   (if idris-connection
       string
-    (idris-connect (string-to-number (substring string 0 -1)))
-    ""))
+    ;; Idris sometimes prints a warning prior to the port number, which causes
+    ;; `string-match' to return 0
+    (cl-flet ((idris-warn (msg)
+                          (unless (or (null msg) (string-blank-p msg))
+                            (message "Warning from Idris: %s" msg))))
+      (if (not (string-match idris-process-port-output-regexp string))
+          (idris-warn string)
+        (idris-warn (match-string 1 string))
+        (idris-connect (string-to-number (match-string 2 string))))
+      "")))
 
 (defun idris-show-process-buffer (string)
   "Show the Idris process buffer if STRING is non-empty."
