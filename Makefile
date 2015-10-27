@@ -1,47 +1,36 @@
 # Makefile for idris-mode, to run tests and ensure dependencies are in order
 # Portions based on the Makefile for Proof General
 
-EMACS=emacs24
+EMACS = emacs
+EMACSFLAGS =
+CASK = cask
 
-BATCHEMACS=$(EMACS) --batch --no-site-file -q -eval '(add-to-list (quote load-path) "${PWD}/")' -eval '(require (quote package))' -eval '(add-to-list (quote package-archives) (quote ("melpa" . "http://melpa.org/packages/")) t)' -eval '(package-initialize)'
+PKGDIR := $(shell EMACS=$(EMACS) $(CASK) package-directory)
 
-BYTECOMP = $(BATCHEMACS) -eval '(progn (require (quote bytecomp)) (setq byte-compile-warnings t) (setq byte-compile-error-on-warn t))' -f batch-byte-compile
+SRCS   := $(shell $(CASK) files)
+OBJECTS = $(SRCS:.el=.elc)
 
-OBJS =	idris-commands.elc		\
-	idris-common-utils.elc		\
-	idris-compat.elc		\
-	idris-core.elc			\
-	idris-events.elc		\
-	idris-highlight-input.elc	\
-	idris-info.elc			\
-	idris-ipkg-mode.elc		\
-	idris-keys.elc			\
-	idris-log.elc			\
-	idris-hole-list.elc		\
-	idris-mode.elc			\
-	idris-prover.elc		\
-	idris-repl.elc			\
-	idris-settings.elc		\
-	idris-simple-indent.elc		\
-        idris-tree-info.elc             \
-	idris-syntax.elc		\
-	idris-warnings.elc		\
-	idris-warnings-tree.elc		\
-	inferior-idris.elc
+EMACSBATCH = $(EMACS) -Q --batch $(EMACSFLAGS)
 
-.el.elc:
-	$(BYTECOMP) $<
+build: $(OBJECTS)
 
-build: $(OBJS)
+dist:
+	$(CASK) package
 
-test:
-	$(BATCHEMACS) -l ert -l idris-tests.el -f ert-run-tests-batch-and-exit
+test: $(OBJECTS)
+	$(CASK) exec $(EMACSBATCH) -L . -l ert -l idris-tests.el -f ert-run-tests-batch-and-exit
+
+getdeps: $(PKGDIR)
+
+$(PKGDIR): Cask
+	$(CASK) install
+	touch $(PKGDIR)
+
+%.elc : %.el $(PKGDIR)
+	$(CASK) exec $(EMACSBATCH) -L . -f batch-byte-compile $<
 
 clean:
-	-rm -f $(OBJS)
-	-rm -f test-data/*ibc
-
-getdeps:
-	$(BATCHEMACS) -eval '(progn (package-refresh-contents) (package-install (quote prop-menu)))'
+	-$(RM) $(OBJECTS)
+	-$(RM) test-data/*ibc
 
 .PHONY: clean build test
