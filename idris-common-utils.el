@@ -345,12 +345,12 @@ corresponding values in the CDR of VALUE."
     `(let* ((,tmp ,value)
 	    (,operator (car ,tmp))
 	    (,operands (cdr ,tmp)))
-       (case ,operator
+       (cl-case ,operator
 	 ,@(mapcar (lambda (clause)
                      (if (eq (car clause) t)
                          `(t ,@(cdr clause))
                        (cl-destructuring-bind ((op &rest rands) &rest body) clause
-                         `(,op (destructuring-bind ,rands ,operands
+                         `(,op (cl-destructuring-bind ,rands ,operands
                                  . ,body)))))
 		   patterns)
 	 ,@(if (eq (caar (last patterns)) t)
