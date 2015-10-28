@@ -145,6 +145,16 @@ If ALWAYS-INSERT is non-nil, always insert a prompt at the end of the buffer."
             (idris-repl-buffer-init))
           buffer))))
 
+(defun idris-repl-clear-buffer ()
+  "Clear prior output from the Idris REPL buffer."
+  (interactive)
+  (with-current-buffer (idris-repl-buffer)
+    (let ((inhibit-read-only t)
+          (current-input (idris-repl-current-input)))
+      (erase-buffer)
+      (idris-repl-insert-prompt)
+      (insert current-input))))
+
 (defun idris-switch-to-output-buffer ()
   "Select the output buffer and scroll to bottom."
   (interactive)
@@ -168,6 +178,7 @@ If ALWAYS-INSERT is non-nil, always insert a prompt at the end of the buffer."
     (define-key map (kbd "<C-up>") 'idris-repl-backward-history)
     (define-key map (kbd "M-n") 'idris-repl-forward-history)
     (define-key map (kbd "<C-down>") 'idris-repl-forward-history)
+    (define-key map (kbd "C-c M-o") 'idris-repl-clear-buffer)
     (cl-loop for keyer
              in '(idris-define-docs-keys
                   idris-define-general-keys
