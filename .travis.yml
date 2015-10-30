@@ -16,6 +16,10 @@ before_install:
       - sudo make install
       - cd ..
 
+      ## Cask
+      - curl -fsSL https://github.com/cask/cask/raw/master/go | python
+      - export PATH="$HOME/.cask/bin:$PATH"
+
       ## Idris prereqs
       - sudo add-apt-repository --yes ppa:h-rayflood/llvm
       - sudo apt-get update -qq
