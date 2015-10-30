@@ -44,6 +44,15 @@
 In particular, this takes bird tracks into account in literate Idris."
   (+ idris-col (if (idris-lidr-p) 1 -1)))
 
+(defun idris-highlight--overlay-modification-hook (&rest args)
+  "Delete semantic overlays if they are changed.
+
+See Info node `(elisp)Overlay Properties' to understand how ARGS are used."
+  ;; There are 5 args when it's called post-modification
+  (when (= (length args) 5)
+    (let ((overlay (car args)))
+      (delete-overlay overlay))))
+
 (defun idris-highlight-input-region (buffer start-line start-col end-line end-col highlight)
   "Highlight in BUFFER using an overlay from START-LINE and START-COL to END-LINE and END-COL and the semantic properties specified in HIGHLIGHT."
   (when idris-semantic-source-highlighting
@@ -63,7 +72,10 @@ In particular, this takes bird tracks into account in literate Idris."
                                                       (get-buffer buffer))))
                 (overlay-put highlight-overlay 'idris-source-highlight t)
                 (idris-add-overlay-properties highlight-overlay
-                                              (idris-semantic-properties highlight)))))
+                                              (idris-semantic-properties highlight))
+                (overlay-put highlight-overlay
+                             'modification-hooks
+                             '(idris-highlight--overlay-modification-hook)))))
         (when (eq idris-semantic-source-highlighting 'debug)
           (message "Not highlighting absurd span %s:%s-%s:%s with %s"
                    start-line start-col
