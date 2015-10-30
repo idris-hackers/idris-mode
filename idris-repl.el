@@ -161,6 +161,7 @@ If ALWAYS-INSERT is non-nil, always insert a prompt at the end of the buffer."
   (pop-to-buffer (idris-repl-buffer))
   (goto-char (point-max)))
 
+;;;###autoload
 (defun idris-repl ()
   (interactive)
   (idris-run)

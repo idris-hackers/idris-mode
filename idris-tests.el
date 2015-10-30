@@ -25,6 +25,7 @@
 ;;; Code:
 
 (require 'idris-mode)
+(require 'inferior-idris)
 (require 'idris-ipkg-mode)
 (require 'cl-lib)
 
@@ -32,6 +33,15 @@
 (ert-deftest trivial-test ()
   (should t))
 
+(ert-deftest idris-test-idris-editor-port ()
+  (let ((output "Can't find import Prelude\n37072\n"))
+    (should (string-match idris-process-port-output-regexp output))
+    (should (string= "Can't find import Prelude\n" (match-string 1 output)))
+    (should (string= "37072" (match-string 2 output))))
+  (let ((output "37072\n"))
+    (should (string-match idris-process-port-output-regexp output))
+    (should (null (match-string 1 output)))
+    (should (string= "37072" (match-string 2 output)))))
 
 (ert-deftest idris-test-idris-quit ()
   "Ensure that running Idris and quitting doesn't leave behind
