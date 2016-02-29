@@ -100,7 +100,7 @@ contributing the settings upstream to the theme maintainer."
 
 
 (defvar idris-definition-keywords
-  '("data" "class" "codata" "constructor" "record" "postulate")
+  '("data" "codata" "constructor" "interface" "record" "postulate")
   "Keywords that introduce some identifier.")
 
 (defvar idris-operator-regexp
@@ -144,8 +144,8 @@ contributing the settings upstream to the theme maintainer."
     st))
 
 (defconst idris-keywords
-  '("abstract" "case" "covering" "default" "do" "dsl" "else" "if"
-    "implicit" "import" "in" "infix" "infixl" "infixr" "instance"
+  '("abstract" "case" "covering" "default" "do" "dsl" "else" "export" "if"
+    "implementation" "implicit" "import" "in" "infix" "infixl" "infixr"
     "module" "mutual" "namespace" "of" "let" "parameters" "partial"
     "pattern" "prefix" "private" "proof" "public" "rewrite" "syntax"
     "tactics" "then" "total" "using" "where" "with"))
