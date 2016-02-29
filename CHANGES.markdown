@@ -3,6 +3,15 @@
 This file documents the user-interface changes in idris-mode, starting
 with release 0.9.19.
 
+## 2016 Feb 29
+
+ * It is possible to customize what happens to the focus of the current 
+   window when the type checking is performed and type errors are detected, 
+   now the user can choose between two options: 1) the current window stays
+   focused or 2) the focus goes to the `*idris-notes*` buffer.
+   The  true or false value of the variable 
+   `idris-stay-in-current-window-on-compiler-error` controls this behaviour.
+
 ## 0.9.19
 
  * The variable `idris-packages` has been renamed to
