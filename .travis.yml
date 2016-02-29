@@ -34,7 +34,7 @@ install:
       - pushd .
       - git clone https://github.com/idris-lang/Idris-dev.git /tmp/Idris-dev
       - cd /tmp/Idris-dev
-      - cabal install -f FFI -f LLVM --only-dependencies --enable-tests --max-backjumps=-1
+      - cabal install -f FFI -f LLVM --only-dependencies --enable-tests --max-backjumps=-1 --force-reinstalls
       - cabal configure -f FFI -f LLVM
       - cabal sdist
       - cd ..
