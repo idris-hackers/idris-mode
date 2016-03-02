@@ -238,7 +238,9 @@ line."
            (lambda (_condition)
              (when (member 'warnings-tree idris-warnings-printing)
                (idris-list-compiler-notes)
-               (pop-to-buffer (idris-buffer-name :notes)))))))
+               (if idris-stay-in-current-window-on-compiler-error
+                 (display-buffer (idris-buffer-name :notes))
+                 (pop-to-buffer (idris-buffer-name :notes))))))))
     (error "Cannot find file for current buffer")))
 
 (defun idris-view-compiler-log ()

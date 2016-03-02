@@ -59,6 +59,11 @@
   :group 'idris
   :type 'boolean)
 
+(defcustom idris-stay-in-current-window-on-compiler-error nil
+  "Stay in current window if type checking fails."
+  :group 'idris
+  :type 'boolean)
+
 (defcustom idris-semantic-source-highlighting t
   "If non-nil, use the Idris compiler's semantic source
   information to highlight Idris code. If `debug', log failed
