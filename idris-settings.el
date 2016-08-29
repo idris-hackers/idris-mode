@@ -224,6 +224,8 @@ change to ordinary prover interaction."
   :group 'idris)
 
 ;;;; Other hooks
+
+(autoload 'idris-set-current-pretty-print-width "idris-commands.el")
 (defcustom idris-run-hook '(idris-set-current-pretty-print-width)
   "A hook to run when Idris is started."
   :type 'hook
