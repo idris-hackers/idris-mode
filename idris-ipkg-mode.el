@@ -319,7 +319,7 @@ arguments."
         (idris-ipkg-buffer-cmdline-opts)))))
 
 (defun idris-ipkg-flags-for-current-buffer ()
-  "Extract the command line options field from the current .ipk buffer."
+  "Extract the command line options field from the current .ipkg buffer."
   (let ((opts (idris-ipkg-find-cmdline-opts)))
     (if (stringp opts)
         (split-string opts nil t)
