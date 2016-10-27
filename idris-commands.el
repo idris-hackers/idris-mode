@@ -309,15 +309,22 @@ Idris process. This sets the load position to point, if there is one."
 
 
 (defun idris-thing-at-point ()
-  "Return the line number and name at point. Use this in Idris source buffers."
-  (let ((name (thing-at-point 'word))
-        (op (thing-at-point 'symbol))
-        (line (idris-get-line-num)))
-    (if name
-        (cons (substring-no-properties name) line)
-      (if op
-          (cons (substring-no-properties op) line)
-        (error "Nothing identifiable under point")))))
+  "Return the line number and name at point as a cons.
+Use this in Idris source buffers."
+  (let ((line (idris-get-line-num)))
+    (cons
+     (if (equal (syntax-after (point))
+                (string-to-syntax "."))
+         ;; We're on an operator.
+         (save-excursion
+           (skip-syntax-backward ".")
+           (let ((beg (point)))
+             (skip-syntax-forward ".")
+             (buffer-substring-no-properties beg (point))))
+       ;; Try if we're on a symbol or fail otherwise.
+       (or (current-word t)
+           (error "Nothing identifiable under point")))
+     line)))
 
 (defun idris-name-at-point ()
   "Return the name at point, taking into account semantic
