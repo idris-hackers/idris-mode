@@ -121,17 +121,18 @@ contributing the settings upstream to the theme maintainer."
     ;; Matching {}, but with nested comments
     (modify-syntax-entry ?\{ "(} 1bn" st)
     (modify-syntax-entry ?\} "){ 4bn" st)
-    (modify-syntax-entry ?\- "_ 123" st)
     (modify-syntax-entry ?\n ">" st)
 
-    ;; ' and _ can be names
-    (modify-syntax-entry ?' "w" st)
-    (modify-syntax-entry ?_ "w" st)
+    ;; ' and _ can be part of names, so give them symbol constituent syntax
+    (modify-syntax-entry ?' "_" st)
+    (modify-syntax-entry ?_ "_" st)
 
-
-    ;; Idris operator chars
-    (mapc #'(lambda (ch) (modify-syntax-entry ch "_" st))
-          "!#$%&*+./<=>@^|~:")
+    ;; Idris operator chars get punctuation syntax
+    (mapc #'(lambda (ch) (modify-syntax-entry ch "." st))
+	  "!#$%&*+./<=>@^|~:")
+    ;; - is an operator char but may also be 1st or 2nd char of comment starter
+    ;; -- and the 1st char of comment end -}
+    (modify-syntax-entry ?\- ". 123" st)
 
     ;; Whitespace is whitespace
     (modify-syntax-entry ?\  " " st)
