@@ -227,7 +227,7 @@ line."
                                                        start-line start-col
                                                        end-line end-col
                                                        props))))))
-               (t (idris-make-clean)
+               (_ (idris-make-clean)
                   (idris-update-options-cache)
 
                   (setq idris-currently-loaded-buffer (current-buffer))
@@ -426,7 +426,7 @@ compiler-annotated output. Does not return a line number."
                                  nil)))
                          children))
       :preserve-properties '(idris-tt-tree)))
-    (t (error "failed to make tree from %s" caller))))
+    (_ (error "failed to make tree from %s" caller))))
 
 (defun idris-namespace-tree (namespace &optional recursive)
   "Create a tree of the contents of NAMESPACE, lazily retrieving children when RECURSIVE is non-nil."
@@ -469,7 +469,7 @@ compiler-annotated output. Does not return a line number."
             :collapsed-p nil
             :kids (get-children sub-namespaces names)
             :preserve-properties '(idris-tt-term)))
-          (t (error "Invalid namespace %s" namespace)))))))
+          (_ (error "Invalid namespace %s" namespace)))))))
 
 (defun idris-newline-and-indent ()
   "Indent a new line like the current one by default"
