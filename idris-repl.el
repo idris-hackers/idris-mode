@@ -350,7 +350,7 @@ Invokes `idris-repl-mode-hook'."
                  ,props)
                (idris-repl-highlight-input
                 start start-line start-col end-line end-col props))))))
-       (t (idris-repl-insert-result result spans)))) ;; The actual result
+       (_ (idris-repl-insert-result result spans)))) ;; The actual result
     ((:error condition &optional spans)
      (idris-repl-show-abort condition spans))))
 

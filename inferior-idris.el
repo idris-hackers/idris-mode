@@ -406,7 +406,7 @@ applicable. Returns nil if the version of Idris used doesn't
 support asking for versions."
   (pcase (idris-eval :version t)
     (`((,version ,prerelease)) (cons version prerelease))
-    (t nil)))
+    (_ nil)))
 
 (defun idris-get-idris-version-string ()
   "Ask the Idris compiler for its version information, and return the result as a user-friendly string.
