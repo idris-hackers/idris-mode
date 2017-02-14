@@ -206,3 +206,14 @@ The following commands are supported (taken from idris-vim):
       popwin:special-display-config)
 ```
 
+### Spacemacs
+We have received reports that the `idris-stay-in-current-window-on-compiler-error` setting does not function properly for users of Spacemacs. The following user configuration can fix it:
+
+```elisp
+(defun dotspacemacs/user-config ()
+  ; ...
+  (with-eval-after-load 'idris-mode
+    (setq idris-stay-in-current-window-on-compiler-error t)
+    (dolist (x '("*idris-notes*" "*idris-holes*" "*idris-info*"))
+      (plist-put (cdr (assoc x popwin:special-display-config)) :noselect t))))
+```
