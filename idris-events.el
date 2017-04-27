@@ -27,7 +27,7 @@
 
 (require 'idris-core)
 (require 'idris-common-utils)
-
+(require 'idris-settings)
 
 (defvar idris-event-buffer-name (idris-buffer-name :events)
   "The name of the Idris event buffer.")
@@ -45,17 +45,20 @@
         buffer)))
 
 (defun idris-event-log (event sending)
-  "Record the fact that EVENT occured."
-  (with-current-buffer (idris-events-buffer)
-    (goto-char (point-max))
-    (let ((buffer-read-only nil)
-          (time (format-time-string "%H:%M:%S")))
-      (save-excursion
-        (if sending
-            (insert (concat time " -> "))
-          (insert (concat time " <- ")))
-        (idris-pprint-event event (current-buffer))))
-    (goto-char (point-max))))
+  "Record the fact that EVENT occured in the SENDING direction.
+
+The event is only logged if `idris-log-events' is non-nil."
+  (when idris-log-events
+    (with-current-buffer (idris-events-buffer)
+      (goto-char (point-max))
+      (let ((buffer-read-only nil)
+            (time (format-time-string "%H:%M:%S")))
+        (save-excursion
+          (if sending
+              (insert (concat time " -> "))
+            (insert (concat time " <- ")))
+          (idris-pprint-event event (current-buffer))))
+      (goto-char (point-max)))))
 
 (defun idris-pprint-event (event buffer)
   "Pretty print EVENT in BUFFER."
@@ -65,3 +68,4 @@
     (pp event buffer)))
 
 (provide 'idris-events)
+;;; idris-events.el ends here
