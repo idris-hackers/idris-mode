@@ -254,6 +254,7 @@ inserted text (that is, relative to point prior to insertion)."
   (let* ((name (assoc :name props))
          (decor (assoc :decor props))
          (term (assoc :tt-term props))
+         (key (assoc :key props))
          (namespace (assoc :namespace props))
          (source-file (assoc :source-file props))
          (idris-err (assoc :error props))
@@ -287,6 +288,9 @@ inserted text (that is, relative to point prior to insertion)."
                   (t nil))
             (if term
                 (list 'idris-tt-term (cadr term))
+              ())
+            (if key
+                (list 'idris-name-key (concat "{{{{{" (cadr key) "}}}}}"))
               ())
             (if idris-err
                 (list 'idris-tt-error (cadr idris-err))

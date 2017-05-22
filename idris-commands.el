@@ -1164,7 +1164,7 @@ of the term to replace."
 ;;; Computing a menu with these commands
 (defun idris-context-menu-items (plist)
   "Compute a contextual menu based on the Idris semantic decorations in PLIST."
-  (let ((ref (plist-get plist 'idris-ref))
+  (let ((ref (or (plist-get plist 'idris-name-key) (plist-get plist 'idris-ref)))
         (ref-style (plist-get plist 'idris-ref-style))
         (namespace (plist-get plist 'idris-namespace))
         (source-file (plist-get plist 'idris-source-file))
