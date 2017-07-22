@@ -456,7 +456,7 @@ compiler-annotated output. Does not return a line number."
                    (pcase (idris-eval `(:browse-namespace ,namespace))
                      (`((,sub-namespaces ,names . ,_))
                       (get-children sub-namespaces names))
-                     (t nil)))
+                     (_ nil)))
            :preserve-properties '(idris-tt-term))
         ;; In the non-recursive case, generate an expanded tree with the
         ;; first level available, but only if the namespace actually makes
