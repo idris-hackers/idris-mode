@@ -576,8 +576,10 @@ KILLFLAG is set if N was explicitly specified."
       (let ((result (car (idris-eval `(:case-split ,(cdr what) ,(car what))))))
         (if (<= (length result) 2)
             (message "Can't case split %s" (car what))
+          (setq final-point (point))
           (delete-region (line-beginning-position) (line-end-position))
-          (insert (substring result 0 (1- (length result)))))))))
+          (insert (substring result 0 (1- (length result))))
+          (goto-char final-point))))))
 
 (defun idris-make-cases-from-hole ()
   "Make a case expression from the metavariable at point."
@@ -588,8 +590,10 @@ KILLFLAG is set if N was explicitly specified."
       (let ((result (car (idris-eval `(:make-case ,(cdr what) ,(car what))))))
         (if (<= (length result) 2)
             (message "Can't make cases from %s" (car what))
+          (setq final-point (point))
           (delete-region (line-beginning-position) (line-end-position))
-          (insert (substring result 0 (1- (length result)))))))))
+          (insert (substring result 0 (1- (length result))))
+          (goto-char final-point))))))
 
 (defun idris-case-dwim ()
   "If point is on a hole name, make it into a case expression. Otherwise, case split as a pattern variable."
