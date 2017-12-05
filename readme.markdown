@@ -217,3 +217,33 @@ We have received reports that the `idris-stay-in-current-window-on-compiler-erro
     (dolist (x '("*idris-notes*" "*idris-holes*" "*idris-info*"))
       (plist-put (cdr (assoc x popwin:special-display-config)) :noselect t))))
 ```
+
+
+### [`frames-only-mode`](https://github.com/davidshepherd7/frames-only-mode) and many buffer pop-ups
+
+[`frames-only-mode`](https://github.com/davidshepherd7/frames-only-mode) obviates the need for emacs internal windows so that emacs can get along better with tiling managers - such as [xmonad](https://github.com/xmonad/xmonad) - by using emacs' frames instead of windows.
+
+Throughout a session with `idris-mode`, many frames will accummulate, such as `*idris-holes*`, and over time these clutter your screen. A quick simple solution is to add the following to your emacs configuration:
+
+```elisp
+(defun my-idris-mode-hook ()
+
+  ;; This makes it so that especially errors reuse their frames
+  ;; https://emacs.stackexchange.com/questions/327/how-can-i-block-a-frame-from-being-split/338
+  ;; alternatively, add this to certain frames: (set-frame-parameter nil 'unsplittable t)
+  ;; (without this, idris throws out tons of new frames)
+  (add-to-list 'display-buffer-alist
+               '(".*". (display-buffer-reuse-window . ((reusable-frames . t)))))
+  (setq idris-stay-in-current-window-on-compiler-error t)
+  (setq idris-prover-restore-window-configuration t)
+
+  ;; If you kill a buffer (eg, hit "q"), frames with these names wil also be killed
+  (add-to-list 'frames-only-mode-kill-frame-when-buffer-killed-buffer-list "*idris-repl*")
+  (add-to-list 'frames-only-mode-kill-frame-when-buffer-killed-buffer-list "*idris-notes*")
+  (add-to-list 'frames-only-mode-kill-frame-when-buffer-killed-buffer-list "*idris-info*")
+  (add-to-list 'frames-only-mode-kill-frame-when-buffer-killed-buffer-list "*idris-holes*"))
+
+(add-hook 'idris-mode-hook #'my-idris-mode-hook)
+```
+
+
