@@ -60,14 +60,14 @@ See Info node `(elisp)Overlay Properties' to understand how ARGS are used."
       (widen)
       (if (or (> end-line start-line)
               (and (= end-line start-line)
-                   (> end-col start-col)))
+                   (>= end-col start-col)))
           (with-current-buffer buffer
             (save-excursion
               (goto-char (point-min))
               (let* ((start-pos (+ (line-beginning-position start-line)
                                    (idris-highlight-column start-col)))
                      (end-pos (+ (line-beginning-position end-line)
-                                 (idris-highlight-column end-col)))
+                                 (idris-highlight-column (+ 1 end-col))))
                      (highlight-overlay (make-overlay start-pos end-pos
                                                       (get-buffer buffer))))
                 (overlay-put highlight-overlay 'idris-source-highlight t)
