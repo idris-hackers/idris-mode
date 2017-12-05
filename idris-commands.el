@@ -353,6 +353,7 @@ compiler-annotated output. Does not return a line number."
   (let ((name (if thing (read-string "Check: ")
                 (idris-name-at-point))))
     (when name
+      (save-excursion (idris-load-file-sync))
       (idris-info-for-name :type-of name))))
 
 (defun idris-print-definition-of-name (thing)
