@@ -1,11 +1,15 @@
 # Makefile for idris-mode, to run tests and ensure dependencies are in order
 # Portions based on the Makefile for Proof General
 
-EMACS=emacs24
+EMACS=emacs
 
-BATCHEMACS=$(EMACS) --batch --no-site-file -q -eval '(add-to-list (quote load-path) "${PWD}/")' -eval '(require (quote package))' -eval '(add-to-list (quote package-archives) (quote ("melpa" . "http://melpa.org/packages/")) t)' -eval '(package-initialize)'
+BATCHEMACS=$(EMACS) --batch --no-site-file -q \
+	-eval '(add-to-list (quote load-path) "${PWD}/")' \
+	-eval '(require (quote package))' \
+	-eval '(add-to-list (quote package-archives) (quote ("melpa" . "http://melpa.org/packages/")) t)' \
+	-eval '(package-initialize)'
 
-BYTECOMP = $(BATCHEMACS) -eval '(progn (require (quote bytecomp)) (setq byte-compile-warnings t) (setq byte-compile-error-on-warn t))' -f batch-byte-compile
+BYTECOMP = $(BATCHEMACS) -eval '(progn (require (quote bytecomp)) (setq byte-compile-warnings t) (setq byte-compile-error-on-warn nil))' -f batch-byte-compile
 
 OBJS =	idris-commands.elc		\
 	idris-common-utils.elc		\
@@ -23,7 +27,7 @@ OBJS =	idris-commands.elc		\
 	idris-repl.elc			\
 	idris-settings.elc		\
 	idris-simple-indent.elc		\
-        idris-tree-info.elc             \
+	idris-tree-info.elc             \
 	idris-syntax.elc		\
 	idris-warnings.elc		\
 	idris-warnings-tree.elc		\
@@ -32,9 +36,9 @@ OBJS =	idris-commands.elc		\
 .el.elc:
 	$(BYTECOMP) $<
 
-build: $(OBJS)
+build: getdeps $(OBJS)
 
-test:
+test: getdeps
 	$(BATCHEMACS) -L . -l ert -l idris-tests.el -f ert-run-tests-batch-and-exit
 
 clean:
@@ -42,6 +46,6 @@ clean:
 	-rm -f test-data/*ibc
 
 getdeps:
-	$(BATCHEMACS) -eval '(progn (package-refresh-contents) (package-install (quote prop-menu)))'
+	$(BATCHEMACS) -eval '(progn (package-refresh-contents) (unless (package-installed-p (quote prop-menu)) (package-install (quote prop-menu)) ))'
 
-.PHONY: clean build test
+.PHONY: clean build test getdeps
