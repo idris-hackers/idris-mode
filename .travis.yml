@@ -9,8 +9,11 @@ sudo: false
 # Do not choose a language; we provide our own build tools.
 language: generic
 
-env:
-  - EMACS_VERSION=24.3 EMACS_VERSION=24.4 EMACS_VERSION=25.3
+matrix:
+  include:
+    - env: EMACS_VERSION=24.3
+    - env: EMACS_VERSION=24.4
+    - env: EMACS_VERSION=25.3
 
 # Caching so the next build will be fast too.
 cache:
