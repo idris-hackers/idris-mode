@@ -46,6 +46,15 @@ before_install:
   - sudo make install
   - cd ..
 
+  ## Emacs 25.3
+  - wget http://ftpmirror.gnu.org/emacs/emacs-25.3.tar.xz
+  - tar -xf emacs-25.3.tar.xz
+  - cd emacs-25.3
+  - ./configure --prefix=/usr/local/emacs-25.3 --with-xpm=no --with-gif=no
+  - make
+  - sudo make install
+  - cd ..
+
 # Install Idris
 install:
   - pushd .
@@ -64,4 +73,8 @@ script:
 
   # emacs 24.4
   - make test EMACS=/usr/local/emacs-24.4/bin/emacs
+  - make clean
+
+  # emacs 25.3
+  - make test EMACS=/usr/local/emacs-25.3/bin/emacs
   - make clean
