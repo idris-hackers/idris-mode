@@ -741,14 +741,16 @@ prefix argument sets the recursion depth directly."
     (when (car what)
       (save-excursion (idris-load-file-sync))
       (let ((result (car (idris-eval `(:proof-search ,(cdr what) ,(car what) ,hints ,@depth)))))
-        (save-excursion
-          (let ((start (progn (search-backward "?") (point)))
-                (end (progn (forward-char) (search-forward-regexp "[^a-zA-Z0-9_']") (backward-char) (point))))
-            (delete-region start end))
-          (insert result))))))
+        (if (string= result "")
+            (error "Nothing found")
+          (save-excursion
+            (let ((start (progn (search-backward "?") (point)))
+                  (end (progn (forward-char) (search-forward-regexp "[^a-zA-Z0-9_']") (backward-char) (point))))
+              (delete-region start end))
+            (insert result)))))))
 
 (defun idris-refine (name)
-  "Refine by some name, without recursive proof search"
+  "Refine by some NAME, without recursive proof search."
   (interactive "MRefine by: ")
   (let ((what (idris-thing-at-point)))
     (unless (car what)
