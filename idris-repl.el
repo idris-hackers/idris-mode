@@ -35,6 +35,8 @@
 (require 'idris-prover)
 (require 'idris-highlight-input)
 
+(eval-when-compile (require 'cl))
+
 
 (defvar idris-prompt-string "Idris"
   "The prompt shown in the REPL.")
