@@ -9,7 +9,7 @@ BATCHEMACS=$(EMACS) --batch --no-site-file -q \
 	-eval '(add-to-list (quote package-archives) (quote ("melpa" . "http://melpa.org/packages/")) t)' \
 	-eval '(package-initialize)'
 
-BYTECOMP = $(BATCHEMACS) -eval '(progn (require (quote bytecomp)) (setq byte-compile-warnings t) (setq byte-compile-error-on-warn nil))' -f batch-byte-compile
+BYTECOMP = $(BATCHEMACS) -eval '(progn (require (quote bytecomp)) (setq byte-compile-warnings t) (setq byte-compile-error-on-warn t))' -f batch-byte-compile
 
 OBJS =	idris-commands.elc		\
 	idris-common-utils.elc		\
