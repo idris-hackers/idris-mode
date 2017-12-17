@@ -58,5 +58,5 @@ before_script: true
 script:
   - popd
   # emacs
-  - make test EMACS=/usr/local/emacs-${EMACS_VERSION}/bin/emacs
   - make clean
+  - make test EMACS=/usr/local/emacs-${EMACS_VERSION}/bin/emacs
