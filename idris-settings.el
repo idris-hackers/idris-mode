@@ -66,11 +66,18 @@
 
 (defcustom idris-semantic-source-highlighting t
   "If non-nil, use the Idris compiler's semantic source
-  information to highlight Idris code. If `debug', log failed
+information to highlight Idris code. If `debug', log failed
   highlighting to buffer `*Messages*'."
   :group 'idris
   :type '(choice (boolean :tag "Enable")
                  (const :tag "Debug" debug)))
+
+(defcustom idris-log-events nil
+  "If non-nil, communications between Emacs and Idris are logged.
+
+The log is placed in `idris-event-buffer-name'."
+  :group 'idris
+  :type 'boolean)
 
 ;;; Faces
 (defface idris-active-term-face
