@@ -43,7 +43,17 @@
 (require 'idris-highlight-input)
 
 (require 'cl-lib)
+(require 'cl-macs)
 (require 'thingatpt)
+
+(cl-defstruct (idris-file-info (:constructor idris-current-buffer-info))
+  (buffer (current-buffer)
+          :read-only t)
+  (filename (buffer-file-name (current-buffer))
+            :read-only t)
+  (srcdir (or (idris-ipkg-find-src-dir)
+              (file-name-directory (buffer-file-name (current-buffer))))
+          :read-only t))
 
 (defvar-local idris-load-to-here nil
   "The maximum position to load")
@@ -58,10 +68,10 @@
 (defun idris-make-clean ()
   (setq idris-buffer-dirty-p nil))
 
-(defun idris-current-buffer-dirty-p ()
+(defun idris-current-buffer-dirty-p (&optional buffer)
   "Check whether the current buffer's most recent version is loaded."
   (or idris-buffer-dirty-p
-      (not (equal (current-buffer)
+      (not (equal (or buffer (current-buffer))
                   idris-currently-loaded-buffer))
       ;; for when we load the whole buffer
       (and (not idris-load-to-here) (not idris-loaded-region-overlay))
@@ -110,8 +120,8 @@
     ;; Otherwise just make it dirty.
     (idris-make-dirty)))
 
-
-(defun idris-update-loaded-region (fc)
+(defun idris-update-loaded-region (fc loaded-file)
+  "Load and highlight a loaded buffer."
   (if fc
       (let* ((end (assoc :end fc))
              (line (cadr end))
@@ -125,18 +135,19 @@
                                               (forward-line (1- line))
                                               (move-to-column (1- col))
                                               (point))
-                              (current-buffer)))
+                              (idris-file-info-buffer loaded-file)))
           (overlay-put idris-loaded-region-overlay 'face 'idris-loaded-region-face)))
 
     ;; HACK: Some versions of Idris don't properly return a span for
     ;; some modules, returning () instead. Remove this (and the
     ;; surrounding (if fc)) after Idris 0.9.17, which contains a fix.
     (idris-update-loaded-region
-     `((:filename ,(cdr (idris-filename-to-load)))
+     `((:filename ,(idris-file-info-filename loaded-file))
        (:start 1 1)
        ,(save-excursion
           (goto-char (point-max))
-          `(:end ,(idris-get-line-num) 1))))))
+          `(:end ,(idris-get-line-num) 1)))
+     loaded-file)))
 
 (defun idris-load-to (&optional pos)
   (when (not pos) (setq pos (point)))
@@ -161,19 +172,6 @@
   (interactive)
   (idris-load-forward-line -1))
 
-(defun idris-filename-to-load ()
-  "Compute the working directory and filename to load in Idris, returning these as a cons."
-  (let* ((fn (buffer-file-name))
-         (ipkg-srcdir (idris-ipkg-find-src-dir))
-         (srcdir (if ipkg-srcdir
-                     ipkg-srcdir
-                   (file-name-directory fn))))
-    (when (and  ;; check that srcdir is prefix of filename - then load relative
-           (> (length fn) (length srcdir))
-           (string= (substring fn 0 (length srcdir)) srcdir))
-      (setq fn (file-relative-name fn srcdir)))
-    (cons srcdir fn)))
-
 (defun idris-load-file (&optional set-line)
   "Pass the current buffer's file to the inferior Idris process.
 A prefix argument restricts loading to the current
@@ -184,63 +182,63 @@ line."
   (when (and set-line (= set-line 4)) (idris-load-to (point)))
   (when (and set-line (= set-line 16)) (idris-no-load-to))
   (if (buffer-file-name)
-      (when (idris-current-buffer-dirty-p)
-        (when idris-prover-currently-proving
-          (if (y-or-n-p (format "%s is open in the prover. Abandon and load? "
-                                idris-prover-currently-proving))
-              (idris-prover-abandon)
-            (signal 'quit nil)))
-        ;; Remove warning overlays
-        (idris-warning-reset-all)
-        ;; Clear the contents of the compiler notes buffer, if it exists
-        (when (get-buffer idris-notes-buffer-name)
-          (with-current-buffer idris-notes-buffer-name
-            (let ((inhibit-read-only t)) (erase-buffer))))
-        ;; Remove stale semantic highlighting
-        (idris-highlight-remove-overlays (current-buffer))
-        ;; Actually do the loading
-        (let* ((dir-and-fn (idris-filename-to-load))
-               (fn (cdr dir-and-fn))
-               (srcdir (car dir-and-fn)))
+      (let ((file-to-load (idris-current-buffer-info)))
+        (when (idris-current-buffer-dirty-p (idris-file-info-buffer file-to-load))
+          (when idris-prover-currently-proving
+            (if (y-or-n-p (format "%s is open in the prover. Abandon and load? "
+                                  idris-prover-currently-proving))
+                (idris-prover-abandon)
+              (signal 'quit nil)))
+          ;; Remove warning overlays
+          (idris-warning-reset-all)
+          ;; Clear the contents of the compiler notes buffer, if it exists
+          (when (get-buffer idris-notes-buffer-name)
+            (with-current-buffer idris-notes-buffer-name
+              (let ((inhibit-read-only t)) (erase-buffer))))
+          ;; Remove stale semantic highlighting
+          (idris-highlight-remove-overlays (idris-file-info-buffer file-to-load))
+          ;; Actually do the loading
           (setq idris-currently-loaded-buffer nil)
-          (idris-switch-working-directory srcdir)
+          (idris-switch-working-directory (idris-file-info-srcdir file-to-load))
           (idris-delete-ibc t) ;; delete the ibc to avoid interfering with partial loads
-          (idris-eval-async
-           (if idris-load-to-here
-               `(:load-file ,fn ,(save-excursion
-                                   (goto-char idris-load-to-here)
-                                   (idris-get-line-num)))
-             `(:load-file ,fn))
-           (lambda (result)
-             (pcase result
-               (`(:highlight-source ,hs)
-                (cl-loop
-                 for h in hs
-                 do (pcase h
-                      (`(((:filename ,fn)
-                          (:start ,start-line ,start-col)
-                          (:end ,end-line ,end-col))
-                         ,props)
-                       (when (string= (file-name-nondirectory fn)
-                                      (file-name-nondirectory (buffer-file-name)))
-                         (idris-highlight-input-region (current-buffer)
-                                                       start-line start-col
-                                                       end-line end-col
-                                                       props))))))
-               (_ (idris-make-clean)
-                  (idris-update-options-cache)
+          (let ((fn (idris-file-info-filename file-to-load))
+                (buffer (idris-file-info-buffer file-to-load)))
+            (idris-eval-async
+             (if idris-load-to-here
+                 `(:load-file ,fn ,(save-excursion
+                                     (goto-char idris-load-to-here)
+                                     (idris-get-line-num)))
+               `(:load-file ,fn))
+             (lambda (result)
+               (pcase result
+                 (`(:highlight-source ,hs)
+                  (cl-loop
+                   for h in hs
+                   do (pcase h
+                        (`(((:filename ,fn)
+                            (:start ,start-line ,start-col)
+                            (:end ,end-line ,end-col))
+                           ,props)
+                         (when (string= (file-name-nondirectory fn)
+                                        (file-name-nondirectory (buffer-file-name buffer)))
+                           (idris-highlight-input-region buffer
+                                                         start-line start-col
+                                                         end-line end-col
+                                                         props))))))
+                 (_ (idris-make-clean)
+                    (idris-update-options-cache)
 
-                  (setq idris-currently-loaded-buffer (current-buffer))
-                  (when (member 'warnings-tree idris-warnings-printing)
-                    (idris-list-compiler-notes))
-                  (run-hooks 'idris-load-file-success-hook)
-                  (idris-update-loaded-region result))))
-           (lambda (_condition)
-             (when (member 'warnings-tree idris-warnings-printing)
-               (idris-list-compiler-notes)
-               (if idris-stay-in-current-window-on-compiler-error
-                 (display-buffer (idris-buffer-name :notes))
-                 (pop-to-buffer (idris-buffer-name :notes))))))))
+                    (setq idris-currently-loaded-buffer buffer)
+                    (when (member 'warnings-tree idris-warnings-printing)
+                      (idris-list-compiler-notes))
+                    (run-hooks 'idris-load-file-success-hook)
+                    (idris-update-loaded-region result file-to-load))))
+             (lambda (_condition)
+               (when (member 'warnings-tree idris-warnings-printing)
+                 (idris-list-compiler-notes)
+                 (if idris-stay-in-current-window-on-compiler-error
+                     (display-buffer (idris-buffer-name :notes))
+                   (pop-to-buffer (idris-buffer-name :notes)))))))))
     (error "Cannot find file for current buffer")))
 
 (defun idris-view-compiler-log ()
@@ -275,27 +273,25 @@ Idris process. This sets the load position to point, if there is one."
   (save-buffer)
   (idris-ensure-process-and-repl-buffer)
   (if (buffer-file-name)
-      (unless (idris-position-loaded-p (point))
-        (idris-warning-reset-all)
-        (when (and idris-load-to-here
-                   (< (marker-position idris-load-to-here) (point)))
-          (idris-load-to (point)))
-        (let* ((dir-and-fn (idris-filename-to-load))
-               (fn (cdr dir-and-fn))
-               (srcdir (car dir-and-fn)))
-          (setq idris-currently-loaded-buffer nil)
-          (idris-switch-working-directory srcdir)
-          (let ((result
-                 (if idris-load-to-here
-                     (idris-eval `(:load-file ,fn
-                                              ,(save-excursion
-                                                 (goto-char idris-load-to-here)
-                                                 (idris-get-line-num))))
-                   (idris-eval `(:load-file ,fn)))))
-            (idris-update-options-cache)
-            (setq idris-currently-loaded-buffer (current-buffer))
-            (idris-make-clean)
-            (idris-update-loaded-region (car result)))))
+      (let ((file-to-load (idris-current-buffer-info)))
+	(unless (idris-position-loaded-p (point))
+          (idris-warning-reset-all)
+          (when (and idris-load-to-here
+                     (< (marker-position idris-load-to-here) (point)))
+            (idris-load-to (point)))
+            (setq idris-currently-loaded-buffer nil)
+            (idris-switch-working-directory (idris-file-info-srcdir file-to-load))
+            (let ((result
+                   (if idris-load-to-here
+                       (idris-eval `(:load-file ,(idris-file-info-filename file-to-load)
+						,(save-excursion
+                                                   (goto-char idris-load-to-here)
+                                                   (idris-get-line-num))))
+                     (idris-eval `(:load-file ,(idris-file-info-filename file-to-load))))))
+              (idris-update-options-cache)
+              (setq idris-currently-loaded-buffer (idris-file-info-buffer file-to-load))
+              (idris-make-clean)
+              (idris-update-loaded-region (car result) file-to-load))))
     (error "Cannot find file for current buffer")))
 
 
