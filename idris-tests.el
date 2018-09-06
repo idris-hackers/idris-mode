@@ -45,20 +45,31 @@
 
 (ert-deftest idris-test-idris-quit ()
   "Ensure that running Idris and quitting doesn't leave behind
-unwanted buffers. In particular, only *idris-events* should
-remain."
+unwanted buffers."
   (let ((before (buffer-list)))
     (idris-repl)
     (dotimes (_ 5) (accept-process-output nil 1))
     (idris-quit)
     (let* ((after (buffer-list))
            (extra (cl-set-difference after before)))
+      (should (= (length extra) 0)))))
+
+(ert-deftest idris-test-idris-quit-logging-enabled ()
+  "Ensure that running Idris and quitting doesn't leave behind
+unwanted buffers. In particular, only *idris-events* should
+remain."
+  (let ((before (buffer-list))
+        (idris-log-events 't))
+    (idris-repl)
+    (dotimes (_ 5) (accept-process-output nil 1))
+    (idris-quit)
+    (let* ((after (buffer-list))
+           (extra (cl-set-difference after before)))
       (should (= (length extra) 1))
-      (should (string= (buffer-name (car extra)) idris-event-buffer-name )))
+      (should (string= (buffer-name (car extra)) idris-event-buffer-name)))
 
     ;; Cleanup
     (kill-buffer idris-event-buffer-name)))
-
 
 (ert-deftest idris-test-hole-load ()
   "Test the hole-list-on-load setting."
@@ -93,8 +104,7 @@ remain."
     (kill-buffer))
 
   ;; More cleanup
-  (idris-quit)
-  (kill-buffer idris-event-buffer-name))
+  (idris-quit))
 
 (ert-deftest idris-test-proof-search ()
   "Test that proof search works"
@@ -117,8 +127,7 @@ remain."
       (kill-buffer)))
 
   ;; More cleanup
-  (idris-quit)
-  (kill-buffer idris-event-buffer-name))
+  (idris-quit))
 
 (ert-deftest idris-test-find-cmdline-args ()
   "Test that idris-mode calculates command line arguments from .ipkg files."
@@ -146,8 +155,7 @@ remain."
       (should (re-search-forward "Nat" nil t))) ;; check that the buffer has something error-like
     (with-current-buffer buffer
       (kill-buffer))
-    (idris-quit)
-    (kill-buffer idris-event-buffer-name)))
+    (idris-quit)))
 
 (provide 'idris-tests)
 ;;; idris-tests.el ends here
