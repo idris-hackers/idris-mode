@@ -7,6 +7,7 @@ BATCHEMACS=$(EMACS) --batch --no-site-file -q \
 	-eval '(add-to-list (quote load-path) "${PWD}/")' \
 	-eval '(require (quote package))' \
 	-eval '(add-to-list (quote package-archives) (quote ("melpa" . "http://melpa.org/packages/")) t)' \
+	-eval '(setq custom-file "/dev/null")' \
 	-eval '(package-initialize)'
 
 BYTECOMP = $(BATCHEMACS) -eval '(progn (require (quote bytecomp)) (setq byte-compile-warnings t) (setq byte-compile-error-on-warn nil))' -f batch-byte-compile
