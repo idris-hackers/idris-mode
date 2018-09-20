@@ -333,7 +333,7 @@ arguments."
         (let ((pkgs nil))
           (cl-flet
               ((get-pkg ()
-                        (re-search-forward "[a-zA-Z0-9\\.]+" nil t)
+                        (re-search-forward "[a-zA-Z0-9\\._-]+" nil t)
                         (let ((beg (match-beginning 0))
                               (end (match-end 0)))
                           (push (buffer-substring-no-properties beg end) pkgs))))
