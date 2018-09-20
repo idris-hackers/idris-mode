@@ -157,5 +157,14 @@ remain."
       (kill-buffer))
     (idris-quit)))
 
+(ert-deftest idris-test-ipkg-packages-with-underscores-and-dashes ()
+  "Test that loading an ipkg file can have dependencies on packages with _ or - in the name."
+  (let ((buffer (find-file "test-data/package-test/Packaging.idr")))
+    (with-current-buffer buffer
+      (should (equal '("-p" "idris-free" "-p" "recursion_schemes")
+                     (idris-ipkg-pkgs-flags-for-current-buffer)))
+      (kill-buffer buffer))
+    (idris-quit)))
+
 (provide 'idris-tests)
 ;;; idris-tests.el ends here
