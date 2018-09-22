@@ -32,8 +32,6 @@
 (require 'idris-log)
 (require 'idris-warnings)
 
-(eval-when-compile (require 'cl)) ;; for lexical-let
-
 ;;; Words of encouragement - strongly inspired by Slime
 (defun idris-user-first-name ()
   (let ((name (if (string= (user-full-name) "")
@@ -252,7 +250,7 @@
   (or (run-hook-with-args-until-success 'idris-event-hooks event)
       (destructure-case event
         ((:emacs-rex form continuation &optional output-continuation)
-         (let ((id (incf idris-continuation-counter)))
+         (let ((id (cl-incf idris-continuation-counter)))
            (idris-send `(,form ,id) process)
            (push (if output-continuation
                      (list id continuation output-continuation)
@@ -292,10 +290,10 @@ Note: don't use backquote syntax for SEXP, because various Emacs
 versions cannot deal with that."
   (declare (indent 3))
   (let ((result (cl-gensym)))
-    `(lexical-let ,(cl-loop for var in saved-vars
-                            collect (cl-etypecase var
-                                      (symbol (list var var))
-                                      (cons var)))
+    `(let ,(cl-loop for var in saved-vars
+                    collect (cl-etypecase var
+                              (symbol (list var var))
+                              (cons var)))
        (idris-dispatch-event
         (list :emacs-rex ,sexp
               (lambda (,result)

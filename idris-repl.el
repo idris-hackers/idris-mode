@@ -478,7 +478,7 @@ DIRECTION is 'forward' or 'backward' (in the history list)."
   "Return the position of the history item matching the PREFIX.
 Return -1 resp. the length of the history if no item matches."
   ;; Loop through the history list looking for a matching line
-  (let* ((step (ecase direction
+  (let* ((step (cl-ecase direction
                  (forward -1)
                  (backward 1)))
          (history idris-repl-input-history)
