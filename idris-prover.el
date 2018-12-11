@@ -28,6 +28,8 @@
 (require 'idris-settings)
 (require 'inferior-idris)
 
+(eval-when-compile (require 'cl))
+
 ; consisting of three buffers:
 ; ------------------------------
 ; | proof obligations          |
