@@ -27,7 +27,7 @@ The REPL also supports tab completion, thus pressing tab opens a buffer with the
 
 The [extended abstract] for DTP14 gives overview of the features of idris-mode. The underlying [protocol] is described in the Idris documentation.
 
-[extended abstract]: http://itu.dk/people/drc/pubs/dtp2014-idris-mode.pdf
+[extended abstract]: http://davidchristiansen.dk/pubs/dtp2014-idris-mode.pdf
 [protocol]: http://docs.idris-lang.org/en/latest/reference/ide-protocol.html
 
 Certain areas of `idris-mode` show explanatory help text. When you've learned how to use `idris-mode`, you can turn these off by setting `idris-show-help-text` to `nil`.
