@@ -595,7 +595,7 @@ KILLFLAG is set if N was explicitly specified."
   "If point is on a hole name, make it into a case expression. Otherwise, case split as a pattern variable."
   (interactive)
   (if (or (looking-at-p "\\?[a-zA-Z_]+")
-          (looking-back "\\?[a-zA-Z0-9_]+"))
+          (looking-back "\\?[a-zA-Z0-9_]+" nil))
       (idris-make-cases-from-hole)
     (idris-case-split)))
 
