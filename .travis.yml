@@ -3,6 +3,9 @@
 # Copy these contents into the root directory of your Github project in a file
 # named .travis.yml
 
+# choose a build environment
+dist: xenial
+
 # Use new container infrastructure to enable caching
 sudo: false
 
@@ -11,8 +14,7 @@ language: generic
 
 matrix:
   include:
-    - env: EMACS_VERSION=24.3
-    - env: EMACS_VERSION=24.4
+    - env: EMACS_VERSION=24.5
     - env: EMACS_VERSION=25.3
     - env: EMACS_VERSION=26.1
 
@@ -25,11 +27,6 @@ cache:
 addons:
   apt:
     packages:
-      - libgmp-dev
-      - libffi-dev
-      - libtinfo-dev
-      - zlib1g-dev
-      - pkg-config
       - libgc-dev
 
 before_install:
@@ -42,7 +39,7 @@ before_install:
   - wget http://ftpmirror.gnu.org/emacs/emacs-${EMACS_VERSION}.tar.xz
   - tar -xf emacs-${EMACS_VERSION}.tar.xz
   - cd emacs-${EMACS_VERSION}
-  - ./configure --prefix=/usr/local/emacs-${EMACS_VERSION} --with-xpm=no --with-gif=no
+  - ./configure --prefix=/usr/local/emacs-${EMACS_VERSION} --with-xpm=no --with-x-toolkit=no --with-gif=no --with-jpeg=no --with-gnutls=no
   - make
   - sudo make install
   - cd ..
@@ -52,7 +49,7 @@ install:
   - pushd .
   - git clone https://github.com/idris-lang/Idris-dev.git /tmp/Idris-dev
   - cd /tmp/Idris-dev
-  - stack --no-terminal --install-ghc install
+  - stack --no-terminal --install-ghc install --flag idris:-FFI --flag idris:-GMP
 
 before_script: true
 
