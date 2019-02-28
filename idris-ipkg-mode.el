@@ -171,7 +171,7 @@ or nil if not found."
       ((find-file-r (path)
                     (let* ((parent (file-name-directory path))
                            (matching (if parent
-                                         (idris-try-directory-files parent t (concat suffix "$"))
+                                         (idris-try-directory-files parent t (concat "\\\." suffix "$"))
                                        nil)))
                       (cond
                        (matching matching)
