@@ -14,9 +14,12 @@ language: generic
 
 matrix:
   include:
-    - env: EMACS_VERSION=24.5
-    - env: EMACS_VERSION=25.3
-    - env: EMACS_VERSION=26.1
+    - env: EMACS_VERSION=24.5 IDRIS_VERSION=git
+    - env: EMACS_VERSION=24.5 IDRIS_VERSION=stackage
+    - env: EMACS_VERSION=25.3 IDRIS_VERSION=git
+    - env: EMACS_VERSION=25.3 IDRIS_VERSION=stackage
+    - env: EMACS_VERSION=26.1 IDRIS_VERSION=git
+    - env: EMACS_VERSION=26.1 IDRIS_VERSION=stackage
 
 # Caching so the next build will be fast too.
 cache:
@@ -45,16 +48,10 @@ before_install:
   - cd ..
 
 # Install Idris
-install:
-  - pushd .
-  - git clone https://github.com/idris-lang/Idris-dev.git /tmp/Idris-dev
-  - cd /tmp/Idris-dev
-  - stack --no-terminal --install-ghc install --flag idris:-FFI --flag idris:-GMP
+install: . ./.travis_install.sh
 
 before_script: true
 
 script:
-  - popd
-  # emacs
   - make clean
   - make test EMACS=/usr/local/emacs-${EMACS_VERSION}/bin/emacs
