@@ -39,10 +39,11 @@ before_install:
   - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
 
   ## Emacs
+  - sudo apt-get install -y libgif-dev libxaw7-dev
   - wget http://ftpmirror.gnu.org/emacs/emacs-${EMACS_VERSION}.tar.xz
   - tar -xf emacs-${EMACS_VERSION}.tar.xz
   - cd emacs-${EMACS_VERSION}
-  - ./configure --prefix=/usr/local/emacs-${EMACS_VERSION} --with-xpm=no --with-x-toolkit=no --with-gif=no --with-jpeg=no --with-gnutls=no
+  - ./configure --prefix=/usr/local/emacs-${EMACS_VERSION} --with-gnutls=no
   - make
   - sudo make install
   - cd ..
@@ -54,4 +55,5 @@ before_script: true
 
 script:
   - make clean
+  - make build
   - make test EMACS=/usr/local/emacs-${EMACS_VERSION}/bin/emacs

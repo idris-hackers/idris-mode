@@ -66,7 +66,7 @@
 Returns non-`nil' on success, `nil' on failure."
   (let ((logo (idris-repl-get-logo)))
     (if (and (display-graphic-p)
-             (member 'png image-types)
+             (image-type-available-p 'png)
              logo)
         (progn (insert-image (create-image logo)
                              (idris-repl-welcome-message))
