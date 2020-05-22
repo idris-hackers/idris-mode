@@ -155,6 +155,7 @@
     (save-excursion
       (goto-char idris-load-to-here)
       (forward-line nlines)
+      (idris-make-dirty)
       (idris-load-to (point)))))
 
 (defun idris-load-backward-line ()
@@ -176,12 +177,13 @@
 
 (defun idris-load-file (&optional set-line)
   "Pass the current buffer's file to the inferior Idris process.
-A prefix argument restricts loading to the current
-line."
+A prefix argument forces loading but only up to the current line."
   (interactive "p")
   (save-buffer)
   (idris-ensure-process-and-repl-buffer)
-  (when (and set-line (= set-line 4)) (idris-load-to (point)))
+  (when (and set-line (= set-line 4))
+    (idris-load-to (point))
+    (idris-make-dirty))
   (when (and set-line (= set-line 16)) (idris-no-load-to))
   (if (buffer-file-name)
       (when (idris-current-buffer-dirty-p)
