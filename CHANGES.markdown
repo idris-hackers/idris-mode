@@ -3,13 +3,41 @@
 This file documents the user-interface changes in idris-mode, starting
 with release 0.9.19.
 
+## 1.0
+
++ Idris mode has been brought uptodate with Idris1
+
+### Fixes
+
++ Fix regular expression when matching on `.ipkg` extensions
++ Prevent completion-error when identifier is at beginning of buffer
++ Internal code changes
++ Better development testing with travis
+
+### UX
+
++ `C-u C-c C-l` flags the buffer as dirty
++ Add images back into the repl
++ Disable the Idris event log by default
++ When Idris returns no proof search, do not delete the metavas
++ Remove references to idris-event-buffer-name when idris-log-events is nil
++ Fix idris-simple-indent-backtab
++ Give operator chars "." syntax and improve idris-thing-at-point
++ Conditional semantic faces for light/dark backgrounds
+
+### Documentation
+
++ General fix ups
++ Document a way of reducing excessive frames
+
+
 ## 2016 Feb 29
 
- * It is possible to customize what happens to the focus of the current 
-   window when the type checking is performed and type errors are detected, 
+ * It is possible to customize what happens to the focus of the current
+   window when the type checking is performed and type errors are detected,
    now the user can choose between two options: 1) the current window stays
    focused or 2) the focus goes to the `*idris-notes*` buffer.
-   The  true or false value of the variable 
+   The  true or false value of the variable
    `idris-stay-in-current-window-on-compiler-error` controls this behaviour.
 
 ## 0.9.19
