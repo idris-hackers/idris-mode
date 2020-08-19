@@ -723,6 +723,11 @@ KILLFLAG is set if N was explicitly specified."
   (idris-load-file-sync)
   (idris-eval '(:interpret ":exec")))
 
+(defvar-local proof-region-start nil
+  "The start position of the last proof region.")
+(defvar-local proof-region-end nil
+  "The end position of the last proof region.")
+
 (defun idris-proof-search (&optional arg)
   "Invoke the proof search. A plain prefix argument causes the
 command to prompt for hints and recursion depth, while a numeric
@@ -749,7 +754,24 @@ prefix argument sets the recursion depth directly."
             (let ((start (progn (search-backward "?") (point)))
                   (end (progn (forward-char) (search-forward-regexp "[^a-zA-Z0-9_']") (backward-char) (point))))
               (delete-region start end))
-            (insert result)))))))
+	    (setq proof-region-start (point))
+	    (insert result)
+	    (setq proof-region-end (point))))))))
+
+(defun idris-proof-search-next ()
+  "Replace the previous proof search result with the next one, if it exists.  Idris 2 only."
+  (interactive)
+  (if (not proof-region-start)
+      (error "You must proof search first before looking for subsequent proof results.")
+    (let ((result (car (idris-eval `:proof-search-next))))
+      (if (string= result "No more results")
+          (message "No more results")
+	(save-excursion
+	  (goto-char proof-region-start)
+	  (delete-region proof-region-start proof-region-end)
+	  (setq proof-region-start (point))
+          (insert result)
+	  (setq proof-region-end (point)))))))
 
 (defun idris-refine (name)
   "Refine by some NAME, without recursive proof search."

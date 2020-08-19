@@ -84,6 +84,7 @@
     ["Extract lemma from hole" idris-make-lemma t]
     ["Solve hole with case expression" idris-make-cases-from-hole t]
     ["Attempt to solve hole" idris-proof-search t]
+    ["Get next solve attempt (Idris 2)" idris-proof-search-next t]
     ["Display type" idris-type-at-point t]
     "-----------------"
     ["Open package" idris-open-package-file t]
