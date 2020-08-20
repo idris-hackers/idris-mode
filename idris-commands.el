@@ -747,7 +747,9 @@ prefix argument sets the recursion depth directly."
         (what (idris-thing-at-point)))
     (when (car what)
       (save-excursion (idris-load-file-sync))
-      (let ((result (car (idris-eval `(:proof-search ,(cdr what) ,(car what) ,hints ,@depth)))))
+      ;; With Idris 2, using hints or depth in idris-eval produces errors in the process filter.
+      ;; Since both are optional, remove them here until someone is able to debug the root cause.
+      (let ((result (car (idris-eval `(:proof-search ,(cdr what) ,(car what))))))
         (if (string= result "")
             (error "Nothing found")
           (save-excursion
