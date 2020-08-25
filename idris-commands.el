@@ -751,6 +751,9 @@ prefix argument sets the recursion depth directly."
               (delete-region start end))
             (insert result)))))))
 
+(defvar-local def-region-start nil)
+(defvar-local def-region-end nil)
+
 (defun idris-generate-def ()
   "Generate defintion."
   (interactive)
