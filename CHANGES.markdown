@@ -6,6 +6,7 @@ with release 0.9.19.
 ## 1.0
 
 + Idris mode has been brought uptodate with Idris1
++ Basic navigation commands added
 
 ### Fixes
 
