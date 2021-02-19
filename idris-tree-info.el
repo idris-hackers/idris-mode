@@ -35,7 +35,8 @@
 (require 'idris-warnings-tree)
 
 (defvar idris-tree-info-buffer-name (idris-buffer-name :tree-viewer)
-  "The name of the buffer that `idris-mode' uses to show general tree-structured command output.")
+  "The name of the buffer that `idris-mode' uses to show general
+tree-structured command output.")
 
 (defun idris-tree-info-quit ()
   "Quit the Idris tree info viewer."

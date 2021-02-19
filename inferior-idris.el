@@ -76,7 +76,8 @@
      t)))
 
 (defvar-local idris-load-packages nil
-  "The list of packages to be loaded by Idris. Set using file or directory variables.")
+  "The list of packages to be loaded by Idris. Set using file or
+directory variables.")
 
 (defun idris-compute-flags ()
   "Calculate the command line options to use when running Idris."
@@ -335,7 +336,7 @@ trigger warning buffers and don't call `ERROR' if there was an
 Idris error."
   (let* ((tag (cl-gensym (format "idris-result-%d-"
                                  (1+ idris-continuation-counter))))
-	 (idris-stack-eval-tags (cons tag idris-stack-eval-tags)))
+         (idris-stack-eval-tags (cons tag idris-stack-eval-tags)))
     (apply
      #'funcall
      (catch tag
