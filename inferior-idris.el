@@ -66,13 +66,22 @@
 (defvar idris-connection nil
   "The Idris connection.")
 
-(defvar idris-protocol-version 0 "The protocol version")
+(defvar idris-protocol-version 0 "The version of Idris being interacted with,")
+
+(defvar idris-version-ide-protocol 0 "The version of the IDE protocol being used.")
 
 (defun idris-version-hook-function (event)
   (pcase event
     (`(:protocol-version ,version ,_target)
      (setf idris-protocol-version version)
      (remove-hook 'idris-event-hooks 'idris-version-hook-function)
+     t)))
+
+(defun idris-version-ide-protocol-hook-function (event)
+  (pcase event
+    (`(:version-protocol ,version)
+     (setf idris-version-ide-protocol version)
+     (remove-hook 'idris-event-hooks 'idris-version-ide-protocol-hook-function)
      t)))
 
 (defvar-local idris-load-packages nil
@@ -133,6 +142,7 @@
     (setq idris-connection
           (open-network-stream "Idris IDE support" (idris-buffer-name :connection) "127.0.0.1" port))
     (add-hook 'idris-event-hooks 'idris-version-hook-function)
+    (add-hook 'idris-event-hooks 'idris-version-ide-protocol-hook-function)
     (add-hook 'idris-event-hooks 'idris-log-hook-function)
     (add-hook 'idris-event-hooks 'idris-warning-event-hook-function)
     (add-hook 'idris-event-hooks 'idris-prover-event-hook-function)
@@ -335,7 +345,7 @@ trigger warning buffers and don't call `ERROR' if there was an
 Idris error."
   (let* ((tag (cl-gensym (format "idris-result-%d-"
                                  (1+ idris-continuation-counter))))
-	 (idris-stack-eval-tags (cons tag idris-stack-eval-tags)))
+         (idris-stack-eval-tags (cons tag idris-stack-eval-tags)))
     (apply
      #'funcall
      (catch tag
