@@ -41,6 +41,11 @@ build: getdeps $(OBJS)
 test: getdeps build
 	$(BATCHEMACS) -L . -l ert -l idris-tests.el -f ert-run-tests-batch-and-exit
 
+test2: getdeps build
+	$(BATCHEMACS) -L . \
+		-eval '(setq idris-interpreter-path (executable-find "idris2"))' \
+		-l ert -l idris-tests.el -f ert-run-tests-batch-and-exit
+
 clean:
 	-rm -f $(OBJS)
 	-rm -f test-data/*ibc

@@ -28,7 +28,7 @@
 (require 'idris-settings)
 (require 'inferior-idris)
 
-(eval-when-compile (require 'cl))
+(eval-when-compile (require 'cl-lib))
 
 ; consisting of three buffers:
 ; ------------------------------
