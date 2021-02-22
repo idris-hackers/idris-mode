@@ -588,7 +588,10 @@ KILLFLAG is set if N was explicitly specified."
         (if (<= (length result) 2)
             (message "Can't case split %s" (car what))
           (delete-region (line-beginning-position) (line-end-position))
-          (insert (substring result 0 (length result))))))))
+          (if (> idris-protocol-version 1)
+              (insert (substring result 0 (length result)))
+              (insert (substring result 0 (1- (length result))))
+              ))))))
 
 (defun idris-make-cases-from-hole ()
   "Make a case expression from the metavariable at point."
@@ -600,7 +603,10 @@ KILLFLAG is set if N was explicitly specified."
         (if (<= (length result) 2)
             (message "Can't make cases from %s" (car what))
           (delete-region (line-beginning-position) (line-end-position))
-          (insert (substring result 0 (length result))))))))
+          (if (> idris-protocol-version 1)
+              (insert (substring result 0 (length result)))
+              (insert (substring result 0 (1- (length result))))
+              ))))))
 
 (defun idris-case-dwim ()
   "If point is on a hole name, make it into a case expression. Otherwise, case split as a pattern variable."
@@ -767,9 +773,9 @@ prefix argument sets the recursion depth directly."
             (let ((start (progn (search-backward "?") (point)))
                   (end (progn (forward-char) (search-forward-regexp "[^a-zA-Z0-9_']") (backward-char) (point))))
               (delete-region start end))
-	    (setq proof-region-start (point))
-	    (insert result)
-	    (setq proof-region-end (point))))))))
+            (setq proof-region-start (point))
+            (insert result)
+            (setq proof-region-end (point))))))))
 
 (defun idris-proof-search-next ()
   "Replace the previous proof search result with the next one, if it exists.  Idris 2 only."
@@ -779,12 +785,12 @@ prefix argument sets the recursion depth directly."
     (let ((result (car (idris-eval `:proof-search-next))))
       (if (string= result "No more results")
           (message "No more results")
-	(save-excursion
-	  (goto-char proof-region-start)
-	  (delete-region proof-region-start proof-region-end)
-	  (setq proof-region-start (point))
+        (save-excursion
+          (goto-char proof-region-start)
+          (delete-region proof-region-start proof-region-end)
+          (setq proof-region-start (point))
           (insert result)
-	  (setq proof-region-end (point)))))))
+          (setq proof-region-end (point)))))))
 
 (defvar-local def-region-start nil)
 (defvar-local def-region-end nil)
