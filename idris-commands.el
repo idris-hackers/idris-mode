@@ -757,6 +757,39 @@ prefix argument sets the recursion depth directly."
               (delete-region start end))
             (insert result)))))))
 
+(defvar-local def-region-start nil)
+(defvar-local def-region-end nil)
+
+(defun idris-generate-def ()
+  "Generate defintion."
+  (interactive)
+  (let ((what (idris-thing-at-point)))
+    (when (car what)
+      (save-excursion (idris-load-file-sync))
+      (let ((result (car (idris-eval `(:generate-def ,(cdr what) ,(car what))))))
+        (if (string= result "")
+            (error "Nothing found")
+          (save-excursion
+            (forward-line 1)
+            (setq def-region-start (point))
+            (insert result)
+            (setq def-region-end (point))))))))
+
+(defun idris-generate-def-next ()
+  "Replace the previous generated definition with next definition, if it exists.  Idris 2 only."
+  (interactive)
+  (if (not def-region-start)
+      (error "You must program search first before looking for subsequent program results.")
+    (let ((result (car (idris-eval `:generate-def-next))))
+      (if (string= result "No more results")
+          (message "No more results")
+        (save-excursion
+          (goto-char def-region-start)
+          (delete-region def-region-start def-region-end)
+          (setq def-region-start (point))
+          (insert result)
+          (setq def-region-end (point)))))))
+
 (defun idris-refine (name)
   "Refine by some NAME, without recursive proof search."
   (interactive "MRefine by: ")
