@@ -1,10 +1,23 @@
 [![MELPA Stable](http://stable.melpa.org/packages/idris-mode-badge.svg)](http://stable.melpa.org/#/idris-mode) [![MELPA](http://melpa.org/packages/idris-mode-badge.svg)](http://melpa.org/#/idris-mode)
 
+<!-- removed until originals can be found
+
 ![Interactive editing](http://itu.dk/people/drc/idris-mode.gif)
+
+-->
 
 # idris-mode for emacs
 
-This is an emacs mode for editing [Idris][] code.
+This is an emacs mode for editing [Idris][https://www.idris-lang.org] code.
+
+This mode was original designed to work with version 1 of the language through an IDE-Protocol.
+Idris2 uses the next iteration of the same protocol.
+Idris-mode tries to maintain compatibility with both protocol versions, however, not all the features from the IDE-Protocol have been realised in Idris2.
+When using idris-mode with Idris2 your experience might be a bit clunky.
+
+PRs to both projects to get things working smoothly are more than welcome!
+
+## Note on Syntax Highlighting.
 
 Syntax highlighting functional languages is a little quirky; I've
 deferred to haskell-mode for some things
@@ -13,7 +26,9 @@ other things as appropriate for Idris. `font-lock-type-face` isn't
 used at all, for example, and data types declared with `data` use the
 same face as functions and values defined with `=`.
 
+<!--
 ![Screenshot](http://itu.dk/~hame/idris-emacs.png)
+-->
 
 ## Changes
 
@@ -71,7 +86,9 @@ Idris mode displays output from the Idris compiler with full semantic highlighti
 
 ## Interactive editing
 
+<!--
 ![Interactive editing](http://itu.dk/people/drc/idris-mode.gif)
+-->
 
 The following commands are available when there is an inferior Idris process (which is started on demand by the commands):
 
@@ -246,5 +263,3 @@ Throughout a session with `idris-mode`, many frames will accummulate, such as `*
 
 (add-hook 'idris-mode-hook #'my-idris-mode-hook)
 ```
-
-
