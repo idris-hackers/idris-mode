@@ -82,9 +82,12 @@
   (idris-repl-buffer))
 
 (defun idris-switch-working-directory (new-working-directory)
+  "Switch working directory."
   (unless (string= idris-process-current-working-directory new-working-directory)
     (idris-ensure-process-and-repl-buffer)
-    (idris-eval `(:interpret ,(concat ":cd " new-working-directory)))
+    (if (> idris-protocol-version 1)
+        (idris-eval `(:interpret ,(concat ":cd " (prin1-to-string new-working-directory))))
+        (idris-eval `(:interpret ,(concat ":cd " new-working-directory))))
     (setq idris-process-current-working-directory new-working-directory)))
 
 (defun idris-list-holes-on-load ()
@@ -748,7 +751,10 @@ prefix argument sets the recursion depth directly."
         (what (idris-thing-at-point)))
     (when (car what)
       (save-excursion (idris-load-file-sync))
-      (let ((result (car (idris-eval `(:proof-search ,(cdr what) ,(car what) ,hints ,@depth)))))
+      (let ((result (car (if (> idris-protocol-version 1)
+                             (idris-eval `(:proof-search ,(cdr what) ,(car what)))
+                             (idris-eval `(:proof-search ,(cdr what) ,(car what) ,hints ,@depth))
+                           ))))
         (if (string= result "")
             (error "Nothing found")
           (save-excursion
