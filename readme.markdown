@@ -81,6 +81,7 @@ The following commands are available when there is an inferior Idris process (wh
 * `C-c C-s`: Create an initial pattern match clause for a type declaration
 * `C-c C-m`: Add missing pattern-match cases to an existing definition
 * `C-c C-a`: Attempt to solve a hole automatically. A plain prefix argument prompts for hints, while a numeric prefix argument sets the recursion depth.
+* `C-c C-S-a`: (Idris 2 only) Replace the previous proof search answer with a different attempt by the compiler.  If no further attempts are available it leaves the last one unchanged.
 * `C-c C-e`: Extract a hole or provisional definition name to an explicit top level definition
 * `C-c C-c`: Case split the pattern variable under point, or fill the hole at point with a case expression.
 * `C-c C-t`: Get the type for the identifier under point. A prefix argument prompts for the name.
