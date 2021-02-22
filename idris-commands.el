@@ -82,9 +82,12 @@
   (idris-repl-buffer))
 
 (defun idris-switch-working-directory (new-working-directory)
+  "Switch working directory."
   (unless (string= idris-process-current-working-directory new-working-directory)
     (idris-ensure-process-and-repl-buffer)
-    (idris-eval `(:interpret ,(concat ":cd " new-working-directory)))
+    (if (> idris-protocol-version 1)
+        (idris-eval `(:interpret ,(concat ":cd " (prin1-to-string new-working-directory))))
+        (idris-eval `(:interpret ,(concat ":cd " new-working-directory))))
     (setq idris-process-current-working-directory new-working-directory)))
 
 (defun idris-list-holes-on-load ()
@@ -203,7 +206,13 @@ A prefix argument forces loading but only up to the current line."
         ;; Actually do the loading
         (let* ((dir-and-fn (idris-filename-to-load))
                (fn (cdr dir-and-fn))
-               (srcdir (car dir-and-fn)))
+               (srcdir
+                (if (> idris-protocol-version 1)
+                    (prin1-to-string (car dir-and-fn))
+                    (car dir-and-fn)
+                 )
+                )
+               )
           (setq idris-currently-loaded-buffer nil)
           (idris-switch-working-directory srcdir)
           (idris-delete-ibc t) ;; delete the ibc to avoid interfering with partial loads
@@ -747,9 +756,11 @@ prefix argument sets the recursion depth directly."
         (what (idris-thing-at-point)))
     (when (car what)
       (save-excursion (idris-load-file-sync))
-      ;; With Idris 2, using hints or depth in idris-eval produces errors in the process filter.
-      ;; Since both are optional, remove them here until someone is able to debug the root cause.
-      (let ((result (car (idris-eval `(:proof-search ,(cdr what) ,(car what))))))
+
+      (let ((result (car (if (> idris-protocol-version 1)
+                             (idris-eval `(:proof-search ,(cdr what) ,(car what)))
+                             (idris-eval `(:proof-search ,(cdr what) ,(car what) ,hints ,@depth))
+                           ))))
         (if (string= result "")
             (error "Nothing found")
           (save-excursion
@@ -774,6 +785,39 @@ prefix argument sets the recursion depth directly."
 	  (setq proof-region-start (point))
           (insert result)
 	  (setq proof-region-end (point)))))))
+
+(defvar-local def-region-start nil)
+(defvar-local def-region-end nil)
+
+(defun idris-generate-def ()
+  "Generate defintion."
+  (interactive)
+  (let ((what (idris-thing-at-point)))
+    (when (car what)
+      (save-excursion (idris-load-file-sync))
+      (let ((result (car (idris-eval `(:generate-def ,(cdr what) ,(car what))))))
+        (if (string= result "")
+            (error "Nothing found")
+          (save-excursion
+            (forward-line 1)
+            (setq def-region-start (point))
+            (insert result)
+            (setq def-region-end (point))))))))
+
+(defun idris-generate-def-next ()
+  "Replace the previous generated definition with next definition, if it exists.  Idris 2 only."
+  (interactive)
+  (if (not def-region-start)
+      (error "You must program search first before looking for subsequent program results.")
+    (let ((result (car (idris-eval `:generate-def-next))))
+      (if (string= result "No more results")
+          (message "No more results")
+        (save-excursion
+          (goto-char def-region-start)
+          (delete-region def-region-start def-region-end)
+          (setq def-region-start (point))
+          (insert result)
+          (setq def-region-end (point)))))))
 
 (defun idris-refine (name)
   "Refine by some NAME, without recursive proof search."

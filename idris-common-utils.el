@@ -35,19 +35,20 @@
 
 ;;; These variables are here because many things depend on them
 (defvar-local idris-buffer-dirty-p t
-  "An Idris buffer is dirty if there have been modifications since it was last loaded")
+  "An Idris buffer is dirty if there have been modifications since
+it was last loaded")
 
 (defvar idris-currently-loaded-buffer nil
-  "The buffer currently loaded by the running Idris")
+  "The buffer currently loaded by the running Idris.")
 
 (defvar idris-loaded-region-overlay nil
-  "The region loaded by Idris, should such a thing exist")
+  "The region loaded by Idris, should such a thing exist.")
 
 (defvar idris-process-current-working-directory ""
-  "Working directory of Idris process")
+  "Working directory of Idris process.")
 
 (defvar idris-command-line-option-functions nil
-  "A list of functions to call to compute the command-line arguments to Idris.
+  "A list of functions to call to compute the 'command-line' arguments to Idris.
 Each function should take no arguments and return a list of
 strings that are suitable arguments to `start-process'.")
 
@@ -102,7 +103,7 @@ positions before and after executing BODY."
   (let ((start (cl-gensym)))
     `(let ((,start (point)))
        (prog1 (progn ,@body)
-	 (add-text-properties ,start (point) ,props)))))
+         (add-text-properties ,start (point) ,props)))))
 
 (defmacro idris-propertize-spans (spans &rest body)
   "Execute BODY and add the properties indicated by SPANS to the
@@ -344,22 +345,22 @@ VALUE. If one is found, the BODY is executed with ARGS bound to the
 corresponding values in the CDR of VALUE."
   (declare (indent 1))
   (let ((operator (cl-gensym "op-"))
-	(operands (cl-gensym "rand-"))
-	(tmp (cl-gensym "tmp-")))
+        (operands (cl-gensym "rand-"))
+        (tmp (cl-gensym "tmp-")))
     `(let* ((,tmp ,value)
-	    (,operator (car ,tmp))
-	    (,operands (cdr ,tmp)))
+            (,operator (car ,tmp))
+            (,operands (cdr ,tmp)))
        (cl-case ,operator
-	 ,@(mapcar (lambda (clause)
+         ,@(mapcar (lambda (clause)
                      (if (eq (car clause) t)
                          `(t ,@(cdr clause))
                        (cl-destructuring-bind ((op &rest rands) &rest body) clause
                          `(,op (cl-destructuring-bind ,rands ,operands
                                  . ,body)))))
-		   patterns)
-	 ,@(if (eq (caar (last patterns)) t)
-	       '()
-	     `((t (error "ELISP destructure-case failed: %S" ,tmp))))))))
+                   patterns)
+         ,@(if (eq (caar (last patterns)) t)
+               '()
+             `((t (error "ELISP destructure-case failed: %S" ,tmp))))))))
 
 (defun idris-lidr-p (&optional buffer)
   "Return t if BUFFER is a literate Idris file, or nil otherwise. Use the current buffer if
