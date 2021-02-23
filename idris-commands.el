@@ -801,14 +801,38 @@ prefix argument sets the recursion depth directly."
   (let ((what (idris-thing-at-point)))
     (when (car what)
       (save-excursion (idris-load-file-sync))
-      (let ((result (car (idris-eval `(:generate-def ,(cdr what) ,(car what))))))
+      (let ((result (car (idris-eval `(:generate-def ,(cdr what) ,(car what)))))
+            final-point
+            (prefix (save-excursion
+                      (goto-char (point-min))
+                      (forward-line (1- (cdr what)))
+                      (goto-char (line-beginning-position))
+                      (re-search-forward "\\(^>?\\s-*\\)" nil t)
+                      (let ((prefix (match-string 1)))
+                        (if prefix
+                            prefix
+                          "")))))
         (if (string= result "")
             (error "Nothing found")
-          (save-excursion
-            (forward-line 1)
-            (setq def-region-start (point))
-            (insert result)
-            (setq def-region-end (point))))))))
+          (goto-char (line-beginning-position))
+          (forward-line)
+          (while (and (not (eobp))
+                      (progn (goto-char (line-beginning-position))
+                             (looking-at-p (concat prefix "\\s-+"))))
+            (forward-line))
+          (insert prefix)
+          (setq final-point (point))
+          (setq def-region-start (point))
+          (insert result)
+          (setq def-region-end (point))
+          (newline)
+          (goto-char final-point)
+;          (save-excursion
+;            (forward-line 1)
+;            (setq def-region-start (point))
+;            (insert result)
+;            (setq def-region-end (point)))
+          )))))
 
 (defun idris-generate-def-next ()
   "Replace the previous generated definition with next definition, if it exists.  Idris 2 only."
