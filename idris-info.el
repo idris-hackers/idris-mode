@@ -68,6 +68,9 @@ Following the behavior of Emacs help buffers, the future is deleted."
 (defvar idris-info-buffer-name (idris-buffer-name :info)
   "The name of the buffer containing Idris help information")
 
+(defvar idris-buffer-to-return-to-from-info-buffer
+  "The buffer that should be returned to when the info buffer is closed.")
+
 (defvar idris-info-mode-map
   (let ((map (make-keymap)))
     (suppress-keymap map) ; remove the self-inserting char commands
@@ -105,14 +108,20 @@ Ensure that the buffer is in `idris-info-mode'."
 
 (defun idris-info-quit ()
   (interactive)
-  (idris-kill-buffer idris-info-buffer-name))
+  (idris-kill-buffer idris-info-buffer-name)
+  (if (and idris-buffer-to-return-to-from-info-buffer
+           (buffer-live-p idris-buffer-to-return-to-from-info-buffer))
+      (pop-to-buffer idris-buffer-to-return-to-from-info-buffer `(display-buffer-reuse-window))
+    ())
+  (setq idris-buffer-to-return-to-from-info-buffer nil))
 
 (defun idris-info-buffer-visible-p ()
   (if (get-buffer-window idris-info-buffer-name 'visible) t nil))
 
 (defun idris-info-show ()
-  "Show the Idris info buffer."
+  "Show the Idris info buffer. Updates idris-buffer-to-return-to-from-info-buffer to current buffer"
   (interactive)
+  (setq idris-buffer-to-return-to-from-info-buffer (current-buffer))
   (with-current-buffer (idris-info-buffer)
     (setq buffer-read-only t)
     (pcase-let ((inhibit-read-only t)
@@ -130,7 +139,8 @@ Ensure that the buffer is in `idris-info-mode'."
       (goto-char (point-min))))
   (unless (idris-info-buffer-visible-p)
     (pop-to-buffer (idris-info-buffer))
-    (message "Press q to close the Idris info buffer.")))
+    (message "Press q to close the Idris info buffer."))
+  (pop-to-buffer idris-buffer-to-return-to-from-info-buffer))
 
 (defmacro with-idris-info-buffer (&rest cmds)
   "Execute `CMDS' in a fresh Idris info buffer, then display it to the user."
@@ -141,7 +151,6 @@ Ensure that the buffer is in `idris-info-mode'."
                         (buffer-string))))
        (idris-info-history-insert ,str-info)
        (idris-info-show))))
-
 
 (defun idris-show-info (info-string &optional spans)
   "Show INFO-STRING in the Idris info buffer, obliterating its previous contents."
