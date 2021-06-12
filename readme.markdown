@@ -50,10 +50,10 @@ Certain areas of `idris-mode` show explanatory help text. When you've learned ho
 ## Inferior Idris
 
 There is now support for running an Idris interpreter in a buffer. Use
-'C-c C-l' to load the current Idris buffer into the interpreter. This will
+`C-c C-l` to load the current Idris buffer into the interpreter. This will
 spawn an inferior idris process and load the buffer. It will report warnings
-if idris reports any. Pressing C-c C-l again will reload that buffer - if you
-switch to a different buffer and press C-c C-l, that buffer will be loaded
+if idris reports any. Pressing `C-c C-l` again will reload that buffer - if you
+switch to a different buffer and press `C-c C-l`, that buffer will be loaded
 instead.
 
 Customize `idris-interpreter-path` if idris is not on your default path.
@@ -161,7 +161,7 @@ Alternatively, download the elisp files, and place them somewhere in your load p
 
 If you want `idris-mode` to be enabled by default, add the line `(require 'idris-mode)` to your `~/.emacs` or `~/.emacs.d/init.el` file.
 
-Idris mode is heavily dependent on the Idris compiler for its more advanced features. Thus, please ensure that Emacs can see your Idris binary. Emacs looks for executables in the directories specified in the variable `exec-path`, which is initialized from your PATH at startup. If Idris is not on your PATH, then you may need to add it to `exec-path` manually. E.g.: if you installed idris with cabal into `~/.cabal/bin`, then add the line `(add-to-list 'exec-path "~/.cabal/bin")` to your emacs initialization file. Alternatively, you can customize the variable `idris-interpreter-path` and provide an absolute path.
+Idris mode is heavily dependent on the Idris compiler for its more advanced features. Thus, please ensure that Emacs can see your Idris binary. Emacs looks for executables in the directories specified in the variable `exec-path`, which is initialized from your PATH at startup. If Idris is not on your `PATH`, then you may need to add it to `exec-path` manually. E.g.: if you installed idris with cabal into `~/.cabal/bin`, then add the line `(add-to-list 'exec-path "~/.cabal/bin")` to your emacs initialization file. Alternatively, you can customize the variable `idris-interpreter-path` and provide an absolute path.
 
 ## Customization
 
