@@ -8,7 +8,7 @@
 
 # idris-mode for emacs
 
-This is an emacs mode for editing [Idris][https://www.idris-lang.org] code.
+This is an emacs mode for editing [Idris] code.
 
 This mode was original designed to work with version 1 of the language through an IDE-Protocol.
 Idris2 uses the next iteration of the same protocol.
@@ -32,7 +32,7 @@ same face as functions and values defined with `=`.
 
 ## Changes
 
-See the file CHANGES.markdown in the repository root for user-visible
+See the file [CHANGES.markdown](CHANGES.markdown) in the repository root for user-visible
 changes between versions, starting at version 0.9.18.
 
 ## Documentation
