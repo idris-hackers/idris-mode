@@ -61,7 +61,7 @@ Customize `idris-interpreter-path` if idris is not on your default path.
 [Idris]: http://www.idris-lang.org
 
 ## Highlighting
-`idris-mode` provides two forms of source code highlighting, that work together: convential Emacs `font-lock` to highlight things like keywords and code that has not yet been type checked, and compiler-supported semantic highlighting of identifiers (as known from Agda). Semantic highlighting is controlled by the variable `idris-semantic-source-highlighting`.
+`idris-mode` provides two forms of source code highlighting, that work together: conventional Emacs `font-lock` to highlight things like keywords and code that has not yet been type checked, and compiler-supported semantic highlighting of identifiers (as known from Agda). Semantic highlighting is controlled by the variable `idris-semantic-source-highlighting`.
 
 ## Keybindings
 `idris-mode` follows conventions from SLIME whenever possible. In particular:
@@ -79,10 +79,10 @@ When loading a buffer, `idris-mode` will decorate errors from the Idris compiler
 The following error message commands are available:
 
 * `M-n`: Move the point to the next compiler note
-* `M-p`: Move the point to the previous comiler note
+* `M-p`: Move the point to the previous compiler note
 
 ## Colors and fonts
-Idris mode displays output from the Idris compiler with full semantic highlighting. It is quite possible that this is ugly in your color scheme. If that is the case, you can use `M-x customize-group RET idris-faces RET` to modify them. In particular, some users don't like the background color for the currently loaded region of the buffer. This is controlled by `idris-loaded-region-face`. Remove all it's properties to make it disappear.
+Idris mode displays output from the Idris compiler with full semantic highlighting. It is quite possible that this is ugly in your color scheme. If that is the case, you can use `M-x customize-group RET idris-faces RET` to modify them. In particular, some users don't like the background color for the currently loaded region of the buffer. This is controlled by `idris-loaded-region-face`. Remove all its properties to make it disappear.
 
 ## Interactive editing
 
@@ -177,14 +177,14 @@ All three-letter keybindings are available in versions with and without `C-` on 
 
 Before sending a patch or pull request, please run the automated tests for `idris-mode` and correct any errors that are found. There are two kinds of test:
 
-1. The Emacs byte code compiler can catch many issues. Running `make compile` will invode the byte code compiler, failing if there are any warnings. You may wish to run `make clean` after `make compile` to get rid of pesky `.elc` files.
+1. The Emacs byte code compiler can catch many issues. Running `make compile` will invoke the byte code compiler, failing if there are any warnings. You may wish to run `make clean` after `make compile` to get rid of pesky `.elc` files.
 
 2. There is a test suite that can be invoked with `make test`. It requires a functioning `idris` executable.
 
 
 ## Integration with other Emacs packages
 
-### Evil mode support (Vim compatability)
+### Evil mode support (Vim compatibility)
 There is emulation for idris-vim commands in idris-mode. To enable this support please install the `evil` and `evil-leader` packages from MELPA (or your favorite source of packages) and then add `(idris-define-evil-keys)` to `init.el`.
 
 The following commands are supported (taken from idris-vim):
@@ -241,7 +241,7 @@ We have received reports that the `idris-stay-in-current-window-on-compiler-erro
 
 [`frames-only-mode`](https://github.com/davidshepherd7/frames-only-mode) obviates the need for emacs internal windows so that emacs can get along better with tiling managers - such as [xmonad](https://github.com/xmonad/xmonad) - by using emacs' frames instead of windows.
 
-Throughout a session with `idris-mode`, many frames will accummulate, such as `*idris-holes*`, and over time these clutter your screen. A quick simple solution is to add the following to your emacs configuration:
+Throughout a session with `idris-mode`, many frames will accumulate, such as `*idris-holes*`, and over time these clutter your screen. A quick simple solution is to add the following to your emacs configuration:
 
 ```elisp
 (defun my-idris-mode-hook ()
