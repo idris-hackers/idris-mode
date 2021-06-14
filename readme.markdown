@@ -8,7 +8,7 @@
 
 # idris-mode for emacs
 
-This is an emacs mode for editing [Idris][https://www.idris-lang.org] code.
+This is an emacs mode for editing [Idris] code.
 
 This mode was original designed to work with version 1 of the language through an IDE-Protocol.
 Idris2 uses the next iteration of the same protocol.
@@ -32,7 +32,7 @@ same face as functions and values defined with `=`.
 
 ## Changes
 
-See the file CHANGES.markdown in the repository root for user-visible
+See the file [CHANGES.markdown](CHANGES.markdown) in the repository root for user-visible
 changes between versions, starting at version 0.9.18.
 
 ## Documentation
@@ -50,10 +50,10 @@ Certain areas of `idris-mode` show explanatory help text. When you've learned ho
 ## Inferior Idris
 
 There is now support for running an Idris interpreter in a buffer. Use
-'C-c C-l' to load the current Idris buffer into the interpreter. This will
+`C-c C-l` to load the current Idris buffer into the interpreter. This will
 spawn an inferior idris process and load the buffer. It will report warnings
-if idris reports any. Pressing C-c C-l again will reload that buffer - if you
-switch to a different buffer and press C-c C-l, that buffer will be loaded
+if idris reports any. Pressing `C-c C-l` again will reload that buffer - if you
+switch to a different buffer and press `C-c C-l`, that buffer will be loaded
 instead.
 
 Customize `idris-interpreter-path` if idris is not on your default path.
@@ -61,7 +61,7 @@ Customize `idris-interpreter-path` if idris is not on your default path.
 [Idris]: http://www.idris-lang.org
 
 ## Highlighting
-`idris-mode` provides two forms of source code highlighting, that work together: convential Emacs `font-lock` to highlight things like keywords and code that has not yet been type checked, and compiler-supported semantic highlighting of identifiers (as known from Agda). Semantic highlighting is controlled by the variable `idris-semantic-source-highlighting`.
+`idris-mode` provides two forms of source code highlighting, that work together: conventional Emacs `font-lock` to highlight things like keywords and code that has not yet been type checked, and compiler-supported semantic highlighting of identifiers (as known from Agda). Semantic highlighting is controlled by the variable `idris-semantic-source-highlighting`.
 
 ## Keybindings
 `idris-mode` follows conventions from SLIME whenever possible. In particular:
@@ -79,10 +79,10 @@ When loading a buffer, `idris-mode` will decorate errors from the Idris compiler
 The following error message commands are available:
 
 * `M-n`: Move the point to the next compiler note
-* `M-p`: Move the point to the previous comiler note
+* `M-p`: Move the point to the previous compiler note
 
 ## Colors and fonts
-Idris mode displays output from the Idris compiler with full semantic highlighting. It is quite possible that this is ugly in your color scheme. If that is the case, you can use `M-x customize-group RET idris-faces RET` to modify them. In particular, some users don't like the background color for the currently loaded region of the buffer. This is controlled by `idris-loaded-region-face`. Remove all it's properties to make it disappear.
+Idris mode displays output from the Idris compiler with full semantic highlighting. It is quite possible that this is ugly in your color scheme. If that is the case, you can use `M-x customize-group RET idris-faces RET` to modify them. In particular, some users don't like the background color for the currently loaded region of the buffer. This is controlled by `idris-loaded-region-face`. Remove all its properties to make it disappear.
 
 ## Interactive editing
 
@@ -161,7 +161,7 @@ Alternatively, download the elisp files, and place them somewhere in your load p
 
 If you want `idris-mode` to be enabled by default, add the line `(require 'idris-mode)` to your `~/.emacs` or `~/.emacs.d/init.el` file.
 
-Idris mode is heavily dependent on the Idris compiler for its more advanced features. Thus, please ensure that Emacs can see your Idris binary. Emacs looks for executables in the directories specified in the variable `exec-path`, which is initialized from your PATH at startup. If Idris is not on your PATH, then you may need to add it to `exec-path` manually. E.g.: if you installed idris with cabal into `~/.cabal/bin`, then add the line `(add-to-list 'exec-path "~/.cabal/bin")` to your emacs initialization file. Alternatively, you can customize the variable `idris-interpreter-path` and provide an absolute path.
+Idris mode is heavily dependent on the Idris compiler for its more advanced features. Thus, please ensure that Emacs can see your Idris binary. Emacs looks for executables in the directories specified in the variable `exec-path`, which is initialized from your PATH at startup. If Idris is not on your `PATH`, then you may need to add it to `exec-path` manually. E.g.: if you installed idris with cabal into `~/.cabal/bin`, then add the line `(add-to-list 'exec-path "~/.cabal/bin")` to your emacs initialization file. Alternatively, you can customize the variable `idris-interpreter-path` and provide an absolute path.
 
 ## Customization
 
@@ -177,14 +177,14 @@ All three-letter keybindings are available in versions with and without `C-` on 
 
 Before sending a patch or pull request, please run the automated tests for `idris-mode` and correct any errors that are found. There are two kinds of test:
 
-1. The Emacs byte code compiler can catch many issues. Running `make compile` will invode the byte code compiler, failing if there are any warnings. You may wish to run `make clean` after `make compile` to get rid of pesky `.elc` files.
+1. The Emacs byte code compiler can catch many issues. Running `make compile` will invoke the byte code compiler, failing if there are any warnings. You may wish to run `make clean` after `make compile` to get rid of pesky `.elc` files.
 
 2. There is a test suite that can be invoked with `make test`. It requires a functioning `idris` executable.
 
 
 ## Integration with other Emacs packages
 
-### Evil mode support (Vim compatability)
+### Evil mode support (Vim compatibility)
 There is emulation for idris-vim commands in idris-mode. To enable this support please install the `evil` and `evil-leader` packages from MELPA (or your favorite source of packages) and then add `(idris-define-evil-keys)` to `init.el`.
 
 The following commands are supported (taken from idris-vim):
@@ -241,7 +241,7 @@ We have received reports that the `idris-stay-in-current-window-on-compiler-erro
 
 [`frames-only-mode`](https://github.com/davidshepherd7/frames-only-mode) obviates the need for emacs internal windows so that emacs can get along better with tiling managers - such as [xmonad](https://github.com/xmonad/xmonad) - by using emacs' frames instead of windows.
 
-Throughout a session with `idris-mode`, many frames will accummulate, such as `*idris-holes*`, and over time these clutter your screen. A quick simple solution is to add the following to your emacs configuration:
+Throughout a session with `idris-mode`, many frames will accumulate, such as `*idris-holes*`, and over time these clutter your screen. A quick simple solution is to add the following to your emacs configuration:
 
 ```elisp
 (defun my-idris-mode-hook ()
