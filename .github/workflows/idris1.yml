@@ -24,6 +24,9 @@ jobs:
       IDRIS_VERSION: ${{ matrix.idris }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: Fetch Dependencies
         run: sudo apt install -y libgc-dev libgif-dev libxaw7-dev
 
