@@ -53,7 +53,9 @@
             (message "Press q to close, return or mouse on error to navigate to source")
             (setq buffer-read-only t)
             (goto-char (point-min))
-            notes))))))
+            notes
+            (display-buffer (idris2-buffer-name :notes))
+          ))))))
 
 (defvar idris-tree-printer 'idris-tree-default-printer)
 
@@ -203,8 +205,8 @@ a preview and offer to widen."
 
 (defun idris-tree-decoration (tree)
   (cond ((idris-tree-leaf-p tree) "--")
-	((idris-tree.collapsed-p tree) "[+]")
-	(t "- +")))
+        ((idris-tree.collapsed-p tree) "[+]")
+        (t "- +")))
 
 (defun idris-tree-insert-list (list prefix)
   "Insert a list of trees."
