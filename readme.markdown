@@ -1,5 +1,7 @@
 [![MELPA Stable](http://stable.melpa.org/packages/idris-mode-badge.svg)](http://stable.melpa.org/#/idris-mode) [![MELPA](http://melpa.org/packages/idris-mode-badge.svg)](http://melpa.org/#/idris-mode)
 
+[![Idris1 on Ubuntu](https://github.com/idris-hackers/idris-mode/actions/workflows/idris1.yml/badge.svg)](https://github.com/idris-h
+
 <!-- removed until originals can be found
 
 ![Interactive editing](http://itu.dk/people/drc/idris-mode.gif)
