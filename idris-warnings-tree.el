@@ -54,7 +54,7 @@
             (setq buffer-read-only t)
             (goto-char (point-min))
             notes
-            (display-buffer (idris2-buffer-name :notes))
+            (display-buffer idris-notes-buffer-name)
           ))))))
 
 (defvar idris-tree-printer 'idris-tree-default-printer)
