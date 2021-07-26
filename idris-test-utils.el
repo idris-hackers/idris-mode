@@ -24,6 +24,7 @@
 
 ;;; Code:
 (require 'cl-lib)
+(require 'idris-mode)
 
 (defun idris-test-run-goto-char (test-fun &rest args)
   "To run commands like idris-case-split, we have to move the cursor to an appropriate location.
@@ -47,6 +48,49 @@ test  var = ?cases_rhs
     ))
 
 
+;; Under consideration.
+(defmacro idris-ert-command-action (test-case test-fun buffer-p)
+  "Common test code to run idris-mode command which modifies the buffer.
+It is used for the command
+- if command succeeds, it modifies buffer and stays in original buffer.
+- otherwise test failure
+As this is not for a test of Idris itself, we do not care the results."
+  `(ert-deftest ,(intern (concat (symbol-name test-fun) "/" (string-remove-suffix ".idr" test-case))) ()
+			  
+     (let ((buffer (find-file ,test-case)))
+       (with-current-buffer buffer
+	 (idris-load-file)
+	 (dotimes (_ 5) (accept-process-output nil 0.1)) ;;
+	 (idris-test-run-goto-char (function ,test-fun))
+	 (let ((this-buffer (current-buffer)))
+	   (should (,buffer-p buffer this-buffer))))
+	 (kill-buffer))
+     (idris-quit)))
+
+(defmacro idris-ert-command-action2 (test-case test-fun buffer-p)
+  "Common test code to run idris-mode command which modifies the buffer.
+It is used for the command
+- if command succeeds, it modifies buffer and stays in original buffer.
+- otherwise test failure
+As this is not for a test of Idris itself, we do not care the results."
+  `(ert-deftest ,(intern (concat (symbol-name test-fun) "/" (string-remove-suffix ".idr" test-case))) ()
+			  
+     (let ((buffer (find-file ,test-case)))
+       (with-current-buffer buffer
+	 (idris-load-file)
+	 (dotimes (_ 5) (accept-process-output nil 0.1)) ;;
+	 (idris-test-run-goto-char (function ,test-fun) nil)
+	 (let ((this-buffer (current-buffer)))
+	   (should (,buffer-p buffer this-buffer))))
+	 (kill-buffer))
+     (idris-quit)))
+
+
+(defun idris-test-eq-buffer (orig modified)
+  (and (buffer-modified-p orig) (eq orig modified)))
+
+(defmacro check-rest (&rest args)
+  `(listp (quote ,args)))
 
 (provide 'idris-test-utils)
 ;;; idris-test-utils.el ends here
