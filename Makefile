@@ -46,7 +46,7 @@ test2: getdeps build
 	$(BATCHEMACS) -L . \
 		-eval '(setq idris-interpreter-path (executable-find "idris2"))' \
                 -eval '(setq idris-repl-history-file "~/.idris2/idris2-histtory.eld")' \
-		-l ert -l idris-tests.el -f ert-run-tests-batch-and-exit
+		-l ert -l idris-tests2.el -f ert-run-tests-batch-and-exit
 
 clean:
 	-rm -f $(OBJS)
