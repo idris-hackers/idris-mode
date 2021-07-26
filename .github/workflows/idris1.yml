@@ -33,14 +33,19 @@ jobs:
           curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
 
       - name: Fetch Emacs
-        run: |
-         wget http://ftpmirror.gnu.org/emacs/emacs-${EMACS_VERSION}.tar.xz
-         tar -xf emacs-${EMACS_VERSION}.tar.xz
-         cd emacs-${EMACS_VERSION}
-         ./configure --prefix=/usr/local/emacs-${EMACS_VERSION} --with-gnutls=no
-         make
-         sudo make install
-         cd ..
+        uses: purcell/setup-emacs@master
+        with:
+          version: ${{ matrix.emacs }}
+
+      ##- name: Fetch Emacs
+      ##  run: |
+      ##   wget http://ftpmirror.gnu.org/emacs/emacs-${EMACS_VERSION}.tar.xz
+      ##   tar -xf emacs-${EMACS_VERSION}.tar.xz
+      ##   cd emacs-${EMACS_VERSION}
+      ##   ./configure --prefix=/usr/local/emacs-${EMACS_VERSION} --with-gnutls=no
+      ##   make
+      ##   sudo make install
+      ##   cd ..
 
       ## - name: Install Idris from GIT
       ##   if: matrix.idris == 'git'
@@ -62,5 +67,5 @@ jobs:
       - name: Run Tests
         run: |
           make clean
-          make build EMACS=/usr/local/emacs-${EMACS_VERSION}/bin/emacs
-          make test EMACS=/usr/local/emacs-${EMACS_VERSION}/bin/emacs
+          make build # EMACS=/usr/local/emacs-${EMACS_VERSION}/bin/emacs
+          make test # EMACS=/usr/local/emacs-${EMACS_VERSION}/bin/emacs
