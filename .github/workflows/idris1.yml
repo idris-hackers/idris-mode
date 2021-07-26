@@ -37,35 +37,24 @@ jobs:
         with:
           version: ${{ matrix.emacs }}
 
-      ##- name: Fetch Emacs
-      ##  run: |
-      ##   wget http://ftpmirror.gnu.org/emacs/emacs-${EMACS_VERSION}.tar.xz
-      ##   tar -xf emacs-${EMACS_VERSION}.tar.xz
-      ##   cd emacs-${EMACS_VERSION}
-      ##   ./configure --prefix=/usr/local/emacs-${EMACS_VERSION} --with-gnutls=no
-      ##   make
-      ##   sudo make install
-      ##   cd ..
-
-      ## - name: Install Idris from GIT
-      ##   if: matrix.idris == 'git'
-      ##   run: |
-      ##     pushd .
-      ##     git clone https://github.com/idris-lang/Idris-dev.git /tmp/Idris-dev
-      ##     cd /tmp/Idris-dev
-      ##     stack --no-terminal --install-ghc install --flag idris:-FFI --flag idris:-GMP
-      ##     popd
-      ## - name: Install Idris from Stackage
-      ##   if: matrix.idris == 'stackage'
-      ##   run: |
-      ##     stack install --resolver lts-12.26 idris
+      - name: Install Idris from GIT
+        if: matrix.idris == 'git'
+        run: |
+          pushd .
+          git clone https://github.com/idris-lang/Idris-dev.git /tmp/Idris-dev
+          cd /tmp/Idris-dev
+          stack --no-terminal --install-ghc install --flag idris:-FFI --flag idris:-GMP
+          popd
+      - name: Install Idris from Stackage
+        if: matrix.idris == 'stackage'
+        run: |
+          stack install --resolver lts-12.26 idris
 
       - name: Checkout
         uses: actions/checkout@v2
 
-
       - name: Run Tests
         run: |
           make clean
-          make build # EMACS=/usr/local/emacs-${EMACS_VERSION}/bin/emacs
-          make test # EMACS=/usr/local/emacs-${EMACS_VERSION}/bin/emacs
+          make build
+          make test
