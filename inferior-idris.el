@@ -155,7 +155,25 @@ directory variables.")
 
 (defvar idris-process-port-output-regexp (rx (? (group (+ any (not num)))) (group (+ (any num))))
   "Regexp used to match the port of an Idris process.")
+(defvar idris-process-exact-port-output-regexp (rx bol (group (+ (any num))) eol)
+  "Regexp to match port number")
+(defvar idris-exact-port-matcher 1
+  "port number matcher")
 
+(defvar idris-process-port-with-warning-output-regexp
+  (rx (? (group (+ any (not num)))) (group (** 3 4 (any num)))))
+;;      ^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^
+;;           ^                          ^
+;;           |                          |
+;;           |                          +---- port number
+;;           +------------------------------- warning message
+(defvar idris-warning-matcher 1
+  "Warning from idris")
+(defvar idris-warning-port-matcher 2
+  "port number matcher with warning")
+
+
+;; idris-process-filter is broken in theoreticaly.
 (defun idris-process-filter (string)
   "Accept output from the process"
   (if idris-connection
