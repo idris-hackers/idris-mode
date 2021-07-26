@@ -11,7 +11,6 @@ on:
       - master
       - main
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -63,5 +62,5 @@ jobs:
       - name: Run Tests
         run: |
           make clean
-          make build
+          make build EMACS=/usr/local/emacs-${EMACS_VERSION}/bin/emacs
           make test EMACS=/usr/local/emacs-${EMACS_VERSION}/bin/emacs
