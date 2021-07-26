@@ -67,5 +67,11 @@ The event is only logged if `idris-log-events' is non-nil."
         (pp-escape-newlines t))
     (pp event buffer)))
 
+(defun idris-dump-events-to-file (file)
+  "Dump event log to file"
+  (when idris-log-events
+    (with-current-buffer (idris-events-buffer)
+      (write-file file))))
+
 (provide 'idris-events)
 ;;; idris-events.el ends here
