@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Fetch Dependencies
-        run: sudo apt install -y libgc-dev libgif-dev libxaw7-dev
+        run: sudo apt install -y libgc-dev libgif-dev libxaw7-dev openssl
 
       - name: Fetch Stack
         run: |
