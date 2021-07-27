@@ -4,7 +4,6 @@
 EMACS ?= emacs
 
 BATCHEMACS=$(EMACS) --batch --no-site-file -q \
-	-eval '(setq debug-on-error t)' \
 	-eval '(add-to-list (quote load-path) "${PWD}/")' \
 	-eval '(require (quote package))' \
 	-eval '(add-to-list (quote package-archives) (quote ("melpa" . "http://melpa.org/packages/")) t)' \
@@ -45,7 +44,7 @@ test: getdeps build
 test2: getdeps build
 	$(BATCHEMACS) -L . \
 		-eval '(setq idris-interpreter-path (executable-find "idris2"))' \
-		-l ert -l idris-tests.el -f ert-run-tests-batch-and-exit
+		-l ert -l idris-tests2.el -f ert-run-tests-batch-and-exit
 
 clean:
 	-rm -f $(OBJS)
