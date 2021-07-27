@@ -12,7 +12,51 @@ on:
       - main
 
 jobs:
-  build:
+
+# --- [ Caching Idris1 builds ]
+
+  caching-idris-git:
+    runs-on: ubuntu-latest
+    steps:
+
+# ---- [ Setup up cache ]
+      - name: Build Idris from Git and Save
+        id: idris-git-cache
+        uses: actions/cache@v2
+        with:
+          key: idris-git
+          path:
+            ~/.local/bin/idris
+            ~/.stack
+            ~/.stack-work
+            ~/idris-dev-git
+
+# ---- [ Install ]
+      - name: Install Idris from GIT
+        run: |
+          pushd .
+          git clone https://github.com/idris-lang/Idris-dev.git ~/idris-dev-git
+          cd ~/idris-dev-git
+          stack --no-terminal --install-ghc install --flag idris:-FFI --flag idris:-GMP
+          popd
+          idris --info
+
+# ---- [ Upload ]
+      - name: Upload Idris Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: idris-git
+          path:
+            ~/.local/bin/idris
+            ~/.stack
+            ~/.stack-work
+            ~/idris-dev-git
+
+# --- [ Testing ]
+  testing:
+
+# ---- [ Initialise Build Environment ]
+    needs: [caching-idris-git]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -22,34 +66,45 @@ jobs:
       EMACS_VERSION: ${{ matrix.emacs }}
       IDRIS_VERSION: ${{ matrix.idris }}
 
+# ---- [ Steps to Run ]
     steps:
+
+# ----- [ Steps Dependencies ]
       - name: Fetch Dependencies
         run: sudo apt install -y libgc-dev libgif-dev libxaw7-dev openssl
 
-      - name: Fetch Stack
-        run: |
-          mkdir -p ~/.local/bin
-          export PATH=$HOME/.local/bin:$PATH
-          curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
+#      - name: Fetch Stack
+#        run: |
+#          mkdir -p ~/.local/bin
+#          export PATH=$HOME/.local/bin:$PATH
+#          curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
+
+# ----- [ Emacs ]
 
       - name: Fetch Emacs
         uses: purcell/setup-emacs@master
         with:
           version: ${{ matrix.emacs }}
 
+# ----- [ Idris from GIT ]
       - name: Install Idris from GIT
         if: matrix.idris == 'git'
-        run: |
-          pushd .
-          git clone https://github.com/idris-lang/Idris-dev.git /tmp/Idris-dev
-          cd /tmp/Idris-dev
-          stack --no-terminal --install-ghc install --flag idris:-FFI --flag idris:-GMP
-          popd
+        uses: actions/download-artifact@v2
+        with:
+          name: idris-git
+          path:
+             ~/.local/bin/idris
+             ~/.stack
+             ~/.stack-work
+             ~/idris-dev-git
+
+# ----- [ Idris from Stack ]
       - name: Install Idris from Stackage
         if: matrix.idris == 'stackage'
         run: |
           stack install --resolver lts-12.26 idris
 
+# ----- [ Checkout and Run]
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -58,3 +113,5 @@ jobs:
           make clean
           make build
           make test
+
+# - EOF
