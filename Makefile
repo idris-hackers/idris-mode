@@ -4,7 +4,6 @@
 EMACS ?= emacs
 
 BATCHEMACS=$(EMACS) --batch --no-site-file -q \
-	-eval '(setq debug-on-error t)' \
 	-eval '(add-to-list (quote load-path) "${PWD}/")' \
 	-eval '(require (quote package))' \
 	-eval '(add-to-list (quote package-archives) (quote ("melpa" . "http://melpa.org/packages/")) t)' \

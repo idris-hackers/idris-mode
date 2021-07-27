@@ -1,0 +1,97 @@
+## Adapted from The Frex Project.
+
+name: Idris2 on Ubuntu
+
+# -- [ When to Act]
+
+on:
+  push:
+    branches:
+      - '*'
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - master
+      - main
+
+# -- [ ENV Variables ]
+
+env:
+  SCHEME: scheme
+
+# -- [ Jobs ]
+jobs:
+
+## -- [ Initialise Build Environment ]
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        emacs: [24.5, 25.3, 26.1]
+
+    env:
+      EMACS_VERSION: ${{ matrix.emacs }}
+
+## -- [ Steps To Run ]
+    steps:
+
+### -- [ Initialise Variables ]
+
+      - name: Initialise variables
+        run: |
+          # Only deploy if the build follows from pushing to main
+          echo "$HOME/.idris2/bin" >> $GITHUB_PATH
+
+### -- [ Cache Idris2 ]
+
+      - name: Cache Idris2
+        uses: actions/cache@v2
+        id: cache-idris2
+        with:
+          path: |
+            ~/.idris2
+          key: ${{ runner.os }}-idris2
+
+### -- [ Fetch Dependencies ]
+
+#### -- [ Chez Scheme ]
+
+      - name: Install Chez
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chezscheme
+
+#### -- [ Idris2 ]
+
+      - name: Install Idris2
+        if: steps.cache-idris2.outputs.cache-hit != 'true'
+        run: |
+          pushd .
+          git clone https://github.com/idris-lang/idris2
+          cd idris2
+          make bootstrap && make install
+          popd
+
+#### -- [ Emacs ]
+
+      - name: Fetch Emacs
+        uses: purcell/setup-emacs@master
+        with:
+          version: ${{ matrix.emacs }}
+
+### -- [ Checkout the test ]
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+### -- [ Test ]
+
+      - name: Build and Run
+        run: |
+          make clean
+          make build
+          make test2
+
+# -- [ EOF ]

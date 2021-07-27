@@ -2,6 +2,8 @@
 
 [![Idris1 on Ubuntu](https://github.com/idris-hackers/idris-mode/actions/workflows/idris1.yml/badge.svg)](https://github.com/idris-hackers/idris-mode/actions/workflows/idris1.yml)
 
+[![Idris2 on Ubuntu](https://github.com/idris-hackers/idris-mode/actions/workflows/idris2.yml/badge.svg)](https://github.com/idris-hackers/idris-mode/actions/workflows/idris2.yml)
+
 <!-- removed until originals can be found
 
 ![Interactive editing](http://itu.dk/people/drc/idris-mode.gif)
