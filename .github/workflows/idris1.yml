@@ -12,7 +12,10 @@ on:
       - main
 
 jobs:
+# -- [ Build ]
   build:
+
+# ---- [ Initialise Build Environment ]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -22,34 +25,84 @@ jobs:
       EMACS_VERSION: ${{ matrix.emacs }}
       IDRIS_VERSION: ${{ matrix.idris }}
 
+# ---- [ Steps to Run ]
     steps:
+
+# ----- [ Steps Dependencies ]
       - name: Fetch Dependencies
         run: sudo apt install -y libgc-dev libgif-dev libxaw7-dev openssl
 
-      - name: Fetch Stack
+# ----- [ Initialise Variables ]
+
+      - name: Initialise variables
         run: |
-          mkdir -p ~/.local/bin
-          export PATH=$HOME/.local/bin:$PATH
-          curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
+          mkdir -p $HOME/.local/bin
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+# ----- [ Emacs ]
 
       - name: Fetch Emacs
         uses: purcell/setup-emacs@master
         with:
           version: ${{ matrix.emacs }}
 
-      - name: Install Idris from GIT
+# ----- [ Caches ]
+
+      - name: Cache stack global package-db
+        id: stack-global
+        uses: actions/cache@v2
+        with:
+          path: ~/.stack
+          key: ${{ runner.os }}-stack-global-${{ matrix.idris }}
+          restore-keys: |
+            ${{ runner.os }}-stack-global-${{ matrix.idris }}
+
+      - name: Cache stack-installed programs in ~/.local/bin
+        id:   stack-programs
+        uses: actions/cache@v2
+        with:
+          path: ~/.local/bin
+          key: ${{ runner.os }}-stack-programs-${{ matrix.idris }}
+          restore-keys: |
+               ${{ runner.os }}-stack-programs-${{ matrix.idris }}
+
+      - name: Cache .stack-work
+        uses: actions/cache@v2
+        with:
+          path: .stack-work
+          key: ${{ runner.os }}-stack-work-${{ matrix.idris }}
+          restore-keys: |
+               ${{ runner.os }}-stack-work-${{ matrix.idris }}
+
+
+      - name: Cache idris-dev-git/
         if: matrix.idris == 'git'
+        id: idris-dev-git
+        uses: actions/cache@v2
+        with:
+          path: ~/idris-dev-git/
+          key: ${{ runner.os }}-idris-dev-stack-work-${{ matrix.idris }}
+          restore-keys: |
+               ${{ runner.os }}-idris-dev-stack-work-${{ matrix.idris }}
+
+# ----- [ Idris from GIT ]
+      - name: Install Idris from GIT
+        if: matrix.idris == 'git' && steps.idris-dev-git.outputs.cache-hit != 'true'
         run: |
           pushd .
-          git clone https://github.com/idris-lang/Idris-dev.git /tmp/Idris-dev
-          cd /tmp/Idris-dev
-          stack --no-terminal --install-ghc install --flag idris:-FFI --flag idris:-GMP
+          git clone https://github.com/idris-lang/Idris-dev.git ~/idris-dev-git
+          cd ~/idris-dev-git
+          stack --no-terminal install --flag idris:-FFI --flag idris:-GMP
           popd
+          idris --info
+
+# ----- [ Idris from Stack ]
       - name: Install Idris from Stackage
-        if: matrix.idris == 'stackage'
+        if: matrix.idris == 'stackage' && steps.stack-program.outputs.cache-hit != 'true'
         run: |
           stack install --resolver lts-12.26 idris
 
+# ----- [ Checkout and Run]
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -58,3 +111,5 @@ jobs:
           make clean
           make build
           make test
+
+# -- EOF
