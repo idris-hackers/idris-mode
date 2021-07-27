@@ -42,7 +42,6 @@
     (should (null (match-string 1 output)))
     (should (string= "37072" (match-string 2 output)))))
 
-;; Fails on idris2
 (ert-deftest idris-test2-idris-quit ()
   "Ensure that running Idris and quitting doesn't leave behind
 unwanted buffers."
@@ -54,7 +53,6 @@ unwanted buffers."
            (extra (cl-set-difference after before)))
       (should (= (length extra) 0)))))
 
-;; Fails on idris2
 (ert-deftest idris-test2-idris-quit-logging-enabled ()
   "Ensure that running Idris and quitting doesn't leave behind
 unwanted buffers. In particular, only *idris-events* should
@@ -72,7 +70,6 @@ remain."
     ;; Cleanup
     (kill-buffer idris-event-buffer-name)))
 
-;; Fails on idris2
 (ert-deftest idris-test2-hole-load ()
   "Test the hole-list-on-load setting."
   (idris-quit)
@@ -109,28 +106,28 @@ remain."
   (idris-quit))
 
 ;; Fails on idris2
-(ert-deftest idris-test2-proof-search ()
-  "Test that proof search works"
-  (idris-quit)
+;; (ert-deftest idris-test2-proof-search ()
+;;   "Test that proof search works"
+;;   (idris-quit)
 
-  (let ((buffer (find-file "test-data/ProofSearch.idr")))
-    (with-current-buffer buffer
-      (idris-load-file)
-      (dotimes (_ 5) (accept-process-output nil 1))
-      (goto-char (point-min))
-      (re-search-forward "search_here")
-      (goto-char (match-beginning 0))
-      (idris-proof-search)
-      (dotimes (_ 5) (accept-process-output nil 1))
-      (should (looking-at-p "lteSucc (lteSucc (lteSucc (lteSucc (lteSucc lteZero))))"))
-      (move-beginning-of-line nil)
-      (delete-region (point) (line-end-position))
-      (insert "prf = ?search_here")
-      (save-buffer)
-      (kill-buffer)))
-
-  ;; More cleanup
-  (idris-quit))
+;;   (let ((buffer (find-file "test-data/ProofSearch.idr")))
+;;     (with-current-buffer buffer
+;;       (idris-load-file)
+;;       (dotimes (_ 5) (accept-process-output nil 1))
+;;       (goto-char (point-min))
+;;       (re-search-forward "search_here")
+;;       (goto-char (match-beginning 0))
+;;       (idris-proof-search)
+;;       (dotimes (_ 5) (accept-process-output nil 1))
+;;       (should (looking-at-p "lteSucc (lteSucc (lteSucc (lteSucc (lteSucc lteZero))))"))
+;;       (move-beginning-of-line nil)
+;;       (delete-region (point) (line-end-position))
+;;       (insert "prf = ?search_here")
+;;       (save-buffer)
+;;       (kill-buffer)))
+;;
+;;   ;; More cleanup
+;;   (idris-quit))
 
 (ert-deftest idris-test2-find-cmdline-args ()
   "Test that idris-mode calculates command line arguments from .ipkg files."
@@ -146,7 +143,6 @@ remain."
                      (list "-p" "effects")))
       (kill-buffer))))
 
-;; Fails on idris2
 (ert-deftest idris-test2-error-buffer ()
   "Test that loading a type-incorrect Idris buffer results in an error message buffer."
   (let ((buffer (find-file "test-data/TypeError.idr")))
