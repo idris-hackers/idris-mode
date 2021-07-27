@@ -18,7 +18,6 @@ jobs:
 # ---- [ Initialise Build Environment ]
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 2
       matrix:
         emacs: [24.5, 25.3, 26.1]
         idris: [git, stackage]
@@ -77,6 +76,7 @@ jobs:
 
 
       - name: Cache idris-dev-git/
+        if: matrix.idris == 'git'
         id: idris-dev-git
         uses: actions/cache@v2
         with:
