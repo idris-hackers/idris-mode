@@ -3,6 +3,11 @@
 This file documents the user-interface changes in idris-mode, starting
 with release 0.9.19.
 
+## 1.1
+
++ More tests and test support for Idris1 and Idris2.
++ More support for IDE Protocol Version2 (i.e. Idris2).
+
 ## 1.0
 
 + Idris mode has been brought uptodate with Idris1
