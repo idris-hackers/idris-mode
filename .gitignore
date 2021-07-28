@@ -4,3 +4,4 @@ documentation.aux
 documentation.log
 documentation.pdf
 test-data/build/
+test-data/*.ibc
