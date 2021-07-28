@@ -155,7 +155,25 @@ directory variables.")
 
 (defvar idris-process-port-output-regexp (rx (? (group (+ any (not num)))) (group (+ (any num))))
   "Regexp used to match the port of an Idris process.")
+(defvar idris-process-exact-port-output-regexp (rx bol (group (+ (any num))) eol)
+  "Regexp to match port number")
+(defvar idris-exact-port-matcher 1
+  "port number matcher")
 
+(defvar idris-process-port-with-warning-output-regexp
+  (rx (? (group (+ any (not num)))) (group (** 3 4 (any num)))))
+;;      ^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^
+;;           ^                          ^
+;;           |                          |
+;;           |                          +---- port number
+;;           +------------------------------- warning message
+(defvar idris-warning-matcher 1
+  "Warning from idris")
+(defvar idris-warning-port-matcher 2
+  "port number matcher with warning")
+
+
+;; idris-process-filter is broken in theoreticaly.
 (defun idris-process-filter (string)
   "Accept output from the process"
   (if idris-connection
@@ -165,12 +183,14 @@ directory variables.")
     (cl-flet ((idris-warn (msg)
                           (unless (or (null msg) (string-blank-p msg))
                             (message "Warning from Idris: %s" msg))))
-      (if (not (string-match idris-process-port-output-regexp string))
-          (idris-warn string)
-        (idris-warn (match-string 1 string))
-        (idris-connect (string-to-number (match-string 2 string))))
-      "")))
-
+	(if (string-match idris-process-exact-port-output-regexp string)
+	    (idris-connect (string-to-number (match-string idris-exact-port-matcher string)))
+	  (if (not (string-match idris-process-port-with-warning-output-regexp string))
+	      (idris-warn string)
+            (idris-warn (match-string idris-warning-matcher string))
+            (idris-connect (string-to-number (match-string idris-warning-port-matcher string))))
+	  ""))))
+    
 (defun idris-show-process-buffer (string)
   "Show the Idris process buffer if STRING is non-empty."
   (when (> (length string) 0)

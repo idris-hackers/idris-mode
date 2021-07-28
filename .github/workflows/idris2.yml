@@ -29,7 +29,7 @@ jobs:
 
     strategy:
       matrix:
-        emacs: [24.5, 25.3, 26.1]
+        emacs: [25.3, 26.3, 27.2]
 
     env:
       EMACS_VERSION: ${{ matrix.emacs }}
@@ -93,5 +93,6 @@ jobs:
           make clean
           make build
           make test2
+          make test3
 
 # -- [ EOF ]
