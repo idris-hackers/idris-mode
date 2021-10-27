@@ -18,6 +18,7 @@
 (require 'ansi-color)
 (require 'compile)
 
+(require 'inferior-idris)
 (require 'idris-core)
 (require 'idris-settings)
 (require 'idris-common-utils)
@@ -53,39 +54,41 @@
     st))
 
 (defconst idris-ipkg-keywords
-  '("package"
-    "authors"
-    "maintainers"
-    "license"
-    "brief"
-    "readme"
-    "homepage"
-    "sourceloc"
-    "bugtracker"
-    "options"
-    "opts"
-    "sourcedir"
-    "builddir"
-    "outputdir"
-    "prebuild"
-    "postbuild"
-    "preinstall"
-    "postinstall"
-    "preclean"
-    "postclean"
-    "version"
-    "depends"
-    "modules"
-    "main"
-    "executable"
-    "makefile"
-    "objs"
-    "libs"
-    "pkgs"))
+  (let ((common '("package"
+                  "authors"
+                  "maintainers"
+                  "license"
+                  "brief"
+                  "readme"
+                  "homepage"
+                  "sourceloc"
+                  "bugtracker"
+                  "options"
+                  "opts"
+                  "sourcedir"
+                  "builddir"
+                  "outputdir"
+                  "prebuild"
+                  "postbuild"
+                  "preinstall"
+                  "postinstall"
+                  "preclean"
+                  "postclean"
+                  "version"
+                  "depends"
+                  "modules"
+                  "main"
+                  "executable"))
+        (additional (if (> idris-protocol-version 1)
+                        '()
+                        '("makefile"
+                           "objs"
+                           "libs"
+                           "pkgs"))))
+    (append common additional)))
 
 (defconst idris-ipkg-font-lock-defaults
   `(,idris-ipkg-keywords))
-
 
 ;;; Completion
 
