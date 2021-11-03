@@ -84,6 +84,11 @@ The log is placed in `idris-event-buffer-name'."
   :type 'boolean
   :group 'idris)
 
+(defcustom idris-display-words-of-encouragement t
+  "Send words of encouragement."
+  :type 'boolean
+  :group 'idris)
+
 ;;; Faces
 (defface idris-active-term-face
   '((((background light))
