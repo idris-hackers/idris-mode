@@ -12,7 +12,7 @@ BATCHEMACS=$(EMACS) --batch --no-site-file -q \
 	-eval '(package-initialize)'
 
 BYTECOMP = $(BATCHEMACS) \
-	-eval '(require (quote bytecomp))'
+	-eval '(require (quote bytecomp))' \
 	-eval '(setq byte-compile-warnings t)' \
 	-eval '(setq byte-compile-error-on-warn t)' \
 	-f batch-byte-compile
@@ -61,10 +61,10 @@ test3: getdeps build
 		-l ert -l idris-tests3.el -f ert-run-tests-batch-and-exit
 
 clean:
-	-rm -f $(OBJS)
-	-rm -f test-data/*ibc
-	-rm -rf test-data/build/
-
+	-${RM} -f $(OBJS)
+	-${RM} -f test-data/*ibc
+	-${RM} -rf test-data/build/
+	-${RM} -r docs/auto docs/*.aux docs/*.log docs/*.pdf
 getdeps:
 	$(BATCHEMACS) -eval \
 		"(let* \
@@ -74,4 +74,7 @@ getdeps:
 		    (package-refresh-contents) \
 		    (mapcar #'package-install want-pkgs)))"
 
-.PHONY: clean build test getdeps
+docs: docs/documentation.tex
+	-@( cd docs/ && latexmk -xelatex documentation.tex )
+
+.PHONY: clean build test getdeps docs
