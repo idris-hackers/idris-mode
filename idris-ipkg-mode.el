@@ -53,7 +53,35 @@
     st))
 
 (defconst idris-ipkg-keywords
-  '("package" "opts" "modules" "sourcedir" "makefile" "objs" "executable" "main" "libs" "pkgs"))
+  '("package"
+    "authors"
+    "maintainers"
+    "license"
+    "brief"
+    "readme"
+    "homepage"
+    "sourceloc"
+    "bugtracker"
+    "options"
+    "opts"
+    "sourcedir"
+    "builddir"
+    "outputdir"
+    "prebuild"
+    "postbuild"
+    "preinstall"
+    "postinstall"
+    "preclean"
+    "postclean"
+    "version"
+    "depends"
+    "modules"
+    "main"
+    "executable"
+    "makefile"
+    "objs"
+    "libs"
+    "pkgs"))
 
 (defconst idris-ipkg-font-lock-defaults
   `(,idris-ipkg-keywords))
