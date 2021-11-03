@@ -142,7 +142,7 @@ directory variables.")
     (set-process-query-on-exit-flag idris-connection t)
     (setq idris-process-current-working-directory "")
     (run-hooks 'idris-run-hook)
-    (when idris-words-of-encouragement
+    (when idris-display-words-of-encouragement
       (message "Connected. %s" (idris-random-words-of-encouragement)))
     ))
 
