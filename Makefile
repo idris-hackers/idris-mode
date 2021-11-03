@@ -3,13 +3,19 @@
 
 EMACS ?= emacs
 
+NEED_PKGS=prop-menu
+
 BATCHEMACS=$(EMACS) --batch --no-site-file -q \
 	-eval '(add-to-list (quote load-path) "${PWD}/")' \
 	-eval '(require (quote package))' \
 	-eval '(add-to-list (quote package-archives) (quote ("melpa" . "http://melpa.org/packages/")) t)' \
 	-eval '(package-initialize)'
 
-BYTECOMP = $(BATCHEMACS) -eval '(progn (require (quote bytecomp)) (setq byte-compile-warnings t) (setq byte-compile-error-on-warn t))' -f batch-byte-compile
+BYTECOMP = $(BATCHEMACS) \
+	-eval '(require (quote bytecomp))'
+	-eval '(setq byte-compile-warnings t)' \
+	-eval '(setq byte-compile-error-on-warn t)' \
+	-f batch-byte-compile
 
 OBJS =	idris-commands.elc		\
 	idris-common-utils.elc		\
@@ -60,7 +66,6 @@ clean:
 	-rm -rf test-data/build/
 
 getdeps:
-
 	$(BATCHEMACS) -eval \
 		"(let* \
 		    ((need-pkgs '($(NEED_PKGS))) \
