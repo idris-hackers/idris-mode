@@ -118,7 +118,7 @@ The log is placed in `idris-event-buffer-name'."
   :group 'idris-faces)
 
 (defface idris-semantic-postulate-face
-  '((t (:inherit idris-semantic-function-face :weight semi-bold)))
+  '((t (:inherit idris-unsafe-face :weight semi-bold)))
   "The face to be used to highlight postulated values"
   :group 'idris-faces)
 

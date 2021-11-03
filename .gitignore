@@ -5,3 +5,16 @@ documentation.log
 documentation.pdf
 test-data/build/
 test-data/*.ibc
+test-data/idris2-history.eld
+test-data/Empty.idr
+
+docs/*.aux
+docs/*.log
+docs/*.pdf
+docs/auto/
+docs/*.fdb_latexmk
+docs/*.fls
+docs/*.xdv
+
+*.ttc
+*.ttm
