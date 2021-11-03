@@ -5,3 +5,5 @@ documentation.log
 documentation.pdf
 test-data/build/
 test-data/*.ibc
+test-data/idris2-history.eld
+test-data/Empty.idr

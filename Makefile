@@ -44,20 +44,29 @@ test: getdeps build
 test2: getdeps build
 	$(BATCHEMACS) -L . \
 		-eval '(setq idris-interpreter-path (executable-find "idris2"))' \
-                -eval '(setq idris-repl-history-file "~/.idris2/idris2-histtory.eld")' \
+		-eval '(setq idris-repl-history-file "~/.idris2/idris2-history.eld")' \
 		-l ert -l idris-tests2.el -f ert-run-tests-batch-and-exit
+
 test3: getdeps build
 	$(BATCHEMACS) -L . \
 		-eval '(setq idris-interpreter-path (executable-find "idris2"))' \
-                -eval '(setq idris-repl-history-file "idris2-histtory.eld")' \
-                -eval '(setq idris-log-events t)' \
+		-eval '(setq idris-repl-history-file "idris2-history.eld")' \
+		-eval '(setq idris-log-events t)' \
 		-l ert -l idris-tests3.el -f ert-run-tests-batch-and-exit
 
 clean:
 	-rm -f $(OBJS)
 	-rm -f test-data/*ibc
+	-rm -rf test-data/build/
 
 getdeps:
-	$(BATCHEMACS) -eval '(progn (package-refresh-contents) (unless (package-installed-p (quote prop-menu)) (package-install (quote prop-menu))))'
+
+	$(BATCHEMACS) -eval \
+		"(let* \
+		    ((need-pkgs '($(NEED_PKGS))) \
+		     (want-pkgs (seq-remove #'package-installed-p need-pkgs))) \
+		  (unless (null want-pkgs) \
+		    (package-refresh-contents) \
+		    (mapcar #'package-install want-pkgs)))"
 
 .PHONY: clean build test getdeps
