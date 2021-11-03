@@ -79,6 +79,11 @@ The log is placed in `idris-event-buffer-name'."
   :group 'idris
   :type 'boolean)
 
+(defcustom idris-completion-via-compiler t
+  "Use the compiler to make suggestions."
+  :type 'boolean
+  :group 'idris)
+
 ;;; Faces
 (defface idris-active-term-face
   '((((background light))

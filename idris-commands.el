@@ -885,14 +885,15 @@ already loaded, as a buffer awaiting completion is probably not
 type-correct, so loading will fail."
   (if (not idris-process)
       nil
-    (cl-destructuring-bind (identifier start end) (idris-identifier-backwards-from-point)
-      (when identifier
-        (let ((result (car (idris-eval `(:repl-completions ,identifier)))))
-          (cl-destructuring-bind (completions _partial) result
-            (if (null completions)
-                nil
-              (list start end completions
-                    :exclusive 'no))))))))
+    (when idris-completion-via-compiler
+      (cl-destructuring-bind (identifier start end) (idris-identifier-backwards-from-point)
+        (when identifier
+          (let ((result (car (idris-eval `(:repl-completions ,identifier)))))
+            (cl-destructuring-bind (completions _partial) result
+              (if (null completions)
+                  nil
+                (list start end completions
+                      :exclusive 'no)))))))))
 
 (defun idris-complete-keyword-at-point ()
   "Attempt to complete the symbol at point as an Idris keyword."
