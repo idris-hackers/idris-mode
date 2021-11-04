@@ -5,8 +5,17 @@ with release 0.9.19.
 
 ## 1.1
 
-+ More tests and test support for Idris1 and Idris2.
++ New customisation settings:
+  + `idris-displat-words-of-encouragement` toggles showing words of encouragement.
+  + `idris-completion-via-compiler` toggles use of the Idris compiler to provide completion.
+    + Tab in the repl still uses `completion-at-point`.
++ Improvements to testing harness, with support for testing against Idris2.
++ Migration of CI from Travis to GitHub Actions
+  + Deprecation of older emacs for testing.
 + More support for IDE Protocol Version2 (i.e. Idris2).
++ Upstream changes as contributed to the Idris2-Mode on idris-community.
+  + Improvements to Makefile
+  + Changes to semantic faces
 
 ## 1.0
 
