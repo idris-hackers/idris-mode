@@ -67,11 +67,18 @@
   "The Idris connection.")
 
 (defvar idris-protocol-version 0 "The protocol version")
+(defvar idris-protocol-version-minor 0 "The protocol minor version")
+
+(defun >=-protocol-version (major minor)
+  (or  (> idris-protocol-version major)
+       (and (>= idris-protocol-version       major)
+            (>= idris-protocol-version-minor minor))))
 
 (defun idris-version-hook-function (event)
   (pcase event
-    (`(:protocol-version ,version ,_target)
+    (`(:protocol-version ,version ,minor)
      (setf idris-protocol-version version)
+     (setf idris-protocol-version-minor minor)
      (remove-hook 'idris-event-hooks 'idris-version-hook-function)
      t)))
 
