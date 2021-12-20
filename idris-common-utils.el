@@ -402,4 +402,12 @@ relative to SRC-DIR"
         (when (file-exists-p lidr)
           (make-link lidr))))))
 
+(defvar idris-protocol-version 0 "The protocol version")
+(defvar idris-protocol-version-minor 0 "The protocol minor version")
+
+(defun >=-protocol-version (major minor)
+  (or  (> idris-protocol-version major)
+       (and (>= idris-protocol-version       major)
+            (>= idris-protocol-version-minor minor))))
+
 (provide 'idris-common-utils)
