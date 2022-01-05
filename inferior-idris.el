@@ -66,12 +66,11 @@
 (defvar idris-connection nil
   "The Idris connection.")
 
-(defvar idris-protocol-version 0 "The protocol version")
-
 (defun idris-version-hook-function (event)
   (pcase event
-    (`(:protocol-version ,version ,_target)
+    (`(:protocol-version ,version ,minor)
      (setf idris-protocol-version version)
+     (setf idris-protocol-version-minor minor)
      (remove-hook 'idris-event-hooks 'idris-version-hook-function)
      t)))
 

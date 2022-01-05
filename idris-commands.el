@@ -229,15 +229,27 @@ A prefix argument forces loading but only up to the current line."
                  for h in hs
                  do (pcase h
                       (`(((:filename ,fn)
-                          (:start ,start-line ,start-col)
-                          (:end ,end-line ,end-col))
+                          (:start ,start-line-raw ,start-col-raw)
+                          (:end ,end-line-raw ,end-col-raw))
                          ,props)
                        (when (string= (file-name-nondirectory fn)
                                       (file-name-nondirectory (buffer-file-name)))
-                         (idris-highlight-input-region (current-buffer)
+                         (let ((start-line (if (>=-protocol-version 2 1)
+                                               (+ 1 start-line-raw)
+                                             start-line-raw))
+                               (start-col  (if (>=-protocol-version 2 1)
+                                               (+ 1 start-col-raw)
+                                             start-col-raw))
+                               (end-line   (if (>=-protocol-version 2 1)
+                                               (+ 1 end-line-raw)
+                                             end-line-raw  ))
+                               (end-col    (if (>= idris-protocol-version 2 1)
+                                               (+ 1 end-col-raw)
+                                             end-col-raw   )))
+                           (idris-highlight-input-region (current-buffer)
                                                        start-line start-col
                                                        end-line end-col
-                                                       props))))))
+                                                       props)))))))
                (_ (idris-make-clean)
                   (idris-update-options-cache)
 
