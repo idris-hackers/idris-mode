@@ -71,6 +71,7 @@ getdeps:
 		    ((need-pkgs '($(NEED_PKGS))) \
 		     (want-pkgs (seq-remove #'package-installed-p need-pkgs))) \
 		  (unless (null want-pkgs) \
+		    (package-initialize) \
 		    (package-refresh-contents) \
 		    (mapcar #'package-install want-pkgs)))"
 
