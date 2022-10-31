@@ -1,4 +1,5 @@
 (require 'flycheck)
+(require 'flycheck-ert)
 (require 'idris-mode)
 (require 'flycheck-idris)
 (require 'idris-commands)
@@ -9,21 +10,40 @@
 
 ;;; Code:
 
-(flycheck-parse-error-with-patterns
-(concat "Warning: We are about to implicitly bind the following lowercase names.\n"
-        "You may be unintentionally shadowing the associated global definitions:\n"
-        "  plus is shadowing Main.plus, Prelude.Types.plus\n"
-        "\n"
-        "Temp:5:3--5:4\n"
-        " 1 | plus : Nat -> Nat -> Nat    \n"
-        " 2 | plus x y = plus x \"w\"      \n"
-        " 3 |                             \n"
-        " 4 | data Foo : Nat -> Type where\n"
-        " 5 |   F : Foo plus              \n"
-        "       ^                         \n"
-        "\n")
-(flycheck-checker-get 'idris2 'error-patterns)
-'idris2)
+(ert-deftest idris2-test-flycheck-warning ()
+  "Test parsing of warnings with flycheck."
+  (should (eql
+           (flycheck-parse-error-with-patterns
+            (concat "Warning: We are about to implicitly bind the following lowercase names.\n"
+                    "You may be unintentionally shadowing the associated global definitions:\n"
+                    "  plus is shadowing Main.plus, Prelude.Types.plus\n"
+                    "\n"
+                    "Temp:5:3--5:4\n"
+                    " 1 | plus : Nat -> Nat -> Nat    \n"
+                    " 2 | plus x y = plus x \"w\"      \n"
+                    " 3 |                             \n"
+                    " 4 | data Foo : Nat -> Type where\n"
+                    " 5 |   F : Foo plus              \n"
+                    "       ^                         \n"
+                    "\n\n")
+            (flycheck-checker-get 'idris2 'error-patterns) 'idris2)
+           (flycheck-error-new
+            :filename "Temp"
+            :checker 'idris2
+
+            :line 5
+            :column 3
+            :end-column 5
+            :level 'warning
+            :id nil
+            :message (concat
+                      "Warning: We are about to implicitly bind the following lowercase names.\n"
+                      "You may be unintentionally shadowing the associated global definitions:\n"
+                      "  plus is shadowing Main.plus, Prelude.Types.plus\n"
+                      "\n"))))
+  )
+
+;;; Hand tests
 
 (flycheck-parse-error-with-patterns
  (concat "Error: While processing right hand side of plus. Ambiguous elaboration. Possible results:\n"
