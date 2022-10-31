@@ -48,8 +48,7 @@
 (flycheck-define-checker idris2
   "An Idris2 syntax and type checker."
   :command ("idris2"
-            "-q"
-            "--check" "--nocolor" "--warnpartial"
+            "--check" "--no-colour"
             ;; Compute the command-line options similarly to inferior-idris
             (eval (idris-compute-flags))
             source)
