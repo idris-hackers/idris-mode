@@ -315,7 +315,9 @@ Invokes `idris-repl-mode-hook'."
   (buffer-substring-no-properties idris-input-start (point-max)))
 
 (defun idris-repl-highlight-input (start-pos start-line start-col end-line end-col props)
-  "Apply semantic highlighting to the REPL input beginning at START-POS using the Idris location information START-LINE, START-COL, END-LINE, and END-COL and semantic annotations PROPS."
+  "Apply semantic highlighting to the REPL input beginning at START-POS using
+the Idris location information START-LINE, START-COL, END-LINE, and END-COL
+and semantic annotations PROPS."
   (let ((buffer (get-buffer (idris-buffer-name :repl))))
     (with-current-buffer buffer
       (save-restriction
@@ -385,7 +387,7 @@ Invokes `idris-repl-mode-hook'."
 
 
 (defun idris-repl-insert-result (string &optional highlighting)
-  "Insert STRING and mark it asg evaluation result.
+  "Insert STRING and mark it as evaluation result.
 Optional argument HIGHLIGHTING is a collection of semantic
 highlighting information from Idris."
   (with-current-buffer (idris-repl-buffer)

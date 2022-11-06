@@ -76,7 +76,8 @@
            idris-simple-indent-version))
 
 (defun idris-simple-indent-current-indentation ()
-  "Return the indentation of the current line, taking into account literate Idris syntax"
+  "Return the indentation of the current line.
+Takes into account literate Idris syntax."
   (save-excursion
     (move-to-column 0)
     (looking-at (if (idris-lidr-p) ">\\s-*" "\\s-*"))

@@ -381,7 +381,7 @@ the length reported by Idris."
       (error "No proof in progress"))))
 
 (defun idris-prover-end ()
-  "Get rid of left over buffers from proof mode and unset global state related to the prover."
+  "Remove buffers from proof mode and unset global state related to the prover."
   (interactive)
   (setq idris-prover-currently-proving nil)
   (let ((obligations (idris-prover-obligations-buffer))

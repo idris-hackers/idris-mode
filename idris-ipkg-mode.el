@@ -375,7 +375,8 @@ arguments."
           pkgs)))))
 
 (defun idris-ipkg-pkgs-flags-for-current-buffer ()
-  "Compute a list of Idris command line options based on the pkgs field of the .ipkg file."
+  "Compute a list of Idris command line options
+based on the pkgs field of the .ipkg file."
   (let ((pkgs (idris-ipkg-pkgs-for-current-buffer)))
     (cl-loop for pkg in pkgs appending (list "-p" pkg))))
 

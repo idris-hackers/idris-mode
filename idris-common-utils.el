@@ -360,8 +360,8 @@ corresponding values in the CDR of VALUE."
              `((t (error "ELISP destructure-case failed: %S" ,tmp))))))))
 
 (defun idris-lidr-p (&optional buffer)
-  "Return t if BUFFER is a literate Idris file, or nil otherwise. Use the current buffer if
-BUFFER is not supplied or is nil."
+  "Return t if BUFFER is a literate Idris file, or nil otherwise.
+Use the current buffer if BUFFER is not supplied or is nil."
   (let ((file-name (buffer-file-name buffer)))
     ;; We check for nil here because idris-lidr-p might be called on
     ;; buffers that don't have associated files, such as the REPL

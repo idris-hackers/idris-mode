@@ -166,7 +166,8 @@
   (idris-load-forward-line -1))
 
 (defun idris-filename-to-load ()
-  "Compute the working directory and filename to load in Idris, returning these as a cons."
+  "Compute the working directory and filename to load in Idris.
+Returning these as a cons."
   (let* ((fn (buffer-file-name))
          (ipkg-srcdir (idris-ipkg-find-src-dir))
          (srcdir (if ipkg-srcdir
@@ -267,7 +268,7 @@ A prefix argument forces loading but only up to the current line."
     (error "Cannot find file for current buffer")))
 
 (defun idris-view-compiler-log ()
-  "Jump to the log buffer, if it is open"
+  "Jump to the log buffer, if it is open."
   (interactive)
   (let ((buffer (get-buffer idris-log-buffer-name)))
     (if buffer
@@ -452,7 +453,8 @@ compiler-annotated output. Does not return a line number."
     (_ (error "failed to make tree from %s" caller))))
 
 (defun idris-namespace-tree (namespace &optional recursive)
-  "Create a tree of the contents of NAMESPACE, lazily retrieving children when RECURSIVE is non-nil."
+  "Create a tree of the contents of NAMESPACE.
+Lazily retrieve children when RECURSIVE is non-nil."
   (cl-flet*
       ;; Show names as childless trees with decorated roots
       ((name-tree (n) (make-idris-tree :item (car n)
@@ -543,17 +545,18 @@ KILLFLAG is set if N was explicitly specified."
     (t (delete-char 1 killflag))))
 
 (defun idris-apropos (what)
-  "Look up something in names, type signatures, and docstrings"
-  (interactive "sSearch Idris docs for: ")
+  "Look up WHAT in names, type signatures, and docstrings"
+  (interactive "Search Idris docs for: ")
   (idris-info-for-name :apropos what))
 
 (defun idris-type-search (what)
-  "Search the Idris libraries by fuzzy type matching"
-  (interactive "sSearch for type: ")
+  "Search the Idris libraries for WHAT by fuzzy type matching"
+  (interactive "Search for type: ")
   (idris-info-for-name :interpret (concat ":search " what)))
 
 (defun idris-docs-at-point (thing)
-  "Display the internal documentation for the name at point, considered as a global variable"
+  "Display the internal documentation for the THING (name at point).
+Considered as a global variable"
   (interactive "P")
   (let ((name (if thing (read-string "Docs: ")
                 (idris-name-at-point))))
@@ -565,7 +568,8 @@ KILLFLAG is set if N was explicitly specified."
   (get-char-property (point) 'idris-eldoc))
 
 (defun idris-pretty-print ()
-  "Get a term or definition pretty-printed by Idris. Useful for writing papers or slides."
+  "Get a term or definition pretty-printed by Idris.
+Useful for writing papers or slides."
   (interactive)
   (let ((what (read-string "What should be pretty-printed? "))
         (fmt (completing-read "What format? " '("html", "latex") nil t nil nil "latex"))
@@ -621,7 +625,8 @@ KILLFLAG is set if N was explicitly specified."
               ))))))
 
 (defun idris-case-dwim ()
-  "If point is on a hole name, make it into a case expression. Otherwise, case split as a pattern variable."
+  "If point is on a hole name, make it into a case expression.
+Otherwise, case split as a pattern variable."
   (interactive)
   (if (or (looking-at-p "\\?[a-zA-Z_]+")
           (looking-back "\\?[a-zA-Z0-9_]+" nil))
@@ -790,7 +795,8 @@ prefix argument sets the recursion depth directly."
             (setq proof-region-end (point))))))))
 
 (defun idris-proof-search-next ()
-  "Replace the previous proof search result with the next one, if it exists.  Idris 2 only."
+  "Replace the previous proof search result with the next one, if it exists.
+Idris 2 only."
   (interactive)
   (if (not proof-region-start)
       (error "You must proof search first before looking for subsequent proof results.")
@@ -847,7 +853,8 @@ prefix argument sets the recursion depth directly."
           )))))
 
 (defun idris-generate-def-next ()
-  "Replace the previous generated definition with next definition, if it exists.  Idris 2 only."
+  "Replace the previous generated definition with next definition, if it exists.
+Idris 2 only."
   (interactive)
   (if (not def-region-start)
       (error "You must program search first before looking for subsequent program results.")
@@ -943,7 +950,7 @@ type-correct, so loading will fail."
       (error "No Idris REPL buffer is open."))))
 
 (defun idris-quit ()
-  "Quit the Idris process, cleaning up the state that it has synchronized with Emacs."
+  "Quit the Idris process, cleaning up the state synchronized with Emacs."
   (interactive)
   (setq idris-prover-currently-proving nil)
   (let* ((pbufname (idris-buffer-name :process))
@@ -1014,7 +1021,8 @@ be Idris's own serialization of the term in question."
     menu))
 
 (defun idris-insert-term-widget (term)
-  "Make a widget for interacting with the term represented by TERM beginning at START-POS in the current buffer."
+  "Make a widget for interacting with the term represented by TERM
+beginning at START-POS in the current buffer."
   (let ((inhibit-read-only t)
         (start-pos (copy-marker (point)))
         (end-pos (copy-marker (idris-find-term-end (point) 1)))

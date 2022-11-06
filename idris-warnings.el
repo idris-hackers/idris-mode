@@ -77,9 +77,10 @@
 (defun idris-warning-overlay (warning)
   "Add a compiler warning to the buffer as an overlay.
 May merge overlays, if there's already one in the same location.
-WARNING is of form (filename (startline startcolumn) (endline endcolumn) message &optional highlighting-spans).
-As of 20140807 (Idris 0.9.14.1-git:abee538) (endline endcolumn) is mostly the same as (startline startcolumn)
-"
+WARNING is of form (filename (startline startcolumn) (endline endcolumn)
+message &optional highlighting-spans).
+As of 20140807 (Idris 0.9.14.1-git:abee538) (endline endcolumn)
+is mostly the same as (startline startcolumn)"
   (cl-destructuring-bind (filename sl1 sl2 message spans) warning
     (let ((startline (if (>=-protocol-version 2 1)
                          (1+ (nth 0 sl1))
