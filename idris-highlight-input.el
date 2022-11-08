@@ -29,7 +29,8 @@
 (require 'idris-settings)
 
 (defun idris-highlight-remove-overlays (&optional buffer)
-  "Remove all Idris highlighting overlays from BUFFER, or the current buffer if it's nil."
+  "Remove all Idris highlighting overlays from BUFFER.
+Use the current buffer if BUFFER is nil."
   (interactive)
   (with-current-buffer (or buffer (current-buffer))
     (save-restriction
@@ -39,7 +40,7 @@
           (delete-overlay overlay))))))
 
 (defun idris-highlight-column (idris-col)
-  "Compute the Emacs position offset of the Idris column IDRIS-COL, for highlighting.
+  "Compute the Emacs position offset of the Idris column IDRIS-COL.
 
 In particular, this takes bird tracks into account in literate Idris."
   (+ idris-col (if (idris-lidr-p) 1 -1)))
@@ -54,7 +55,8 @@ See Info node `(elisp)Overlay Properties' to understand how ARGS are used."
       (delete-overlay overlay))))
 
 (defun idris-highlight-input-region (buffer start-line start-col end-line end-col highlight)
-  "Highlight in BUFFER using an overlay from START-LINE and START-COL to END-LINE and END-COL and the semantic properties specified in HIGHLIGHT."
+  "Highlight in BUFFER using an overlay from START-LINE and START-COL to
+ END-LINE and END-COL and the semantic properties specified in HIGHLIGHT."
   (when idris-semantic-source-highlighting
     (save-restriction
       (widen)

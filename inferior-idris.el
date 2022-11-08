@@ -328,7 +328,8 @@ versions cannot deal with that."
         idris-connection))))
 
 (defun idris-eval-async (sexp cont &optional failure-cont)
-  "Evaluate EXPR on the superior Idris and call CONT with the result, or FAILURE-CONT in failure case."
+  "Evaluate EXPR on the superior Idris and call CONT with the result,
+or FAILURE-CONT in failure case."
   (idris-rex (cont (buffer (current-buffer)) failure-cont)
       sexp t
     ((:ok result)
@@ -421,17 +422,16 @@ Idris error."
 (defun idris-get-idris-version ()
   "Ask the Idris compiler for its version information.
 Returns a cons cell whose car is a list of version number
-components and whose cdr is a list of prerelease identifiers, if
-applicable. Returns nil if the version of Idris used doesn't
-support asking for versions."
+components and whose cdr is a list of prerelease identifiers, if applicable.
+Returns nil if the version of Idris used doesn't support asking for versions."
   (pcase (idris-eval :version t)
     (`((,version ,prerelease)) (cons version prerelease))
     (_ nil)))
 
 (defun idris-get-idris-version-string ()
-  "Ask the Idris compiler for its version information, and return the result as a user-friendly string.
-Returns nil if the version of Idris used doesn't support asking
-for versions."
+  "Ask the Idris compiler for its version information.
+Returns result as a user-friendly string.
+Returns nil if the version of Idris used doesn't support asking for versions."
   (let ((version (idris-get-idris-version)))
     (if (consp version) ; returns nil on older versions of Idris
         (let* ((version-number (car version))

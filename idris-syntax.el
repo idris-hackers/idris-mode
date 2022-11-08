@@ -129,7 +129,7 @@ contributing the settings upstream to the theme maintainer."
 
     ;; Idris operator chars get punctuation syntax
     (mapc #'(lambda (ch) (modify-syntax-entry ch "." st))
-	  "!#$%&*+./<=>@^|~:")
+    "!#$%&*+./<=>@^|~:")
     ;; - is an operator char but may also be 1st or 2nd char of comment starter
     ;; -- and the 1st char of comment end -}
     (modify-syntax-entry ?\- ". 123" st)
@@ -201,7 +201,8 @@ syntax table won't support, such as characters."
   "A regexp for matching Idris keywords")
 
 (defun idris-font-lock-literate-search (regexp lidr limit)
-  "Find REGEXP in Idris source between point and LIMIT, where LIDR is non-nil for literate files..
+  "Find REGEXP in Idris source between point and LIMIT.
+LIDR is non-nil for literate files.
 
 See the documentation for search-based fontification,
 esp. `font-lock-defaults', for details."

@@ -232,7 +232,8 @@ a preview and offer to widen."
       (insert " "))))
 
 (defun idris-tree-indent-item (start end prefix &optional preserve-props)
-  "Insert PREFIX at the beginning of each but the first line between START and END, copying the text properties in PRESERVE-PROPS.
+  "Insert PREFIX at the beginning of each but the first line
+between START and END, copying the text properties in PRESERVE-PROPS.
 This is used for labels spanning multiple lines."
   (save-excursion
     (goto-char end)
