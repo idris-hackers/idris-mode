@@ -295,8 +295,10 @@ Set to `nil' for no banner."
   "Face for the result of an evaluation in the Idris REPL."
   :group 'idris-repl)
 
-(defcustom idris-repl-history-file "~/.idris/idris-history.eld"
-  "File to save the persistent REPL history to."
+(defcustom idris-repl-history-file nil
+  "File to save the persistent REPL history to.
+
+Defaults to ~/.[:IDRIS_EXECUTABLE_NAME:]/idris-history.eld"
   :type 'string
   :group 'idris-repl)
 
