@@ -159,7 +159,7 @@ remain."
 
 (ert-deftest idris-test-idris-type-search ()
   "Test that `idris-type-search' produces output in Idris info buffer."
-  (let ((buffer (find-file "test-data/Empty.idr")))
+  (let ((buffer (find-file "test-data/AddClause.idr")))
     (with-current-buffer buffer
       (idris-load-file)
       (funcall-interactively 'idris-type-search "Nat"))
