@@ -303,8 +303,8 @@ By default we assume Idris' default configuration home is:
   $HOME/.idris/idris-history.eld.
      
 If you have installed/configured Idris differently, or are 
-using Idris2, then you may wish to customise this variable.
-"
+using Idris2, then you may wish to customise this variable."
+
   :type 'string
   :group 'idris-repl)
 
