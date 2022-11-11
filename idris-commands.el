@@ -544,14 +544,15 @@ KILLFLAG is set if N was explicitly specified."
     ;; `delete-forward-char' does
     (t (delete-char 1 killflag))))
 
+
 (defun idris-apropos (what)
-  "Look up WHAT in names, type signatures, and docstrings"
-  (interactive "Search Idris docs for: ")
+  "Look up WHAT in names, type signatures, and docstrings."
+  (interactive "sSearch Idris docs for: ")
   (idris-info-for-name :apropos what))
 
 (defun idris-type-search (what)
-  "Search the Idris libraries for WHAT by fuzzy type matching"
-  (interactive "Search for type: ")
+  "Search the Idris libraries for WHAT by fuzzy type matching."
+  (interactive "sSearch for type: ")
   (idris-info-for-name :interpret (concat ":search " what)))
 
 (defun idris-docs-at-point (thing)

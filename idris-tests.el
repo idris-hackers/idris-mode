@@ -157,6 +157,17 @@ remain."
       (kill-buffer))
     (idris-quit)))
 
+(ert-deftest idris-test-idris-type-search ()
+  "Test that `idris-type-search' produces output in Idris info buffer."
+  (let ((buffer (find-file "test-data/AddClause.idr")))
+    (with-current-buffer buffer
+      (idris-load-file)
+      (funcall-interactively 'idris-type-search "Nat"))
+    (with-current-buffer (get-buffer idris-info-buffer-name)
+      (goto-char (point-min))
+      (should (re-search-forward "Zero" nil t)))
+    (idris-quit)))
+
 (ert-deftest idris-test-ipkg-packages-with-underscores-and-dashes ()
   "Test that loading an ipkg file can have dependencies on packages with _ or - in the name."
   (let ((buffer (find-file "test-data/package-test/Packaging.idr")))
