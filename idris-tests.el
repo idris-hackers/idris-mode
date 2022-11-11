@@ -108,7 +108,7 @@ remain."
 
 (ert-deftest idris-test-proof-search ()
   "Test that proof search works"
-  (idris-quit)
+;  (idris-quit)
 
   (let ((buffer (find-file "test-data/ProofSearch.idr")))
     (with-current-buffer buffer
