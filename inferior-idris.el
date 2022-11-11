@@ -340,7 +340,9 @@ or FAILURE-CONT in failure case."
      (when failure-cont
        (set-buffer buffer)
        (funcall failure-cont condition))
-     (message "Evaluation returned an error: %s." condition))))
+     ;; Using `(car (split-string condition ":"))' to avoid long
+     ;; multiline message in minibuffer returned by idris-protocol-version 2.1
+     (message "Evaluation returned an error: %s." (car (split-string condition ":"))))))
 
 ;;; Synchronous requests are implemented in terms of asynchronous
 ;;; ones. We make an asynchronous request with a continuation function
