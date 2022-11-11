@@ -187,6 +187,9 @@ If ALWAYS-INSERT is non-nil, always insert a prompt at the end of the buffer."
                   idris-define-general-keys
                   idris-define-active-term-keys)
              do (funcall keyer map))
+    (substitute-key-definition 'idris-pop-to-repl
+                               'idris-switch-to-last-idris-buffer
+                               map)
     map)
   "Keymap used in Idris REPL mode.")
 

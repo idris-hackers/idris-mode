@@ -949,6 +949,25 @@ type-correct, so loading will fail."
         (pop-to-buffer buf)
       (error "No Idris REPL buffer is open."))))
 
+(defun idris-switch-to-last-idris-buffer ()
+  "Switch to the last Idris buffer.
+The default keybinding for this command is
+the same as variable `idris-pop-to-repl',
+so that it is very convenient to jump between a
+Idris buffer and the REPL buffer.
+
+Inspired by `cider-switch-to-last-clojure-buffer'
+https://github.com/clojure-emacs/cider"
+  (interactive)
+  (if (derived-mode-p 'idris-repl-mode)
+      (let ((idris-buffer (seq-find
+                           (lambda (b) (eq 'idris-mode (buffer-local-value 'major-mode b)))
+                           (buffer-list))))
+        (if idris-buffer
+            (pop-to-buffer idris-buffer `(display-buffer-reuse-window))
+          (user-error "No Idris buffer found")))
+    (user-error "Not in a Idris REPL buffer")))
+
 (defun idris-quit ()
   "Quit the Idris process, cleaning up the state synchronized with Emacs."
   (interactive)
