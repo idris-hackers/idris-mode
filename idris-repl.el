@@ -219,7 +219,7 @@ Invokes `idris-repl-mode-hook'."
   (set (make-local-variable 'indent-tabs-mode) nil)
   (add-hook 'idris-event-hooks 'idris-repl-event-hook-function)
   (add-hook 'kill-buffer-hook 'idris-repl-remove-event-hook-function nil t)
-  (when idris-repl-history-file
+  (when (idris-repl-history-file-f)
     (idris-repl-safe-load-history)
     (add-hook 'kill-buffer-hook
               'idris-repl-safe-save-history nil t))
@@ -537,22 +537,31 @@ The handler will use qeuery to ask the use if the error should be ingored."
          nil
        (signal (car err) (cdr err))))))
 
+(defun idris-repl-history-file-f ()
+  "Return repl history file.
+
+Use `idris-repl-history-file' if set or fallback
+ to filepath computed from the `idris-interpreter-path'."
+  (or idris-repl-history-file
+      ;; We should use `file-name-concat' but it is only in Emacs version 28+
+      (concat "~/." (file-name-nondirectory idris-interpreter-path) "/idris-history.eld")))
+
 (defun idris-repl-read-history-filename ()
   (read-file-name "Use Idris REPL history from file: "
-                  idris-repl-history-file))
+                  (idris-repl-history-file-f)))
 
 (defun idris-repl-load-history (&optional filename)
   "Set the current Idris REPL history.
 It can be read either from FILENAME or `idris-repl-history-file' or
 from a user defined filename."
   (interactive (list (idris-repl-read-history-filename)))
-  (let ((file (or filename idris-repl-history-file)))
+  (let ((file (or filename (idris-repl-history-file-f))))
     (setq idris-repl-input-history (idris-repl-read-history file))))
 
 (defun idris-repl-read-history (&optional filename)
   "Read and return the history from FILENAME.
 The default value for FILENAME is `idris-repl-history-file'."
-  (let ((file (or filename idris-repl-history-file)))
+  (let ((file (or filename (idris-repl-history-file-f))))
     (cond ((not (file-readable-p file)) '())
           (t (with-temp-buffer
                (insert-file-contents file)
@@ -564,7 +573,7 @@ When Idris is setup to always load the old history and one uses only
 one instance of idris all the time, there is no need to merge the
 files and this function is sufficient."
   (interactive (list (idris-repl-read-history-filename)))
-  (let ((file (or filename idris-repl-history-file))
+  (let ((file (or filename (idris-repl-history-file-f)))
         (hist (or history idris-repl-input-history)))
     (unless (file-writable-p file)
       (error (format "History file not writable: %s" file)))
