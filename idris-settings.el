@@ -298,7 +298,13 @@ Set to `nil' for no banner."
 (defcustom idris-repl-history-file nil
   "File to save the persistent REPL history to.
 
-Defaults to ~/.[:IDRIS_EXECUTABLE_NAME:]/idris-history.eld"
+By default we assume Idris' default configuration home is:
+ 
+  $HOME/.idris/idris-history.eld.
+     
+If you have installed/configured Idris differently, or are 
+using Idris2, then you may wish to customise this variable.
+"
   :type 'string
   :group 'idris-repl)
 
