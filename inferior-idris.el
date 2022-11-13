@@ -189,8 +189,8 @@ directory variables.")
           (if (not (string-match idris-process-port-with-warning-output-regexp string))
               (idris-warn string)
             (idris-warn (match-string idris-warning-matcher string))
-            (idris-connect (string-to-number (match-string idris-warning-port-matcher string))))
-          ""))))
+            (idris-connect (string-to-number (match-string idris-warning-port-matcher string)))))
+        "")))
 
 (defun idris-show-process-buffer (string)
   "Show the Idris process buffer if STRING is non-empty."
