@@ -141,9 +141,7 @@ directory variables.")
     (set-process-query-on-exit-flag idris-connection t)
     (setq idris-process-current-working-directory "")
     (run-hooks 'idris-run-hook)
-    (when idris-display-words-of-encouragement
-      (message "Connected. %s" (idris-random-words-of-encouragement)))
-    ))
+    (message "Connection to Idris established.")))
 
 (defun idris-sentinel (_process msg)
   (message "Idris disconnected: %s" (substring msg 0 -1))
