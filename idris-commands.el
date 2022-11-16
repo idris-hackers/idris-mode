@@ -324,12 +324,8 @@ Idris process. This sets the load position to point, if there is one."
 
 
 (defun idris-get-line-num ()
-  "Get the current line number"
-  (save-restriction
-    (widen)
-    (save-excursion
-      (beginning-of-line)
-      (1+ (count-lines 1 (point))))))
+  "Get the current line absolute number."
+  (line-number-at-pos (point) t))
 
 
 (defun idris-thing-at-point ()
