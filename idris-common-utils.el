@@ -97,7 +97,7 @@ Lisp package.")
 (defmacro idris-save-marker (marker &rest body)
   "Save the contents of the marker MARKER while executing BODY."
   (declare (indent 1))
-  (let ((pos (cl-gensym "pos")))
+  (let ((pos (gensym "pos")))
   `(let ((,pos (marker-position ,marker)))
      (prog1 (progn . ,body)
        (set-marker ,marker ,pos)))))
@@ -107,7 +107,7 @@ Lisp package.")
 More precisely, PROPS are added to the region between the point's
 positions before and after executing BODY."
   (declare (indent 1))
-  (let ((start (cl-gensym)))
+  (let ((start (gensym "foo")))
     `(let ((,start (point)))
        (prog1 (progn ,@body)
          (add-text-properties ,start (point) ,props)))))
@@ -116,7 +116,7 @@ positions before and after executing BODY."
   "Execute BODY and add the properties indicated by SPANS to the
 inserted text (that is, relative to point prior to insertion)."
   (declare (indent 1))
-  (let ((start (cl-gensym)))
+  (let ((start (gensym)))
     `(let ((,start (point)))
        (prog1 (progn ,@body)
          (cl-loop for (begin length props) in ,spans
@@ -174,7 +174,7 @@ inserted text (that is, relative to point prior to insertion)."
                       (:underline '(underline))
                       (_ nil)))
          (link-face (if link-href '(idris-link-face) ()))
-         (unique-val (cl-gensym)) ; HACK to stop consecutive mouse-faces from interfering
+         (unique-val (gensym)) ; HACK to stop consecutive mouse-faces from interfering
          (mousable-face
           (cond ((member (cadr decor) idris-semantic-properties-clickable-decors)
                  `((:inherit (,decor-face highlight) :hack ,unique-val)))
@@ -348,9 +348,9 @@ The list of patterns is searched for a HEAD `eq' to the car of
 VALUE. If one is found, the BODY is executed with ARGS bound to the
 corresponding values in the CDR of VALUE."
   (declare (indent 1))
-  (let ((operator (cl-gensym "op-"))
-        (operands (cl-gensym "rand-"))
-        (tmp (cl-gensym "tmp-")))
+  (let ((operator (gensym "op-"))
+        (operands (gensym "rand-"))
+        (tmp (gensym "tmp-")))
     `(let* ((,tmp ,value)
             (,operator (car ,tmp))
             (,operands (cdr ,tmp)))

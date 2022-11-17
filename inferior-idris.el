@@ -309,7 +309,7 @@ asynchronously.
 Note: don't use backquote syntax for SEXP, because various Emacs
 versions cannot deal with that."
   (declare (indent 3))
-  (let ((result (cl-gensym)))
+  (let ((result (gensym)))
     `(let ,(cl-loop for var in saved-vars
                     collect (cl-etypecase var
                               (symbol (list var var))
@@ -354,7 +354,7 @@ or FAILURE-CONT in failure case."
 ignoring intermediate output. If `NO-ERRORS' is non-nil, don't
 trigger warning buffers and don't call `ERROR' if there was an
 Idris error."
-  (let* ((tag (cl-gensym (format "idris-result-%d-"
+  (let* ((tag (gensym (format "idris-result-%d-"
                                  (1+ idris-continuation-counter))))
          (idris-stack-eval-tags (cons tag idris-stack-eval-tags)))
     (apply

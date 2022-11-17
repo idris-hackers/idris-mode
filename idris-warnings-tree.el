@@ -160,7 +160,7 @@ a preview and offer to widen."
   "Like with-slots but works only for structs.
 \(fn (CONC-NAME &rest SLOTS) STRUCT &body BODY)"
   (declare (indent 2))
-  (let ((struct-var (cl-gensym "struct")))
+  (let ((struct-var (gensym "struct")))
     `(let ((,struct-var ,struct))
        (cl-symbol-macrolet
            ,(mapcar (lambda (slot)

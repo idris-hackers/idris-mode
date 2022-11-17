@@ -30,5 +30,9 @@ attention to case differences."
            (eq t (compare-strings suffix nil nil
                                   string start-pos nil ignore-case))))))
 
+;; gensym fun introduced at or before Emacs version 26.1.
+(unless (fboundp 'gensym)
+  (defalias 'gensym 'cl-gensym))
+
 (provide 'idris-compat)
 ;;; idris-compat.el ends here
