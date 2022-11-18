@@ -96,7 +96,9 @@ Returns non-`nil' on success, `nil' on failure."
                  version-string)
         (insert (propertize (concat "Idris " version-string)
                             'face 'italic)
-                "\n\n")))))
+                "\n")))
+    (when idris-display-words-of-encouragement
+      (insert (idris-random-words-of-encouragement) "\n"))))
 
 (defun idris-repl-insert-prompt (&optional always-insert)
   "Insert or update Idris prompt in buffer.
