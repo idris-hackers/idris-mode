@@ -3,8 +3,6 @@ module MakeLemma
 -- (idris-test-run-goto-char #'idris-make-lemma)
 data Test = A | B
 
-test : Test -> Test
+my_lemmaTest : Test -> Test
 --       +++++++++++
-test x = ?make_lemma
-
-
+my_lemmaTest x = ?my_lemmaTest_rhs

@@ -712,8 +712,8 @@ Otherwise, case split as a pattern variable."
                  ;; now we add the type signature - search upwards for the current
                  ;; signature, then insert before it
                  (re-search-backward (if (idris-lidr-p)
-                                         "^\\(>\\s-*\\)\\(([^)]+)\\|\\w+\\)\\s-*:"
-                                       "^\\(\\s-*\\)\\(([^)]+)\\|\\w+\\)\\s-*:"))
+                                         "^\\(>\\s-*\\)\\(([^)]+)\\|[a-zA-Z_0-9]+\\)\\s-*:"
+                                       "^\\(\\s-*\\)\\(([^)]+)\\|[a-zA-Z_0-9]+\\)\\s-*:"))
                  (let ((indentation (match-string 1)) end-point)
                    (beginning-of-line)
                    (insert indentation)
