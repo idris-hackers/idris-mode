@@ -48,6 +48,15 @@
 (defvar-local idris-load-to-here nil
   "The maximum position to load")
 
+(defun idris-get-line-num (position)
+  "Get the absolute line number at POSITION."
+  ;; In Emacs 26.1 > line-number-at-pos accepts
+  ;; additional optional argument ABSOLUTE which
+  ;; removes need for `save-restriction' and `widen'
+  (save-restriction
+    (widen)
+    (line-number-at-pos position)))
+
 (defun idris-make-dirty ()
   "Mark an Idris buffer as dirty and remove the loaded region."
   (setq idris-buffer-dirty-p t)
@@ -137,9 +146,7 @@
     (idris-update-loaded-region
      `((:filename ,(cdr (idris-filename-to-load)))
        (:start 1 1)
-       ,(save-excursion
-          (goto-char (point-max))
-          `(:end ,(idris-get-line-num) 1))))))
+       ,`(:end ,(idris-get-line-num (point-max)) 1)))))
 
 (defun idris-load-to (&optional pos)
   (when (not pos) (setq pos (point)))
@@ -219,9 +226,7 @@ A prefix argument forces loading but only up to the current line."
           (idris-delete-ibc t) ;; delete the ibc to avoid interfering with partial loads
           (idris-eval-async
            (if idris-load-to-here
-               `(:load-file ,fn ,(save-excursion
-                                   (goto-char idris-load-to-here)
-                                   (idris-get-line-num)))
+               `(:load-file ,fn ,(idris-get-line-num idris-load-to-here))
              `(:load-file ,fn))
            (lambda (result)
              (pcase result
@@ -312,9 +317,7 @@ Idris process. This sets the load position to point, if there is one."
           (let ((result
                  (if idris-load-to-here
                      (idris-eval `(:load-file ,fn
-                                              ,(save-excursion
-                                                 (goto-char idris-load-to-here)
-                                                 (idris-get-line-num))))
+                                              ,(idris-get-line-num idris-load-to-here)))
                    (idris-eval `(:load-file ,fn)))))
             (idris-update-options-cache)
             (setq idris-currently-loaded-buffer (current-buffer))
@@ -323,15 +326,10 @@ Idris process. This sets the load position to point, if there is one."
     (error "Cannot find file for current buffer")))
 
 
-(defun idris-get-line-num ()
-  "Get the current line absolute number."
-  (line-number-at-pos (point) t))
-
-
 (defun idris-thing-at-point ()
   "Return the line number and name at point as a cons.
 Use this in Idris source buffers."
-  (let ((line (idris-get-line-num)))
+  (let ((line (idris-get-line-num (point))))
     (cons
      (if (equal (syntax-after (point))
                 (string-to-syntax "."))
