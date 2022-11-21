@@ -629,10 +629,15 @@ Useful for writing papers or slides."
   "If point is on a hole name, make it into a case expression.
 Otherwise, case split as a pattern variable."
   (interactive)
-  (if (or (looking-at-p "\\?[a-zA-Z_]+")
-          (looking-back "\\?[a-zA-Z0-9_]+" nil))
-      (idris-make-cases-from-hole)
-    (idris-case-split)))
+  (cond
+   ((looking-at-p "\\?[a-zA-Z_]+") ;; point at "?" in ?hole_rs1
+    (forward-char) ;; move from "?" for idris-make-cases-from-hole to work correctly
+    (idris-make-cases-from-hole))
+   ((or (and (char-equal (char-before) ??) ;; point at "h" in ?hole_rs1
+             (looking-at-p "[a-zA-Z_]+"))
+        (looking-back "\\?[a-zA-Z0-9_]+" nil)) ;; point somewhere afte "?h" in ?hole_rs1
+    (idris-make-cases-from-hole))
+   (t (idris-case-split))))
 
 (defun idris-add-clause (proof)
   "Add clauses to the declaration at point"
