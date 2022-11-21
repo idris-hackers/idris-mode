@@ -1,4 +1,4 @@
-;;; idris-warnings.el --- Mark warnings reported by idris in buffers -*- lexical-binding: t -*-
+;;; idris-warnings.el --- Mark warnings reported by Idris in buffers -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2013 Hannes Mehnert
 
@@ -35,9 +35,9 @@
   "Face for warnings from the compiler."
   :group 'idris-faces)
 
-(defvar idris-warnings-buffers '() "All buffers which have warnings")
-(defvar-local idris-warnings '() "All warnings in the current buffer")
-(defvar idris-raw-warnings '() "All warnings from Idris")
+(defvar idris-warnings-buffers '() "All buffers which have warnings.")
+(defvar-local idris-warnings '() "All warnings in the current buffer.")
+(defvar idris-raw-warnings '() "All warnings from Idris.")
 
 (defun idris-warning-event-hook-function (event)
   (pcase event

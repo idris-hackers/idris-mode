@@ -1,4 +1,4 @@
-;;; idris-warnings-tree.el --- Tree view of warnings reported by idris in buffers -*- lexical-binding: t -*-
+;;; idris-warnings-tree.el --- Tree view of warnings reported by Idris in buffers -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2014 Hannes Mehnert
 
@@ -94,7 +94,6 @@
   (interactive)
   (idris-kill-buffer idris-notes-buffer-name))
 
-
 (define-derived-mode idris-compiler-notes-mode special-mode "Compiler-Notes"
   "Major mode for displaying Idris compiler notes.
 \\{idris-compiler-notes-mode-map}
@@ -112,7 +111,7 @@ Invokes `idris-compiler-notes-mode-hook'."
            (idris-goto-source-location (nth 0 note) (nth 1 note) (nth 2 note))))))
 
 (defun idris-goto-location (filename)
-  "Opens buffer for filename"
+  "Opens buffer for FILENAME."
   (let ((fullpath (concat (file-name-as-directory idris-process-current-working-directory)
                           filename)))
     (or (get-buffer filename)
@@ -120,9 +119,10 @@ Invokes `idris-compiler-notes-mode-hook'."
         (find-file-noselect fullpath))))
 
 (defun idris-goto-source-location (filename lineno col)
-  "Move to the source location FILENAME LINENO COL. If the buffer
-containing the file is narrowed and the location is hidden, show
-a preview and offer to widen."
+  "Move to the source location FILENAME LINENO COL.
+
+If the buffer containing the file is narrowed and the location is hidden,
+show a preview and offer to widen."
   (let ((buf (idris-goto-location filename)))
     (set-buffer buf)
     (pop-to-buffer buf t)
@@ -145,11 +145,10 @@ a preview and offer to widen."
         (when widen-p (widen))
         (goto-char new-location)))))
 
-
 ;;;;;; Tree Widget
 
 (cl-defmacro with-struct ((conc-name &rest slots) struct &body body)
-  "Like with-slots but works only for structs.
+  "Like `with-slots' but works only for structs.
 \(fn (CONC-NAME &rest SLOTS) STRUCT &body BODY)"
   (declare (indent 2))
   (let ((struct-var (gensym "struct")))
@@ -179,7 +178,7 @@ a preview and offer to widen."
   (preserve-properties '() :type list))
 
 (defun idris-tree-leaf-p (tree)
-  ;; Evaluate the kids to see if we are at a leaf
+  "Evaluate the kids of TREE to see if we are at a leaf."
   (when (functionp (idris-tree.kids tree))
     (setf (idris-tree.kids tree) (funcall (idris-tree.kids tree))))
   (cl-assert (listp (idris-tree.kids tree)))

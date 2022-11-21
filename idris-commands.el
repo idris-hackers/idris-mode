@@ -1,4 +1,4 @@
-;;; idris-commands.el --- Commands for Emacs passed to idris -*- lexical-binding: t -*-
+;;; idris-commands.el --- Commands for Emacs passed to Idris -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2013 Hannes Mehnert
 
@@ -46,7 +46,7 @@
 (require 'thingatpt)
 
 (defvar-local idris-load-to-here nil
-  "The maximum position to load")
+  "The maximum position to load.")
 
 (defun idris-get-line-num (position)
   "Get the absolute line number at POSITION."
@@ -113,6 +113,7 @@
    "Use the user's settings from customize to determine whether to list the holes.")
 
 (defun idris-possibly-make-dirty (_beginning _end _length)
+  "Make the buffer dirty."
   (idris-make-dirty))
   ;; If there is a load-to-here marker and a currently loaded region, only
   ;; make the buffer dirty when the change overlaps the loaded region.
@@ -122,7 +123,6 @@
   ;;       (idris-make-dirty))
   ;;   ;; Otherwise just make it dirty.
   ;; (idris-make-dirty)))
-
 
 (defun idris-update-loaded-region (fc)
   (if fc
@@ -189,7 +189,7 @@ Returning these as a cons."
 
 (defun idris-load-file (&optional set-line)
   "Pass the current buffer's file to the inferior Idris process.
-A prefix argument forces loading but only up to the current line."
+A prefix argument SET-LINE forces loading but only up to the current line."
   (interactive "p")
   (save-buffer)
   (idris-ensure-process-and-repl-buffer)
@@ -264,8 +264,8 @@ A prefix argument forces loading but only up to the current line."
       (error "No warnings or errors until beginning of buffer"))))
 
 (defun idris-load-file-sync ()
-  "Pass the current buffer's file synchronously to the inferior
-Idris process. This sets the load position to point, if there is one."
+  "Pass the current buffer's file synchronously to the inferior Idris process.
+This sets the load position to point, if there is one."
   (save-buffer)
   (idris-ensure-process-and-repl-buffer)
   (if (buffer-file-name)
@@ -313,9 +313,9 @@ Use this in Idris source buffers."
      line)))
 
 (defun idris-name-at-point ()
-  "Return the name at point, taking into account semantic
-annotations. Use this in Idris source buffers or in
-compiler-annotated output. Does not return a line number."
+  "Return the name at point, taking into account semantic annotations.
+Use this in Idris source buffers or in compiler-annotated output.
+Does not return a line number."
   (let ((ref (cl-remove-if
               #'null
               (cons (get-text-property (point) 'idris-ref)
@@ -326,7 +326,7 @@ compiler-annotated output. Does not return a line number."
       (car ref))))
 
 (defun idris-info-for-name (what name)
-  "Display the type for a name"
+  "Display the type for a NAME."
   (let* ((ty (idris-eval (list what name)))
              (result (car ty))
              (formatting (cdr ty)))
@@ -334,7 +334,7 @@ compiler-annotated output. Does not return a line number."
 
 
 (defun idris-type-at-point (thing)
-  "Display the type of the name at point, considered as a global variable"
+  "Display the type of the THING at point, considered as a global variable."
   (interactive "P")
   (let ((name (if thing (read-string "Check: ")
                 (idris-name-at-point))))
@@ -342,7 +342,7 @@ compiler-annotated output. Does not return a line number."
       (idris-info-for-name :type-of name))))
 
 (defun idris-print-definition-of-name (thing)
-  "Display the definition of the function or type at point"
+  "Display the definition of the function or type of the THING at point."
   (interactive "P")
   (let ((name (if thing (read-string "Print definition: ")
                 (idris-name-at-point))))
@@ -397,7 +397,8 @@ compiler-annotated output. Does not return a line number."
                         "Browse Namespace"))
 
 (defun idris-caller-tree (caller cmd)
-  "Display a tree from an IDE caller list, lazily retrieving a few levels at a time"
+  "Display a tree from an IDE CALLER list.
+Using CMD lazily retrieve a few levels at a time from Idris compiler."
   (pcase caller
     (`((,name ,highlight) ,children)
      (make-idris-tree
@@ -412,7 +413,7 @@ compiler-annotated output. Does not return a line number."
                                  nil)))
                          children))
       :preserve-properties '(idris-tt-tree)))
-    (_ (error "failed to make tree from %s" caller))))
+    (_ (error "Failed to make tree from %s" caller))))
 
 (defun idris-namespace-tree (namespace &optional recursive)
   "Create a tree of the contents of NAMESPACE.
@@ -459,7 +460,7 @@ Lazily retrieve children when RECURSIVE is non-nil."
           (_ (error "Invalid namespace %s" namespace)))))))
 
 (defun idris-newline-and-indent ()
-  "Indent a new line like the current one by default"
+  "Indent a new line like the current one by default."
   (interactive)
   (let ((indent ""))
     (save-excursion
@@ -474,8 +475,8 @@ If the current buffer is in `idris-mode' and the file being
 edited is a literate Idris file, deleting the end of a line will
 take into account bird tracks.  If Transient Mark mode is
 enabled, the mark is active, and N is 1, delete the text in the
-region and deactivate the mark instead.  To disable this, set
-`delete-active-region' to nil.
+region and deactivate the mark instead.
+To disable this, set variable `delete-active-region' to nil.
 
 Optional second arg KILLFLAG non-nil means to kill (save in kill
 ring) instead of delete.  Interactively, N is the prefix arg, and
@@ -527,7 +528,7 @@ Considered as a global variable"
       (idris-info-for-name :docs-for name))))
 
 (defun idris-eldoc-lookup ()
-  "Support for showing type signatures in the modeline when there's a running Idris"
+  "Return Eldoc string associated with the thing at point."
   (get-char-property (point) 'idris-eldoc))
 
 (defun idris-pretty-print ()
@@ -603,7 +604,7 @@ Otherwise, case split as a pattern variable."
    (t (idris-case-split))))
 
 (defun idris-add-clause (proof)
-  "Add clauses to the declaration at point"
+  "Add clauses to the declaration at point."
   (interactive "P")
   (let ((what (idris-thing-at-point))
         (command (if proof :add-proof-clause :add-clause)))
@@ -638,7 +639,7 @@ Otherwise, case split as a pattern variable."
         (goto-char final-point))))) ;; Put the cursor on the start of the inserted clause
 
 (defun idris-add-missing ()
-  "Add missing cases"
+  "Add missing cases."
   (interactive)
   (let ((what (idris-thing-at-point)))
     (when (car what)
@@ -648,7 +649,7 @@ Otherwise, case split as a pattern variable."
         (insert result)))))
 
 (defun idris-make-with-block ()
-  "Add with block"
+  "Add with block."
   (interactive)
   (let ((what (idris-thing-at-point)))
     (when (car what)
@@ -659,7 +660,7 @@ Otherwise, case split as a pattern variable."
         (insert result)))))
 
 (defun idris-make-lemma ()
-  "Extract lemma from hole"
+  "Extract lemma from hole."
   (interactive)
   (let ((what (idris-thing-at-point)))
     (when (car what)
@@ -742,9 +743,9 @@ Otherwise, case split as a pattern variable."
   "The end position of the last proof region.")
 
 (defun idris-proof-search (&optional arg)
-  "Invoke the proof search. A plain prefix argument causes the
-command to prompt for hints and recursion depth, while a numeric
-prefix argument sets the recursion depth directly."
+  "Invoke the proof search.
+A plain prefix ARG causes the command to prompt for hints and recursion
+ depth, while a numeric prefix argument sets the recursion depth directly."
   (interactive "P")
   (let ((hints (if (consp arg)
                    (split-string (read-string "Hints: ") "[^a-zA-Z0-9']")
@@ -774,7 +775,7 @@ prefix argument sets the recursion depth directly."
 Idris 2 only."
   (interactive)
   (if (not proof-region-start)
-      (error "You must proof search first before looking for subsequent proof results.")
+      (error "You must proof search first before looking for subsequent proof results")
     (let ((result (car (idris-eval `:proof-search-next))))
       (if (string= result "No more results")
           (message "No more results")
@@ -789,7 +790,7 @@ Idris 2 only."
 (defvar-local def-region-end nil)
 
 (defun idris-generate-def ()
-  "Generate defintion."
+  "Generate definition."
   (interactive)
   (let ((what (idris-thing-at-point)))
     (when (car what)
@@ -832,7 +833,7 @@ Idris 2 only."
 Idris 2 only."
   (interactive)
   (if (not def-region-start)
-      (error "You must program search first before looking for subsequent program results.")
+      (error "You must program search first before looking for subsequent program results")
     (let ((result (car (idris-eval `:generate-def-next))))
       (if (string= result "No more results")
           (message "No more results")
@@ -942,7 +943,7 @@ type-correct, so loading will fail."
   (let ((buf (get-buffer idris-repl-buffer-name)))
     (if buf
         (pop-to-buffer buf)
-      (error "No Idris REPL buffer is open."))))
+      (error "No Idris REPL buffer is open"))))
 
 (defun idris-switch-to-last-idris-buffer ()
   "Switch to the last Idris buffer.
@@ -990,8 +991,9 @@ https://github.com/clojure-emacs/cider"
           idris-protocol-version-minor 0)))
 
 (defun idris-delete-ibc (no-confirmation)
-  "Delete the IBC file for the current buffer. A prefix argument
-means to not ask for confirmation."
+  "Delete the IBC file for the current buffer.
+When NO-CONFIRMATION argument is set to t the deletion will be
+performed silently without confirmation from the user."
   (interactive "P")
   (unless (> idris-protocol-version 1)
     (let* ((fname (buffer-file-name))
@@ -1038,8 +1040,7 @@ be Idris's own serialization of the term in question."
     menu))
 
 (defun idris-insert-term-widget (term)
-  "Make a widget for interacting with the term represented by TERM
-beginning at START-POS in the current buffer."
+  "Make a widget for interacting with the TERM."
   (let ((inhibit-read-only t)
         (start-pos (copy-marker (point)))
         (end-pos (copy-marker (idris-find-term-end (point) 1)))
@@ -1088,7 +1089,7 @@ beginning at START-POS in the current buffer."
         (idris-insert-term-widget term)))))
 
 (defun idris-remove-term-widgets (&optional buffer)
-  "Remove interaction widgets from annotated terms."
+  "Remove interaction widgets from annotated terms in BUFFER."
   (interactive)
   (with-current-buffer (or buffer (current-buffer))
     (save-excursion
@@ -1102,27 +1103,27 @@ beginning at START-POS in the current buffer."
           (delete-char 1))))))
 
 (defun idris-show-term-implicits (position &optional buffer)
-  "Replace the term at POSITION with a fully-explicit version."
+  "Replace the term at POSITION in BUFFER with a fully-explicit version."
   (interactive "d")
   (idris-active-term-command position :show-term-implicits buffer))
 
 (defun idris-hide-term-implicits (position &optional buffer)
-  "Replace the term at POSITION with a fully-implicit version."
+  "Replace the term at POSITION in BUFFER with a fully-implicit version."
   (interactive "d")
   (idris-active-term-command position :hide-term-implicits buffer))
 
 (defun idris-normalize-term (position &optional buffer)
-  "Replace the term at POSITION with a normalized version."
+  "Replace the term at POSITION in BUFFER with a normalized version."
   (interactive "d")
   (idris-active-term-command position :normalise-term buffer))
 
 (defun idris-show-core-term (position &optional buffer)
-  "Replace the term at POSITION with the corresponding core term."
+  "Replace the term at POSITION in BUFFER with the corresponding core term."
   (interactive "d")
   (idris-active-term-command position :elaborate-term buffer))
 
 (defun idris-active-term-command (position cmd &optional buffer)
-  "For the term at POSITION, Run the live term command CMD."
+  "For the term at POSITION in BUFFER, run the live term command (CMD)."
   (unless (member cmd '(:show-term-implicits
                         :hide-term-implicits
                         :normalise-term
@@ -1201,7 +1202,7 @@ of the term to replace."
                               (select-window window))))))))
 
 (defun idris-fill-paragraph (justify)
-  ;; In literate Idris files, allow filling non-code paragraphs
+  "In literate Idris files, allow filling non-code paragraphs."
   (if (and (idris-lidr-p) (not (save-excursion (move-beginning-of-line nil)
                                                (looking-at-p ">\\s-"))))
       (fill-paragraph justify)
@@ -1219,7 +1220,7 @@ of the term to replace."
 
 
 (defun idris-set-idris-load-packages ()
-  "Interactively set the `idris-load-packages' variable"
+  "Interactively set the `idris-load-packages' variable."
   (interactive)
   (let* ((idris-libdir (replace-regexp-in-string
                         "[\r\n]*\\'" ""   ; remove trailing newline junk

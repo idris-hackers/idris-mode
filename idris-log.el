@@ -33,42 +33,42 @@
 (defface idris-log-timestamp-face
   '((t :foreground "#211ab0"
        :weight bold))
-  "The face used for timestamps in the Idris log"
+  "The face used for timestamps in the Idris log."
   :group 'idris-faces)
 
 (defface idris-log-level-face
   '((t :weight bold))
-  "General properties for displaying Idris log levels"
+  "General properties for displaying Idris log levels."
   :group 'idris-faces)
 
 (defface idris-log-level-1-face
   '((t :foreground "#ff0011"))
-  "The face used for log level 1 in the Idris log"
+  "The face used for log level 1 in the Idris log."
   :group 'idris-faces)
 
 (defface idris-log-level-2-face
   '((t :foreground "#dd0033"))
-  "The face used for log level 2 in the Idris log"
+  "The face used for log level 2 in the Idris log."
   :group 'idris-faces)
 
 (defface idris-log-level-3-face
   '((t :foreground "#bb0055"))
-  "The face used for log level 3 in the Idris log"
+  "The face used for log level 3 in the Idris log."
   :group 'idris-faces)
 
 (defface idris-log-level-4-face
   '((t :foreground "#990077"))
-  "The face used for log level 4 in the Idris log"
+  "The face used for log level 4 in the Idris log."
   :group 'idris-faces)
 
 (defface idris-log-level-5-face
   '((t :foreground "#770099"))
-  "The face used for log level 5 in the Idris log"
+  "The face used for log level 5 in the Idris log."
   :group 'idris-faces)
 
 (defface idris-log-level-higher-face
   '((t :foreground "#550099"))
-  "The face used for log levels over 5 in the Idris log"
+  "The face used for log levels over 5 in the Idris log."
   :group 'idris-faces)
 
 (defun idris-get-log-level-face (level)
@@ -85,8 +85,8 @@
     map))
 
 (define-derived-mode idris-log-mode fundamental-mode "Idris Log"
-  "Major mode used to show Idris compiler internals logs
-      \\{idris-log-mode-map}
+  "Major mode used to show Idris compiler internals logs.
+\\{idris-log-mode-map}
 Invokes `idris-log-mode-hook'."
   (buffer-disable-undo)
   (set (make-local-variable 'outline-regexp) "^(")

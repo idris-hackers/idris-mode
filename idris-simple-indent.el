@@ -84,7 +84,7 @@ Takes into account literate Idris syntax."
     (length (match-string 0))))
 
 (defun idris-simple-indent-indent-line-to (column)
-  "Just like `indent-line-to`, but ignoring the leading > for literate Idris"
+  "Just like `indent-line-to`, but ignoring the leading > for literate Idris."
   (if (idris-lidr-p)
       (if (save-excursion (move-to-column 0) (looking-at ">")) ;; lidr code line - look out for >
           (progn
@@ -99,7 +99,7 @@ Takes into account literate Idris syntax."
     (indent-line-to column))) ;; not lidr, do normal indent
 
 (defun idris-simple-indent-tab-to-tab-stop ()
-  "A version of `tab-to-tab-stop' that takes literate Idris into account"
+  "A version of `tab-to-tab-stop' that takes literate Idris into account."
   (let ((indent (idris-simple-indent-current-indentation))
         (stops tab-stop-list)
         indent-to)
@@ -125,7 +125,7 @@ column, `tab-to-tab-stop' is done instead."
              (skip-chars-forward " "))
     ;; otherwise we're in code - do code indenting
     (let* ((start-column (current-column))
-           (invisible-from nil) ; `nil' means infinity here
+           (invisible-from nil) ; nil means infinity here
            (indent
             (catch 'idris-simple-indent-break
               (save-excursion

@@ -27,12 +27,12 @@
 
 (defface idris-ipkg-keyword-face
   '((t (:inherit font-lock-keyword-face)))
-  "The face to highlight Idris package keywords"
+  "The face to highlight Idris package keywords."
   :group 'idris-faces)
 
 (defface idris-ipkg-package-name-face
   '((t (:inherit font-lock-function-name-face)))
-  "The face to highlight the name of the package"
+  "The face to highlight the name of the package."
   :group 'idris-faces)
 
 
@@ -107,7 +107,7 @@
       failure)))
 
 (defun idris-ipkg-complete-keyword ()
-  "Complete the current .ipkg keyword, if possible"
+  "Complete the current .ipkg keyword, if possible."
   (interactive)
   (cl-destructuring-bind (identifier start end) (idris-ipkg-find-keyword)
     (when identifier
@@ -115,7 +115,7 @@
 
 ;;; Inserting fields
 (defun idris-ipkg-insert-field ()
-  "Insert one of the ipkg fields"
+  "Insert one of the ipkg fields."
   (interactive)
   (let ((field (completing-read "Field: " (remove "package" idris-ipkg-keywords) nil t)))
     (beginning-of-line)
@@ -133,7 +133,7 @@
 ;;; Clickable modules
 
 (defun idris-ipkg-make-files-clickable ()
-  "Make all modules with existing files clickable, where clicking opens them"
+  "Make all modules with existing files clickable, where clicking opens them."
   (interactive)
   (idris-clear-file-link-overlays 'idris-ipkg-mode)
   (let ((src-dir (idris-ipkg-buffer-src-dir (file-name-directory (buffer-file-name)))))
@@ -180,7 +180,7 @@
 
 
 (defun idris-ipkg-enable-clickable-files ()
-  "Enable setting up clickable modules and makefiles on idle Emacs"
+  "Enable setting up clickable modules and makefiles on idle Emacs."
   (interactive)
   (add-hook 'after-save-hook 'idris-ipkg-make-files-clickable)
   (idris-ipkg-make-files-clickable))
@@ -217,9 +217,8 @@ or nil if not found."
                       (find-file-r dir))))))
 
 (defun idris-try-directory-files (directory &optional full match nosort)
-  "Call `directory-files' with arguments DIRECTORY, FULL, MATCH,
-and NOSORT, but return the empty list on failure instead of
-throwing an error.
+  "Call `directory-files' with arguments DIRECTORY, FULL, MATCH and NOSORT.
+Return the empty list on failure instead of throwing an error.
 
 See the docstring for `directory-files' for the meaning of the
 arguments."
@@ -233,7 +232,7 @@ arguments."
 (defvar idris-ipkg-build-buffer-name "*idris-build*")
 
 (defun idris-ipkg--compilation-buffer-name-function (_mode)
-  "Compute a buffer name for the idris-mode compilation buffer."
+  "Compute a buffer name for the `idris-mode' compilation buffer."
   idris-ipkg-build-buffer-name)
 
 (defun idris-ipkg--ansi-compile-filter (start)
@@ -243,7 +242,7 @@ arguments."
       (ansi-color-apply-on-region start (point)))))
 
 (defun idris-ipkg-command (ipkg-file command)
-  "Run a command on ipkg-file. The command can be build, install, or clean."
+  "Run a command on IPKG-FILE. The COMMAND can be build, install, or clean."
   ;; Idris must have its working directory in the same place as the ipkg file
   (let ((dir (file-name-directory ipkg-file))
         (file (file-name-nondirectory ipkg-file))
@@ -375,8 +374,7 @@ arguments."
           pkgs)))))
 
 (defun idris-ipkg-pkgs-flags-for-current-buffer ()
-  "Compute a list of Idris command line options
-based on the pkgs field of the .ipkg file."
+  "List of Idris command line options based on the pkgs field of the .ipkg file."
   (let ((pkgs (idris-ipkg-pkgs-for-current-buffer)))
     (cl-loop for pkg in pkgs appending (list "-p" pkg))))
 
@@ -401,10 +399,10 @@ based on the pkgs field of the .ipkg file."
                                             idris-define-ipkg-editing-keys)
                                        do (funcall keyer map))
                               map)
-  "Keymap used for Idris package mode")
+  "Keymap used for Idris package mode.")
 
 (easy-menu-define idris-ipkg-mode-menu idris-ipkg-mode-map
-  "Menu for Idris package mode"
+  "Menu for Idris package mode."
   `("IPkg"
     ["Build package" idris-ipkg-build t]
     ["Install package" idris-ipkg-install t]
@@ -414,8 +412,8 @@ based on the pkgs field of the .ipkg file."
 
 ;;;###autoload
 (define-derived-mode idris-ipkg-mode prog-mode "Idris Pkg"
-  "Major mode for Idris package files
-     \\{idris-ipkg-mode-map}
+  "Major mode for Idris package files.
+\\{idris-ipkg-mode-map}
 Invokes `idris-ipkg-mode-hook'."
   :group 'idris
   :syntax-table idris-ipkg-syntax-table

@@ -55,7 +55,7 @@
   "Welcome to the Idris REPL!")
 
 (defun idris-repl-get-logo ()
-  "Return the path to the Idris logo if it exists, or `nil' if not."
+  "Return the path to the Idris logo if it exists, or nil if not."
   (let ((logo-path (concat idris-mode-path "logo-small.png")))
     (if (file-readable-p logo-path)
         logo-path
@@ -63,7 +63,7 @@
 
 (defun idris-repl-insert-logo ()
   "Attempt to insert a graphical logo.
-Returns non-`nil' on success, `nil' on failure."
+Returns non-nil on success, nil on failure."
   (let ((logo (idris-repl-get-logo)))
     (if (and (display-graphic-p)
              (image-type-available-p 'png)
@@ -75,13 +75,13 @@ Returns non-`nil' on success, `nil' on failure."
 
 (defun idris-repl-animate-banner ()
   "Insert a text banner using animation.
-Returns non-`nil' on success, `nil' on failure."
+Returns non-nil on success, nil on failure."
   (animate-string (idris-repl-welcome-message) 0 0)
   t)
 
 (defun idris-repl-text-banner ()
   "Insert a text banner with no animation.
-Returns non-`nil' on success, `nil' on failure."
+Returns non-nil on success, nil on failure."
   (insert (idris-repl-welcome-message))
   t)
 
@@ -196,7 +196,7 @@ If ALWAYS-INSERT is non-nil, always insert a prompt at the end of the buffer."
   "Keymap used in Idris REPL mode.")
 
 (easy-menu-define idris-repl-mode-menu idris-repl-mode-map
-  "Menu for the Idris REPL mode"
+  "Menu for the Idris REPL mode."
   `("Idris REPL"
     ("Interpreter options" :active idris-process
      ["Show implicits" (idris-set-option :show-implicits t)
@@ -209,12 +209,12 @@ If ALWAYS-INSERT is non-nil, always insert a prompt at the end of the buffer."
       :visible (idris-get-option :error-context)])
     ["Show term interaction widgets" idris-add-term-widgets t]
     ["Customize idris-mode" (customize-group 'idris) t]
-    ["Quit inferior idris process" idris-quit t]
+    ["Quit inferior Idris process" idris-quit t]
     ))
 
 (define-derived-mode idris-repl-mode fundamental-mode "Idris-REPL"
   "Major mode for interacting with Idris.
-    \\{idris-repl-mode-map}
+\\{idris-repl-mode-map}
 Invokes `idris-repl-mode-hook'."
                                         ;syntax-table?
   :group 'idris-repl
@@ -286,7 +286,7 @@ Invokes `idris-repl-mode-hook'."
       (idris-repl-eval-string input input-start))))
 
 (defun idris-repl-complete ()
-  "Completion of the current input"
+  "Completion of the current input."
   (when idris-completion-via-compiler
     (let* ((input (idris-repl-current-input))
            (result (idris-eval `(:repl-completions ,input))))
@@ -296,7 +296,7 @@ Invokes `idris-repl-mode-hook'."
           (list (+ idris-input-start (length partial)) (point-max) completions))))))
 
 (defun find-common-prefix (input slist)
-  "Finds longest common prefix of all strings in list."
+  "Finds longest common prefix of all strings in SLIST."
   (let ((first (car slist))
         (ilen (length input)))
     (if (> (length first) ilen)
@@ -308,7 +308,7 @@ Invokes `idris-repl-mode-hook'."
       input)))
 
 (defun idris-repl-begin-of-prompt ()
-  "Got to the beginning of linke or the prompt."
+  "Go to the beginning of line or the prompt."
   (interactive)
   (cond ((and (>= (point) idris-input-start)
               (idris-same-line-p (point) idris-input-start))
@@ -431,7 +431,7 @@ highlighting information from Idris."
   "History list of strings entered into the REPL buffer.")
 
 (defun idris-repl-add-to-input-history (string)
-  "Adds input to history."
+  "Add input STRING to history."
   (unless (equal string "")
     (setq idris-repl-input-history
           (remove string idris-repl-input-history)))
@@ -570,9 +570,9 @@ The default value for FILENAME is `idris-repl-history-file'."
                (read (current-buffer)))))))
 
 (defun idris-repl-save-history (&optional filename history)
-  "Simply save the current Idris REPL history to a file.
+  "Save the current Idris REPL HISTORY to a FILENAME.
 When Idris is setup to always load the old history and one uses only
-one instance of idris all the time, there is no need to merge the
+one instance of Idris all the time, there is no need to merge the
 files and this function is sufficient."
   (interactive (list (idris-repl-read-history-filename)))
   (let ((file (or filename (idris-repl-history-file-f)))

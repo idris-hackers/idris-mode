@@ -35,8 +35,7 @@
 
 ;;; These variables are here because many things depend on them
 (defvar-local idris-buffer-dirty-p t
-  "An Idris buffer is dirty if there have been modifications since
-it was last loaded")
+  "An Idris buffer is dirty if it have been modified since it was last loaded.")
 
 (defvar idris-currently-loaded-buffer nil
   "The buffer currently loaded by the running Idris.")
@@ -141,7 +140,7 @@ inserted text (that is, relative to point prior to insertion)."
   "The decors that should light up as responsive to mouse clicks.")
 
 (defun idris-semantic-properties-face (props)
-  "Compute the text property `face' from the Idris properties for a region."
+  "Compute the text property `face' from the Idris properties (PROPS) for a region."
   (let* ((decor (assoc :decor props))
          (implicit (assoc :implicit props))
          (text-format (assoc :text-formatting props))
@@ -197,7 +196,7 @@ inserted text (that is, relative to point prior to insertion)."
 
 
 (defun idris-semantic-properties-eldoc (props)
-  "Compute an Eldoc string from Idris semantic properties PROPS"
+  "Compute an Eldoc string from Idris semantic properties (PROPS)."
   (let* ((name (assoc :name props))
          (namespace (assoc :namespace props))
          (source-file (assoc :source-file props))
@@ -255,7 +254,7 @@ inserted text (that is, relative to point prior to insertion)."
           (t nil))))
 
 (defun idris-semantic-properties (props)
-  "Compute how to highlight with Idris compiler properties PROPS."
+  "Compute how to highlight with Idris compiler properties (PROPS)."
   (let* ((name (assoc :name props))
          (decor (assoc :decor props))
          (term (assoc :tt-term props))
@@ -384,7 +383,7 @@ Use the current buffer if BUFFER is not supplied or is nil."
     (overlay-put overlay 'help-echo help-echo)))
 
 (defun idris-clear-file-link-overlays (&optional mode)
-  "Remove all file link overlays from the current buffer"
+  "Remove all file link overlays from the current buffer."
   (when (or (not mode) (eq major-mode mode))
     (remove-overlays (point-min) (point-max) 'idris-file-link t)))
 
@@ -409,8 +408,8 @@ relative to SRC-DIR"
         (when (file-exists-p lidr)
           (make-link lidr))))))
 
-(defvar idris-protocol-version 0 "The protocol version")
-(defvar idris-protocol-version-minor 0 "The protocol minor version")
+(defvar idris-protocol-version 0 "The protocol version.")
+(defvar idris-protocol-version-minor 0 "The protocol minor version.")
 
 (defun >=-protocol-version (major minor)
   (or  (> idris-protocol-version major)

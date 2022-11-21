@@ -35,8 +35,7 @@
 (require 'idris-warnings-tree)
 
 (defvar idris-tree-info-buffer-name (idris-buffer-name :tree-viewer)
-  "The name of the buffer that `idris-mode' uses to show general
-tree-structured command output.")
+  "The buffer used to show general, tree-structured command output.")
 
 (defun idris-tree-info-quit ()
   "Quit the Idris tree info viewer."
@@ -57,14 +56,14 @@ tree-structured command output.")
     map))
 
 (easy-menu-define idris-tree-info-mode-menu idris-tree-info-mode-map
-  "Menu for the Idris tree viewer buffer"
+  "Menu for the Idris tree viewer buffer."
   `("Idris Tree Viewer"
     ["Show term interaction widgets" idris-add-term-widgets t]
     ["Close Idris tree viewer buffer" idris-tree-info-quit t]))
 
 (define-derived-mode idris-tree-info-mode fundamental-mode "Idris Tree"
-  "Major mode used for transient Idris tree viewers
-    \\{idris-tree-info-mode-map}
+  "Major mode used for transient Idris tree viewers.
+\\{idris-tree-info-mode-map}
 Invokes `idris-tree-info-mode-hook'.
 
 This mode should be used to display tree-structured output,
