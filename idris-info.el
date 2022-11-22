@@ -135,7 +135,7 @@ Ensure that the buffer is in `idris-info-mode'."
 (defmacro with-idris-info-buffer (&rest cmds)
   "Execute `CMDS' in a fresh Idris info buffer, then display it to the user."
   (declare (indent defun))
-  (let ((str-info (cl-gensym "STR-INFO")))
+  (let ((str-info (gensym "STR-INFO")))
     `(let ((,str-info (with-temp-buffer
                         ,@cmds
                         (buffer-string))))

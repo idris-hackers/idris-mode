@@ -64,7 +64,7 @@
          (button-text `(,(format "%s line %s col %s:" (nth 0 note) (nth 1 note) (nth 2 note))
                         help-echo "go to source location"
                         action ,#'(lambda (_)
-                                    (idris-show-source-location (nth 0 note)
+                                    (idris-goto-source-location (nth 0 note)
                                                                 (nth 1 note)
                                                                 (nth 2 note))))))
     (make-idris-tree :item (nth 3 note)
@@ -117,10 +117,7 @@ Invokes `idris-compiler-notes-mode-hook'."
     (cond ((not (idris-tree-leaf-p tree))
            (idris-tree-toggle tree))
           (t
-           (idris-show-source-location (nth 0 note) (nth 1 note) (nth 2 note))))))
-
-(defun idris-show-source-location (filename lineno col)
-  (idris-goto-source-location filename lineno col))
+           (idris-goto-source-location (nth 0 note) (nth 1 note) (nth 2 note))))))
 
 (defun idris-goto-location (filename)
   "Opens buffer for filename"
@@ -163,7 +160,7 @@ a preview and offer to widen."
   "Like with-slots but works only for structs.
 \(fn (CONC-NAME &rest SLOTS) STRUCT &body BODY)"
   (declare (indent 2))
-  (let ((struct-var (cl-gensym "struct")))
+  (let ((struct-var (gensym "struct")))
     `(let ((,struct-var ,struct))
        (cl-symbol-macrolet
            ,(mapcar (lambda (slot)

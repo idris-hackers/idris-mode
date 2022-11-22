@@ -139,7 +139,7 @@ string and whose cadr is highlighting information."
 
 (defun idris-prover-complete ()
   "Completion of the current input."
-  (let* ((start (save-excursion (beginning-of-line) (point)))
+  (let* ((start (line-beginning-position))
          (input (buffer-substring-no-properties
                  start
                  (point)))
