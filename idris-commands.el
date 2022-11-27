@@ -935,7 +935,10 @@ type-correct, so loading will fail."
 (defun idris-list-holes ()
   "Get a list of currently-open holes"
   (interactive)
-  (idris-hole-list-show (car (idris-eval '(:metavariables 80)))))
+  (let ((idris-hole-show-on-load nil))
+    (when (idris-current-buffer-dirty-p)
+      (save-excursion (idris-load-file-sync)))
+    (idris-hole-list-show (car (idris-eval '(:metavariables 80))))))
 
 (defun idris-kill-buffers ()
   (idris-warning-reset-all)
