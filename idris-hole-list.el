@@ -73,9 +73,6 @@ Invoces `idris-hole-list-mode-hook'."
   "Return the Idris hole buffer, creating one if there is not one"
   (get-buffer-create idris-hole-list-buffer-name))
 
-(defun idris-hole-list-buffer-visible-p ()
-  (if (get-buffer-window idris-hole-list-buffer-name 'visible) t nil))
-
 (defun idris-hole-list-show (hole-info)
   (if (null hole-info)
       (progn (message "No holes found!")
