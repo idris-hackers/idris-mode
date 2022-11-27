@@ -268,8 +268,8 @@ A prefix argument forces loading but only up to the current line."
              (when (member 'warnings-tree idris-warnings-printing)
                (idris-list-compiler-notes)
                (if idris-stay-in-current-window-on-compiler-error
-                 (display-buffer (idris-buffer-name :notes))
-                 (pop-to-buffer (idris-buffer-name :notes))))))))
+                 (display-buffer idris-notes-buffer-name)
+                 (pop-to-buffer idris-notes-buffer-name)))))))
     (error "Cannot find file for current buffer")))
 
 (defun idris-view-compiler-log ()
