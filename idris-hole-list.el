@@ -42,7 +42,6 @@
 (defvar idris-hole-list-mode-map
   (let ((map (make-keymap)))
     (suppress-keymap map)
-    (define-key map (kbd "q") 'idris-hole-list-quit)
     (define-key map (kbd "RET") 'idris-compiler-notes-default-action-or-show-details)
     (define-key map (kbd "<mouse-2>") 'idris-compiler-notes-default-action-or-show-details/mouse)
     ;;; Allow buttons to be clicked with the left mouse button in the hole list
@@ -63,11 +62,15 @@
     ["Customize idris-hole-list-mode" (customize-group 'idris-hole-list) t]
     ["Customize fonts and colors" (customize-group 'idris-faces) t]))
 
-(define-derived-mode idris-hole-list-mode fundamental-mode "Idris Holes"
-  "Major mode used for transient Idris hole list buffers
-   \\{idris-hole-list-mode-map}
-Invoces `idris-hole-list-mode-hook'."
+(define-derived-mode idris-hole-list-mode special-mode "Idris Holes"
+  "Major mode used for transient Idris hole list buffers.
+\\{idris-hole-list-mode-map}
+Invokes `idris-hole-list-mode-hook'."
   (setq-local prop-menu-item-functions '(idris-context-menu-items)))
+
+;; TODO: Auto detect mode for idris holes buffer instead of
+;; invoking `idris-hole-list-mode' in `idris-hole-list-show'
+;; (push '("#\\*idris-holes\\*$" . idris-hole-list-mode) auto-mode-alist)
 
 (defun idris-hole-list-buffer ()
   "Return the Idris hole buffer, creating one if there is not one"
@@ -81,9 +84,9 @@ Invoces `idris-hole-list-mode-hook'."
       (progn (message "No holes found!")
              (idris-hole-list-quit))
     (with-current-buffer (idris-hole-list-buffer)
+      (idris-hole-list-mode)
       (setq buffer-read-only nil)
       (erase-buffer)
-      (idris-hole-list-mode)
       (insert (propertize "Holes" 'face 'idris-info-title-face) "\n\n")
       (when idris-show-help-text
         (insert "This buffer displays the unsolved holes from the currently-loaded code. ")
