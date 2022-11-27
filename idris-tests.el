@@ -73,7 +73,6 @@ remain."
 
 (ert-deftest idris-test-hole-load ()
   "Test the hole-list-on-load setting."
-  (idris-quit)
   ;;; The default setting should be to show holes
   (should idris-hole-show-on-load)
 
