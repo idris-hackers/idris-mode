@@ -108,8 +108,9 @@ remain."
 
 (ert-deftest idris-test-proof-search ()
   "Test that proof search works"
-;  (idris-quit)
-
+  :expected-result (if (string-match-p "idris2" idris-interpreter-path)
+                       :failed
+                     :passed)
   (let ((buffer (find-file "test-data/ProofSearch.idr")))
     (with-current-buffer buffer
       (idris-load-file)
