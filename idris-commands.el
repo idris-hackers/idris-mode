@@ -748,12 +748,15 @@ Otherwise, case split as a pattern variable."
                        ;; make sure point is at new defn
                        (goto-char end)))))))))))
 
-
 (defun idris-compile-and-execute ()
-  "Execute the program in the current buffer"
+  "Execute the program in the current buffer."
   (interactive)
   (idris-load-file-sync)
-  (idris-eval '(:interpret ":exec")))
+  (if (>=-protocol-version 2 1)
+      (let ((name (read-string "MExpression to compile & execute (default main): "
+                                     nil nil "main")))
+        (idris-repl-eval-string (format ":exec %s" name) 0))
+    (idris-eval '(:interpret ":exec"))))
 
 (defvar-local proof-region-start nil
   "The start position of the last proof region.")
