@@ -738,6 +738,15 @@ Otherwise, case split as a pattern variable."
         (idris-repl-eval-string (format ":exec %s" name) 0))
     (idris-eval '(:interpret ":exec"))))
 
+(defun idris-replace-hole-with (expr)
+  "Replace the hole under the cursor by some EXPR."
+  (save-excursion
+    (let ((start (progn (search-backward "?") (point)))
+          (end (progn (forward-char) (search-forward-regexp "[^a-zA-Z0-9_']")
+                      (backward-char) (point))))
+      (delete-region start end))
+    (insert expr)))
+
 (defvar-local proof-region-start nil
   "The start position of the last proof region.")
 (defvar-local proof-region-end nil
@@ -769,13 +778,7 @@ prefix argument sets the recursion depth directly."
                            ))))
         (if (string= result "")
             (error "Nothing found")
-          (save-excursion
-            (let ((start (progn (search-backward "?") (point)))
-                  (end (progn (forward-char) (search-forward-regexp "[^a-zA-Z0-9_']") (backward-char) (point))))
-              (delete-region start end))
-            (setq proof-region-start (point))
-            (insert result)
-            (setq proof-region-end (point))))))))
+          (idris-replace-hole-with result))))))
 
 (defun idris-proof-search-next ()
   "Replace the previous proof search result with the next one, if it exists.
@@ -851,6 +854,18 @@ Idris 2 only."
           (insert result)
           (setq def-region-end (point)))))))
 
+(defun idris-intro ()
+  "Introduce the unambiguous constructor to use in this hole."
+  (interactive)
+  (let ((what (idris-thing-at-point)))
+    (unless (car what)
+      (error "Could not find a hole at point to refine by"))
+    (save-excursion (idris-load-file-sync))
+    (let ((results (car (idris-eval `(:intro ,(cdr what) ,(car what))))))
+      (pcase results
+        (`(,result) (idris-replace-hole-with result))
+        (_ (idris-replace-hole-with (ido-completing-read "I'm hesitating between: " results)))))))
+
 (defun idris-refine (name)
   "Refine by some NAME, without recursive proof search."
   (interactive "MRefine by: ")
@@ -859,11 +874,7 @@ Idris 2 only."
       (error "Could not find a hole at point to refine by"))
     (save-excursion (idris-load-file-sync))
     (let ((result (car (idris-eval `(:refine ,(cdr what) ,(car what) ,name)))))
-      (save-excursion
-        (let ((start (progn (search-backward "?") (point)))
-              (end (progn (forward-char) (search-forward-regexp "[^a-zA-Z0-9_']") (backward-char) (point))))
-          (delete-region start end))
-        (insert result)))))
+      (idris-replace-hole-with result))))
 
 (defun idris-identifier-backwards-from-point ()
   (let (identifier-start
