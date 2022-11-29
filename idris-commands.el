@@ -989,7 +989,9 @@ https://github.com/clojure-emacs/cider"
         (delete-overlay idris-loaded-region-overlay)
         (setq idris-loaded-region-overlay nil)))
     (idris-prover-end)
-    (idris-kill-buffers)))
+    (idris-kill-buffers)
+    (setq idris-protocol-version 0
+          idris-protocol-version-minor 0)))
 
 (defun idris-delete-ibc (no-confirmation)
   "Delete the IBC file for the current buffer. A prefix argument
