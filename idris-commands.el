@@ -976,7 +976,7 @@ https://github.com/clojure-emacs/cider"
   (interactive)
   (setq idris-prover-currently-proving nil)
   (let* ((pbuf (get-buffer idris-process-buffer-name))
-         (cbuf (get-buffer (idris-buffer-name :connection))))
+         (cbuf (get-buffer idris-connection-buffer-name)))
     (when cbuf
       (when (get-buffer-process cbuf)
         (with-current-buffer cbuf (delete-process nil))) ; delete connection without asking

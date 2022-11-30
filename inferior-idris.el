@@ -69,6 +69,9 @@
 (defvar idris-process-buffer-name (idris-buffer-name :process)
   "The name of the Idris process buffer.")
 
+(defvar idris-connection-buffer-name (idris-buffer-name :connection)
+  "The name of the Idris connection buffer.")
+
 (defun idris-version-hook-function (event)
   (pcase event
     (`(:protocol-version ,version ,minor)
@@ -101,7 +104,7 @@ directory variables.")
   (interactive)
   (let ((command-line-flags (idris-compute-flags)))
     ;; Kill the running Idris if the command-line flags need updating
-    (when (and (get-buffer-process (get-buffer (idris-buffer-name :connection)))
+    (when (and (get-buffer-process (get-buffer idris-connection-buffer-name))
                (not (equal command-line-flags idris-current-flags)))
       (message "Idris command line arguments changed, restarting Idris")
       (idris-quit)
@@ -134,7 +137,7 @@ directory variables.")
   "Establish a connection with a Idris REPL."
   (when (not idris-connection)
     (setq idris-connection
-          (open-network-stream "Idris IDE support" (idris-buffer-name :connection) "127.0.0.1" port))
+          (open-network-stream "Idris IDE support" idris-connection-buffer-name "127.0.0.1" port))
     (add-hook 'idris-event-hooks 'idris-version-hook-function)
     (add-hook 'idris-event-hooks 'idris-log-hook-function)
     (add-hook 'idris-event-hooks 'idris-warning-event-hook-function)
