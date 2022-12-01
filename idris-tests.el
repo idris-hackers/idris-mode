@@ -177,5 +177,28 @@ remain."
       (kill-buffer buffer))
     (idris-quit)))
 
+(ert-deftest idris-test-idris-add-clause ()
+  "Test that `idris-add-clause' generates definition with hole."
+  (let ((buffer (find-file "test-data/AddClause.idr"))
+        (buffer-content (with-temp-buffer
+                          (insert-file-contents "AddClause.idr")
+                          (buffer-string))))
+    (with-current-buffer buffer
+      (goto-char (point-min))
+      (re-search-forward "test :")
+      (goto-char (match-beginning 0))
+      (funcall-interactively 'idris-add-clause nil)
+      (should (looking-at-p "test \\w+ = \\?test_rhs"))
+      (re-search-forward "(-) :")
+      (goto-char (1+ (match-beginning 0)))
+      (funcall-interactively 'idris-add-clause nil)
+      (should (looking-at-p "(-) = \\?\\w+_rhs"))
+      ;; Cleanup
+      (erase-buffer)
+      (insert buffer-content)
+      (save-buffer)
+      (kill-buffer)))
+  (idris-quit))
+
 (provide 'idris-tests)
 ;;; idris-tests.el ends here

@@ -326,14 +326,17 @@ Idris process. This sets the load position to point, if there is one."
     (error "Cannot find file for current buffer")))
 
 
+(defun idris-operator-at-position-p (pos)
+  "Return t if syntax lookup is `.' or char after POS is `-'."
+  (or (equal (syntax-after pos) (string-to-syntax "."))
+      (eq (char-after pos) ?-)))
+
 (defun idris-thing-at-point ()
   "Return the line number and name at point as a cons.
 Use this in Idris source buffers."
   (let ((line (idris-get-line-num (point))))
     (cons
-     (if (equal (syntax-after (point))
-                (string-to-syntax "."))
-         ;; We're on an operator.
+     (if (idris-operator-at-position-p (point))
          (save-excursion
            (skip-syntax-backward ".")
            (let ((beg (point)))
