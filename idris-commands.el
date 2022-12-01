@@ -268,8 +268,8 @@ A prefix argument forces loading but only up to the current line."
              (when (member 'warnings-tree idris-warnings-printing)
                (idris-list-compiler-notes)
                (if idris-stay-in-current-window-on-compiler-error
-                 (display-buffer (idris-buffer-name :notes))
-                 (pop-to-buffer (idris-buffer-name :notes))))))))
+                 (display-buffer idris-notes-buffer-name)
+                 (pop-to-buffer idris-notes-buffer-name)))))))
     (error "Cannot find file for current buffer")))
 
 (defun idris-view-compiler-log ()
@@ -947,7 +947,7 @@ type-correct, so loading will fail."
 (defun idris-pop-to-repl ()
   "Go to the REPL, if one is open."
   (interactive)
-  (let ((buf (get-buffer (idris-buffer-name :repl))))
+  (let ((buf (get-buffer idris-repl-buffer-name)))
     (if buf
         (pop-to-buffer buf)
       (error "No Idris REPL buffer is open."))))
@@ -975,9 +975,8 @@ https://github.com/clojure-emacs/cider"
   "Quit the Idris process, cleaning up the state synchronized with Emacs."
   (interactive)
   (setq idris-prover-currently-proving nil)
-  (let* ((pbufname (idris-buffer-name :process))
-         (pbuf (get-buffer pbufname))
-         (cbuf (get-buffer (idris-buffer-name :connection))))
+  (let* ((pbuf (get-buffer idris-process-buffer-name))
+         (cbuf (get-buffer idris-connection-buffer-name)))
     (when cbuf
       (when (get-buffer-process cbuf)
         (with-current-buffer cbuf (delete-process nil))) ; delete connection without asking
@@ -986,7 +985,7 @@ https://github.com/clojure-emacs/cider"
       (when (get-buffer-process pbuf)
         (with-current-buffer pbuf (delete-process nil))) ; delete process without asking
       (kill-buffer pbuf)
-      (unless (get-buffer pbufname) (idris-kill-buffers))
+      (unless (get-buffer idris-process-buffer-name) (idris-kill-buffers))
       (setq idris-rex-continuations '())
       (when idris-loaded-region-overlay
         (delete-overlay idris-loaded-region-overlay)

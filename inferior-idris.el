@@ -66,6 +66,12 @@
 (defvar idris-connection nil
   "The Idris connection.")
 
+(defvar idris-process-buffer-name (idris-buffer-name :process)
+  "The name of the Idris process buffer.")
+
+(defvar idris-connection-buffer-name (idris-buffer-name :connection)
+  "The name of the Idris connection buffer.")
+
 (defun idris-version-hook-function (event)
   (pcase event
     (`(:protocol-version ,version ,minor)
@@ -98,7 +104,7 @@ directory variables.")
   (interactive)
   (let ((command-line-flags (idris-compute-flags)))
     ;; Kill the running Idris if the command-line flags need updating
-    (when (and (get-buffer-process (get-buffer (idris-buffer-name :connection)))
+    (when (and (get-buffer-process (get-buffer idris-connection-buffer-name))
                (not (equal command-line-flags idris-current-flags)))
       (message "Idris command line arguments changed, restarting Idris")
       (idris-quit)
@@ -109,12 +115,12 @@ directory variables.")
             (get-buffer-process
              (apply #'make-comint-in-buffer
                     "idris"
-                    (idris-buffer-name :process)
+                    idris-process-buffer-name
                     idris-interpreter-path
                     nil
                     "--ide-mode-socket"
                     command-line-flags)))
-      (with-current-buffer (idris-buffer-name :process)
+      (with-current-buffer idris-process-buffer-name
         (add-hook 'comint-preoutput-filter-functions
                   'idris-process-filter
                   nil
@@ -131,7 +137,7 @@ directory variables.")
   "Establish a connection with a Idris REPL."
   (when (not idris-connection)
     (setq idris-connection
-          (open-network-stream "Idris IDE support" (idris-buffer-name :connection) "127.0.0.1" port))
+          (open-network-stream "Idris IDE support" idris-connection-buffer-name "127.0.0.1" port))
     (add-hook 'idris-event-hooks 'idris-version-hook-function)
     (add-hook 'idris-event-hooks 'idris-log-hook-function)
     (add-hook 'idris-event-hooks 'idris-warning-event-hook-function)
@@ -193,7 +199,7 @@ directory variables.")
 (defun idris-show-process-buffer (string)
   "Show the Idris process buffer if STRING is non-empty."
   (when (> (length string) 0)
-    (pop-to-buffer (get-buffer (idris-buffer-name :process)))))
+    (pop-to-buffer (get-buffer idris-process-buffer-name))))
 
 (defun idris-output-filter (process string)
   "Accept output from the socket and process all complete messages"

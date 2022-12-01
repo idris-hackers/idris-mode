@@ -323,7 +323,7 @@ Invokes `idris-repl-mode-hook'."
   "Apply semantic highlighting to the REPL input beginning at START-POS using
 the Idris location information START-LINE, START-COL, END-LINE, and END-COL
 and semantic annotations PROPS."
-  (let ((buffer (get-buffer (idris-buffer-name :repl))))
+  (let ((buffer (get-buffer idris-repl-buffer-name)))
     (with-current-buffer buffer
       (save-restriction
         (widen)
