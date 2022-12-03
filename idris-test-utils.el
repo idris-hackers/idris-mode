@@ -56,15 +56,15 @@ It is used for the command
 - otherwise test failure
 As this is not for a test of Idris itself, we do not care the results."
   `(ert-deftest ,(intern (concat (symbol-name test-fun) "/" (string-remove-suffix ".idr" test-case))) ()
-			  
+
      (let ((buffer (find-file ,test-case)))
        (with-current-buffer buffer
-	 (idris-load-file)
-	 (dotimes (_ 5) (accept-process-output nil 0.1)) ;;
-	 (idris-test-run-goto-char (function ,test-fun))
-	 (let ((this-buffer (current-buffer)))
-	   (should (,buffer-p buffer this-buffer))))
-	 (kill-buffer))
+         (idris-load-file)
+         (dotimes (_ 5) (accept-process-output nil 0.1)) ;;
+         (idris-test-run-goto-char (function ,test-fun))
+         (let ((this-buffer (current-buffer)))
+           (should (,buffer-p buffer this-buffer))))
+       (kill-buffer))
      (idris-quit)))
 
 (defmacro idris-ert-command-action2 (test-case test-fun buffer-p)
@@ -74,15 +74,15 @@ It is used for the command
 - otherwise test failure
 As this is not for a test of Idris itself, we do not care the results."
   `(ert-deftest ,(intern (concat (symbol-name test-fun) "/" (string-remove-suffix ".idr" test-case))) ()
-			  
+
      (let ((buffer (find-file ,test-case)))
        (with-current-buffer buffer
-	 (idris-load-file)
-	 (dotimes (_ 5) (accept-process-output nil 0.1)) ;;
-	 (idris-test-run-goto-char (function ,test-fun) nil)
-	 (let ((this-buffer (current-buffer)))
-	   (should (,buffer-p buffer this-buffer))))
-	 (kill-buffer))
+         (idris-load-file)
+         (dotimes (_ 5) (accept-process-output nil 0.1)) ;;
+         (idris-test-run-goto-char (function ,test-fun) nil)
+         (let ((this-buffer (current-buffer)))
+           (should (,buffer-p buffer this-buffer))))
+       (kill-buffer))
      (idris-quit)))
 
 
@@ -91,6 +91,45 @@ As this is not for a test of Idris itself, we do not care the results."
 
 (defmacro check-rest (&rest args)
   `(listp (quote ,args)))
+
+(defmacro idris-test-with-temp-buffer-point-min (contents &rest body)
+  "Create temp buffer in `idris-mode' inserting CONTENTS.
+BODY is code to be executed within the temp buffer.  Point is
+ at the beginning of buffer."
+  (declare (indent 1) (debug t))
+  `(with-temp-buffer
+     ;; requires idris.el
+     ;; (and (featurep 'semantic) (unload-feature 'semantic))
+     ;; (and (featurep 'idris) (unload-feature 'idris))
+     (let (hs-minor-mode)
+       (insert ,contents)
+       (idris-mode)
+       (goto-char (point-min))
+       ;; (message "(current-buffer): %s" (current-buffer))
+       (when idris-debug-p (switch-to-buffer (current-buffer))
+             ;; (font-lock-fontify-buffer)
+             (font-lock-ensure)
+             )
+       ,@body)
+     (sit-for 0.1)))
+
+(defmacro idris-test-with-temp-buffer (contents &rest body)
+  "Create temp buffer in `idris-mode' inserting CONTENTS.
+BODY is code to be executed within the temp buffer.  Point is
+ at the end of buffer."
+  (declare (indent 1) (debug t))
+  `(with-temp-buffer
+     ;; (and (featurep 'idris) (unload-feature 'idris))
+     (let (hs-minor-mode)
+       (insert ,contents)
+       (idris-mode)
+       (when idris-debug-p (switch-to-buffer (current-buffer))
+             ;; (font-lock-fontify-buffer)
+             (font-lock-ensure)
+             )
+       ;; (message "ERT %s" (point))
+       ,@body)
+     (sit-for 0.1)))
 
 (provide 'idris-test-utils)
 ;;; idris-test-utils.el ends here
