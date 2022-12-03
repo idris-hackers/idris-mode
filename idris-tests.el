@@ -187,16 +187,19 @@ remain."
       (goto-char (match-beginning 0))
       (funcall-interactively 'idris-add-clause nil)
       (should (looking-at-p "test \\w+ = \\?test_rhs"))
+      (idris-delete-ibc t)
+
       (re-search-forward "(-) :")
       (goto-char (1+ (match-beginning 0)))
       (funcall-interactively 'idris-add-clause nil)
       (should (looking-at-p "(-) = \\?\\w+_rhs"))
+
       ;; Cleanup
       (erase-buffer)
       (insert buffer-content)
       (save-buffer)
-      (kill-buffer)))
-  (idris-quit))
+      (kill-buffer))
+    (idris-quit)))
 
 (provide 'idris-tests)
 ;;; idris-tests.el ends here
