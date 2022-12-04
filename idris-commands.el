@@ -214,13 +214,7 @@ A prefix argument forces loading but only up to the current line."
         ;; Actually do the loading
         (let* ((dir-and-fn (idris-filename-to-load))
                (fn (cdr dir-and-fn))
-               (srcdir
-                (if (> idris-protocol-version 1)
-                    (prin1-to-string (car dir-and-fn))
-                    (car dir-and-fn)
-                 )
-                )
-               )
+               (srcdir (car dir-and-fn)))
           (setq idris-currently-loaded-buffer nil)
           (idris-switch-working-directory srcdir)
           (idris-delete-ibc t) ;; delete the ibc to avoid interfering with partial loads
