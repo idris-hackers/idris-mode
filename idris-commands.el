@@ -209,8 +209,6 @@ A prefix argument forces loading but only up to the current line."
         (when (get-buffer idris-notes-buffer-name)
           (with-current-buffer idris-notes-buffer-name
             (let ((inhibit-read-only t)) (erase-buffer))))
-        ;; Remove stale semantic highlighting
-        (idris-highlight-remove-overlays (current-buffer))
         ;; Actually do the loading
         (let* ((dir-and-fn (idris-filename-to-load))
                (fn (cdr dir-and-fn))
