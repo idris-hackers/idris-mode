@@ -100,7 +100,7 @@
 
 (defun idris-notes-quit ()
   (interactive)
-  (idris-kill-buffer :notes))
+  (idris-kill-buffer idris-notes-buffer-name))
 
 (define-derived-mode idris-compiler-notes-mode fundamental-mode "Compiler-Notes"
   "Idris compiler notes
