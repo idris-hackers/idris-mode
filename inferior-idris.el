@@ -379,8 +379,7 @@ Idris error."
           (if no-errors
               (throw tag (list #'identity nil))
             (when (member 'warnings-tree idris-warnings-printing)
-              (when (idris-list-compiler-notes)
-                (pop-to-buffer (idris-buffer-name :notes))))
+              (idris-list-compiler-notes))
             (throw tag (list #'error "%s (synchronous Idris evaluation failed)" condition)))))
        (let ((debug-on-quit t)
              (inhibit-quit nil))

@@ -243,10 +243,7 @@ A prefix argument forces loading but only up to the current line."
                   (idris-update-loaded-region result))))
            (lambda (_condition)
              (when (member 'warnings-tree idris-warnings-printing)
-               (idris-list-compiler-notes)
-               (if idris-stay-in-current-window-on-compiler-error
-                 (display-buffer idris-notes-buffer-name)
-                 (pop-to-buffer idris-notes-buffer-name)))))))
+               (idris-list-compiler-notes))))))
     (error "Cannot find file for current buffer")))
 
 (defun idris-view-compiler-log ()
