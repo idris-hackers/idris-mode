@@ -35,27 +35,26 @@
 (defvar idris-notes-buffer-name (idris-buffer-name :notes)
   "The name of the buffer containing Idris errors")
 
+(defun idris-compiler-notes-list-show (notes)
+  (with-current-buffer (get-buffer-create idris-notes-buffer-name)
+      (idris-compiler-notes-mode)
+      (setq buffer-read-only nil)
+      (erase-buffer)
+      (when notes
+        (let ((root (idris-compiler-notes-to-tree notes)))
+          (idris-tree-insert root "")
+          (insert "\n")
+          (message "Press q to close, return or mouse on error to navigate to source")
+          (setq buffer-read-only t)
+          (goto-char (point-min))
+          notes
+          (display-buffer idris-notes-buffer-name)))))
+
 (defun idris-list-compiler-notes ()
   "Show the compiler notes in tree view."
   (interactive)
   (with-temp-message "Preparing compiler note tree..."
-    (let ((notes (reverse idris-raw-warnings))
-          (buffer (get-buffer-create idris-notes-buffer-name)))
-      (with-current-buffer buffer
-        (idris-compiler-notes-mode)
-        (setq buffer-read-only nil)
-        (erase-buffer)
-        (if (null notes)
-            nil
-          (let ((root (idris-compiler-notes-to-tree notes)))
-            (idris-tree-insert root "")
-            (insert "\n")
-            (message "Press q to close, return or mouse on error to navigate to source")
-            (setq buffer-read-only t)
-            (goto-char (point-min))
-            notes
-            (display-buffer idris-notes-buffer-name)
-          ))))))
+    (idris-complier-notes-list-show (reverse idris-raw-warnings))))
 
 (defvar idris-tree-printer 'idris-tree-default-printer)
 
