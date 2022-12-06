@@ -37,24 +37,23 @@
 
 (defun idris-compiler-notes-list-show (notes)
   (with-current-buffer (get-buffer-create idris-notes-buffer-name)
-      (idris-compiler-notes-mode)
-      (setq buffer-read-only nil)
-      (erase-buffer)
-      (when notes
-        (let ((root (idris-compiler-notes-to-tree notes)))
-          (idris-tree-insert root "")
-          (insert "\n")
-          (message "Press q to close, return or mouse on error to navigate to source")
-          (setq buffer-read-only t)
-          (goto-char (point-min))
-          notes
-          (display-buffer idris-notes-buffer-name)))))
+    (idris-compiler-notes-mode)
+    (if (null notes)
+        nil
+      (let ((buffer-read-only nil)
+            (root (idris-compiler-notes-to-tree notes)))
+        (erase-buffer)
+        (idris-tree-insert root "")
+        (insert "\n\n")
+        (message "Press q to close, return or mouse on error to navigate to source")
+        (goto-char (point-min))
+        (display-buffer idris-notes-buffer-name)))))
 
 (defun idris-list-compiler-notes ()
   "Show the compiler notes in tree view."
   (interactive)
   (with-temp-message "Preparing compiler note tree..."
-    (idris-complier-notes-list-show (reverse idris-raw-warnings))))
+    (idris-compiler-notes-list-show (reverse idris-raw-warnings))))
 
 (defvar idris-tree-printer 'idris-tree-default-printer)
 
@@ -81,7 +80,6 @@
 
 (defvar idris-compiler-notes-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "q") 'idris-notes-quit)
     ;;; Allow buttons to be clicked with the left mouse button in the compiler notes
     (define-key map [follow-link] 'mouse-face)
     (cl-loop for keyer
@@ -102,9 +100,10 @@
   (interactive)
   (idris-kill-buffer idris-notes-buffer-name))
 
-(define-derived-mode idris-compiler-notes-mode fundamental-mode "Compiler-Notes"
-  "Idris compiler notes
-     \\{idris-compiler-notes-mode-map}
+
+(define-derived-mode idris-compiler-notes-mode special-mode "Compiler-Notes"
+  "Major mode for displaying Idris compiler notes.
+\\{idris-compiler-notes-mode-map}
 Invokes `idris-compiler-notes-mode-hook'."
   (setq-local prop-menu-item-functions '(idris-context-menu-items)))
 
