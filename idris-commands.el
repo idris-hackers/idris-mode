@@ -91,13 +91,23 @@
   (idris-repl-buffer))
 
 (defun idris-switch-working-directory (new-working-directory)
-  "Switch working directory."
+  "Switch working directory to NEW-WORKING-DIRECTORY."
   (unless (string= idris-process-current-working-directory new-working-directory)
     (idris-ensure-process-and-repl-buffer)
-    (if (> idris-protocol-version 1)
-        (idris-eval `(:interpret ,(concat ":cd " (prin1-to-string new-working-directory))))
-        (idris-eval `(:interpret ,(concat ":cd " new-working-directory))))
-    (setq idris-process-current-working-directory new-working-directory)))
+    (let* ((path (if (> idris-protocol-version 1)
+                     (prin1-to-string new-working-directory)
+                   new-working-directory))
+           (eval-result (idris-eval `(:interpret ,(concat ":cd " path))))
+           (result-msg (or (car-safe eval-result) "")))
+      ;; Check if the message from Idris contains the new directory path.
+      ;; Before check drop the last character (slash) in the path
+      ;; as the message does not include it.
+      (if (string-match-p (file-truename (substring new-working-directory 0 -1))
+                          result-msg)
+          (progn
+            (message result-msg)
+            (setq idris-process-current-working-directory new-working-directory))
+        (error "Failed to switch the working directory %s" eval-result)))))
 
 (defun idris-list-holes-on-load ()
   "Use the user's settings from customize to determine whether to list the holes."
@@ -212,13 +222,7 @@ A prefix argument forces loading but only up to the current line."
         ;; Actually do the loading
         (let* ((dir-and-fn (idris-filename-to-load))
                (fn (cdr dir-and-fn))
-               (srcdir
-                (if (> idris-protocol-version 1)
-                    (prin1-to-string (car dir-and-fn))
-                    (car dir-and-fn)
-                 )
-                )
-               )
+               (srcdir (car dir-and-fn)))
           (setq idris-currently-loaded-buffer nil)
           (idris-switch-working-directory srcdir)
           (idris-delete-ibc t) ;; delete the ibc to avoid interfering with partial loads
