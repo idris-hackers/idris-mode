@@ -914,6 +914,12 @@ type-correct, so loading will fail."
   (interactive)
   (idris-hole-list-show (car (idris-eval '(:metavariables 80)))))
 
+(defun idris-list-compiler-notes ()
+  "Show the compiler notes in tree view."
+  (interactive)
+  (with-temp-message "Preparing compiler note tree..."
+    (idris-compiler-notes-list-show (reverse idris-raw-warnings))))
+
 (defun idris-kill-buffers ()
   (idris-warning-reset-all)
   (setq idris-currently-loaded-buffer nil)

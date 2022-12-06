@@ -354,7 +354,7 @@ or FAILURE-CONT in failure case."
 (defvar idris-stack-eval-tags nil
   "List of stack-tags of continuations waiting on the stack.")
 
-(autoload 'idris-list-compiler-notes "idris-warnings-tree.el")
+(autoload 'idris-list-compiler-notes "idris-commands.el")
 (defun idris-eval (sexp &optional no-errors)
   "Evaluate EXPR on the inferior Idris and return the result,
 ignoring intermediate output. If `NO-ERRORS' is non-nil, don't

@@ -33,7 +33,9 @@
 (require 'idris-common-utils)
 
 (defvar idris-notes-buffer-name (idris-buffer-name :notes)
-  "The name of the buffer containing Idris errors")
+  "The name of the buffer containing Idris errors.")
+
+(defvar idris-tree-printer 'idris-tree-default-printer)
 
 (defun idris-compiler-notes-list-show (notes)
   (if (null notes)
@@ -48,14 +50,6 @@
         (message "Press q to close, return or mouse on error to navigate to source")
         (goto-char (point-min))))
     (display-buffer idris-notes-buffer-name)))
-
-(defun idris-list-compiler-notes ()
-  "Show the compiler notes in tree view."
-  (interactive)
-  (with-temp-message "Preparing compiler note tree..."
-    (idris-compiler-notes-list-show (reverse idris-raw-warnings))))
-
-(defvar idris-tree-printer 'idris-tree-default-printer)
 
 (defun idris-tree-for-note (note)
   (let* ((buttonp (> (length (nth 0 note)) 0)) ;; if empty source location
