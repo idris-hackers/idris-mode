@@ -36,18 +36,18 @@
   "The name of the buffer containing Idris errors")
 
 (defun idris-compiler-notes-list-show (notes)
-  (with-current-buffer (get-buffer-create idris-notes-buffer-name)
-    (idris-compiler-notes-mode)
-    (if (null notes)
-        nil
+  (if (null notes)
+      nil ;; See https://github.com/idris-hackers/idris-mode/pull/148 TODO: revisit
+    (with-current-buffer (get-buffer-create idris-notes-buffer-name)
+      (idris-compiler-notes-mode)
       (let ((buffer-read-only nil)
             (root (idris-compiler-notes-to-tree notes)))
         (erase-buffer)
         (idris-tree-insert root "")
         (insert "\n\n")
         (message "Press q to close, return or mouse on error to navigate to source")
-        (goto-char (point-min))
-        (display-buffer idris-notes-buffer-name)))))
+        (goto-char (point-min))))
+    (display-buffer idris-notes-buffer-name)))
 
 (defun idris-list-compiler-notes ()
   "Show the compiler notes in tree view."
