@@ -93,11 +93,9 @@
 (defun idris-switch-working-directory (new-working-directory)
   "Switch working directory to NEW-WORKING-DIRECTORY."
   (unless (string= idris-process-current-working-directory new-working-directory)
-    (idris-ensure-process-and-repl-buffer)
-    (let* ((path (if (> idris-protocol-version 1)
-                     (prin1-to-string new-working-directory)
-                   new-working-directory))
-           (eval-result (idris-eval `(:interpret ,(concat ":cd " path))))
+    (let* ((eval-result (idris-eval `(:interpret ,(concat ":cd " (if (> idris-protocol-version 1)
+                                                                     (prin1-to-string new-working-directory)
+                                                                   new-working-directory)))))
            (result-msg (or (car-safe eval-result) "")))
       ;; Check if the message from Idris contains the new directory path.
       ;; Before check drop the last character (slash) in the path
