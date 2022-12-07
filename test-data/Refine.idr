@@ -8,7 +8,3 @@ f : Test -> Test
 f = const A
 
 test : Test -> Test
-
-
-
-

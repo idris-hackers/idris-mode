@@ -203,6 +203,31 @@ remain."
       (kill-buffer))
     (idris-quit)))
 
+(ert-deftest idris-test-idris-refine ()
+  "Test that `idris-refine' works as expected."
+  (let* ((buffer (find-file "test-data/Refine.idr"))
+         (buffer-content (buffer-substring-no-properties (point-min) (point-max))))
+    (goto-char (point-min))
+    (search-forward "test : T")
+    (beginning-of-line)
+    (funcall-interactively 'idris-add-clause nil)
+    (should (looking-at-p "test \\w+ = \\?test_rhs"))
+    (idris-delete-ibc t)
+    (search-forward "?test")
+    (funcall-interactively 'idris-refine "x")
+    (should (looking-at-p
+             (if (>=-protocol-version 2 1)
+                 "x"
+               "?test_rhs1")))
+    (idris-delete-ibc t)
+    ;; Cleanup
+    ;; (sit-for 3) ;; usefull for manual inspection before restore
+    (erase-buffer)
+    (insert buffer-content)
+    (save-buffer)
+    (kill-buffer)
+    (idris-quit)))
+
 (ert-deftest idris-backard-toplevel-navigation-test-2pTac9 ()
   "Test idris-backard-toplevel navigation command."
   (idris-test-with-temp-buffer
