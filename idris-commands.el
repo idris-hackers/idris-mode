@@ -570,19 +570,20 @@ Useful for writing papers or slides."
 
 
 (defun idris-case-split ()
-  "Case split the pattern variable at point"
+  "Case split the pattern variable at point."
   (interactive)
   (let ((what (idris-thing-at-point)))
     (when (car what)
       (save-excursion (idris-load-file-sync))
-      (let ((result (car (idris-eval `(:case-split ,(cdr what) ,(car what))))))
+      (let ((result (car (idris-eval `(:case-split ,(cdr what) ,(car what)))))
+            (initial-position (point)))
         (if (<= (length result) 2)
             (message "Can't case split %s" (car what))
           (delete-region (line-beginning-position) (line-end-position))
           (if (> idris-protocol-version 1)
               (insert (substring result 0 (length result)))
-              (insert (substring result 0 (1- (length result))))
-              ))))))
+            (insert (substring result 0 (1- (length result)))))
+          (goto-char initial-position))))))
 
 (defun idris-make-cases-from-hole ()
   "Make a case expression from the metavariable at point."
@@ -596,8 +597,8 @@ Useful for writing papers or slides."
           (delete-region (line-beginning-position) (line-end-position))
           (if (> idris-protocol-version 1)
               (insert (substring result 0 (length result)))
-              (insert (substring result 0 (1- (length result))))
-              ))))))
+            (insert (substring result 0 (1- (length result)))))
+          (search-backward "_ of\n"))))))
 
 (defun idris-case-dwim ()
   "If point is on a hole name, make it into a case expression.
