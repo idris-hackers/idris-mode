@@ -290,10 +290,10 @@ Idris process. This sets the load position to point, if there is one."
           (setq idris-currently-loaded-buffer nil)
           (idris-switch-working-directory srcdir)
           (let ((result
-                 (if idris-load-to-here
-                     (idris-eval `(:load-file ,fn
-                                              ,(idris-get-line-num idris-load-to-here)))
-                   (idris-eval `(:load-file ,fn)))))
+                 (idris-eval
+                  (if idris-load-to-here
+                      `(:load-file ,fn ,(idris-get-line-num idris-load-to-here))
+                    `(:load-file ,fn)))))
             (idris-update-options-cache)
             (setq idris-currently-loaded-buffer (current-buffer))
             (idris-make-clean)
