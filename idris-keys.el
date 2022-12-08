@@ -64,7 +64,8 @@
   (define-key map (kbd "C-c C-g") 'idris-generate-def)
   (define-key map (kbd "C-c C-S-g") 'idris-generate-def-next)
 
-  (define-key map (kbd "C-c C-r") 'idris-refine)
+  (define-key map (kbd "C-c C-r") 'idris-intro)
+  (define-key map (kbd "C-c C-S-r") 'idris-refine)
   (define-key map (kbd "RET") 'idris-newline-and-indent)
   ;; Not using `kbd' due to oddness about backspace and delete
   (define-key map [delete] 'idris-delete-forward-char)
