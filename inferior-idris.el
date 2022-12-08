@@ -75,7 +75,6 @@
 (defun idris-version-hook-function (event)
   (pcase event
     (`(:protocol-version ,version ,minor)
-     (message "-t- idris-version-hook-function 1")
      (setf idris-protocol-version version)
      (setf idris-protocol-version-minor minor)
      (remove-hook 'idris-event-hooks 'idris-version-hook-function)
