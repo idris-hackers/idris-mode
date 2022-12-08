@@ -252,10 +252,7 @@ A prefix argument forces loading but only up to the current line."
                   (idris-update-loaded-region result))))
            (lambda (_condition)
              (when (member 'warnings-tree idris-warnings-printing)
-               (idris-list-compiler-notes)
-               (if idris-stay-in-current-window-on-compiler-error
-                 (display-buffer idris-notes-buffer-name)
-                 (pop-to-buffer idris-notes-buffer-name)))))))
+               (idris-list-compiler-notes))))))
     (error "Cannot find file for current buffer")))
 
 (defun idris-view-compiler-log ()
@@ -926,6 +923,12 @@ type-correct, so loading will fail."
   "Get a list of currently-open holes"
   (interactive)
   (idris-hole-list-show (car (idris-eval '(:metavariables 80)))))
+
+(defun idris-list-compiler-notes ()
+  "Show the compiler notes in tree view."
+  (interactive)
+  (with-temp-message "Preparing compiler note tree..."
+    (idris-compiler-notes-list-show (reverse idris-raw-warnings))))
 
 (defun idris-kill-buffers ()
   (idris-warning-reset-all)
