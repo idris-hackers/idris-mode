@@ -143,7 +143,7 @@ If ALWAYS-INSERT is non-nil, always insert a prompt at the end of the buffer."
       (let ((buffer (get-buffer-create idris-repl-buffer-name)))
         (save-selected-window
           (when idris-repl-show-repl-on-startup
-            (pop-to-buffer buffer t))
+            (display-buffer buffer t))
           (with-current-buffer buffer
             (idris-repl-mode)
             (idris-repl-buffer-init))
