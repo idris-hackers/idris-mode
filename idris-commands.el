@@ -987,6 +987,7 @@ https://github.com/clojure-emacs/cider"
         (setq idris-loaded-region-overlay nil)))
     (idris-prover-end)
     (idris-kill-buffers)
+    (setq idris-process-current-working-directory nil)
     (setq idris-protocol-version 0
           idris-protocol-version-minor 0)))
 
