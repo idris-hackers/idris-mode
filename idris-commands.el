@@ -122,15 +122,16 @@
              idris-set-current-pretty-print-width)
   :group 'idris)
 
-(defun idris-possibly-make-dirty (beginning end _length)
+(defun idris-possibly-make-dirty (_beginning _end _length)
+  (idris-make-dirty))
   ;; If there is a load-to-here marker and a currently loaded region, only
   ;; make the buffer dirty when the change overlaps the loaded region.
-  (if (and idris-load-to-here idris-loaded-region-overlay)
-      (when (member idris-loaded-region-overlay
-                    (overlays-in beginning end))
-        (idris-make-dirty))
-    ;; Otherwise just make it dirty.
-    (idris-make-dirty)))
+  ;; (if (and idris-load-to-here idris-loaded-region-overlay)
+  ;;     (when (member idris-loaded-region-overlay
+  ;;                   (overlays-in beginning end))
+  ;;       (idris-make-dirty))
+  ;;   ;; Otherwise just make it dirty.
+  ;; (idris-make-dirty)))
 
 
 (defun idris-update-loaded-region (fc)
