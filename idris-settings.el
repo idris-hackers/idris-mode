@@ -66,8 +66,8 @@
 
 (defcustom idris-semantic-source-highlighting t
   "If non-nil, use the Idris compiler's semantic source
-information to highlight Idris code. If `debug', log failed
-  highlighting to buffer `*Messages*'."
+information to highlight Idris code.
+If `debug', log failed highlighting to buffer `*Messages*'."
   :group 'idris
   :type '(choice (boolean :tag "Enable")
                  (const :tag "Debug" debug)))
@@ -299,10 +299,10 @@ Set to `nil' for no banner."
   "File to save the persistent REPL history to.
 
 By default we assume Idris' default configuration home is:
- 
+
   $HOME/.idris/idris-history.eld.
-     
-If you have installed/configured Idris differently, or are 
+
+If you have installed/configured Idris differently, or are
 using Idris2, then you may wish to customise this variable."
 
   :type 'string
