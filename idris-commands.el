@@ -940,6 +940,10 @@ type-correct, so loading will fail."
   (let ((bufs (list :connection :repl :proof-obligations :proof-shell :proof-script :log :info :notes :holes :tree-viewer)))
     (dolist (b bufs) (idris-kill-buffer b))))
 
+(defun idris-remove-event-hooks ()
+  "Remove Idris event hooks set after connection with Idris established."
+  (dolist (h idris-event-hooks) (remove-hook 'idris-event-hooks h)))
+
 (defun idris-pop-to-repl ()
   "Go to the REPL, if one is open."
   (interactive)
@@ -988,6 +992,7 @@ https://github.com/clojure-emacs/cider"
         (setq idris-loaded-region-overlay nil)))
     (idris-prover-end)
     (idris-kill-buffers)
+    (idris-remove-event-hooks)
     (setq idris-process-current-working-directory nil)
     (setq idris-protocol-version 0
           idris-protocol-version-minor 0)))

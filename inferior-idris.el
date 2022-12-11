@@ -270,7 +270,7 @@ directory variables.")
 (defvar idris-continuation-counter 1
   "Continuation serial number counter.")
 
-(defvar idris-event-hooks)
+(defvar idris-event-hooks '())
 
 (defun idris-dispatch-event (event process)
   (or (run-hook-with-args-until-success 'idris-event-hooks event)
