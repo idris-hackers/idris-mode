@@ -60,37 +60,36 @@ See Info node `(elisp)Overlay Properties' to understand how ARGS are used."
   (if (or (> end-line start-line)
           (and (= end-line start-line)
                (> end-col start-col)))
-      (when idris-semantic-source-highlighting
-        (with-current-buffer buffer
-          (save-restriction
-            (widen)
-            (save-excursion
-              (goto-char (point-min))
-              (let* ((start-pos (+ (line-beginning-position start-line)
-                                   (idris-highlight-column start-col)))
-                     (end-pos (+ (line-beginning-position end-line)
-                                 (idris-highlight-column end-col)))
-                     (existing-idris-overlays-in-range (seq-filter
-                                                        (lambda (overlay)
-                                                          (overlay-get overlay 'idris-source-highlight))
-                                                        (overlays-in start-pos end-pos)))
-                     (existing-idris-overlay (seq-find (lambda (overlay)
-                                                         (and
-                                                          (eql start-pos (overlay-start overlay))
-                                                          (eql end-pos (overlay-end overlay))
-                                                          ;; TODO: overlay properties match
-                                                          ))
-                                                       existing-idris-overlays-in-range)))
-                (when (null existing-idris-overlay)
-                  (dolist (old-overlay existing-idris-overlays-in-range)
-                    (delete-overlay old-overlay))
-                  (let ((highlight-overlay (make-overlay start-pos end-pos)))
-                    (overlay-put highlight-overlay 'idris-source-highlight t)
-                    (idris-add-overlay-properties highlight-overlay
-                                                  (idris-semantic-properties highlight))
-                    (overlay-put highlight-overlay
-                                 'modification-hooks
-                                 '(idris-highlight--overlay-modification-hook)))))))))
+      (with-current-buffer buffer
+        (save-restriction
+          (widen)
+          (save-excursion
+            (goto-char (point-min))
+            (let* ((start-pos (+ (line-beginning-position start-line)
+                                 (idris-highlight-column start-col)))
+                   (end-pos (+ (line-beginning-position end-line)
+                               (idris-highlight-column end-col)))
+                   (existing-idris-overlays-in-range (seq-filter
+                                                      (lambda (overlay)
+                                                        (overlay-get overlay 'idris-source-highlight))
+                                                      (overlays-in start-pos end-pos)))
+                   (existing-idris-overlay (seq-find (lambda (overlay)
+                                                       (and
+                                                        (eql start-pos (overlay-start overlay))
+                                                        (eql end-pos (overlay-end overlay))
+                                                        ;; TODO: overlay properties match
+                                                        ))
+                                                     existing-idris-overlays-in-range)))
+              (when (null existing-idris-overlay)
+                (dolist (old-overlay existing-idris-overlays-in-range)
+                  (delete-overlay old-overlay))
+                (let ((highlight-overlay (make-overlay start-pos end-pos)))
+                  (overlay-put highlight-overlay 'idris-source-highlight t)
+                  (idris-add-overlay-properties highlight-overlay
+                                                (idris-semantic-properties highlight))
+                  (overlay-put highlight-overlay
+                               'modification-hooks
+                               '(idris-highlight--overlay-modification-hook))))))))
     (when (eq idris-semantic-source-highlighting 'debug)
       (message "Not highlighting absurd span %s:%s-%s:%s with %s"
                start-line start-col
@@ -123,6 +122,19 @@ See Info node `(elisp)Overlay Properties' to understand how ARGS are used."
                                              start-line start-col
                                              end-line end-col
                                              props))))))))
+
+(defun idris-syntax-higlight-event-hook-function (event)
+  (pcase event
+    (`(:output (:ok (:highlight-source ,hs)) ,_id)
+     (progn (idris-highlight-source-file hs) t))))
+
+(defun idris-syntax-higlight-event-noop-hook-function (event)
+  "Do nothing and return t when highlight source EVENT occur.
+
+Used when semantic highlighting is disabled using
+`idris-semantic-source-highlighting'."
+  (pcase event
+    (`(:output (:ok (:highlight-source ,_hs)) ,_id) t)))
 
 (provide 'idris-highlight-input)
 ;;; idris-highlight-input.el ends here

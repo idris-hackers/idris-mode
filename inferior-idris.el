@@ -97,6 +97,27 @@ Set using file or directory variables.")
   "The list of `command-line-args' actually passed to Idris.
 This is maintained to restart Idris when the arguments change.")
 
+(defun toggle-semantic-highlighting ()
+  "Register appropriate syntax highlighting hook function.
+
+Which hook function is active is determinded by value of
+`idris-semantic-source-highlighting' variable."
+  (if idris-semantic-source-highlighting
+      (progn
+        (remove-hook 'idris-event-hooks 'idris-syntax-higlight-event-noop-hook-function)
+        (add-hook 'idris-event-hooks 'idris-syntax-higlight-event-hook-function))
+    (remove-hook 'idris-event-hooks 'idris-syntax-higlight-event-hook-function)
+    (add-hook 'idris-event-hooks 'idris-syntax-higlight-event-noop-hook-function)))
+
+(defun idris-buffer-semantic-source-highlighting ()
+  "Return nil if current buffer size is larger set limit.
+The limit is defined as value of:
+`idris-semantic-source-highlighting-max-buffer-size'.
+Otherwise return current value of `idris-semantic-source-highlighting'"
+  (and (< (buffer-size)
+          idris-semantic-source-highlighting-max-buffer-size)
+       idris-semantic-source-highlighting))
+
 (autoload 'idris-prover-event-hook-function "idris-prover.el")
 (autoload 'idris-quit "idris-commands.el")
 (defun idris-run ()
@@ -142,7 +163,6 @@ This is maintained to restart Idris when the arguments change.")
     (add-hook 'idris-event-hooks 'idris-log-hook-function)
     (add-hook 'idris-event-hooks 'idris-warning-event-hook-function)
     (add-hook 'idris-event-hooks 'idris-prover-event-hook-function)
-
     (unless idris-hole-show-on-load
       (remove-hook 'idris-load-file-success-hook 'idris-list-holes-on-load)
       (remove-hook 'idris-load-file-success-hook 'idris-list-holes)
@@ -150,7 +170,7 @@ This is maintained to restart Idris when the arguments change.")
       ;; idris-hole-show-on-load variable
       (remove-hook 'idris-prover-success-hook 'idris-list-holes-on-load)
       (remove-hook 'idris-prover-success-hook 'idris-list-holes))
-
+    (toggle-semantic-highlighting)
     (set-process-filter idris-connection 'idris-output-filter)
     (set-process-sentinel idris-connection 'idris-sentinel)
     (set-process-query-on-exit-flag idris-connection t)

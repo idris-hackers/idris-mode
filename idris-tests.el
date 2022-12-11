@@ -289,6 +289,54 @@ myReverse xs = revAcc [] xs where
       (kill-buffer))
     (idris-quit)))
 
+(defun idris-buffer-contains-semantic-highlighting-p ()
+  (seq-find (lambda (overlay) (overlay-get overlay 'idris-source-highlight))
+             (overlays-in (point-min) (point-max))))
+
+(ert-deftest idris-semantic-highlighthing ()
+  (let ((idris-semantic-source-highlighting t))
+    (with-idris-file-fixture
+     "test-data/AddClause.idr"
+     (lambda ()
+       (idris-run)
+       (should (member 'idris-syntax-higlight-event-hook-function
+                       idris-event-hooks)))))
+  (let ((idris-semantic-source-highlighting nil))
+    (with-idris-file-fixture
+     "test-data/AddClause.idr"
+     (lambda ()
+       (idris-run)
+       (should (member 'idris-syntax-higlight-event-noop-hook-function
+                       idris-event-hooks)))))
+  (let ((idris-semantic-source-highlighting t))
+    (with-idris-file-fixture
+     "test-data/AddClause.idr"
+     (lambda ()
+       (idris-load-file)
+       (dotimes (_ 5) (accept-process-output nil 0.1))
+       (should (idris-buffer-contains-semantic-highlighting-p)))))
+  (let ((idris-semantic-source-highlighting t)
+        (idris-semantic-source-highlighting-max-buffer-size 8))
+    (with-idris-file-fixture
+     "test-data/AddClause.idr"
+     (lambda ()
+       (idris-load-file)
+       (dotimes (_ 5) (accept-process-output nil 0.1))
+       (should (not (idris-buffer-contains-semantic-highlighting-p))))))
+  (let ((idris-semantic-source-highlighting t))
+    (with-idris-file-fixture
+     "test-data/AddClause.idr"
+     (lambda ()
+       (idris-load-file-sync)
+       (should (idris-buffer-contains-semantic-highlighting-p)))))
+  (let ((idris-semantic-source-highlighting t)
+        (idris-semantic-source-highlighting-max-buffer-size 8))
+    (with-idris-file-fixture
+     "test-data/AddClause.idr"
+     (lambda ()
+       (idris-load-file-sync)
+       (should (not (idris-buffer-contains-semantic-highlighting-p)))))))
+
 (ert-deftest idris-backard-toplevel-navigation-test-2pTac9 ()
   "Test idris-backard-toplevel navigation command."
   (idris-test-with-temp-buffer

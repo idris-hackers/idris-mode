@@ -40,7 +40,6 @@
 (require 'idris-prover)
 (require 'idris-common-utils)
 (require 'idris-syntax)
-(require 'idris-highlight-input)
 
 (require 'cl-lib)
 (require 'thingatpt)
@@ -106,6 +105,10 @@
                           result-msg)
           (progn
             (message result-msg)
+            ;; Allow per directory (project) semantic highlighting from Idris using .dir-locals.el .
+            ;; Example for turning it on:
+            ;; ((idris-mode . ((idris-semantic-source-highlighting . t))))
+            (toggle-semantic-highlighting)
             (setq idris-process-current-working-directory new-working-directory))
         (error "Failed to switch the working directory %s" eval-result)))))
 
@@ -213,7 +216,9 @@ A prefix argument SET-LINE forces loading but only up to the current line."
         ;; Actually do the loading
         (let* ((dir-and-fn (idris-filename-to-load))
                (fn (cdr dir-and-fn))
-               (srcdir (car dir-and-fn)))
+               (srcdir (car dir-and-fn))
+               (idris-semantic-source-highlighting (idris-buffer-semantic-source-highlighting)))
+          (toggle-semantic-highlighting)
           (setq idris-currently-loaded-buffer nil)
           (idris-switch-working-directory srcdir)
           (idris-delete-ibc t) ;; delete the ibc to avoid interfering with partial loads
@@ -223,8 +228,6 @@ A prefix argument SET-LINE forces loading but only up to the current line."
              `(:load-file ,fn))
            (lambda (result)
              (pcase result
-               (`(:highlight-source ,hs)
-                (idris-highlight-source-file hs))
                (_ (idris-make-clean)
                   (idris-update-options-cache)
                   (setq idris-currently-loaded-buffer (current-buffer))
@@ -276,7 +279,9 @@ This sets the load position to point, if there is one."
           (idris-load-to (point)))
         (let* ((dir-and-fn (idris-filename-to-load))
                (fn (cdr dir-and-fn))
-               (srcdir (car dir-and-fn)))
+               (srcdir (car dir-and-fn))
+               (idris-semantic-source-highlighting (idris-buffer-semantic-source-highlighting)))
+          (toggle-semantic-highlighting)
           (setq idris-currently-loaded-buffer nil)
           (idris-switch-working-directory srcdir)
           (let ((result
