@@ -179,9 +179,9 @@ remain."
 
 (ert-deftest idris-test-idris-add-clause ()
   "Test that `idris-add-clause' generates definition with hole."
-  (let ((buffer (find-file "test-data/AddClause.idr"))
+  (let ((buffer (find-file-noselect "test-data/AddClause.idr"))
         (buffer-content (with-temp-buffer
-                          (insert-file-contents "AddClause.idr")
+                          (insert-file-contents "test-data/AddClause.idr")
                           (buffer-string))))
     (with-current-buffer buffer
       (goto-char (point-min))
@@ -195,6 +195,20 @@ remain."
       (goto-char (1+ (match-beginning 0)))
       (funcall-interactively 'idris-add-clause nil)
       (should (looking-at-p "(-) = \\?\\w+_rhs"))
+      (idris-delete-ibc t)
+
+      ;; Test that response with indentation (Idris2) are aligned correctly
+      ;; Idris1 response: "revAcc xs ys = ?revAcc_rhs"
+      ;; Idris2 response: "  revAcc xs ys = ?revAcc_rhs"
+      (goto-char (point-max))
+      (insert "
+myReverse : List a -> List a
+myReverse xs = revAcc [] xs where
+  revAcc : List a -> List a -> List a")
+      (search-backward "evAcc")
+      (funcall-interactively 'idris-add-clause nil)
+      (beginning-of-line)
+      (should (looking-at-p "^  revAcc xs ys = \\?revAcc_rhs"))
 
       ;; Cleanup
       (erase-buffer)

@@ -618,7 +618,7 @@ Otherwise, case split as a pattern variable."
         (command (if proof :add-proof-clause :add-clause)))
     (when (car what)
       (save-excursion (idris-load-file-sync))
-      (let ((result (car (idris-eval `(,command ,(cdr what) ,(car what)))))
+      (let ((result (string-trim-left (car (idris-eval `(,command ,(cdr what) ,(car what))))))
             final-point
             (prefix (save-excursion        ; prefix is the indentation to insert for the clause
                       (goto-char (point-min))
