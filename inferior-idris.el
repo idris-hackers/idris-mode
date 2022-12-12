@@ -142,6 +142,15 @@ directory variables.")
     (add-hook 'idris-event-hooks 'idris-log-hook-function)
     (add-hook 'idris-event-hooks 'idris-warning-event-hook-function)
     (add-hook 'idris-event-hooks 'idris-prover-event-hook-function)
+
+    (unless idris-hole-show-on-load
+      (remove-hook 'idris-load-file-success-hook 'idris-list-holes-on-load)
+      (remove-hook 'idris-load-file-success-hook 'idris-list-holes)
+      ;; TODO: In future decouple prover sucess hook from being affected by
+      ;; idris-hole-show-on-load variable
+      (remove-hook 'idris-prover-success-hook 'idris-list-holes-on-load)
+      (remove-hook 'idris-prover-success-hook 'idris-list-holes))
+
     (set-process-filter idris-connection 'idris-output-filter)
     (set-process-sentinel idris-connection 'idris-sentinel)
     (set-process-query-on-exit-flag idris-connection t)
