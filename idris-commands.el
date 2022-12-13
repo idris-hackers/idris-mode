@@ -122,15 +122,16 @@
              idris-set-current-pretty-print-width)
   :group 'idris)
 
-(defun idris-possibly-make-dirty (beginning end _length)
+(defun idris-possibly-make-dirty (_beginning _end _length)
+  (idris-make-dirty))
   ;; If there is a load-to-here marker and a currently loaded region, only
   ;; make the buffer dirty when the change overlaps the loaded region.
-  (if (and idris-load-to-here idris-loaded-region-overlay)
-      (when (member idris-loaded-region-overlay
-                    (overlays-in beginning end))
-        (idris-make-dirty))
-    ;; Otherwise just make it dirty.
-    (idris-make-dirty)))
+  ;; (if (and idris-load-to-here idris-loaded-region-overlay)
+  ;;     (when (member idris-loaded-region-overlay
+  ;;                   (overlays-in beginning end))
+  ;;       (idris-make-dirty))
+  ;;   ;; Otherwise just make it dirty.
+  ;; (idris-make-dirty)))
 
 
 (defun idris-update-loaded-region (fc)
@@ -289,10 +290,10 @@ Idris process. This sets the load position to point, if there is one."
           (setq idris-currently-loaded-buffer nil)
           (idris-switch-working-directory srcdir)
           (let ((result
-                 (if idris-load-to-here
-                     (idris-eval `(:load-file ,fn
-                                              ,(idris-get-line-num idris-load-to-here)))
-                   (idris-eval `(:load-file ,fn)))))
+                 (idris-eval
+                  (if idris-load-to-here
+                      `(:load-file ,fn ,(idris-get-line-num idris-load-to-here))
+                    `(:load-file ,fn)))))
             (idris-update-options-cache)
             (setq idris-currently-loaded-buffer (current-buffer))
             (idris-make-clean)
@@ -939,6 +940,10 @@ type-correct, so loading will fail."
   (let ((bufs (list :connection :repl :proof-obligations :proof-shell :proof-script :log :info :notes :holes :tree-viewer)))
     (dolist (b bufs) (idris-kill-buffer b))))
 
+(defun idris-remove-event-hooks ()
+  "Remove Idris event hooks set after connection with Idris established."
+  (dolist (h idris-event-hooks) (remove-hook 'idris-event-hooks h)))
+
 (defun idris-pop-to-repl ()
   "Go to the REPL, if one is open."
   (interactive)
@@ -987,6 +992,8 @@ https://github.com/clojure-emacs/cider"
         (setq idris-loaded-region-overlay nil)))
     (idris-prover-end)
     (idris-kill-buffers)
+    (idris-remove-event-hooks)
+    (setq idris-process-current-working-directory nil)
     (setq idris-protocol-version 0
           idris-protocol-version-minor 0)))
 
