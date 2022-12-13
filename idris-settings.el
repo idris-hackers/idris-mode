@@ -230,8 +230,8 @@ customize the display of non-code text."
   :group 'idris)
 
 (defcustom idris-hole-list-show-expanded t
-  "Show the hole list fully expanded by default. This may be useful
-on wide monitors with lots of space for the hole buffer."
+  "Show the hole list fully expanded by default.
+This may be useful on wide monitors with lots of space for the hole buffer."
   :type 'boolean
   :group 'idris-hole-list)
 
@@ -250,6 +250,24 @@ change to ordinary prover interaction."
   :type 'hook
   :group 'idris
   :options '(idris-set-current-pretty-print-width))
+
+(defcustom idris-load-file-success-hook '(idris-list-holes
+                                          idris-set-current-pretty-print-width)
+  "Functions to call when loading a file is successful.
+When `idris-hole-show-on-load' is set to nil the function `idris-list-holes'
+will be removed from the list automatically and will not be executed."
+  :type 'hook
+  :options '(idris-list-holes
+             idris-set-current-pretty-print-width)
+  :group 'idris)
+
+(defcustom idris-prover-success-hook '(idris-list-holes)
+  "Functions to call when completing a proof.
+When `idris-hole-show-on-load' is set to nil the function `idris-list-holes'
+will be removed from the list automatically and will not be executed."
+  :type 'hook
+  :options '(idris-list-holes)
+  :group 'idris-prover)
 
 ;;;; REPL settings
 

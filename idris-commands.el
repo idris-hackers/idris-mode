@@ -109,18 +109,8 @@
             (setq idris-process-current-working-directory new-working-directory))
         (error "Failed to switch the working directory %s" eval-result)))))
 
-(defun idris-list-holes-on-load ()
-  "Use the user's settings from customize to determine whether to list the holes."
-  (interactive)
-  (when idris-hole-show-on-load (idris-list-holes)))
-
-(defcustom idris-load-file-success-hook '(idris-list-holes-on-load
-                                          idris-set-current-pretty-print-width)
-  "Functions to call when loading a file is successful"
-  :type 'hook
-  :options '(idris-list-holes-on-load
-             idris-set-current-pretty-print-width)
-  :group 'idris)
+(define-obsolete-function-alias 'idris-list-holes-on-load 'idris-list-holes "2022-12-15"
+   "Use the user's settings from customize to determine whether to list the holes.")
 
 (defun idris-possibly-make-dirty (_beginning _end _length)
   (idris-make-dirty))

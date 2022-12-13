@@ -436,12 +436,6 @@ the length reported by Idris."
      t)
     (_ nil)))
 
-(defcustom idris-prover-success-hook '(idris-list-holes-on-load)
-  "Functions to call when completing a proof"
-  :type 'hook
-  :options '(idris-list-holes-on-load)
-  :group 'idris-prover)
-
 (defun idris-perhaps-insert-proof-script (proof)
   "Prompt the user as to whether PROOF should be inserted into the buffer."
   (save-window-excursion
