@@ -53,13 +53,6 @@ test2: getdeps build
 		-eval '(setq idris-interpreter-path (executable-find "idris2"))' \
 		-l ert -l idris-tests.el -f ert-run-tests-batch-and-exit
 
-flycheck: getdeps build
-	$(BATCHEMACS) -L . \
-		-eval '(setq idris-interpreter-path (executable-find "idris2"))' \
-		-eval '(setq idris-repl-history-file "~/.idris2/idris2-history.eld")' \
-		-l ert -l idris-test-flycheck.el -f ert-run-tests-batch-and-exit
-
-
 test3: getdeps build
 	$(BATCHEMACS) -L . \
 		-eval '(setq idris-interpreter-path (executable-find "idris2"))' \
