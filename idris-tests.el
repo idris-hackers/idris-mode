@@ -107,6 +107,25 @@ remain."
   ;; More cleanup
   (idris-quit))
 
+(ert-deftest idris-list-holes ()
+  "Test `idris-list-holes' command."
+  (let ((buffer (find-file-noselect "test-data/MetavarTest.idr"))
+        (other-buffer (find-file-noselect "test-data/MakeWithBlock.idr")))
+    ;; Test that hole info is present without need to load file manually
+    (with-current-buffer buffer
+      (idris-list-holes)
+      (dotimes (_ 5) (accept-process-output nil 1))
+      (let ((holes-buffer (get-buffer idris-hole-list-buffer-name)))
+        (should (bufferp holes-buffer))
+        (should (> (buffer-size holes-buffer) 10))))
+    ;; Test that the hole info is updated for the other current buffer
+    (with-current-buffer other-buffer
+      (idris-list-holes)
+      (dotimes (_ 5) (accept-process-output nil 1))
+      (let ((holes-buffer (get-buffer idris-hole-list-buffer-name)))
+        (should (not (bufferp holes-buffer)))))
+    (idris-quit)))
+
 (ert-deftest idris-test-proof-search ()
   "Test that proof search works"
   :expected-result (if (string-match-p "idris2" idris-interpreter-path)

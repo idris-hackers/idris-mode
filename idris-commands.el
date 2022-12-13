@@ -922,8 +922,10 @@ type-correct, so loading will fail."
                 :exclusive 'no))))))
 
 (defun idris-list-holes ()
-  "Get a list of currently-open holes"
+  "Get a list of currently open holes."
   (interactive)
+  (when (idris-current-buffer-dirty-p)
+    (save-excursion (idris-load-file-sync)))
   (idris-hole-list-show (car (idris-eval '(:metavariables 80)))))
 
 (defun idris-list-compiler-notes ()
