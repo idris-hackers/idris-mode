@@ -124,6 +124,9 @@ remain."
       (dotimes (_ 5) (accept-process-output nil 1))
       (let ((holes-buffer (get-buffer idris-hole-list-buffer-name)))
         (should (not (bufferp holes-buffer)))))
+
+    (kill-buffer buffer)
+    (kill-buffer other-buffer)
     (idris-quit)))
 
 (ert-deftest idris-test-proof-search ()
