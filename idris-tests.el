@@ -261,6 +261,31 @@ myReverse xs = revAcc [] xs where
     (kill-buffer)
     (idris-quit)))
 
+(ert-deftest idris-test-idris-type-at-point ()
+  "Test that `idris-type-at-point' works."
+  (let ((buffer (find-file-noselect "test-data/AddClause.idr")))
+    ;; Assert that we have clean global test state
+    (should (not idris-connection))
+    (with-current-buffer buffer
+      (goto-char (point-min))
+      (re-search-forward "data Test")
+      (funcall-interactively 'idris-type-at-point nil)
+      ;; Assert that Idris connection is created
+      (should idris-connection)
+      ;; Assert that focus is in the Idris info buffer
+      (should (string= (buffer-name) idris-info-buffer-name))
+      ;; Assert that the info buffer displays a type
+      (should (string-match-p "Test : Type" (buffer-substring-no-properties (point-min) (point-max))))
+
+      ;; TODO: How to emulate "q" key binding to quit info buffer?
+      (idris-info-quit)
+      ;; Assert leaving info buffer will get us back to Idris code buffer
+      (should (eq (current-buffer) buffer))
+
+      ;; Cleanup
+      (kill-buffer))
+    (idris-quit)))
+
 (ert-deftest idris-backard-toplevel-navigation-test-2pTac9 ()
   "Test idris-backard-toplevel navigation command."
   (idris-test-with-temp-buffer
