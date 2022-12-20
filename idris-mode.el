@@ -66,7 +66,7 @@
 
 
 (easy-menu-define idris-mode-menu idris-mode-map
-  "Menu for the Idris major mode"
+  "Menu for the Idris major mode."
   `("Idris"
     ["New Project" idris-start-project t]
     "-----------------"
@@ -75,7 +75,7 @@
     ["Compile and execute" idris-compile-and-execute]
     ["Delete IBC file" idris-delete-ibc t]
     ["View compiler log" idris-view-compiler-log (get-buffer idris-log-buffer-name)]
-    ["Quit inferior idris process" idris-quit t]
+    ["Quit inferior Idris process" idris-quit t]
     "-----------------"
     ["Add initial match clause to type declaration" idris-add-clause t]
     ["Add missing cases" idris-add-missing t]

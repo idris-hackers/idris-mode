@@ -95,7 +95,7 @@ contributing the settings upstream to the theme maintainer."
 
 (defface idris-unsafe-face
   '((t (:inherit font-lock-warning-face)))
-  "The face used to highlight unsafe Idris features, such as %assert_total"
+  "The face used to highlight unsafe Idris features, such as %assert_total."
   :group 'idris-faces)
 
 
@@ -198,7 +198,7 @@ syntax table won't support, such as characters."
   (regexp-opt (append idris-definition-keywords
                       idris-keywords)
               'words)
-  "A regexp for matching Idris keywords")
+  "A regexp for matching Idris keywords.")
 
 (defun idris-font-lock-literate-search (regexp lidr limit)
   "Find REGEXP in Idris source between point and LIMIT.

@@ -37,7 +37,7 @@
 ; | proof shell | proof script |
 ; ------------------------------
 
-(defgroup idris-prover nil "Idris Prover" :prefix 'idris :group 'idris)
+(defgroup idris-prover nil "Idris Prover." :prefix 'idris :group 'idris)
 
 (defface idris-prover-processed-face
   '((t (:background "PaleGreen1")))
@@ -50,8 +50,7 @@
   :group 'idris-faces)
 
 (defcustom idris-prover-restore-window-configuration t
-  "When non-nil, restore the window configuration after exiting
-the prover."
+  "When non-nil, restore the window configuration after exiting the prover."
   :type 'boolean
   :group 'idris-prover)
 
@@ -65,12 +64,11 @@ the prover."
   "The name of the Idris proof script buffer.")
 
 (defvar idris-prover-currently-proving nil
-  "The hole that Idris has open in the interactive prover, or nil
-if Idris is not proving anything.")
+  "The hole that Idris has open in the interactive prover.
+Nil if Idris is not proving anything.")
 
 (defconst idris-prover-error-message-prefix "Prover error: "
-  "A prefix to show on minibuffer error messages that originate
-  in the prover.")
+  "A prefix to show on minibuffer error messages that originate in the prover.")
 
 (defun idris-prover-obligations-buffer ()
   (or (get-buffer idris-prover-obligations-buffer-name)
@@ -104,24 +102,24 @@ string and whose cadr is highlighting information."
   "The saved window configuration from before running the prover.")
 
 (defvar-local idris-prover-script-processed nil
-  "Marker for the processed part of proof script")
+  "Marker for the processed part of proof script.")
 
 (defvar-local idris-prover-script-processed-overlay nil
-  "Overlay for processed proof script")
+  "Overlay for processed proof script.")
 
 (defvar-local idris-prover-script-processing nil
-  "Marker for the processing part of proof script")
+  "Marker for the processing part of proof script.")
 
 (defvar-local idris-prover-script-processing-overlay nil
-  "Overlay for processing proof script")
+  "Overlay for processing proof script.")
 
 (defvar-local idris-prover-script-warning-overlay nil
-  "Overlay for warning in proof script")
+  "Overlay for warning in proof script.")
 
 ; invariant: point-min <= idris-prover-script-processed <= idris-prover-script-processing <= point-max
 
 (defvar-local idris-prover-prove-step 0
-  "Step counter of the proof")
+  "Step counter of the proof.")
 
 (defvar idris-prover-script-mode-map
   (let ((map (make-sparse-keymap)))
@@ -150,10 +148,9 @@ string and whose cadr is highlighting information."
         (list start (point) completions)))))
 
 (defun idris-prover-find-tactic (start-pos)
-  "Use some layout heuristics to find the tactic beginning at
-START-POS, returning a pair consisting of the start and end
-positions of the tactic. Tactics are required to begin at the
-left margin."
+  "Use layout heuristics to find the tactic beginning at START-POS.
+Return a pair consisting of the start and end positions of the tactic.
+Tactics are required to begin at the left margin."
   (let (tactic-start tactic-end)
     (save-excursion
       (goto-char start-pos)
@@ -188,7 +185,7 @@ left margin."
 
 
 (defun idris-prover-script-backward ()
-  "Backward one piece of proof script"
+  "Backward one piece of proof script."
   (interactive)
   (idris-eval-async (list :interpret (if idris-enable-elab-prover ":undo" "undo"))
                     #'(lambda (_result) t)
@@ -273,7 +270,7 @@ left margin."
     (error "No proof in progress")))
 
 (easy-menu-define idris-prover-script-mode-menu idris-prover-script-mode-map
-  "Menu for Idris prover scripts"
+  "Menu for Idris prover scripts."
   `("Idris Proof"
     ["Advance" idris-prover-script-forward t]
     ["Retract" idris-prover-script-backward t]
@@ -283,7 +280,7 @@ left margin."
 
 (define-derived-mode idris-prover-script-mode prog-mode "Idris-Proof-Script"
   "Major mode for interacting with Idris proof script.
-    \\{idris-prover-script-mode-map}
+\\{idris-prover-script-mode-map}
 Invokes `idris-prover-script-mode-hook'."
   :group 'idris-prover
   (set (make-local-variable 'completion-at-point-functions)
@@ -302,8 +299,7 @@ Invokes `idris-prover-script-mode-hook'."
         buffer)))
 
 (defun idris-prover-reset-prover-script-buffer ()
-  "Erase or initialize a proof script buffer, resetting all the
-special prover state."
+  "Erase or initialize a proof script buffer, resetting all the prover state."
   (with-current-buffer (idris-prover-script-buffer)
     (when idris-prover-script-processed-overlay
       (delete-overlay idris-prover-script-processed-overlay)
@@ -453,8 +449,8 @@ the length reported by Idris."
         (kill-buffer proof-buffer)))))
 
 (defconst idris-proof-script-insertion-marker "---------- Proofs ----------"
-  "Look for this marker to insert proofs. Should agree with the
-  one in the Idris compiler source.")
+  "Look for this marker to insert proofs.
+Should agree with the one in the Idris compiler source.")
 
 (defun idris-insert-proof-script (buffer proof)
   "Insert PROOF into BUFFER."

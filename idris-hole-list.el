@@ -32,10 +32,10 @@
 (require 'idris-settings)
 
 (defvar idris-hole-list-buffer-name (idris-buffer-name :holes)
-  "The name of the buffer containing Idris holes")
+  "The name of the buffer containing Idris holes.")
 
 (defun idris-hole-list-quit ()
-  "Quit the Idris hole list"
+  "Quit the Idris hole list."
   (interactive)
   (idris-kill-buffer idris-hole-list-buffer-name))
 
@@ -54,7 +54,7 @@
     map))
 
 (easy-menu-define idris-hole-list-mode-menu idris-hole-list-mode-map
-  "Menu for the Idris hole list buffer"
+  "Menu for the Idris hole list buffer."
   `("Idris Holes"
     ["Show term interaction widgets" idris-add-term-widgets t]
     ["Close hole list buffer" idris-hole-list-quit t]
@@ -73,7 +73,7 @@ Invokes `idris-hole-list-mode-hook'."
 ;; (push '("#\\*idris-holes\\*$" . idris-hole-list-mode) auto-mode-alist)
 
 (defun idris-hole-list-buffer ()
-  "Return the Idris hole buffer, creating one if there is not one"
+  "Return the Idris hole buffer, creating one if there is not one."
   (get-buffer-create idris-hole-list-buffer-name))
 
 (defun idris-hole-list-show (hole-info)

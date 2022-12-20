@@ -81,8 +81,8 @@
      t)))
 
 (defvar-local idris-load-packages nil
-  "The list of packages to be loaded by Idris. Set using file or
-directory variables.")
+  "The list of packages to be loaded by Idris.
+Set using file or directory variables.")
 
 (defun idris-compute-flags ()
   "Calculate the command line options to use when running Idris."
@@ -94,8 +94,8 @@ directory variables.")
                      idris-command-line-option-functions)))
 
 (defvar idris-current-flags nil
-  "The list of command-line-args actually passed to Idris. This
-  is maintained to restart Idris when the arguments change.")
+  "The list of `command-line-args' actually passed to Idris.
+This is maintained to restart Idris when the arguments change.")
 
 (autoload 'idris-prover-event-hook-function "idris-prover.el")
 (autoload 'idris-quit "idris-commands.el")
@@ -134,7 +134,7 @@ directory variables.")
       (accept-process-output idris-process 3))))
 
 (defun idris-connect (port)
-  "Establish a connection with a Idris REPL."
+  "Establish a connection with a Idris REPL at PORT."
   (when (not idris-connection)
     (setq idris-connection
           (open-network-stream "Idris IDE support" idris-connection-buffer-name "127.0.0.1" port))
@@ -170,9 +170,9 @@ directory variables.")
 (defvar idris-process-port-output-regexp (rx (? (group (+ any (not num)))) (group (+ (any num))))
   "Regexp used to match the port of an Idris process.")
 (defvar idris-process-exact-port-output-regexp (rx bol (group (+ (any num))) eol)
-  "Regexp to match port number")
+  "Regexp to match port number.")
 (defvar idris-exact-port-matcher 1
-  "port number matcher")
+  "Port number matcher.")
 
 (defvar idris-process-port-with-warning-output-regexp
   (rx (? (group (+ any (not num)))) (group (** 3 4 (any num)))))
@@ -182,14 +182,14 @@ directory variables.")
 ;;           |                          +---- port number
 ;;           +------------------------------- warning message
 (defvar idris-warning-matcher 1
-  "Warning from idris")
-(defvar idris-warning-port-matcher 2
-  "port number matcher with warning")
+  "Warning from Idris.")
 
+(defvar idris-warning-port-matcher 2
+  "Port number matcher with warning.")
 
 ;; idris-process-filter is broken in theoreticaly.
 (defun idris-process-filter (string)
-  "Accept output from the process"
+  "Accept STRING output from the process."
   (if idris-connection
       string
     ;; Idris sometimes prints a warning prior to the port number, which causes
@@ -211,14 +211,14 @@ directory variables.")
     (pop-to-buffer (get-buffer idris-process-buffer-name))))
 
 (defun idris-output-filter (process string)
-  "Accept output from the socket and process all complete messages"
+  "Accept STRING output from the socket and PROCESS all complete messages."
   (with-current-buffer (process-buffer process)
     (goto-char (point-max))
     (insert string))
   (idris-connection-available-input process))
 
 (defun idris-connection-available-input (process)
-  "Process all complete messages which arrived from Idris."
+  "Process all complete messages which arrived from Idris PROCESS."
   (with-current-buffer (process-buffer process)
     (while (idris-have-input-p)
       (let ((event (idris-receive)))
@@ -234,7 +234,7 @@ directory variables.")
        (>= (- (buffer-size) 6) (idris-decode-length))))
 
 (defun idris-receive ()
-  "Read a message from the idris process"
+  "Read a message from the Idris process."
   (goto-char (point-min))
   (let* ((length (idris-decode-length))
          (start (+ 6 (point)))
@@ -257,7 +257,7 @@ directory variables.")
     (process-send-string proc string)))
 
 (defun idris-encode-length (n)
-  "Encode an integer into a 24-bit hex string."
+  "Encode an N (integer) into a 24-bit hex string."
   (format "%06x" n))
 
 (defun idris-prin1-to-string (sexp)
@@ -271,10 +271,9 @@ directory variables.")
       (buffer-string))))
 
 (defvar idris-rex-continuations '()
-  "List of (ID FUNCTION [FUNCTION]) continuations waiting for RPC
-  results. The first function will be called with a final result,
-  and the second (if present) will be called with intermediate
-  output results.")
+  "List of (ID FUNCTION [FUNCTION]) continuations waiting for RPC results.
+The first function will be called with a final result, and the second
+ (if present) will be called with intermediate output results.")
 
 (defvar idris-continuation-counter 1
   "Continuation serial number counter.")
@@ -306,7 +305,7 @@ directory variables.")
 (cl-defmacro idris-rex ((&rest saved-vars) sexp intermediate &rest continuations)
   "(idris-rex (VAR ...) (SEXP) INTERMEDIATE CLAUSES ...)
 
-Remote EXecute SEXP.
+Remote Execute SEXP.
 
 VARs are a list of saved variables visible in the other forms.  Each
 VAR is either a symbol or a list (VAR INIT-VALUE).
@@ -341,8 +340,7 @@ versions cannot deal with that."
         idris-connection))))
 
 (defun idris-eval-async (sexp cont &optional failure-cont)
-  "Evaluate EXPR on the superior Idris and call CONT with the result,
-or FAILURE-CONT in failure case."
+  "Evaluate SEXP on the superior Idris and call CONT or FAILURE-CONT."
   (idris-rex (cont (buffer (current-buffer)) failure-cont)
       sexp t
     ((:ok result)
@@ -365,12 +363,11 @@ or FAILURE-CONT in failure case."
 
 (autoload 'idris-list-compiler-notes "idris-commands.el")
 (defun idris-eval (sexp &optional no-errors)
-  "Evaluate EXPR on the inferior Idris and return the result,
-ignoring intermediate output. If `NO-ERRORS' is non-nil, don't
-trigger warning buffers and don't call `ERROR' if there was an
-Idris error."
+  "Evaluate SEXP on the inferior Idris and return the result.
+If `NO-ERRORS' is non-nil, don't trigger warning buffers and
+ don't call `ERROR' if there was an Idris error."
   (let* ((tag (gensym (format "idris-result-%d-"
-                                 (1+ idris-continuation-counter))))
+                              (1+ idris-continuation-counter))))
          (idris-stack-eval-tags (cons tag idris-stack-eval-tags)))
     (apply
      #'funcall

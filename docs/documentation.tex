@@ -227,7 +227,7 @@ A dependency diagram of the various emacs lisp files is shown in Figure~\ref{fig
 
 Minor notes on some of the implementation files: \texttt{compat.el} includes emacs 24.1 compatibility; \texttt{completion.el} implements a completion popup; \texttt{warnings.el} does the highlighting of warnings using overlays.
 
-The current design uses exactly one idris process for the interaction (a handle is stored in \emph{idris-process} (in \texttt{inferior-idris.el})).
+The current design uses exactly one Idris process for the interaction (a handle is stored in \emph{idris-process} (in \texttt{inferior-idris.el})).
 
 Since it can consume an arbitrary amount of time to handle a request, \emph{idris-eval-async} (in \texttt{inferior-idris.el}) can be used to evaluate any sexp, where the given continuation is called with the asynchronous result.
 Some features, like tab completion, return a result immediately.

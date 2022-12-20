@@ -55,12 +55,12 @@ Certain areas of `idris-mode` show explanatory help text. When you've learned ho
 
 There is now support for running an Idris interpreter in a buffer. Use
 `C-c C-l` to load the current Idris buffer into the interpreter. This will
-spawn an inferior idris process and load the buffer. It will report warnings
+spawn an inferior Idris process and load the buffer. It will report warnings
 if idris reports any. Pressing `C-c C-l` again will reload that buffer - if you
 switch to a different buffer and press `C-c C-l`, that buffer will be loaded
 instead.
 
-Customize `idris-interpreter-path` if idris is not on your default path.
+Customize `idris-interpreter-path` if Idris is not on your default path.
 
 [Idris]: http://www.idris-lang.org
 
@@ -253,7 +253,7 @@ Throughout a session with `idris-mode`, many frames will accumulate, such as `*i
   ;; This makes it so that especially errors reuse their frames
   ;; https://emacs.stackexchange.com/questions/327/how-can-i-block-a-frame-from-being-split/338
   ;; alternatively, add this to certain frames: (set-frame-parameter nil 'unsplittable t)
-  ;; (without this, idris throws out tons of new frames)
+  ;; (without this, Idris throws out tons of new frames)
   (add-to-list 'display-buffer-alist
                '(".*". (display-buffer-reuse-window . ((reusable-frames . t)))))
   (setq idris-stay-in-current-window-on-compiler-error t)
