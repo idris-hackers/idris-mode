@@ -94,24 +94,25 @@ is mostly the same as (startline startcolumn)"
              (buffer (get-file-buffer fullpath)))
         (when (not (null buffer))
           (with-current-buffer buffer
-            (save-restriction
-              (widen) ;; Show errors at the proper location in narrowed buffers
-              (goto-char (point-min))
-              (let* ((startp (line-beginning-position startline))
-                     (endp (line-end-position startline))
-                     (start (+ startp startcol))
-                     (end (if (and (= startline endline) (= startcol endcol))
-                              ;; this is a hack to have warnings reported which point to empty lines
-                              (if (= startp endp)
-                                  (progn (goto-char startp)
-                                         (insert " ")
-                                         (1+ endp))
-                                endp)
-                            (+ (line-beginning-position endline) endcol)))
-                     (overlay (idris-warning-overlay-at-point startp)))
-                (if overlay
-                    (idris-warning-merge-overlays overlay message)
-                  (idris-warning-create-overlay start end message))))))))))
+            (save-excursion
+              (save-restriction
+                (widen) ;; Show errors at the proper location in narrowed buffers
+                (goto-char (point-min))
+                (let* ((startp (line-beginning-position startline))
+                       (endp (line-end-position startline))
+                       (start (+ startp startcol))
+                       (end (if (and (= startline endline) (= startcol endcol))
+                                ;; a hack to have warnings, which point to empty lines, reported
+                                (if (= startp endp)
+                                    (progn (goto-char startp)
+                                           (insert " ")
+                                           (1+ endp))
+                                  endp)
+                              (+ (line-beginning-position endline) endcol)))
+                       (overlay (idris-warning-overlay-at-point startp)))
+                  (if overlay
+                      (idris-warning-merge-overlays overlay message)
+                    (idris-warning-create-overlay start end message)))))))))))
 
 (defun idris-warning-merge-overlays (overlay message)
   (overlay-put overlay 'help-echo
