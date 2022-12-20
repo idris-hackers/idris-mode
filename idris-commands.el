@@ -338,6 +338,8 @@ Does not return a line number."
   (interactive "P")
   (let ((name (if thing (read-string "Check: ")
                 (idris-name-at-point))))
+    (when (idris-current-buffer-dirty-p)
+      (idris-load-file-sync))
     (when name
       (idris-info-for-name :type-of name))))
 
