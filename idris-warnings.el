@@ -60,18 +60,12 @@
   (setq idris-warnings '())
   (delq (current-buffer) idris-warnings-buffers))
 
-(defun idris-get-line-region (line)
-  (goto-char (point-min))
-  (cl-values
-   (line-beginning-position line)
-   (line-end-position line)))
-
 (defun idris-warning-overlay-p (overlay)
   (overlay-get overlay 'idris-warning))
 
-(defun idris-warning-overlay-at-point ()
-  "Return the overlay for a note starting at point, otherwise nil."
-  (cl-find (point) (cl-remove-if-not 'idris-warning-overlay-p (overlays-at (point)))
+(defun idris-warning-overlay-at-point (point)
+  "Return the overlay for a note starting at POINT, otherwise nil."
+  (cl-find point (cl-remove-if-not 'idris-warning-overlay-p (overlays-at point))
         :key 'overlay-start))
 
 (defun idris-warning-overlay (warning)
@@ -100,23 +94,22 @@ is mostly the same as (startline startcolumn)"
              (buffer (get-file-buffer fullpath)))
         (when (not (null buffer))
           (with-current-buffer buffer
-            (save-restriction
-              (widen) ;; Show errors at the proper location in narrowed buffers
-              (goto-char (point-min))
-              (cl-multiple-value-bind (startp endp) (idris-get-line-region startline)
-                (goto-char startp)
-                (let ((start (+ startp startcol))
-                      (end (if (and (= startline endline) (= startcol endcol))
-                               ;; this is a hack to have warnings reported which point to empty lines
-                               (if (= startp endp)
-                                   (progn (insert " ")
-                                          (1+ endp))
-                                 endp)
-                             (+ (save-excursion
-                                  (goto-char (point-min))
-                                  (line-beginning-position endline))
-                                endcol)))
-                      (overlay (idris-warning-overlay-at-point)))
+            (save-excursion
+              (save-restriction
+                (widen) ;; Show errors at the proper location in narrowed buffers
+                (goto-char (point-min))
+                (let* ((startp (line-beginning-position startline))
+                       (endp (line-end-position startline))
+                       (start (+ startp startcol))
+                       (end (if (and (= startline endline) (= startcol endcol))
+                                ;; a hack to have warnings, which point to empty lines, reported
+                                (if (= startp endp)
+                                    (progn (goto-char startp)
+                                           (insert " ")
+                                           (1+ endp))
+                                  endp)
+                              (+ (line-beginning-position endline) endcol)))
+                       (overlay (idris-warning-overlay-at-point startp)))
                   (if overlay
                       (idris-warning-merge-overlays overlay message)
                     (idris-warning-create-overlay start end message)))))))))))

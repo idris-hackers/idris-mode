@@ -289,6 +289,36 @@ myReverse xs = revAcc [] xs where
       (kill-buffer))
     (idris-quit)))
 
+(ert-deftest idris-test-warning-overlay ()
+  "Test that `idris-warning-overaly-point' works as expected."
+  (let* ((buffer (find-file-noselect "test-data/AddClause.idr"))
+         (warning '("AddClause.idr" (5 7) (5 17) "Some warning message" ()))
+         (idris-raw-warnings '())
+         (idris-process-current-working-directory (file-name-directory (buffer-file-name buffer)))
+         (expected-position)
+         (expected-overlay))
+    (with-current-buffer buffer
+      (goto-char (point-min))
+      (re-search-forward "data Test")
+      (setq expected-position (point))
+
+      (idris-warning-overlay warning)
+
+      ;; Assert that the point position does not change
+      ;; https://github.com/idris-community/idris2-mode/issues/36
+      (should (eq (point) expected-position))
+
+      ;; Assert side effect
+      (should (not (null idris-raw-warnings)))
+
+      ;; Assert that overlay was added
+      (setq expected-overlay (car (overlays-in (point-min) (point-max))))
+      (should (not (null expected-overlay)))
+      (should (string= (overlay-get expected-overlay 'help-echo)
+                       "Some warning message"))
+      ;; Cleanup
+      (kill-buffer))))
+       
 (ert-deftest idris-backard-toplevel-navigation-test-2pTac9 ()
   "Test idris-backard-toplevel navigation command."
   (idris-test-with-temp-buffer
