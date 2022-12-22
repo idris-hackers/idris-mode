@@ -344,8 +344,7 @@ and semantic annotations PROPS."
                (start-col-repl (+ input-col start-col))
                (end-line-repl (+ input-line end-line -1))
                (end-col-repl (+ input-col end-col)))
-          (idris-highlight-input-region buffer
-                                        start-line-repl start-col-repl
+          (idris-highlight-input-region start-line-repl start-col-repl
                                         end-line-repl end-col-repl
                                         props))))))
 
