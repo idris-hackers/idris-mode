@@ -134,6 +134,38 @@
       (idris-delete-ibc t)
       (kill-buffer))))
 
+(defun idris-buffer-contains-semantic-highlighting-p ()
+  (seq-find (lambda (overlay) (overlay-get overlay 'idris-source-highlight))
+            (overlays-in (point-min) (point-max))))
+
+(ert-deftest idris-semantic-highlighthing ()
+  (let ((idris-semantic-source-highlighting nil))
+    (with-idris-file-fixture
+     "test-data/AddClause.idr"
+     (lambda ()
+       (idris-load-file)
+       (dotimes (_ 5) (accept-process-output nil 0.1))
+       (should (not (idris-buffer-contains-semantic-highlighting-p))))))
+  (let ((idris-semantic-source-highlighting t))
+    (with-idris-file-fixture
+     "test-data/AddClause.idr"
+     (lambda ()
+       (idris-load-file)
+       (dotimes (_ 5) (accept-process-output nil 0.1))
+       (should (idris-buffer-contains-semantic-highlighting-p)))))
+  (let ((idris-semantic-source-highlighting t)
+        (idris-semantic-source-highlighting-max-buffer-size 8))
+    (with-idris-file-fixture
+     "test-data/AddClause.idr"
+     (lambda ()
+       (idris-load-file)
+       (dotimes (_ 5) (accept-process-output nil 0.1))
+       (should (not (idris-buffer-contains-semantic-highlighting-p)))
+       (with-current-buffer "*Messages*"
+         (should (string-match-p "Semantic source highlighting is disabled for the current buffer."
+                                 (buffer-substring-no-properties (point-min) (point-max))))))))
+  (idris-quit))
+
 (load "idris-commands-test")
 (load "idris-navigate-test")
 (load "idris-repl-test")

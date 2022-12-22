@@ -203,10 +203,12 @@ A prefix argument SET-LINE forces loading but only up to the current line."
         ;; Actually do the loading
         (let* ((dir-and-fn (idris-filename-to-load))
                (fn (cdr dir-and-fn))
-               (srcdir (car dir-and-fn)))
+               (srcdir (car dir-and-fn))
+               (idris-semantic-source-highlighting (idris-buffer-semantic-source-highlighting)))
           (setq idris-currently-loaded-buffer nil)
           (idris-switch-working-directory srcdir)
           (idris-delete-ibc t) ;; delete the ibc to avoid interfering with partial loads
+          (idris-toggle-semantic-source-highlighting)
           (idris-eval-async
            (if idris-load-to-here
                `(:load-file ,fn ,(idris-get-line-num idris-load-to-here))

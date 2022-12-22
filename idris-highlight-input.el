@@ -51,51 +51,41 @@ In particular, this takes bird tracks into account in literate Idris."
 See Info node `(elisp)Overlay Properties' to understand how ARGS are used."
   ;; There are 5 args when it's called post-modification
   (when (= (length args) 5)
-    (let ((overlay (car args)))
-      (delete-overlay overlay))))
+    (delete-overlay (car args))))
 
 (defun idris-highlight-input-region (buffer start-line start-col end-line end-col highlight)
   "Highlight in BUFFER using an overlay from START-LINE and START-COL to
  END-LINE and END-COL and the semantic properties specified in HIGHLIGHT."
-  (if (or (> end-line start-line)
-          (and (= end-line start-line)
-               (> end-col start-col)))
-      (when idris-semantic-source-highlighting
-        (with-current-buffer buffer
-          (save-restriction
-            (widen)
-            (save-excursion
-              (goto-char (point-min))
-              (let* ((start-pos (+ (line-beginning-position start-line)
-                                   (idris-highlight-column start-col)))
-                     (end-pos (+ (line-beginning-position end-line)
-                                 (idris-highlight-column end-col)))
-                     (existing-idris-overlays-in-range (seq-filter
-                                                        (lambda (overlay)
-                                                          (overlay-get overlay 'idris-source-highlight))
-                                                        (overlays-in start-pos end-pos)))
-                     (existing-idris-overlay (seq-find (lambda (overlay)
-                                                         (and
-                                                          (eql start-pos (overlay-start overlay))
-                                                          (eql end-pos (overlay-end overlay))
-                                                          ;; TODO: overlay properties match
-                                                          ))
-                                                       existing-idris-overlays-in-range)))
-                (when (null existing-idris-overlay)
-                  (dolist (old-overlay existing-idris-overlays-in-range)
-                    (delete-overlay old-overlay))
-                  (let ((highlight-overlay (make-overlay start-pos end-pos)))
-                    (overlay-put highlight-overlay 'idris-source-highlight t)
-                    (idris-add-overlay-properties highlight-overlay
-                                                  (idris-semantic-properties highlight))
-                    (overlay-put highlight-overlay
-                                 'modification-hooks
-                                 '(idris-highlight--overlay-modification-hook)))))))))
-    (when (eq idris-semantic-source-highlighting 'debug)
-      (message "Not highlighting absurd span %s:%s-%s:%s with %s"
-               start-line start-col
-               end-line end-col
-               highlight))))
+  (with-current-buffer buffer
+    (save-restriction
+      (widen)
+      (save-excursion
+        (goto-char (point-min))
+        (let* ((start-pos (+ (line-beginning-position start-line)
+                             (idris-highlight-column start-col)))
+               (end-pos (+ (line-beginning-position end-line)
+                           (idris-highlight-column end-col)))
+               (existing-idris-overlays-in-range (seq-filter
+                                                  (lambda (overlay)
+                                                    (overlay-get overlay 'idris-source-highlight))
+                                                  (overlays-in start-pos end-pos)))
+               (existing-idris-overlay (seq-find (lambda (overlay)
+                                                   (and
+                                                    (eql start-pos (overlay-start overlay))
+                                                    (eql end-pos (overlay-end overlay))
+                                                    ;; TODO: overlay properties match
+                                                    ))
+                                                 existing-idris-overlays-in-range)))
+          (when (null existing-idris-overlay)
+            (dolist (old-overlay existing-idris-overlays-in-range)
+              (delete-overlay old-overlay))
+            (let ((highlight-overlay (make-overlay start-pos end-pos)))
+              (overlay-put highlight-overlay 'idris-source-highlight t)
+              (idris-add-overlay-properties highlight-overlay
+                                            (idris-semantic-properties highlight))
+              (overlay-put highlight-overlay
+                           'modification-hooks
+                           '(idris-highlight--overlay-modification-hook)))))))))
 
 (defun idris-highlight-source-file (hs)
   (cl-loop
@@ -123,6 +113,42 @@ See Info node `(elisp)Overlay Properties' to understand how ARGS are used."
                                            start-line start-col
                                            end-line end-col
                                            props)))))))
+
+(defun idris-highlight-input-region-debug (_buffer start-line start-col end-line end-col highlight)
+  (when (not (or (> end-line start-line)
+                 (and (= end-line start-line)
+                      (> end-col start-col))))
+    (message "Not highlighting absurd span %s:%s-%s:%s with %s"
+             start-line start-col
+             end-line end-col
+             highlight)))
+
+(defun idris-toggle-semantic-source-highlighting ()
+  "Turn on/off semantic highlighting.
+This is controled by value of`idris-semantic-source-highlighting' variable.
+When the value is 'debug additional checks are performed on received data."
+  (if idris-semantic-source-highlighting
+      (progn
+        (if (eq idris-semantic-source-highlighting 'debug)
+            (advice-add 'idris-highlight-input-region
+                        :before-until
+                        #'idris-highlight-input-region-debug)
+          (advice-remove 'idris-highlight-input-region
+                         #'idris-highlight-input-region-debug))
+        (advice-remove 'idris-highlight-source-file #'ignore))
+    (advice-add 'idris-highlight-source-file :around #'ignore)))
+
+(defun idris-buffer-semantic-source-highlighting ()
+  "Return nil if current buffer size is larger than set limit.
+The limit is defined as value of:
+`idris-semantic-source-highlighting-max-buffer-size'.
+Otherwise return current value of `idris-semantic-source-highlighting'"
+  (if (< (buffer-size)
+         idris-semantic-source-highlighting-max-buffer-size)
+      idris-semantic-source-highlighting
+    (message "Semantic source highlighting is disabled for the current buffer. %s"
+             "Customize `idris-semantic-source-highlighting-max-buffer-size' to enable it.")
+    nil))
 
 (provide 'idris-highlight-input)
 ;;; idris-highlight-input.el ends here

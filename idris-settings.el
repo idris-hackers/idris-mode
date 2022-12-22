@@ -71,6 +71,12 @@ If `debug', log failed highlighting to buffer `*Messages*'."
   :type '(choice (boolean :tag "Enable")
                  (const :tag "Debug" debug)))
 
+(defcustom idris-semantic-source-highlighting-max-buffer-size 32768 ;; (expt 2 15)
+  "Disable semantic source highlighting if the buffer exceeds the allotted size.
+This is to reduce lag when loading large Idris files."
+  :group 'idris
+  :type 'integer)
+
 (defcustom idris-log-events nil
   "If non-nil, communications between Emacs and Idris are logged.
 
