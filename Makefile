@@ -46,32 +46,27 @@ OBJS =	idris-commands.elc		\
 build: getdeps $(OBJS)
 
 test: getdeps build
-	$(BATCHEMACS) -L . -l ert -l idris-tests.el -f ert-run-tests-batch-and-exit
+	$(BATCHEMACS) -L . -l ert -l test/idris-tests.el -f ert-run-tests-batch-and-exit
 
 test2: getdeps build
 	$(BATCHEMACS) -L . \
 		-eval '(setq idris-interpreter-path (executable-find "idris2"))' \
-		-l ert -l idris-tests.el -f ert-run-tests-batch-and-exit
-
-test3: getdeps build
-	$(BATCHEMACS) -L . \
-		-eval '(setq idris-interpreter-path (executable-find "idris2"))' \
-		-l ert -l idris-tests3.el -f ert-run-tests-batch-and-exit
+		-l ert -l test/idris-tests.el -f ert-run-tests-batch-and-exit
 
 clean:
 	-${RM} -f $(OBJS)
-	-${RM} -f test-data/*ibc
-	-${RM} -rf test-data/build/
+	-${RM} -f test/test-data/*ibc
+	-${RM} -rf test/test-data/build/
 	-${RM} -r docs/auto docs/*.aux docs/*.log docs/*.pdf
 getdeps:
 	$(BATCHEMACS) -eval \
 		"(let* \
-		    ((need-pkgs '($(NEED_PKGS))) \
-		     (want-pkgs (seq-remove #'package-installed-p need-pkgs))) \
-		  (unless (null want-pkgs) \
-		    (package-initialize) \
-		    (package-refresh-contents) \
-		    (mapcar #'package-install want-pkgs)))"
+				((need-pkgs '($(NEED_PKGS))) \
+				 (want-pkgs (seq-remove #'package-installed-p need-pkgs))) \
+			(unless (null want-pkgs) \
+				(package-initialize) \
+				(package-refresh-contents) \
+				(mapcar #'package-install want-pkgs)))"
 
 docs: docs/documentation.tex
 	-@( cd docs/ && latexmk -xelatex documentation.tex )

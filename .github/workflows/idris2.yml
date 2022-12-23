@@ -94,6 +94,5 @@ jobs:
           make clean
           make build
           make test2
-          make test3
 
 # -- [ EOF ]

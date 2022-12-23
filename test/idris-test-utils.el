@@ -64,6 +64,7 @@ As this is not for a test of Idris itself, we do not care the results."
          (idris-test-run-goto-char (function ,test-fun))
          (let ((this-buffer (current-buffer)))
            (should (,buffer-p buffer this-buffer))))
+       (idris-delete-ibc t)
        (kill-buffer))
      (idris-quit)))
 
