@@ -75,7 +75,7 @@
 
 (defun idris-define-general-keys (map)
   "Define keys that are generally useful for all Idris modes in the keymap MAP."
-  (define-key map (kbd "C-c C-z") 'idris-pop-to-repl)
+  (define-key map (kbd "C-c C-z") 'idris-switch-to-repl)
   (define-key map (kbd "<mouse-3>") 'prop-menu-show-menu)
   (define-key map (kbd "C-c C-SPC") 'prop-menu-by-completing-read))
 

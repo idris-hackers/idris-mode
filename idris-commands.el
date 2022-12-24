@@ -939,20 +939,13 @@ type-correct, so loading will fail."
   "Remove Idris event hooks set after connection with Idris established."
   (dolist (h idris-event-hooks) (remove-hook 'idris-event-hooks h)))
 
-(defun idris-pop-to-repl ()
-  "Go to the REPL, if one is open."
-  (interactive)
-  (let ((buf (get-buffer idris-repl-buffer-name)))
-    (if buf
-        (pop-to-buffer buf)
-      (error "No Idris REPL buffer is open"))))
+(define-obsolete-function-alias 'idris-pop-to-repl 'idris-switch-to-repl "2022-12-28")
 
 (defun idris-switch-to-last-idris-buffer ()
   "Switch to the last Idris buffer.
 The default keybinding for this command is
-the same as variable `idris-pop-to-repl',
-so that it is very convenient to jump between a
-Idris buffer and the REPL buffer.
+the same as for command `idris-switch-to-repl',
+so it is convenient to jump between Idris code and REPL.
 
 Inspired by `cider-switch-to-last-clojure-buffer'
 https://github.com/clojure-emacs/cider"
