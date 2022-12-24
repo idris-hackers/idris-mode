@@ -966,6 +966,40 @@ https://github.com/clojure-emacs/cider"
           (user-error "No Idris buffer found")))
     (user-error "Not in a Idris REPL buffer")))
 
+(defun idris-run ()
+  "Run an inferior Idris process."
+  (interactive)
+  (let ((command-line-flags (idris-compute-flags)))
+    ;; Kill the running Idris if the command-line flags need updating
+    (when (and (get-buffer-process (get-buffer idris-connection-buffer-name))
+               (not (equal command-line-flags idris-current-flags)))
+      (message "Idris command line arguments changed, restarting Idris")
+      (idris-quit)
+      (sit-for 0.01)) ; allows the sentinel to run and reset idris-process
+    ;; Start Idris if necessary
+    (when (not idris-process)
+      (setq idris-process
+            (get-buffer-process
+             (apply #'make-comint-in-buffer
+                    "idris"
+                    idris-process-buffer-name
+                    idris-interpreter-path
+                    nil
+                    "--ide-mode-socket"
+                    command-line-flags)))
+      (with-current-buffer idris-process-buffer-name
+        (add-hook 'comint-preoutput-filter-functions
+                  'idris-process-filter
+                  nil
+                  t)
+        (add-hook 'comint-output-filter-functions
+                  'idris-show-process-buffer
+                  nil
+                  t))
+      (set-process-sentinel idris-process 'idris-sentinel)
+      (setq idris-current-flags command-line-flags)
+      (accept-process-output idris-process 3))))
+
 (defun idris-quit ()
   "Quit the Idris process, cleaning up the state synchronized with Emacs."
   (interactive)
