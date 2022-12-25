@@ -107,7 +107,10 @@ This is maintained to restart Idris when the arguments change.")
     (add-hook 'idris-event-hooks 'idris-warning-event-hook-function)
     (add-hook 'idris-event-hooks 'idris-prover-event-hook-function)
 
-    (unless idris-hole-show-on-load
+    (if idris-hole-show-on-load
+        (progn
+          (add-hook 'idris-load-file-success-hook 'idris-list-holes)
+          (add-hook 'idris-prover-success-hook 'idris-list-holes))
       (remove-hook 'idris-load-file-success-hook 'idris-list-holes-on-load)
       (remove-hook 'idris-load-file-success-hook 'idris-list-holes)
       ;; TODO: In future decouple prover sucess hook from being affected by
