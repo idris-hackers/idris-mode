@@ -77,7 +77,7 @@ Lisp package.")
     (when (and buf (buffer-live-p buf))
       (let ((win (get-buffer-window buf)))
         (kill-buffer buf)
-        (when (null (window-prev-buffers win))
+        (when (and (null (window-prev-buffers win)) (< 1 (length (window-list))))
           (delete-window win))))
     (when return-buffer (pop-to-buffer return-buffer `(display-buffer-reuse-window)))))
 
