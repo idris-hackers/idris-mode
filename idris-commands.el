@@ -309,7 +309,7 @@ Use this in Idris source buffers."
              (buffer-substring-no-properties beg (point))))
        ;; Try if we're on a symbol or fail otherwise.
        (or (current-word t)
-           (error "Nothing identifiable under point")))
+           (user-error "Nothing identifiable under point")))
      line)))
 
 (defun idris-name-at-point ()
