@@ -34,6 +34,7 @@
 (require 'idris-common-utils)
 (require 'idris-prover)
 (require 'idris-highlight-input)
+(require 'idris-xref)
 
 (eval-when-compile (require 'cl-lib))
 
@@ -229,7 +230,8 @@ Invokes `idris-repl-mode-hook'."
   (set (make-local-variable 'completion-at-point-functions) '(idris-repl-complete))
   (setq mode-name `("Idris-REPL" (:eval (if idris-rex-continuations "!" ""))))
   (set (make-local-variable 'prop-menu-item-functions)
-       '(idris-context-menu-items)))
+       '(idris-context-menu-items))
+  (add-hook 'xref-backend-functions #'idris-xref-backend nil 'local))
 
 (defun idris-repl-remove-event-hook-function ()
   (setq idris-prompt-string "Idris")

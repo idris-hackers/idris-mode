@@ -189,7 +189,7 @@ remain."
   (with-current-buffer (get-buffer idris-info-buffer-name)
     (goto-char (point-min))
     (should (re-search-forward "Zero" nil t)))
- (idris-quit))
+  (idris-quit))
 
 (ert-deftest idris-test-ipkg-packages-with-underscores-and-dashes ()
   "Test that loading an ipkg file can have dependencies on packages with _ or - in the name."
@@ -322,7 +322,7 @@ myReverse xs = revAcc [] xs where
                        "Some warning message"))
       ;; Cleanup
       (kill-buffer))))
-       
+
 (ert-deftest idris-backard-toplevel-navigation-test-2pTac9 ()
   "Test idris-backard-toplevel navigation command."
   (idris-test-with-temp-buffer
@@ -576,5 +576,6 @@ getData2 st failcount
    (should (looking-back "Store LoggedOut)]" (line-beginning-position)))
    ))
 
+(load "idris-xref-test.el")
 (provide 'idris-tests)
 ;;; idris-tests.el ends here
