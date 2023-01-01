@@ -271,6 +271,9 @@ myReverse xs = revAcc [] xs where
     ;; Assert that we have clean global test state
     (should (not idris-connection))
     (with-current-buffer buffer
+      ;; Hack to reduce random failures
+      ;; TODO: Fix the leak
+      (idris-delete-ibc t)
       (goto-char (point-min))
       (re-search-forward "data Test")
       (funcall-interactively 'idris-type-at-point nil)
