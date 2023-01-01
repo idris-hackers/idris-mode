@@ -48,15 +48,6 @@
 (defvar-local idris-load-to-here nil
   "The maximum position to load.")
 
-(defun idris-get-line-num (position)
-  "Get the absolute line number at POSITION."
-  ;; In Emacs 26.1 > line-number-at-pos accepts
-  ;; additional optional argument ABSOLUTE which
-  ;; removes need for `save-restriction' and `widen'
-  (save-restriction
-    (widen)
-    (line-number-at-pos position)))
-
 (defun idris-make-dirty ()
   "Mark an Idris buffer as dirty and remove the loaded region."
   (setq idris-buffer-dirty-p t)
@@ -291,39 +282,6 @@ This sets the load position to point, if there is one."
     (error "Cannot find file for current buffer")))
 
 
-(defun idris-operator-at-position-p (pos)
-  "Return t if syntax lookup is `.' or char after POS is `-'."
-  (or (equal (syntax-after pos) (string-to-syntax "."))
-      (eq (char-after pos) ?-)))
-
-(defun idris-thing-at-point ()
-  "Return the line number and name at point as a cons.
-Use this in Idris source buffers."
-  (let ((line (idris-get-line-num (point))))
-    (cons
-     (if (idris-operator-at-position-p (point))
-         (save-excursion
-           (skip-syntax-backward ".")
-           (let ((beg (point)))
-             (skip-syntax-forward ".")
-             (buffer-substring-no-properties beg (point))))
-       ;; Try if we're on a symbol or fail otherwise.
-       (or (current-word t)
-           (user-error "Nothing identifiable under point")))
-     line)))
-
-(defun idris-name-at-point ()
-  "Return the name at point, taking into account semantic annotations.
-Use this in Idris source buffers or in compiler-annotated output.
-Does not return a line number."
-  (let ((ref (cl-remove-if
-              #'null
-              (cons (get-text-property (point) 'idris-ref)
-                    (cl-loop for overlay in (overlays-at (point))
-                             collecting (overlay-get overlay 'idris-ref))))))
-    (if (null ref)
-        (car (idris-thing-at-point))
-      (car ref))))
 
 (defun idris-info-for-name (what name)
   "Display the type for a NAME."
