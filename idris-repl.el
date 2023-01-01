@@ -545,8 +545,9 @@ The handler will use qeuery to ask the use if the error should be ingored."
 Use `idris-repl-history-file' if set or fallback
  to filepath computed from the `idris-interpreter-path'."
   (or idris-repl-history-file
-      ;; We should use `file-name-concat' but it is only in Emacs version 28+
-      (concat "~/." (file-name-nondirectory idris-interpreter-path) "/idris-history.eld")))
+      (idris-file-name-concat "~"
+                              (concat "." (file-name-nondirectory idris-interpreter-path))
+                              "idris-history.eld")))
 
 (defun idris-repl-read-history-filename ()
   (read-file-name "Use Idris REPL history from file: "

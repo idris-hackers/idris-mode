@@ -34,5 +34,12 @@ attention to case differences."
 (unless (fboundp 'gensym)
   (defalias 'gensym 'cl-gensym))
 
+(if (fboundp 'file-name-concat)
+    (defalias 'idris-file-name-concat 'file-name-concat)
+  (defun idris-file-name-concat (&rest components)
+    (let ((dirs (butlast components)))
+      (concat (apply 'concat (mapcar 'file-name-as-directory dirs))
+              (car (reverse components))))))
+
 (provide 'idris-compat)
 ;;; idris-compat.el ends here
