@@ -535,7 +535,7 @@ Useful for writing papers or slides."
   (interactive)
   (let ((what (idris-thing-at-point)))
     (when (car what)
-      (save-excursion (idris-load-file-sync))
+      (idris-load-file-sync)
       (let ((result (car (idris-eval `(:case-split ,(cdr what) ,(car what)))))
             (initial-position (point)))
         (if (<= (length result) 2)
@@ -551,7 +551,7 @@ Useful for writing papers or slides."
   (interactive)
   (let ((what (idris-thing-at-point)))
     (when (car what)
-      (save-excursion (idris-load-file-sync))
+      (idris-load-file-sync)
       (let ((result (car (idris-eval `(:make-case ,(cdr what) ,(car what))))))
         (if (<= (length result) 2)
             (message "Can't make cases from %s" (car what))
@@ -581,7 +581,7 @@ Otherwise, case split as a pattern variable."
   (let ((what (idris-thing-at-point))
         (command (if proof :add-proof-clause :add-clause)))
     (when (car what)
-      (save-excursion (idris-load-file-sync))
+      (idris-load-file-sync)
       (let ((result (string-trim-left (car (idris-eval `(,command ,(cdr what) ,(car what))))))
             final-point
             (prefix (save-excursion        ; prefix is the indentation to insert for the clause
@@ -615,7 +615,7 @@ Otherwise, case split as a pattern variable."
   (interactive)
   (let ((what (idris-thing-at-point)))
     (when (car what)
-      (save-excursion (idris-load-file-sync))
+      (idris-load-file-sync)
       (let ((result (car (idris-eval `(:add-missing ,(cdr what) ,(car what))))))
         (forward-line 1)
         (insert result)))))
@@ -625,7 +625,7 @@ Otherwise, case split as a pattern variable."
   (interactive)
   (let ((what (idris-thing-at-point)))
     (when (car what)
-      (save-excursion (idris-load-file-sync))
+      (idris-load-file-sync)
       (let ((result (car (idris-eval `(:make-with ,(cdr what) ,(car what))))))
         (beginning-of-line)
         (kill-line)
@@ -636,7 +636,7 @@ Otherwise, case split as a pattern variable."
   (interactive)
   (let ((what (idris-thing-at-point)))
     (when (car what)
-      (save-excursion (idris-load-file-sync))
+      (idris-load-file-sync)
       (let* ((result (car (idris-eval `(:make-lemma ,(cdr what) ,(car what)))))
              (lemma-type (car result)))
         ;; There are two cases here: either a ?hole, or the {name} of a provisional defn.
@@ -732,7 +732,7 @@ A plain prefix ARG causes the command to prompt for hints and recursion
                      (t nil)))
         (what (idris-thing-at-point)))
     (when (car what)
-      (save-excursion (idris-load-file-sync))
+      (idris-load-file-sync)
 
       (let ((result (car (if (> idris-protocol-version 1)
                              (idris-eval `(:proof-search ,(cdr what) ,(car what)))
@@ -766,7 +766,7 @@ Idris 2 only."
   (interactive)
   (let ((what (idris-thing-at-point)))
     (when (car what)
-      (save-excursion (idris-load-file-sync))
+      (idris-load-file-sync)
       (let ((result (car (idris-eval `(:generate-def ,(cdr what) ,(car what)))))
             final-point
             (prefix (save-excursion
@@ -822,7 +822,7 @@ Idris 2 only."
   (let ((what (idris-thing-at-point)))
     (unless (car what)
       (error "Could not find a hole at point to refine by"))
-    (save-excursion (idris-load-file-sync))
+    (idris-load-file-sync)
     (let ((results (car (idris-eval `(:intro ,(cdr what) ,(car what))))))
       (pcase results
         (`(,result) (idris-replace-hole-with result))
@@ -834,7 +834,7 @@ Idris 2 only."
   (let ((what (idris-thing-at-point)))
     (unless (car what)
       (error "Could not find a hole at point to refine by"))
-    (save-excursion (idris-load-file-sync))
+    (idris-load-file-sync)
     (let ((result (car (idris-eval `(:refine ,(cdr what) ,(car what) ,name)))))
       (idris-replace-hole-with result))))
 
@@ -889,7 +889,7 @@ type-correct, so loading will fail."
   "Get a list of currently open holes."
   (interactive)
   (when (idris-current-buffer-dirty-p)
-    (save-excursion (idris-load-file-sync)))
+    (idris-load-file-sync))
   (idris-hole-list-show (car (idris-eval '(:metavariables 80)))))
 
 (defun idris-list-compiler-notes ()
