@@ -93,8 +93,8 @@ update coordinates to be indexed from 1 as expected by Emacs."
                candidate))
     (let ((new-fn (idris-xref-filepath term fn)))
       `(,term (:filename ,new-fn)
-              (:start ,(1+ start-line) ,(1+ start-col))
-              (:end ,(1+ end-line) ,(1+ end-col))))))
+              (:start ,(1+ start-line) ,start-col)
+              (:end ,(1+ end-line) ,end-col)))))
 
 (defun idris-xref-make-xref (location)
   "Return a new Xref object from LOCATION."
