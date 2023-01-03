@@ -169,9 +169,7 @@
 Returning these as a cons."
   (let* ((fn (buffer-file-name))
          (ipkg-srcdir (idris-ipkg-find-src-dir))
-         (srcdir (if ipkg-srcdir
-                     ipkg-srcdir
-                   (file-name-directory fn))))
+         (srcdir (or ipkg-srcdir (file-name-directory fn))))
     (when (and  ;; check that srcdir is prefix of filename - then load relative
            (> (length fn) (length srcdir))
            (string= (substring fn 0 (length srcdir)) srcdir))
@@ -589,10 +587,7 @@ Otherwise, case split as a pattern variable."
                       (forward-line (1- (cdr what)))
                       (goto-char (line-beginning-position))
                       (re-search-forward "\\(^>?\\s-*\\)" nil t)
-                      (let ((prefix (match-string 1)))
-                        (if prefix
-                            prefix
-                          "")))))
+                      (or (match-string 1) ""))))
         ;; Go forward until we get to a line with equal or less indentation to
         ;; the type declaration, or the end of the buffer, and insert the
         ;; result
@@ -774,10 +769,7 @@ Idris 2 only."
                       (forward-line (1- (cdr what)))
                       (goto-char (line-beginning-position))
                       (re-search-forward "\\(^>?\\s-*\\)" nil t)
-                      (let ((prefix (match-string 1)))
-                        (if prefix
-                            prefix
-                          "")))))
+                      (or (match-string 1) ""))))
         (if (string= result "")
             (error "Nothing found")
           (goto-char (line-beginning-position))

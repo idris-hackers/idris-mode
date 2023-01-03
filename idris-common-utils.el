@@ -455,8 +455,6 @@ Does not return a line number."
               (cons (get-text-property (point) 'idris-ref)
                     (cl-loop for overlay in (overlays-at (point))
                              collecting (overlay-get overlay 'idris-ref))))))
-    (if (null ref)
-        (car (idris-thing-at-point))
-      (car ref))))
+    (car (or ref (idris-thing-at-point)))))
 
 (provide 'idris-common-utils)
