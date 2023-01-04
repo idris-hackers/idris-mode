@@ -307,7 +307,9 @@ This sets the load position to point, if there is one."
   (let ((name (if thing (read-string "Print definition: ")
                 (idris-name-at-point))))
     (when name
-      (idris-info-for-name :print-definition name))))
+      (if (>=-protocol-version 2 1)
+          (idris-info-for-name :interpret (concat ":printdef " name))
+        (idris-info-for-name :print-definition name)))))
 
 (defun idris-who-calls-name (name)
   "Show the callers of NAME in a tree."
