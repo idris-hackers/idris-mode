@@ -283,9 +283,9 @@ This sets the load position to point, if there is one."
 
 
 
-(defun idris-info-for-name (what name)
-  "Display the type for a NAME."
-  (let* ((ty (idris-eval (list what name)))
+(defun idris-info-for-name (command name)
+  "Pass to Idris compiler COMMAND with NAME as argument and display the result."
+  (let* ((ty (idris-eval (list command name)))
              (result (car ty))
              (formatting (cdr ty)))
       (idris-show-info (format "%s" result) formatting)))
