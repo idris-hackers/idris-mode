@@ -301,15 +301,25 @@ This sets the load position to point, if there is one."
     (when name
       (idris-info-for-name :type-of name))))
 
-(defun idris-print-definition-of-name (thing)
-  "Display the definition of the function or type of the THING at point."
+(defun idris--print-definition-of-name (name)
+  "Fetch from the Idris compiler and display the definition of the NAME."
+  (if (>=-protocol-version 2 1)
+      (idris-info-for-name :interpret (concat ":printdef " name))
+    (idris-info-for-name :print-definition name)))
+
+(defun idris-print-definition-of-name-at-point (name)
+  "Display the definition of the function or type of the NAME at point.
+
+Idris 2 as of 05/01/2023 does not yet fully support
+printing definition of a type at point."
   (interactive "P")
-  (let ((name (if thing (read-string "Print definition: ")
-                (idris-name-at-point))))
-    (when name
-      (if (>=-protocol-version 2 1)
-          (idris-info-for-name :interpret (concat ":printdef " name))
-        (idris-info-for-name :print-definition name)))))
+  (let ((name* (if name
+                   (read-string "Print definition: ")
+                 (idris-name-at-point))))
+    (when name*
+      (idris--print-definition-of-name name*))))
+
+(define-obsolete-function-alias 'idris-print-definition-of-name 'idris-print-definition-of-name-at-point "2023-01-05")
 
 (defun idris-who-calls-name (name)
   "Show the callers of NAME in a tree."
@@ -1321,7 +1331,7 @@ of the term to replace."
                        (list "Get definition"
                              (lambda ()
                                (interactive)
-                               (idris-info-for-name :print-definition ref)))
+                               (idris--print-definition-of-name ref)))
                        (list "Who calls?"
                              (lambda ()
                                (interactive)
