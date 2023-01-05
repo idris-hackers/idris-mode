@@ -29,7 +29,7 @@
 (require 'idris-warnings)
 (require 'idris-common-utils)
 (require 'idris-ipkg-mode)
-
+(require 'idris-xref)
 
 (defun idris-mode-context-menu-items (plist)
   "Compute menu items from PLIST that are specific to editing text in `idris-mode'."
@@ -162,7 +162,9 @@ Invokes `idris-mode-hook'."
   (when (idris-lidr-p)
     (run-hooks 'idris-mode-lidr-hook))
   (set (make-local-variable 'prop-menu-item-functions)
-       '(idris-context-menu-items idris-mode-context-menu-items)))
+       '(idris-context-menu-items idris-mode-context-menu-items))
+
+  (add-hook 'xref-backend-functions #'idris-xref-backend nil 'local))
 
 ;; Automatically use idris-mode for .idr and .lidr files.
 ;;;###autoload

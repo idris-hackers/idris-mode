@@ -37,6 +37,7 @@ OBJS =	idris-commands.elc		\
 	idris-syntax.elc		\
 	idris-warnings.elc		\
 	idris-warnings-tree.elc		\
+	idris-xref.elc \
 	inferior-idris.elc
 
 .el.elc:
