@@ -20,7 +20,7 @@ C-c C-r		idris-refine
 C-c C-s		idris-add-clause
 C-c C-t		idris-type-at-point
 C-c C-w		idris-make-with-block
-C-c C-z		idris-pop-to-repl
+C-c C-z		idris-switch-to-repl
 C-c C-S-a	idris-proof-search-next
 C-c C-S-g	idris-generate-def-next
 C-c C-SPC	prop-menu-by-completing-read

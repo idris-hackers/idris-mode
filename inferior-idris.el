@@ -97,42 +97,6 @@ Set using file or directory variables.")
   "The list of `command-line-args' actually passed to Idris.
 This is maintained to restart Idris when the arguments change.")
 
-(autoload 'idris-prover-event-hook-function "idris-prover.el")
-(autoload 'idris-quit "idris-commands.el")
-(defun idris-run ()
-  "Run an inferior Idris process."
-  (interactive)
-  (let ((command-line-flags (idris-compute-flags)))
-    ;; Kill the running Idris if the command-line flags need updating
-    (when (and (get-buffer-process (get-buffer idris-connection-buffer-name))
-               (not (equal command-line-flags idris-current-flags)))
-      (message "Idris command line arguments changed, restarting Idris")
-      (idris-quit)
-      (sit-for 0.01)) ; allows the sentinel to run and reset idris-process
-    ;; Start Idris if necessary
-    (when (not idris-process)
-      (setq idris-process
-            (get-buffer-process
-             (apply #'make-comint-in-buffer
-                    "idris"
-                    idris-process-buffer-name
-                    idris-interpreter-path
-                    nil
-                    "--ide-mode-socket"
-                    command-line-flags)))
-      (with-current-buffer idris-process-buffer-name
-        (add-hook 'comint-preoutput-filter-functions
-                  'idris-process-filter
-                  nil
-                  t)
-        (add-hook 'comint-output-filter-functions
-                  'idris-show-process-buffer
-                  nil
-                  t))
-      (set-process-sentinel idris-process 'idris-sentinel)
-      (setq idris-current-flags command-line-flags)
-      (accept-process-output idris-process 3))))
-
 (defun idris-connect (port)
   "Establish a connection with a Idris REPL at PORT."
   (when (not idris-connection)
@@ -143,7 +107,10 @@ This is maintained to restart Idris when the arguments change.")
     (add-hook 'idris-event-hooks 'idris-warning-event-hook-function)
     (add-hook 'idris-event-hooks 'idris-prover-event-hook-function)
 
-    (unless idris-hole-show-on-load
+    (if idris-hole-show-on-load
+        (progn
+          (add-hook 'idris-load-file-success-hook 'idris-list-holes)
+          (add-hook 'idris-prover-success-hook 'idris-list-holes))
       (remove-hook 'idris-load-file-success-hook 'idris-list-holes-on-load)
       (remove-hook 'idris-load-file-success-hook 'idris-list-holes)
       ;; TODO: In future decouple prover sucess hook from being affected by

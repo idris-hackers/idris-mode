@@ -939,20 +939,13 @@ type-correct, so loading will fail."
   "Remove Idris event hooks set after connection with Idris established."
   (dolist (h idris-event-hooks) (remove-hook 'idris-event-hooks h)))
 
-(defun idris-pop-to-repl ()
-  "Go to the REPL, if one is open."
-  (interactive)
-  (let ((buf (get-buffer idris-repl-buffer-name)))
-    (if buf
-        (pop-to-buffer buf)
-      (error "No Idris REPL buffer is open"))))
+(define-obsolete-function-alias 'idris-pop-to-repl 'idris-switch-to-repl "2022-12-28")
 
 (defun idris-switch-to-last-idris-buffer ()
   "Switch to the last Idris buffer.
 The default keybinding for this command is
-the same as variable `idris-pop-to-repl',
-so that it is very convenient to jump between a
-Idris buffer and the REPL buffer.
+the same as for command `idris-switch-to-repl',
+so it is convenient to jump between Idris code and REPL.
 
 Inspired by `cider-switch-to-last-clojure-buffer'
 https://github.com/clojure-emacs/cider"
@@ -965,6 +958,40 @@ https://github.com/clojure-emacs/cider"
             (pop-to-buffer idris-buffer `(display-buffer-reuse-window))
           (user-error "No Idris buffer found")))
     (user-error "Not in a Idris REPL buffer")))
+
+(defun idris-run ()
+  "Run an inferior Idris process."
+  (interactive)
+  (let ((command-line-flags (idris-compute-flags)))
+    ;; Kill the running Idris if the command-line flags need updating
+    (when (and (get-buffer-process (get-buffer idris-connection-buffer-name))
+               (not (equal command-line-flags idris-current-flags)))
+      (message "Idris command line arguments changed, restarting Idris")
+      (idris-quit)
+      (sit-for 0.01)) ; allows the sentinel to run and reset idris-process
+    ;; Start Idris if necessary
+    (when (not idris-process)
+      (setq idris-process
+            (get-buffer-process
+             (apply #'make-comint-in-buffer
+                    "idris"
+                    idris-process-buffer-name
+                    idris-interpreter-path
+                    nil
+                    "--ide-mode-socket"
+                    command-line-flags)))
+      (with-current-buffer idris-process-buffer-name
+        (add-hook 'comint-preoutput-filter-functions
+                  'idris-process-filter
+                  nil
+                  t)
+        (add-hook 'comint-output-filter-functions
+                  'idris-show-process-buffer
+                  nil
+                  t))
+      (set-process-sentinel idris-process 'idris-sentinel)
+      (setq idris-current-flags command-line-flags)
+      (accept-process-output idris-process 3))))
 
 (defun idris-quit ()
   "Quit the Idris process, cleaning up the state synchronized with Emacs."
