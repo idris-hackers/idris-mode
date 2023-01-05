@@ -134,24 +134,25 @@ remain."
   :expected-result (if (string-match-p "idris2" idris-interpreter-path)
                        :failed
                      :passed)
-  (let ((buffer (find-file "test-data/ProofSearch.idr")))
-    (with-current-buffer buffer
-      (idris-load-file)
-      (dotimes (_ 5) (accept-process-output nil 1))
-      (goto-char (point-min))
-      (re-search-forward "search_here")
-      (goto-char (match-beginning 0))
-      (idris-proof-search)
-      (dotimes (_ 5) (accept-process-output nil 1))
-      (should (looking-at-p "lteSucc (lteSucc (lteSucc (lteSucc (lteSucc lteZero))))"))
-      (move-beginning-of-line nil)
-      (delete-region (point) (line-end-position))
-      (insert "prf = ?search_here")
-      (save-buffer)
-      (kill-buffer)))
+  (unwind-protect
+      (let ((buffer (find-file "test-data/ProofSearch.idr")))
+        (with-current-buffer buffer
+          (idris-load-file)
+          (dotimes (_ 5) (accept-process-output nil 1))
+          (goto-char (point-min))
+          (re-search-forward "search_here")
+          (goto-char (match-beginning 0))
+          (idris-proof-search)
+          (dotimes (_ 5) (accept-process-output nil 1))
+          (should (looking-at-p "lteSucc (lteSucc (lteSucc (lteSucc (lteSucc lteZero))))"))
+          (move-beginning-of-line nil)
+          (delete-region (point) (line-end-position))
+          (insert "prf = ?search_here")
+          (save-buffer)
+          (kill-buffer)))
 
-  ;; More cleanup
-  (idris-quit))
+    ;; More cleanup
+    (idris-quit)))
 
 (ert-deftest idris-test-find-cmdline-args ()
   "Test that idris-mode calculates command line arguments from .ipkg files."
@@ -270,6 +271,9 @@ myReverse xs = revAcc [] xs where
     ;; Assert that we have clean global test state
     (should (not idris-connection))
     (with-current-buffer buffer
+      ;; Hack to reduce random failures
+      ;; TODO: Fix the leak
+      (idris-delete-ibc t)
       (goto-char (point-min))
       (re-search-forward "data Test")
       (funcall-interactively 'idris-type-at-point nil)
