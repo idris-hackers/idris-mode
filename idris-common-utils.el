@@ -293,7 +293,7 @@ inserted text (that is, relative to point prior to insertion)."
             (if term
                 (list 'idris-tt-term (cadr term))
               ())
-            (if key
+            (if (and key (not (string-empty-p (cadr key))))
                 (list 'idris-name-key (concat "{{{{{" (cadr key) "}}}}}"))
               ())
             (if idris-err
