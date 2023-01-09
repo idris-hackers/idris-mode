@@ -1,12 +1,12 @@
-(require 'idris-navigate)
+;;; idris-navigate-test.el --- Tests for idris-navigate
 
-;; Testing
-;; load-file-name is present in batch mode and buffer-file-name in interactive
-;; (add-to-list 'load-path
-;;              (file-name-directory (or load-file-name buffer-file-name)))
+(require 'idris-mode)
+(require 'idris-navigate)
 
 (require 'ert)
 (require 'idris-test-utils)
+
+;;; Code:
 
 (ert-deftest idris-backard-toplevel-navigation-test-2pTac9 ()
   "Test idris-backard-toplevel navigation command."
@@ -260,3 +260,6 @@ getData2 st failcount
    (idris-forward-statement)
    (should (looking-back "Store LoggedOut)]" (line-beginning-position)))
    ))
+
+(provide 'idris-navigate-test)
+;;; idris-navigate-test.el ends here

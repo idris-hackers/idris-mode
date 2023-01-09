@@ -37,7 +37,7 @@
     (should buffer)
     (with-current-buffer buffer
       (idris-run)
-      (dotimes (_ 5) (accept-process-output nil 0.1))
+      (dotimes (_ 10) (accept-process-output nil 0.1))
       (should idris-process)
       (should idris-connection))
     (idris-delete-ibc t)
@@ -48,7 +48,7 @@
   "Ensure that running Idris and quitting doesn't leave behind unwanted buffers."
   (let ((before (normalised-buffer-list)))
     (idris-repl)
-    (dotimes (_ 5) (accept-process-output nil 0.1))
+    (dotimes (_ 10) (accept-process-output nil 0.1))
     (idris-quit)
     (let* ((after (normalised-buffer-list))
            (extra (cl-set-difference after before)))
@@ -61,7 +61,7 @@ In particular, only *idris-events* should remain."
         (idris-log-events t))
 
     (idris-repl)
-    (dotimes (_ 5) (accept-process-output nil 0.1))
+    (dotimes (_ 10) (accept-process-output nil 0.1))
     (idris-quit)
     (let* ((after (normalised-buffer-list))
            (extra (cl-set-difference after before)))
@@ -79,7 +79,7 @@ In particular, only *idris-events* should remain."
       (idris-load-file)
 
       ;; Allow async stuff to happen
-      (dotimes (_ 5) (accept-process-output nil 0.1))
+      (dotimes (_ 10) (accept-process-output nil 0.1))
       (let ((mv-buffer (get-buffer idris-hole-list-buffer-name)))
         ;; The buffer exists and contains characters
         (should (bufferp mv-buffer))
@@ -100,7 +100,7 @@ In particular, only *idris-events* should remain."
         (idris-hole-show-on-load nil))
     (with-current-buffer buffer
       (idris-load-file))
-    (dotimes (_ 5) (accept-process-output nil 0.1))
+    (dotimes (_ 10) (accept-process-output nil 0.1))
     (let ((mv-buffer (get-buffer idris-hole-list-buffer-name)))
       (should-not (bufferp mv-buffer))
       (should (null mv-buffer)))
@@ -121,7 +121,7 @@ In particular, only *idris-events* should remain."
     ;; Test that hole info is present without need to load file manually
     (with-current-buffer buffer
       (idris-list-holes)
-      (dotimes (_ 5) (accept-process-output nil 0.1))
+      (dotimes (_ 10) (accept-process-output nil 0.1))
       (let ((holes-buffer (get-buffer idris-hole-list-buffer-name)))
         (should (bufferp holes-buffer))
         (should (> (buffer-size holes-buffer) 10)))
@@ -130,7 +130,7 @@ In particular, only *idris-events* should remain."
     ;; Test that the hole info is updated for the other current buffer
     (with-current-buffer other-buffer
       (idris-list-holes)
-      (dotimes (_ 5) (accept-process-output nil 0.1))
+      (dotimes (_ 10) (accept-process-output nil 0.1))
       (let ((holes-buffer (get-buffer idris-hole-list-buffer-name)))
         (should (not (bufferp holes-buffer))))
       (idris-delete-ibc t))
@@ -150,12 +150,12 @@ In particular, only *idris-events* should remain."
     (let ((buffer (find-file "test-data/ProofSearch.idr")))
       (with-current-buffer buffer
         (idris-load-file)
-        (dotimes (_ 5) (accept-process-output nil 0.1))
+        (dotimes (_ 10) (accept-process-output nil 0.1))
         (goto-char (point-min))
         (re-search-forward "search_here")
         (goto-char (match-beginning 0))
         (idris-proof-search)
-        (dotimes (_ 5) (accept-process-output nil 0.1))
+        (dotimes (_ 10) (accept-process-output nil 0.1))
         (should (looking-at-p "lteSucc (lteSucc (lteSucc (lteSucc (lteSucc lteZero))))"))
         (move-beginning-of-line nil)
         (delete-region (point) (line-end-position))
@@ -247,6 +247,7 @@ myReverse xs = revAcc [] xs where
     ;; Assert that we have clean global test state
     (should (not idris-connection))
     (with-current-buffer buffer
+      (switch-to-buffer buffer)
       (goto-char (point-min))
       (re-search-forward "data Test")
       (funcall-interactively 'idris-type-at-point nil)

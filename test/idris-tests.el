@@ -51,6 +51,7 @@
   (setq default-directory test-dir))
 
 (require 'ert)
+(require 'seq)
 
 (ert-deftest trivial-test ()
   (should t))
@@ -84,7 +85,7 @@
   (let ((buffer (find-file "test-data/TypeError.idr")))
     (with-current-buffer buffer
       (idris-load-file)
-      (dotimes (_ 5) (accept-process-output nil 0.1))
+      (dotimes (_ 10) (accept-process-output nil 0.1))
       (should (get-buffer idris-notes-buffer-name)))
     (with-current-buffer (get-buffer idris-notes-buffer-name)
       (goto-char (point-min))
