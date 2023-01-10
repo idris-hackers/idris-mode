@@ -243,30 +243,45 @@ myReverse xs = revAcc [] xs where
 
 (ert-deftest idris-test-idris-type-at-point ()
   "Test that `idris-type-at-point' works."
-  (let ((buffer (find-file-noselect "test-data/AddClause.idr")))
-    ;; Assert that we have clean global test state
-    (should (not idris-connection))
-    (with-current-buffer buffer
-      (switch-to-buffer buffer)
-      (goto-char (point-min))
-      (re-search-forward "data Test")
-      (funcall-interactively 'idris-type-at-point nil)
-      ;; Assert that Idris connection is created
-      (should idris-connection)
-      ;; Assert that focus is in the Idris info buffer
-      (should (string= (buffer-name) idris-info-buffer-name))
-      ;; Assert that the info buffer displays a type
-      (should (string-match-p "Test : Type" (buffer-substring-no-properties (point-min) (point-max))))
+  (let ((buffer (find-file-noselect "test-data/AddClause.idr"))
+        file-loaded-p
+        eval-args)
+    (cl-flet ((idris-load-file-sync-stub () (setq file-loaded-p t) nil)
+              (idris-eval-stub (&optional &rest args)
+                               (setq eval-args args)
+                               '("Test : Type"
+                                (0 4 ((:name "AddClause.Test")
+                                      (:implicit :False)
+                                      (:key "AQAAAAAAAAAA")
+                                      (:decor :type)
+                                      (:doc-overview "")
+                                      (:type "Type")
+                                      (:namespace "AddClause")))
+                                (7 4 ((:decor :type)
+                                      (:type "Type")
+                                      (:doc-overview "The type of types")
+                                      (:name "Type")))
+                                (7 4 ((:tt-term "AAAAAAAAAAAHAAAAAAA"))))))
+      (advice-add 'idris-load-file-sync :override #'idris-load-file-sync-stub)
+      (advice-add 'idris-eval :override #'idris-eval-stub)
 
-      ;; TODO: How to emulate "q" key binding to quit info buffer?
-      (idris-info-quit)
-      ;; Assert leaving info buffer will get us back to Idris code buffer
-      (should (eq (current-buffer) buffer))
+      (unwind-protect
+          (with-current-buffer buffer
+            (switch-to-buffer buffer)
+            (goto-char (point-min))
+            (re-search-forward "data Test")
+            (funcall-interactively 'idris-type-at-point nil)
+            (should (eq file-loaded-p t))
+            (should (equal eval-args '((:type-of "Test"))))
+            (should (string= (buffer-name) idris-info-buffer-name))
+            (should (string-match-p "Test : Type" (buffer-substring-no-properties (point-min) (point-max))))
+            (idris-info-quit)
+            (should (eq (current-buffer) buffer)))
 
-      ;; Cleanup
-      (idris-delete-ibc t)
-      (kill-buffer))
-    (idris-quit)))
+        (advice-remove 'idris-load-file-sync #'idris-load-file-sync-stub)
+        (advice-remove 'idris-eval #'idris-eval-stub)
+        (kill-buffer buffer)
+        (idris-quit)))))
 
 ;; Tests by Yasuhiko Watanabe
 ;; https://github.com/idris-hackers/idris-mode/pull/537/files
