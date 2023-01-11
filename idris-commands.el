@@ -101,7 +101,7 @@
         (error "Failed to switch the working directory %s" eval-result)))))
 
 (define-obsolete-function-alias 'idris-list-holes-on-load 'idris-list-holes "2022-12-15"
-   "Use the user's settings from customize to determine whether to list the holes.")
+  "Use the user's settings from customize to determine whether to list the holes.")
 
 (defun idris-possibly-make-dirty (_beginning _end _length)
   "Make the buffer dirty."
@@ -145,7 +145,8 @@
   (setq idris-load-to-here (copy-marker pos t))
   (setq overlay-arrow-position (copy-marker (save-excursion
                                               (goto-char pos)
-                                              (line-beginning-position)) nil)))
+                                              (line-beginning-position))
+                                            nil)))
 
 (defun idris-no-load-to ()
   (setq idris-load-to-here nil)
@@ -169,9 +170,7 @@
 Returning these as a cons."
   (let* ((fn (buffer-file-name))
          (ipkg-srcdir (idris-ipkg-find-src-dir))
-         (srcdir (if ipkg-srcdir
-                     ipkg-srcdir
-                   (file-name-directory fn))))
+         (srcdir (or ipkg-srcdir (file-name-directory fn))))
     (when (and  ;; check that srcdir is prefix of filename - then load relative
            (> (length fn) (length srcdir))
            (string= (substring fn 0 (length srcdir)) srcdir))
@@ -249,7 +248,7 @@ A prefix argument SET-LINE forces loading but only up to the current line."
   "Jump to the previous error overlay in the buffer."
   (interactive)
   (let ((warnings-backward (sort (cl-remove-if-not #'(lambda (w) (< (overlay-end w) (point))) idris-warnings)
-                                #'(lambda (w1 w2) (>= (overlay-end w1) (overlay-end w2))))))
+                                 #'(lambda (w1 w2) (>= (overlay-end w1) (overlay-end w2))))))
     (if warnings-backward
         (goto-char (overlay-end (car warnings-backward)))
       (error "No warnings or errors until beginning of buffer"))))
@@ -286,9 +285,9 @@ This sets the load position to point, if there is one."
 (defun idris-info-for-name (command name)
   "Pass to Idris compiler COMMAND with NAME as argument and display the result."
   (let* ((ty (idris-eval (list command name)))
-             (result (car ty))
-             (formatting (cdr ty)))
-      (idris-show-info (format "%s" result) formatting)))
+         (result (car ty))
+         (formatting (cdr ty)))
+    (idris-show-info (format "%s" result) formatting)))
 
 
 (defun idris-type-at-point (thing)
@@ -456,28 +455,28 @@ KILLFLAG is set if N was explicitly specified."
   (interactive "p\nP")
   (unless (integerp n)
     (signal 'wrong-type-argument (list 'integerp n)))
-   (cond
-    ;; Under the circumstances that `delete-forward-char' does something
-    ;; special, delegate to it. This was discovered by reading the source to
-    ;; it.
-    ((and (use-region-p)
-          delete-active-region
-          (= n 1))
-     (call-interactively 'delete-forward-char n killflag))
-    ;; If in idris-mode and editing an LIDR file and at the end of a line,
-    ;; then delete the newline and a leading >, if it exists
-    ((and (eq major-mode 'idris-mode)
-          (idris-lidr-p)
-          (= n 1)
-          (eolp))
-     (delete-char 1 killflag)
-     (when (and (not (eolp)) (equal (following-char) ?\>))
-       (delete-char 1 killflag)
-       (when (and (not (eolp)) (equal (following-char) ?\ ))
-         (delete-char 1 killflag))))
-    ;; Nothing special to do - delegate to `delete-char', just as
-    ;; `delete-forward-char' does
-    (t (delete-char 1 killflag))))
+  (cond
+   ;; Under the circumstances that `delete-forward-char' does something
+   ;; special, delegate to it. This was discovered by reading the source to
+   ;; it.
+   ((and (use-region-p)
+         delete-active-region
+         (= n 1))
+    (call-interactively 'delete-forward-char n killflag))
+   ;; If in idris-mode and editing an LIDR file and at the end of a line,
+   ;; then delete the newline and a leading >, if it exists
+   ((and (eq major-mode 'idris-mode)
+         (idris-lidr-p)
+         (= n 1)
+         (eolp))
+    (delete-char 1 killflag)
+    (when (and (not (eolp)) (equal (following-char) ?\>))
+      (delete-char 1 killflag)
+      (when (and (not (eolp)) (equal (following-char) ?\ ))
+        (delete-char 1 killflag))))
+   ;; Nothing special to do - delegate to `delete-char', just as
+   ;; `delete-forward-char' does
+   (t (delete-char 1 killflag))))
 
 
 (defun idris-apropos (what)
@@ -535,7 +534,7 @@ Useful for writing papers or slides."
   (interactive)
   (let ((what (idris-thing-at-point)))
     (when (car what)
-      (save-excursion (idris-load-file-sync))
+      (idris-load-file-sync)
       (let ((result (car (idris-eval `(:case-split ,(cdr what) ,(car what)))))
             (initial-position (point)))
         (if (<= (length result) 2)
@@ -551,7 +550,7 @@ Useful for writing papers or slides."
   (interactive)
   (let ((what (idris-thing-at-point)))
     (when (car what)
-      (save-excursion (idris-load-file-sync))
+      (idris-load-file-sync)
       (let ((result (car (idris-eval `(:make-case ,(cdr what) ,(car what))))))
         (if (<= (length result) 2)
             (message "Can't make cases from %s" (car what))
@@ -581,7 +580,7 @@ Otherwise, case split as a pattern variable."
   (let ((what (idris-thing-at-point))
         (command (if proof :add-proof-clause :add-clause)))
     (when (car what)
-      (save-excursion (idris-load-file-sync))
+      (idris-load-file-sync)
       (let ((result (string-trim-left (car (idris-eval `(,command ,(cdr what) ,(car what))))))
             final-point
             (prefix (save-excursion        ; prefix is the indentation to insert for the clause
@@ -589,10 +588,7 @@ Otherwise, case split as a pattern variable."
                       (forward-line (1- (cdr what)))
                       (goto-char (line-beginning-position))
                       (re-search-forward "\\(^>?\\s-*\\)" nil t)
-                      (let ((prefix (match-string 1)))
-                        (if prefix
-                            prefix
-                          "")))))
+                      (or (match-string 1) ""))))
         ;; Go forward until we get to a line with equal or less indentation to
         ;; the type declaration, or the end of the buffer, and insert the
         ;; result
@@ -615,7 +611,7 @@ Otherwise, case split as a pattern variable."
   (interactive)
   (let ((what (idris-thing-at-point)))
     (when (car what)
-      (save-excursion (idris-load-file-sync))
+      (idris-load-file-sync)
       (let ((result (car (idris-eval `(:add-missing ,(cdr what) ,(car what))))))
         (forward-line 1)
         (insert result)))))
@@ -625,7 +621,7 @@ Otherwise, case split as a pattern variable."
   (interactive)
   (let ((what (idris-thing-at-point)))
     (when (car what)
-      (save-excursion (idris-load-file-sync))
+      (idris-load-file-sync)
       (let ((result (car (idris-eval `(:make-with ,(cdr what) ,(car what))))))
         (beginning-of-line)
         (kill-line)
@@ -636,7 +632,7 @@ Otherwise, case split as a pattern variable."
   (interactive)
   (let ((what (idris-thing-at-point)))
     (when (car what)
-      (save-excursion (idris-load-file-sync))
+      (idris-load-file-sync)
       (let* ((result (car (idris-eval `(:make-lemma ,(cdr what) ,(car what)))))
              (lemma-type (car result)))
         ;; There are two cases here: either a ?hole, or the {name} of a provisional defn.
@@ -696,7 +692,7 @@ Otherwise, case split as a pattern variable."
   (idris-load-file-sync)
   (if (>=-protocol-version 2 1)
       (let ((name (read-string "MExpression to compile & execute (default main): "
-                                     nil nil "main")))
+                               nil nil "main")))
         (idris-repl-eval-string (format ":exec %s" name) 0))
     (idris-eval '(:interpret ":exec"))))
 
@@ -732,11 +728,11 @@ A plain prefix ARG causes the command to prompt for hints and recursion
                      (t nil)))
         (what (idris-thing-at-point)))
     (when (car what)
-      (save-excursion (idris-load-file-sync))
+      (idris-load-file-sync)
 
       (let ((result (car (if (> idris-protocol-version 1)
                              (idris-eval `(:proof-search ,(cdr what) ,(car what)))
-                             (idris-eval `(:proof-search ,(cdr what) ,(car what) ,hints ,@depth))
+                           (idris-eval `(:proof-search ,(cdr what) ,(car what) ,hints ,@depth))
                            ))))
         (if (string= result "")
             (error "Nothing found")
@@ -766,7 +762,7 @@ Idris 2 only."
   (interactive)
   (let ((what (idris-thing-at-point)))
     (when (car what)
-      (save-excursion (idris-load-file-sync))
+      (idris-load-file-sync)
       (let ((result (car (idris-eval `(:generate-def ,(cdr what) ,(car what)))))
             final-point
             (prefix (save-excursion
@@ -774,10 +770,7 @@ Idris 2 only."
                       (forward-line (1- (cdr what)))
                       (goto-char (line-beginning-position))
                       (re-search-forward "\\(^>?\\s-*\\)" nil t)
-                      (let ((prefix (match-string 1)))
-                        (if prefix
-                            prefix
-                          "")))))
+                      (or (match-string 1) ""))))
         (if (string= result "")
             (error "Nothing found")
           (goto-char (line-beginning-position))
@@ -822,7 +815,7 @@ Idris 2 only."
   (let ((what (idris-thing-at-point)))
     (unless (car what)
       (error "Could not find a hole at point to refine by"))
-    (save-excursion (idris-load-file-sync))
+    (idris-load-file-sync)
     (let ((results (car (idris-eval `(:intro ,(cdr what) ,(car what))))))
       (pcase results
         (`(,result) (idris-replace-hole-with result))
@@ -834,7 +827,7 @@ Idris 2 only."
   (let ((what (idris-thing-at-point)))
     (unless (car what)
       (error "Could not find a hole at point to refine by"))
-    (save-excursion (idris-load-file-sync))
+    (idris-load-file-sync)
     (let ((result (car (idris-eval `(:refine ,(cdr what) ,(car what) ,name)))))
       (idris-replace-hole-with result))))
 
@@ -889,7 +882,7 @@ type-correct, so loading will fail."
   "Get a list of currently open holes."
   (interactive)
   (when (idris-current-buffer-dirty-p)
-    (save-excursion (idris-load-file-sync)))
+    (idris-load-file-sync))
   (idris-hole-list-show (car (idris-eval '(:metavariables 80)))))
 
 (defun idris-list-compiler-notes ()
@@ -1000,10 +993,10 @@ performed silently without confirmation from the user."
       (if (not (member (file-name-extension fname)
                        '("idr" "lidr" "org" "markdown" "md")))
           (error "The current file is not an Idris file")
-          (when (or no-confirmation (y-or-n-p (concat "Really delete " ibc "?")))
-            (when (file-exists-p ibc)
-              (delete-file ibc)
-              (message "%s deleted" ibc)))))))
+        (when (or no-confirmation (y-or-n-p (concat "Really delete " ibc "?")))
+          (when (file-exists-p ibc)
+            (delete-file ibc)
+            (message "%s deleted" ibc)))))))
 
 (defun idris--active-term-beginning (term pos)
   "Find the beginning of active term TERM that occurs at POS.
