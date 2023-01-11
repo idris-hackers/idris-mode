@@ -40,8 +40,16 @@
           line
           ":"
           column
-          ":"
-          (message (and (* nonl) (* "\n" (not (any "/" "~")) (* nonl))))))
+          "-"
+          end-column
+          ":" line-end "\n"
+          (one-or-more blank) "|\n"
+          (one-or-more digit) (one-or-more blank) "|" (one-or-more not-newline) "\n"
+          (one-or-more blank) "|" (zero-or-more blank) (one-or-more "~") "\n"
+          (one-or-more not-newline) "\n"
+          (one-or-more blank) (one-or-more not-newline) "\n\n"
+          (message (one-or-more not-newline)
+                   (zero-or-more "\n" (one-or-more not-newline)))))
   :modes idris-mode)
 
 
@@ -54,31 +62,24 @@
             source-original)
   :error-patterns ((warning line-start
                             "Warning: "
-                            (message (seq (and (* nonl)
-                                               (* "\n"
-                                                  (not (any "/" "~"))
-                                                  (* nonl)))
-                                          (+ "\n")))
-                            (file-name)
+                            (message (one-or-more not-newline)
+                                     (zero-or-more "\n" (one-or-more not-newline))
+                                     "\n\n")
+                            (one-or-more (not ":")) ;; (file-name)
                             ":"  line
                             ":"  column
                             "--" end-line
-                            ":"  end-column
-                            )
+                            ":"  end-column)
                    (error line-start
                           "Error: "
-                          (message (seq (and (* nonl)
-                                             (* "\n"
-                                                (not (any "/" "~"))
-                                                (* nonl)))
-                                        (+ "\n")))
-                          (file-name)
+                          (message (one-or-more not-newline)
+                                   (zero-or-more "\n" (one-or-more not-newline))
+                                   "\n\n")
+                          (one-or-more (not ":")) ;; (file-name)
                           ":"  line
                           ":"  column
                           "--" end-line
-                          ":"  end-column
-                          )
-                   )
+                          ":"  end-column))
   :modes idris-mode)
 
 (setq flycheck-idris2-executable "idris2")
