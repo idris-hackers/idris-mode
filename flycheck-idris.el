@@ -24,7 +24,7 @@
             "--check" "--nocolor" "--warnpartial"
             ;; Compute the command-line options similarly to inferior-idris
             (eval (idris-compute-flags))
-            source)
+            source-original)
   :error-patterns
   ((warning line-start
             (file-name)
@@ -51,7 +51,7 @@
             "--check" "--no-colour"
             ;; Compute the command-line options similarly to inferior-idris
             (eval (idris-compute-flags))
-            source)
+            source-original)
   :error-patterns ((warning line-start
                             "Warning: "
                             (message (seq (and (* nonl)
