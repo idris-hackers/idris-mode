@@ -82,7 +82,6 @@
                           ":"  end-column))
   :modes idris-mode)
 
-(setq flycheck-idris2-executable "idris2")
 
 ;;; ###autoload
 (add-to-list 'flycheck-checkers 'idris)
