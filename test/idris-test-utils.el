@@ -1,4 +1,4 @@
-;;; idris-tests.el --- Tests utilty for idris-mode  -*- lexical-binding: t -*-
+;;; idris-test-utils.el --- Tests utility for idris-mode  -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2021 Yasuhiko Watanabe
 
@@ -20,11 +20,10 @@
 
 ;;; Commentary:
 
-;; This is a collection of simple tests for idris-mode.
+;; This is a collection of utilities used in tests for idris-mode.
 
 ;;; Code:
-(require 'cl-lib)
-(require 'idris-mode)
+(require 'subr-x)
 
 (defun idris-test-run-goto-char (test-fun &rest args)
   "To run commands like idris-case-split, we have to move the cursor to an appropriate location.
@@ -42,8 +41,10 @@ test  var = ?cases_rhs
   (progn
     (goto-char (point-min))
     (search-forward-regexp "^--.*\\+")
-    (goto-char (- (point) 1))
-    (next-line)
+    (goto-char (1- (point)))
+    (let ((col (current-column)))
+      (forward-line)
+      (move-to-column col))
     (apply test-fun args)
     ))
 
@@ -60,10 +61,11 @@ As this is not for a test of Idris itself, we do not care the results."
      (let ((buffer (find-file ,test-case)))
        (with-current-buffer buffer
          (idris-load-file)
-         (dotimes (_ 5) (accept-process-output nil 0.1)) ;;
+         (dotimes (_ 10) (accept-process-output nil 0.1)) ;;
          (idris-test-run-goto-char (function ,test-fun))
          (let ((this-buffer (current-buffer)))
            (should (,buffer-p buffer this-buffer))))
+       (idris-delete-ibc t)
        (kill-buffer))
      (idris-quit)))
 
@@ -78,7 +80,7 @@ As this is not for a test of Idris itself, we do not care the results."
      (let ((buffer (find-file ,test-case)))
        (with-current-buffer buffer
          (idris-load-file)
-         (dotimes (_ 5) (accept-process-output nil 0.1)) ;;
+         (dotimes (_ 10) (accept-process-output nil 0.1)) ;;
          (idris-test-run-goto-char (function ,test-fun) nil)
          (let ((this-buffer (current-buffer)))
            (should (,buffer-p buffer this-buffer))))
