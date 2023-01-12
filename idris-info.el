@@ -71,7 +71,6 @@ Following the behavior of Emacs help buffers, the future is deleted."
 (defvar idris-info-mode-map
   (let ((map (make-keymap)))
     (suppress-keymap map) ; remove the self-inserting char commands
-    (define-key map (kbd "q") 'idris-info-quit)
     ;;; Allow buttons to be clicked with the left mouse button in info buffers
     (define-key map [follow-link] 'mouse-face)
     (cl-loop for keyer
@@ -87,12 +86,11 @@ Following the behavior of Emacs help buffers, the future is deleted."
     ["Show term interaction widgets" idris-add-term-widgets t]
     ["Close Idris info buffer" idris-info-quit t]))
 
-(define-derived-mode idris-info-mode fundamental-mode "Idris Info"
+(define-derived-mode idris-info-mode special-mode "Idris Info"
   "Major mode used for transient Idris information buffers
-    \\{idris-info-mode-map}
+\\{idris-info-mode-map}
 Invokes `idris-info-mode-hook'."
   (set (make-local-variable 'prop-menu-item-functions) '(idris-context-menu-items)))
-; if we use view-mode here, our key binding q would be shadowed.
 
 (defun idris-info-buffer ()
   "Return the Idris info buffer, creating one if there is not one.
@@ -103,9 +101,7 @@ Ensure that the buffer is in `idris-info-mode'."
         (idris-info-mode)))
     buffer))
 
-(defun idris-info-quit ()
-  (interactive)
-  (idris-kill-buffer idris-info-buffer-name))
+(defalias 'idris-info-quit #'quit-window)
 
 (defun idris-info-buffer-visible-p ()
   (if (get-buffer-window idris-info-buffer-name 'visible) t nil))
@@ -114,7 +110,6 @@ Ensure that the buffer is in `idris-info-mode'."
   "Show the Idris info buffer."
   (interactive)
   (with-current-buffer (idris-info-buffer)
-    (setq buffer-read-only t)
     (pcase-let ((inhibit-read-only t)
                 (`(,past ,present ,future) idris-info-history))
       (erase-buffer)
@@ -130,7 +125,8 @@ Ensure that the buffer is in `idris-info-mode'."
       (goto-char (point-min))))
   (unless (idris-info-buffer-visible-p)
     (pop-to-buffer (idris-info-buffer))
-    (message "Press q to close the Idris info buffer.")))
+    (message (substitute-command-keys
+              "Press `\\<special-mode-map>\\[quit-window]' to close the Idris info buffer."))))
 
 (defmacro with-idris-info-buffer (&rest cmds)
   "Execute `CMDS' in a fresh Idris info buffer, then display it to the user."
