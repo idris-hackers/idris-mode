@@ -136,6 +136,7 @@
 
 (load "idris-commands-test")
 (load "idris-navigate-test")
+(load "idris-repl-test")
 (load "idris-xref-test")
 
 (provide 'idris-tests)
