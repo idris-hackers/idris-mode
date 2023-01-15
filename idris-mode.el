@@ -79,10 +79,10 @@
     "-----------------"
     ["Add initial match clause to type declaration" idris-add-clause t]
     ["Add missing cases" idris-add-missing t]
-    ["Case split pattern variable" idris-case-split t]
+    ["Case split pattern variable" idris-case-dwim t]
     ["Add with block" idris-make-with-block t]
     ["Extract lemma from hole" idris-make-lemma t]
-    ["Solve hole with case expression" idris-make-cases-from-hole t]
+    ["Solve hole with case expression" idris-case-dwim t]
     ["Attempt to solve hole" idris-proof-search t]
     ["Get next solve attempt (Idris 2)" idris-proof-search-next t]
 
