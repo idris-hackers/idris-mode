@@ -32,8 +32,14 @@
             line
             ":"
             column
-            ":Warning - "
-            (message (and (* nonl) (* "\n" (not (any "/" "~")) (* nonl)))))
+            "-"
+            end-column
+            ":" line-end "\n"
+            (one-or-more blank) "|\n"
+            (one-or-more digit) (one-or-more blank) "|" (one-or-more not-newline) "\n"
+            (one-or-more blank) "|" (zero-or-more blank) (one-or-more "~") "\n"
+            "Warning - "(message (one-or-more not-newline)
+                                 (zero-or-more "\n" (one-or-more not-newline))))
    (error line-start
           (file-name)
           ":"
@@ -50,6 +56,7 @@
           (one-or-more blank) (one-or-more not-newline) "\n\n"
           (message (one-or-more not-newline)
                    (zero-or-more "\n" (one-or-more not-newline)))))
+  :error-filter delete-dups
   :modes idris-mode)
 
 
