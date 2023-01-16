@@ -79,6 +79,7 @@
                             ":"  end-column)
                    (error line-start
                           "Error: "
+                          (zero-or-one "While processing" (one-or-more (not ".")) ".")
                           (message (one-or-more not-newline)
                                    (zero-or-more "\n" (one-or-more not-newline))
                                    "\n\n")
