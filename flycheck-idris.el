@@ -78,6 +78,7 @@
                             "--" end-line
                             ":"  end-column)
                    (error line-start
+                          (zero-or-one "Uncaught error: ")
                           "Error: "
                           (zero-or-one "While processing" (one-or-more (not ".")) ".")
                           (message (one-or-more not-newline)
