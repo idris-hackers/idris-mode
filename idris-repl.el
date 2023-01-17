@@ -127,8 +127,9 @@ If ALWAYS-INSERT is non-nil, always insert a prompt at the end of the buffer."
       (let ((inhibit-read-only t))
         (insert prompt)))
     (set-marker idris-input-start (point-max))
-    (goto-char idris-input-start)))
-
+    (goto-char idris-input-start)
+    (and (get-buffer-window)
+         (set-window-point (get-buffer-window) idris-input-start))))
 
 (defun idris-repl-update-prompt (new-prompt)
   "Update prompt string to NEW-PROMPT."
