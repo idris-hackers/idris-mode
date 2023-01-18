@@ -3,7 +3,7 @@
 
 EMACS ?= emacs
 
-NEED_PKGS=prop-menu
+NEED_PKGS=prop-menu flycheck
 
 BATCHEMACS=$(EMACS) --batch --no-site-file -q \
 	-eval '(add-to-list (quote load-path) "${PWD}/")' \
@@ -37,8 +37,9 @@ OBJS =	idris-commands.elc		\
 	idris-syntax.elc		\
 	idris-warnings.elc		\
 	idris-warnings-tree.elc		\
-	idris-xref.elc \
-	inferior-idris.elc
+	idris-xref.elc                  \
+	inferior-idris.elc              \
+	flycheck-idris.elc
 
 .el.elc:
 	$(BYTECOMP) $<
