@@ -159,31 +159,30 @@ This is maintained to restart Idris when the arguments change.")
 
 (defun idris-connection-available-input (process)
   "Process all complete messages which arrived from Idris PROCESS."
+  (while (idris-have-input-p process)
+    (let ((event (idris-receive process)))
+      (idris-event-log event nil)
+      (idris-dispatch-event event process))))
+
+(defun idris-have-input-p (process)
+  "Return `true' if a complete message is available in PROCESS buffer."
   (with-current-buffer (process-buffer process)
-    (while (idris-have-input-p)
-      (let ((event (idris-receive)))
-        (idris-event-log event nil)
-        (unwind-protect
-            (save-current-buffer
-              (idris-dispatch-event event process)))))))
+    (goto-char (point-min))
+    (and (>= (buffer-size) 6)
+         (>= (- (buffer-size) 6) (idris-decode-length)))))
 
-(defun idris-have-input-p ()
-  "Return true if a complete message is available."
-  (goto-char (point-min))
-  (and (>= (buffer-size) 6)
-       (>= (- (buffer-size) 6) (idris-decode-length))))
-
-(defun idris-receive ()
-  "Read a message from the Idris process."
-  (goto-char (point-min))
-  (let* ((length (idris-decode-length))
-         (start (+ 6 (point)))
-         (end (+ start length)))
-    (cl-assert (cl-plusp length))
-    (prog1 (save-restriction
-             (narrow-to-region start end)
-             (read (current-buffer)))
-      (delete-region (point-min) end))))
+(defun idris-receive (process)
+  "Read a message from the Idris PROCESS."
+  (with-current-buffer (process-buffer process)
+    (goto-char (point-min))
+    (let* ((length (idris-decode-length))
+           (start (+ 6 (point)))
+           (end (+ start length)))
+      (cl-assert (cl-plusp length))
+      (prog1 (save-restriction
+               (narrow-to-region start end)
+               (read (current-buffer)))
+        (delete-region (point-min) end)))))
 
 (defun idris-decode-length ()
   "Read a 24-bit hex-encoded integer from buffer."
