@@ -1,5 +1,4 @@
-;;; -*- lexical-binding: t -*-
-;;; idris-log.el --- Logging of Idris
+;;; idris-log.el --- Logging of Idris -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2013-2014 Hannes Mehnert and David Raymond Christiansen
 
@@ -24,8 +23,14 @@
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA 02111-1307, USA.
 
+
+;;; Commentary:
+;; Record and present log messages from Idris compiler in a buffer.
+
 (require 'idris-core)
 (require 'idris-common-utils)
+
+;;; Code:
 
 (defvar idris-log-buffer-name (idris-buffer-name :log)
   "The name of the Idris log buffer.")
@@ -105,7 +110,7 @@ Invokes `idris-log-mode-hook'."
         buffer)))
 
 (defun idris-log (level message)
-  "Record the fact that MESSAGE occured."
+  "Record with LEVEL the fact that MESSAGE occured."
   ;; TODO: Different faces for different log levels
   (with-current-buffer (idris-log-buffer)
     (goto-char (point-max))
@@ -131,3 +136,5 @@ Invokes `idris-log-mode-hook'."
     (_ nil)))
 
 (provide 'idris-log)
+
+;;; idris-log.el ends here
