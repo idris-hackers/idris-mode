@@ -23,8 +23,9 @@
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA 02111-1307, USA.
 
-;;; We don't need to (require 'idris-commands) because the RHS of keybindings
-;;; is always just a quoted symbol
+;;; Commentary:
+;; We don't need to (require 'idris-commands) because the RHS of keybindings
+;; is always just a quoted symbol
 
 ;;; Code:
 
@@ -119,3 +120,5 @@
                                   "h" 'idris-docs-at-point)))
 
 (provide 'idris-keys)
+
+;;; idris-keys.el ends here
