@@ -23,16 +23,21 @@
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA 02111-1307, USA.
 
+;;; Commentary:
+;; Handle connection to Idris and expose `idris-eval' and `idris-eval-sync'
+;; functions to be used by other modules for communication with Idris.
+;;
+
 (require 'idris-core)
 (require 'idris-settings)
 (require 'idris-common-utils)
-(require 'pp)
 (require 'cl-lib)
 (require 'idris-events)
 (require 'idris-log)
 (require 'idris-warnings)
 
-;;; Process stuff
+;;; Code:
+
 (defvar idris-process nil
   "The Idris process.")
 
@@ -242,22 +247,21 @@ The first function will be called with a final result, and the second
                  (t (error "Unexpected reply: %S %S" id value))))))))
 
 (cl-defmacro idris-rex ((&rest saved-vars) sexp intermediate &rest continuations)
-  "(idris-rex (VAR ...) (SEXP) INTERMEDIATE CLAUSES ...)
+  "Remote Execute SEXP.
 
-Remote Execute SEXP.
+\\(idris-rex (VAR ...) (SEXP) INTERMEDIATE CONTINUATIONS ...)
 
-VARs are a list of saved variables visible in the other forms.  Each
-VAR is either a symbol or a list (VAR INIT-VALUE).
+SAVED-VARS are a list of saved variables visible in the other forms.
+Each VAR is either a symbol or a list (VAR INIT-VALUE).
 
-SEXP is evaluated and the princed version is sent to Idris.
+SEXP is evaluated and the `princ'-ed version is sent to Idris.
 
 If INTERMEDIATE is non-nil, also register for intermediate results.
 
-CLAUSES is a list of patterns with same syntax as
-`destructure-case'.  The result of the evaluation of SEXP is
-dispatched on CLAUSES.  The result is either a sexp of the
-form (:ok VALUE) or (:error CONDITION).  CLAUSES is executed
-asynchronously.
+CONTINUATIONS is a list of patterns with same syntax as `destructure-case'.
+The result of the evaluation of SEXP is dispatched on CONTINUATIONS.
+The result is either a sexp of the form (:ok VALUE) or (:error CONDITION).
+CONTINUATIONS are executed asynchronously.
 
 Note: don't use backquote syntax for SEXP, because various Emacs
 versions cannot deal with that."
@@ -334,8 +338,7 @@ If `NO-ERRORS' is non-nil, don't trigger warning buffers and
            (accept-process-output idris-connection 0.1)))))))
 
 (defvar idris-options-cache '()
-  "An alist caching the Idris interpreter options, to
-  allow consulting them when the Idris interpreter is busy.")
+  "An alist caching the Idris interpreter options.")
 
 (defun idris-update-options-cache ()
   (idris-eval-async '(:get-options)
@@ -392,3 +395,4 @@ Returns nil if the version of Idris used doesn't support asking for versions."
 
 
 (provide 'inferior-idris)
+;;; inferior-idris.el ends here
