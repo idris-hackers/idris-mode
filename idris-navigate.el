@@ -24,7 +24,7 @@
 
 ;;; Code:
 
-;;; Commentary: 
+;;; Commentary:
 
 ;; Provide a reliable jump to start and end of a top-level form - and some more
 ;; subroutines.
@@ -39,7 +39,7 @@
 ;; Tested with
 ;; GNU Emacs 24.4.1 (i586-pc-linux-gnu, GTK+ Version 3.14.5)
 ;;  of 2017-09-12 on x86-csail-01, modified by Debian
-;; 
+;;
 ;;    passed  1/4  idris-backard-statement-navigation-test-2pTac9
 ;;    passed  2/4  idris-backard-toplevel-navigation-test-2pTac9
 ;;    passed  3/4  idris-forward-statement-navigation-test-2pTac9
@@ -52,7 +52,7 @@
 ;;; Code:
 
 (defvar idris-debug-p nil
-  "Switch to test-buffer when t")
+  "Switch to test-buffer when t.")
 
 ;; (setq idris-debug-p t)
 
@@ -83,19 +83,20 @@
 (make-variable-buffer-local 'idris-delimiter-regexp)
 
 (defvar idris-not-expression-regexp "[ .=#\t\r\n\f)]+"
-  "idris-expression assumes chars indicated probably will not compose a idris-expression. ")
+  "idris-expression assumes chars indicated probably will not compose a idris-expression.")
 
 (defvar idris-not-expression-chars " #\t\r\n\f"
-  "idris-expression assumes chars indicated probably will not compose a idris-expression. ")
+  "idris-expression assumes chars indicated probably will not compose a idris-expression.")
 
 (defvar idris-partial-expression-backward-chars "^] .=,\"'()[{}:#\t\r\n\f"
-  "idris-partial-expression assumes chars indicated possible composing a idris-partial-expression, skip it. ")
+  "idris-partial-expression assumes chars indicated possible composing a idris-partial-expression, skip it.")
 ;; (setq idris-partial-expression-backward-chars "^] .=,\"'()[{}:#\t\r\n\f")
 
 (defvar idris-partial-expression-forward-chars "^ .\"')}]:#\t\r\n\f")
 ;; (setq idris-partial-expression-forward-chars "^ .\"')}]:#\t\r\n\f")
 
-(defvar idris-partial-expression-re (concat "[" idris-partial-expression-backward-chars (substring idris-partial-expression-forward-chars 1) "]+"))
+(defvar idris-partial-expression-re
+  (concat "[" idris-partial-expression-backward-chars (substring idris-partial-expression-forward-chars 1) "]+"))
 ;; (setq idris-partial-expression-re (concat "[" idris-partial-expression-backward-chars "]+"))
 
 (defvar idris-expression-skip-regexp "[^ (=:#\t\r\n\f]"
@@ -163,24 +164,24 @@ Optional argument IACT saying interactively called."
 Optional argument START start."
   (interactive)
   (let* ((pps (parse-partial-sexp (or start (point-min)) (point)))
-	 (erg (and (nth 4 pps) (nth 8 pps))))
+         (erg (and (nth 4 pps) (nth 8 pps))))
     (unless (or erg (nth 3 pps))
       (when (or (eq (car (syntax-after (point))) 11)
-		(ignore-errors (looking-at comment-start)))
-	(setq erg (point))))
-  erg))
+                (ignore-errors (looking-at comment-start)))
+        (setq erg (point))))
+    erg))
 
 (defun idris-backward-comment (&optional pos)
   "Got to beginning of a commented section.
 Optional argument POS start."
   (interactive)
   (let ((erg pos)
-	last)
+        last)
     (when erg (goto-char erg))
     (while (and (not (bobp)) (setq erg (idris-in-comment-p)))
       (when (< erg (point))
-	(goto-char erg)
-	(setq last (point)))
+        (goto-char erg)
+        (setq last (point)))
       (skip-chars-backward " \t\r\n\f"))
     (when last (goto-char last))
     last))
@@ -194,23 +195,23 @@ Optional argument POS orig.
 Optional argument CHAR comment start."
   (interactive)
   (let ((orig (or pos (point)))
-	(char (or char (string-to-char comment-start)))
-	last)
+        (char (or char (string-to-char comment-start)))
+        last)
     (unless (idris-in-comment-p)
       (search-forward comment-start nil t 1))
     (while (and (not (eobp))
-		(forward-comment 99999)))
+                (forward-comment 99999)))
     (when (eq (point) orig)
       ;; forward-comment fails sometimes
       (while
-	  (and (not (eobp)) (or (idris-in-comment-p)(eq (point) orig)))
-	(setq last (line-end-position))
-	(forward-line 1)
-	(end-of-line)
-	;; (setq orig (point))
-	))
+          (and (not (eobp)) (or (idris-in-comment-p)(eq (point) orig)))
+        (setq last (line-end-position))
+        (forward-line 1)
+        (end-of-line)
+        ;; (setq orig (point))
+        ))
     (and (eq orig (point)) (prog1 (forward-line 1) (back-to-indentation))
-	 (while (member (char-after) (list char 10))(forward-line 1)(back-to-indentation)))
+         (while (member (char-after) (list char 10))(forward-line 1)(back-to-indentation)))
     ;; go
     (when last
       (goto-char last)
@@ -227,20 +228,20 @@ Stop at first non-empty char.
 With negative arg go backward. "
   (interactive)
   (let ((arg (or arg 1))
-	(pos (point))
-	(orig (or orig (point)))
-	(pps (or pps (parse-partial-sexp (point-min) (point)))))
+        (pos (point))
+        (orig (or orig (point)))
+        (pps (or pps (parse-partial-sexp (point-min) (point)))))
     (if (< 0 arg)
         (progn
           (skip-chars-forward " \t\r\n")
           (when (or (and pps (nth 4 pps))(idris-in-comment-p))
-	    (end-of-line)
-	    (skip-chars-forward " \t\r\n\f"))
+            (end-of-line)
+            (skip-chars-forward " \t\r\n\f"))
           (when (empty-line-p)
             (forward-line arg))
           (when (> (point) pos)
             (idris-skip-blanks-and-comments arg nil orig))
-	  (< orig (point)))
+          (< orig (point)))
       (skip-chars-backward " \t\r\n")
       (when (or (and pps (nth 4 pps))(idris-in-comment-p))
         (goto-char (or (and pps (nth 4 pps))(nth 8 pps))))
@@ -252,15 +253,15 @@ With negative arg go backward. "
 Otherwise return nil."
   (interactive)
   (let* ((pps (parse-partial-sexp (point-min) (point)))
-	 (erg (and (nth 3 pps) (nth 8 pps)))
-	 (la (unless (or erg (eobp))
-	       (and (eq (char-syntax (char-after)) 34)
-		    ;; look for closing char
-		    (save-excursion
-		      (forward-char 1)
-		      (nth 3 (parse-partial-sexp (point-min) (point))))
-		    (point)))))
-    (when (interactive-p) (message "%s" (or erg la)))
+         (erg (and (nth 3 pps) (nth 8 pps)))
+         (la (unless (or erg (eobp))
+               (and (eq (char-syntax (char-after)) 34)
+                    ;; look for closing char
+                    (save-excursion
+                      (forward-char 1)
+                      (nth 3 (parse-partial-sexp (point-min) (point))))
+                    (point)))))
+    (when (called-interactively-p 'interactive) (message "%s" (or erg la)))
     (or erg la)))
 
 ;; Expression
@@ -275,7 +276,7 @@ go to next expression in buffer upwards"
   (interactive)
   (let (erg)
     (setq erg (idris--beginning-of-expression-intern))
-    (when (and idris-verbose-p (interactive-p)) (message "%s" erg))
+    (when (and idris-verbose-p (called-interactively-p 'interactive)) (message "%s" erg))
     erg))
 
 (defun idris--beginning-of-expression-intern (&optional orig)
@@ -327,7 +328,7 @@ go to next expression in buffer upwards"
        ((and (< (point) orig)(looking-at (concat idris-expression-re idris-delimiter-regexp))))
        ((looking-back (concat "[^ \t\n\r\f]+" idris-delimiter-regexp) (line-beginning-position))
         (goto-char (match-beginning 0))
-	(skip-chars-backward idris-expression-skip-chars)
+        (skip-chars-backward idris-expression-skip-chars)
         (unless (or (looking-back idris-assignment-regexp (line-beginning-position)) (looking-back "^[ \t]*" (line-beginning-position)))
           (idris--beginning-of-expression-intern orig)))
        ;; before assignment
@@ -394,56 +395,56 @@ Optional argument PPS result of ‘parse-partial-sexp’."
   (unless done (skip-chars-forward " \t\r\n\f"))
   (unless (eobp)
     (let ((comment-start (idris-fix-comment-start))
-	  (repeat (or (and repeat (1+ repeat)) 0))
-	  (pps (or pps (parse-partial-sexp (point-min) (point))))
+          (repeat (or (and repeat (1+ repeat)) 0))
+          (pps (or pps (parse-partial-sexp (point-min) (point))))
           (orig (or orig (point)))
           erg)
       (if (< idris-max-specpdl-size repeat)
-	  (error "`idris-forward-expression' reached loops max")
-	(cond
-	 ;; in comment
-	 ((nth 4 pps)
-	  (or (< (point) (progn (forward-comment 1)(point)))(forward-line 1))
-	  (idris-forward-expression orig done repeat))
-	 ;; empty before comment
-	 ((and comment-start (looking-at (concat "[ \t]*" comment-start))(looking-back "^[ \t]*" (line-beginning-position)))
-	  (while (and (looking-at (concat "[ \t]*" comment-start)) (not (eobp)))
-	    (forward-line 1))
-	  (idris-forward-expression orig done repeat))
-	 ;; inside string
-	 ((nth 3 pps)
-	  (goto-char (nth 8 pps))
-	  (goto-char (scan-sexps (point) 1))
-	  (setq done t)
-	  (idris-forward-expression orig done repeat))
-	 ((looking-at "\"\"\"\\|'''\\|\"\\|'")
-	  (goto-char (scan-sexps (point) 1))
-	  (setq done t)
-	  (idris-forward-expression orig done repeat))
-	 ((nth 1 pps)
-	  (goto-char (nth 1 pps))
-	  (goto-char (scan-sexps (point) 1))
-	  (setq done t)
-	  (idris-forward-expression orig done repeat))
-	 ;; looking at opening delimiter
-	 ((eq 4 (car-safe (syntax-after (point))))
-	  (goto-char (scan-sexps (point) 1))
-	  (setq done t)
-	  (idris-forward-expression orig done repeat))
-	 ((and (eq orig (point)) (looking-at idris-operator-regexp))
-	  (goto-char (match-end 0))
-	  (idris-forward-expression orig done repeat))
-	 ((and (not done)
-	       (< 0 (skip-chars-forward idris-expression-skip-chars)))
-	  (setq done t)
-	  (idris-forward-expression orig done repeat))
-	 ;; at colon following arglist
-	 ((looking-at ":[ \t]*$")
-	  (forward-char 1)))
-	(unless (or (eq (point) orig)(and (eobp)(bolp)))
-	  (setq erg (point)))
-	(when (and idris-verbose-p (called-interactively-p 'any)) (message "%s" erg))
-	erg))))
+          (error "`idris-forward-expression' reached loops max")
+        (cond
+         ;; in comment
+         ((nth 4 pps)
+          (or (< (point) (progn (forward-comment 1)(point)))(forward-line 1))
+          (idris-forward-expression orig done repeat))
+         ;; empty before comment
+         ((and comment-start (looking-at (concat "[ \t]*" comment-start))(looking-back "^[ \t]*" (line-beginning-position)))
+          (while (and (looking-at (concat "[ \t]*" comment-start)) (not (eobp)))
+            (forward-line 1))
+          (idris-forward-expression orig done repeat))
+         ;; inside string
+         ((nth 3 pps)
+          (goto-char (nth 8 pps))
+          (goto-char (scan-sexps (point) 1))
+          (setq done t)
+          (idris-forward-expression orig done repeat))
+         ((looking-at "\"\"\"\\|'''\\|\"\\|'")
+          (goto-char (scan-sexps (point) 1))
+          (setq done t)
+          (idris-forward-expression orig done repeat))
+         ((nth 1 pps)
+          (goto-char (nth 1 pps))
+          (goto-char (scan-sexps (point) 1))
+          (setq done t)
+          (idris-forward-expression orig done repeat))
+         ;; looking at opening delimiter
+         ((eq 4 (car-safe (syntax-after (point))))
+          (goto-char (scan-sexps (point) 1))
+          (setq done t)
+          (idris-forward-expression orig done repeat))
+         ((and (eq orig (point)) (looking-at idris-operator-regexp))
+          (goto-char (match-end 0))
+          (idris-forward-expression orig done repeat))
+         ((and (not done)
+               (< 0 (skip-chars-forward idris-expression-skip-chars)))
+          (setq done t)
+          (idris-forward-expression orig done repeat))
+         ;; at colon following arglist
+         ((looking-at ":[ \t]*$")
+          (forward-char 1)))
+        (unless (or (eq (point) orig)(and (eobp)(bolp)))
+          (setq erg (point)))
+        (when (and idris-verbose-p (called-interactively-p 'any)) (message "%s" erg))
+        erg))))
 
 (defun idris-down-expression ()
   "Go to the beginning of next expression downwards in buffer.
@@ -457,7 +458,7 @@ Return position if expression found, nil otherwise."
                 ((ignore-errors (< orig (progn (idris-forward-expression) (idris-backward-expression))))
                  (point))
                 (t (goto-char orig) (and (idris-forward-expression) (idris-forward-expression)(idris-backward-expression))))))
-    (when (and idris-verbose-p (interactive-p)) (message "%s" erg))
+    (when (and idris-verbose-p (called-interactively-p 'interactive)) (message "%s" erg))
     erg))
 
 ;; (defun idris--end-of-expression-intern (&optional orig)
@@ -479,10 +480,10 @@ Return position if expression found, nil otherwise."
 ;;         (or (< (point) (progn (forward-comment 1)(point)))(forward-line 1))
 ;;         (idris--end-of-expression-intern orig))
 ;;        ( ;; (empty-line-p)
-;; 	(eq 9 (char-after))
+;;  (eq 9 (char-after))
 ;;         (while
 ;;             (and  ;; (empty-line-p)
-;; 	     (eq 9 (char-after))(not (eobp)))
+;;       (eq 9 (char-after))(not (eobp)))
 ;;           (forward-line 1))
 ;;         (idris--end-of-expression-intern orig))
 ;;        ((looking-at (concat idris-string-delim-re idris-expression-re idris-string-delim-re idris-operator-regexp idris-string-delim-re idris-expression-re idris-string-delim-re))
@@ -519,12 +520,12 @@ Return position if expression found, nil otherwise."
 ;;         (unless (looking-at (concat idris-assignment-regexp "\\|[ \t]*$\\|" idris-delimiter-regexp))
 ;;           (idris--end-of-expression-intern orig)))
 ;;        ((looking-at (concat "\\([[:alnum:] ]+ \\)" idris-assignment-regexp))
-;; 	(goto-char (match-end 1))
-;; 	(skip-chars-backward " \t\r\n\f"))
+;;  (goto-char (match-end 1))
+;;  (skip-chars-backward " \t\r\n\f"))
 ;;        ((and (eq orig (point)) (looking-at (concat "[ \t]*" "[^(\t\n\r\f]+" idris-operator-regexp)))
-;; 	(skip-chars-forward " \t\r\n\f")
-;; 	(when (< 0 (skip-chars-forward idris-expression-skip-chars))
-;; 	  (idris--end-of-expression-intern orig)))
+;;  (skip-chars-forward " \t\r\n\f")
+;;  (when (< 0 (skip-chars-forward idris-expression-skip-chars))
+;;    (idris--end-of-expression-intern orig)))
 ;;        ((and (eq orig (point)) (looking-at idris-not-expression-regexp))
 ;;         (skip-chars-forward idris-not-expression-chars)
 ;;         (unless (or (looking-at "[ \t]*$")(looking-at idris-assignment-regexp))
@@ -534,9 +535,9 @@ Return position if expression found, nil otherwise."
 ;;         (unless (or (looking-at "[ \n\t\r\f]*$")(looking-at idris-assignment-regexp))
 ;;           (idris--end-of-expression-intern orig)))
 ;;        ((and (eq (point) orig)
-;; 	     (skip-chars-forward " \t\r\n\f")
-;; 	     (< 0 (skip-chars-forward idris-expression-skip-chars)))
-;; 	(idris--end-of-expression-intern orig)))
+;;       (skip-chars-forward " \t\r\n\f")
+;;       (< 0 (skip-chars-forward idris-expression-skip-chars)))
+;;  (idris--end-of-expression-intern orig)))
 
 ;;       (unless (or (eq (point) orig)(and (eobp)(bolp)))
 ;;         (setq erg (point)))
@@ -559,9 +560,9 @@ Optional argument ORIG Position."
       (while (and (not (bobp)) (idris-in-comment-p)(< 0 (abs (skip-chars-backward idris-partial-expression-backward-chars))))))
     (when (< (point) orig)
       (unless
-	  (and (bobp) (member (char-after) (list ?\ ?\t ?\r ?\n ?\f)))
-	(setq erg (point))))
-    (when (interactive-p) (message "%s" erg))
+          (and (bobp) (member (char-after) (list ?\ ?\t ?\r ?\n ?\f)))
+        (setq erg (point))))
+    (when (called-interactively-p 'interactive) (message "%s" erg))
     erg))
 
 (defun idris-forward-of-partial-expression ()
@@ -575,7 +576,7 @@ Optional argument ORIG Position."
      (looking-at "[\[{(]")
      (goto-char (scan-sexps (point) 1)))
     (setq erg (point))
-    (when (interactive-p) (message "%s" erg))
+    (when (called-interactively-p 'interactive) (message "%s" erg))
     erg))
 
 (defun idris--beginning-of-expression-p (orig pps)
@@ -586,23 +587,23 @@ Argument ORIG Position.
 Argument PPS result of ‘parse-partial-sexp’."
   (let (erg)
     (or (and pps (setq erg (eq 0 (nth 0 pps))))
-	(save-excursion
-	  (unless (and (eolp)(bolp))
-	    (idris-forward-statement)
-	    (idris-backward-statement))
-	  (when (eq orig (point))
-	    (setq erg orig))
-	  erg))))
+        (save-excursion
+          (unless (and (eolp)(bolp))
+            (idris-forward-statement)
+            (idris-backward-statement))
+          (when (eq orig (point))
+            (setq erg orig))
+          erg))))
 
 (defun idris--end-of-expression-p ()
   "Return position, if cursor is at the end of a expression, nil otherwise."
   (let ((orig (point))
-	erg)
+        erg)
     (save-excursion
       (idris-backward-statement)
       (idris-forward-statement)
       (when (eq orig (point))
-	(setq erg orig))
+        (setq erg orig))
       erg)))
 
 (defvar toplevel-nostart-chars (list ?-))
@@ -617,25 +618,25 @@ Optional argument ARG times"
     ;; (forward-line -1)
     ;; (beginning-of-line)
     (let* ((arg (or arg 1))
-	   (orig (point))
-	   (pps (parse-partial-sexp (point-min) (point)))
-	   ;; set ppss start point
-	   (limit (or (nth 8 pps) (point-min)))
-	   (comment-start (idris-fix-comment-start))
-	   erg this)
+           (orig (point))
+           (pps (parse-partial-sexp (point-min) (point)))
+           ;; set ppss start point
+           (limit (or (nth 8 pps) (point-min)))
+           (comment-start (idris-fix-comment-start))
+           erg this)
       ;; (unless (bobp)
       (while (and
-	      (prog1 (re-search-backward "^[^ \t\n\f\r]" nil 'move arg)
-		(beginning-of-line))
-	      (or (ignore-errors (looking-at comment-start))(ignore-errors (looking-at comment-start-skip))
-		  (and (setq this (save-excursion (ignore-errors (nth 8 (parse-partial-sexp limit (point))))))
-		       (setq limit this))
-		  (member (char-after) toplevel-nostart-chars)))
-	(forward-line -1)
-	(beginning-of-line))
+              (prog1 (re-search-backward "^[^ \t\n\f\r]" nil 'move arg)
+                (beginning-of-line))
+              (or (ignore-errors (looking-at comment-start))(ignore-errors (looking-at comment-start-skip))
+                  (and (setq this (save-excursion (ignore-errors (nth 8 (parse-partial-sexp limit (point))))))
+                       (setq limit this))
+                  (member (char-after) toplevel-nostart-chars)))
+        (forward-line -1)
+        (beginning-of-line))
       (when (< (point) orig)
-	(setq erg (point))
-	(when (interactive-p) (message "%s" erg)))
+        (setq erg (point))
+        (when (called-interactively-p 'interactive) (message "%s" erg)))
       erg)))
 
 (defun idris--forward-toplevel-intern (orig pps)
@@ -646,11 +647,11 @@ Optional argument ARG times"
       (idris-backward-toplevel))
     (unless (< orig (point))
       (while (and
-	      (not (eobp))
-	      (save-excursion
-		(idris-forward-expression orig nil nil pps)
-		(setq last (point)))
-	      (idris-down-expression)(< 0 (current-indentation)))))
+              (not (eobp))
+              (save-excursion
+                (idris-forward-expression orig nil nil pps)
+                (setq last (point)))
+              (idris-down-expression)(< 0 (current-indentation)))))
     (and last (goto-char last))
     ))
 
@@ -661,19 +662,19 @@ Optional argument BEGINNING-OF-STRING-POSITION Position."
   ;; (when idris-debug-p (message "(current-buffer): %s" (current-buffer)))
   ;; (when idris-debug-p (message "major-mode): %s" major-mode))
   (let ((orig (point))
-	(beginning-of-string-position (or beginning-of-string-position (and (nth 3 (parse-partial-sexp 1 (point)))(nth 8 (parse-partial-sexp 1 (point))))
+        (beginning-of-string-position (or beginning-of-string-position (and (nth 3 (parse-partial-sexp 1 (point)))(nth 8 (parse-partial-sexp 1 (point))))
                                           (and (looking-at "\"\"\"\\|'''\\|\"\\|\'")(match-beginning 0))))
         erg)
     (if beginning-of-string-position
         (progn
           (goto-char beginning-of-string-position)
-	  (when
-	      ;; work around parse-partial-sexp error
-	      (and (nth 3 (parse-partial-sexp 1 (point)))(nth 8 (parse-partial-sexp 1 (point))))
-	    (goto-char (nth 3 (parse-partial-sexp 1 (point)))))
+          (when
+              ;; work around parse-partial-sexp error
+              (and (nth 3 (parse-partial-sexp 1 (point)))(nth 8 (parse-partial-sexp 1 (point))))
+            (goto-char (nth 3 (parse-partial-sexp 1 (point)))))
           (if (ignore-errors (setq erg (scan-sexps (point) 1)))
-			      (goto-char erg)
-	    (goto-char orig)))
+              (goto-char erg)
+            (goto-char orig)))
 
       (error (concat "idris-end-of-string: don't see end-of-string at " (buffer-name (current-buffer)) "at pos " (point))))
     (when (and idris-verbose-p (called-interactively-p 'any)) (message "%s" erg))
@@ -687,37 +688,37 @@ Optional argument ARG times."
   (interactive "p")
   (unless (eobp)
     (let* ((arg (or arg 1))
-	   (orig (point))
-	   (pps (parse-partial-sexp (point-min) (point)))
-	   ;; set ppss start point
-	   (limit (or (nth 8 pps) (point-min)))
-	   (comment-start (idris-fix-comment-start))
-	   erg this)
+           (orig (point))
+           (pps (parse-partial-sexp (point-min) (point)))
+           ;; set ppss start point
+           (limit (or (nth 8 pps) (point-min)))
+           (comment-start (idris-fix-comment-start))
+           erg this)
       (idris-skip-blanks-and-comments)
       (while
-	  (and
-	   (progn (end-of-line)
-		  (setq erg (re-search-forward "^[^ \t\n\f\r]" nil 'move arg)))
-	   (or
-	    (progn
-	      (beginning-of-line)
-	      (nth 8 (parse-partial-sexp (point-min) (point))))
-	    (ignore-errors (when
-			       (looking-at comment-start)
-			     (forward-line 1)
-			     t))
-	    (ignore-errors (when (looking-at comment-start-skip)
-			     (forward-line 1)
-			     t))
-	    (and (setq this (ignore-errors (nth 8 (parse-partial-sexp limit (point)))))
-		 (setq limit this)))))
+          (and
+           (progn (end-of-line)
+                  (setq erg (re-search-forward "^[^ \t\n\f\r]" nil 'move arg)))
+           (or
+            (progn
+              (beginning-of-line)
+              (nth 8 (parse-partial-sexp (point-min) (point))))
+            (ignore-errors (when
+                               (looking-at comment-start)
+                             (forward-line 1)
+                             t))
+            (ignore-errors (when (looking-at comment-start-skip)
+                             (forward-line 1)
+                             t))
+            (and (setq this (ignore-errors (nth 8 (parse-partial-sexp limit (point)))))
+                 (setq limit this)))))
       (when erg
-	(beginning-of-line)
-	(skip-chars-backward " \t\r\n\f")
-	(forward-line 1) (beginning-of-line))
+        (beginning-of-line)
+        (skip-chars-backward " \t\r\n\f")
+        (forward-line 1) (beginning-of-line))
       (when (< orig (point))
-	(setq erg (point))
-	(when (and idris-verbose-p (interactive-p)) (message "%s" erg)))
+        (setq erg (point))
+        (when (and idris-verbose-p (called-interactively-p 'interactive)) (message "%s" erg)))
       erg)))
 
 (defun idris-forward-toplevel-bol ()
@@ -729,13 +730,13 @@ Returns position if successful, nil otherwise"
         erg)
     (unless (eobp)
       (when (idris--forward-toplevel-intern orig (parse-partial-sexp (point-min) (point)))
-	(if (eobp)
-	    (newline 1)
-	  (forward-line 1)
-	  (beginning-of-line)))
+        (if (eobp)
+            (newline 1)
+          (forward-line 1)
+          (beginning-of-line)))
       (when (< orig (point))
-	(setq erg (point))))
-    (when (and idris-verbose-p (interactive-p)) (message "%s" erg))
+        (setq erg (point))))
+    (when (and idris-verbose-p (called-interactively-p 'interactive)) (message "%s" erg))
     erg))
 
 (defun idris-backward-statement (&optional orig done limit)
@@ -800,21 +801,21 @@ Optional argument LIMIT limit."
          ((and (member (char-after) (list ?\" ?\'))
                (progn (back-to-indentation) (eq ?@ (char-after))))
           (back-to-indentation)
-	  (when (< (point) orig) (setq done t))
+          (when (< (point) orig) (setq done t))
           (idris-backward-statement orig done limit))
-	 ((eq orig (point))
-	  (back-to-indentation)
-	  (when (< (point) orig)(setq done t))
-	  (idris-backward-statement orig done limit))
-	 )
+         ((eq orig (point))
+          (back-to-indentation)
+          (when (< (point) orig)(setq done t))
+          (idris-backward-statement orig done limit))
+         )
         ;; return nil when before comment
-	(unless (eq (current-indentation)  (current-column))
-	  (back-to-indentation)
-	  (setq done t)
-	  (idris-backward-statement orig done limit))
+        (unless (eq (current-indentation)  (current-column))
+          (back-to-indentation)
+          (setq done t)
+          (idris-backward-statement orig done limit))
         (unless (and (looking-at "[ \t]*#") (looking-back "^[ \t]*" (line-beginning-position)))
           (when (< (point) orig)(setq erg (point))))
-        (when (and idris-verbose-p (interactive-p)) (message "%s" erg))
+        (when (and idris-verbose-p (called-interactively-p 'interactive)) (message "%s" erg))
         erg))))
 
 (defun idris-forward-statement (&optional orig done repeat)
@@ -850,7 +851,7 @@ If no error, customize `idris-max-specpdl-size'"))
             (idris-forward-statement orig done repeat))))
        ;; in comment
        ((or (nth 4 pps)(eq (char-syntax (char-after)) ?<))
-	(idris-forward-comment)
+        (idris-forward-comment)
         (idris-forward-statement orig done repeat))
        ((idris--current-line-backslashed-p)
         (end-of-line)
@@ -864,31 +865,31 @@ If no error, customize `idris-max-specpdl-size'"))
           (idris-forward-statement orig done repeat)))
        ((eq orig (point))
         (or (and
-	     (< 0 (abs (skip-chars-forward (concat " \t\r\n\f'\"" comment-start))))
-	     (eolp) (setq done t))
-	    (end-of-line)
-	    (skip-chars-backward " \t\r\n\f$"))
+             (< 0 (abs (skip-chars-forward (concat " \t\r\n\f'\"" comment-start))))
+             (eolp) (setq done t))
+            (end-of-line)
+            (skip-chars-backward " \t\r\n\f$"))
         (idris-forward-statement orig done repeat))
        ((eq (current-indentation) (current-column))
-	(end-of-line)
-	(skip-chars-backward " \t\r\n\f")
-	(setq done t)
-	(idris-forward-statement orig done repeat))
+        (end-of-line)
+        (skip-chars-backward " \t\r\n\f")
+        (setq done t)
+        (idris-forward-statement orig done repeat))
        ;; list
        ((nth 1 pps)
-	(unless done
-	  (goto-char (nth 1 pps))
-	  (ignore-errors (forward-sexp))
-	  (setq done t)
-	  (idris-forward-statement orig done repeat))))
+        (unless done
+          (goto-char (nth 1 pps))
+          (ignore-errors (forward-sexp))
+          (setq done t)
+          (idris-forward-statement orig done repeat))))
       (unless
-	  (or
-	   (eq (point) orig)
-	   (member (char-before) (list 10 32 9)))
-	(setq erg (point)))
+          (or
+           (eq (point) orig)
+           (member (char-before) (list 10 32 9)))
+        (setq erg (point)))
       (if (and idris-verbose-p err)
-	  (message "%s" err)
-	(and idris-verbose-p (interactive-p) (message "%s" erg)))
+          (message "%s" err)
+        (and idris-verbose-p (called-interactively-p 'interactive) (message "%s" erg)))
       erg)))
 
 (provide 'idris-navigate)

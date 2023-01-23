@@ -85,7 +85,7 @@
   "Keymap used in Idris Compiler Notes mode.")
 
 (easy-menu-define idris-compiler-notes-mode-menu idris-compiler-notes-mode-map
-  "Menu for Idris compiler notes buffers"
+  "Menu for Idris compiler notes buffers."
   `("Idris Notes"
     ["Show term interaction widgets" idris-add-term-widgets t]
     ["Close Idris info buffer" idris-notes-quit t]))
@@ -280,3 +280,4 @@ This is used for labels spanning multiple lines."
     (goto-char start-mark)))
 
 (provide 'idris-warnings-tree)
+;;; idris-warnings-tree.el ends here

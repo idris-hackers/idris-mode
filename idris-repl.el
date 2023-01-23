@@ -38,6 +38,31 @@
 
 (eval-when-compile (require 'cl-lib))
 
+;;; Words of encouragement - strongly inspired by Slime
+(defun idris-user-first-name ()
+  (let ((name (if (string= (user-full-name) "")
+                  (user-login-name)
+                (user-full-name))))
+    (string-match "^[^ ]*" name)
+    (capitalize (match-string 0 name))))
+
+(defvar idris-words-of-encouragement
+  `("Let the hacking commence!"
+    "Hacks and glory await!"
+    "Hack and be merry!"
+    ,(format "%s, this could be the start of a beautiful program."
+             (idris-user-first-name))
+    ,(format "%s, this could be the start of a beautiful proof."
+             (idris-user-first-name))
+    "The terms have seized control of the means of computation - a glorious future awaits!"
+    "It typechecks! Ship it!"
+    "Do you know 'Land of My Fathers'?"
+    "Constructors are red / Types are blue / Your code always works / Because Idris loves you"))
+
+(defun idris-random-words-of-encouragement ()
+  "Return a random string of encouragement"
+  (nth (random (length idris-words-of-encouragement))
+       idris-words-of-encouragement))
 
 (defvar idris-prompt-string "Idris"
   "The prompt shown in the REPL.")

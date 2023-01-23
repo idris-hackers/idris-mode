@@ -23,43 +23,21 @@
 ;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA 02111-1307, USA.
 
+;;; Commentary:
+;; Handle connection to Idris and expose `idris-eval' and `idris-eval-sync'
+;; functions to be used by other modules for communication with Idris.
+;;
+
 (require 'idris-core)
 (require 'idris-settings)
 (require 'idris-common-utils)
-(require 'pp)
 (require 'cl-lib)
 (require 'idris-events)
 (require 'idris-log)
 (require 'idris-warnings)
 
-;;; Words of encouragement - strongly inspired by Slime
-(defun idris-user-first-name ()
-  (let ((name (if (string= (user-full-name) "")
-                  (user-login-name)
-                (user-full-name))))
-    (string-match "^[^ ]*" name)
-    (capitalize (match-string 0 name))))
+;;; Code:
 
-
-(defvar idris-words-of-encouragement
-  `("Let the hacking commence!"
-    "Hacks and glory await!"
-    "Hack and be merry!"
-    ,(format "%s, this could be the start of a beautiful program."
-             (idris-user-first-name))
-    ,(format "%s, this could be the start of a beautiful proof."
-             (idris-user-first-name))
-    "The terms have seized control of the means of computation - a glorious future awaits!"
-    "It typechecks! Ship it!"
-    "Do you know 'Land of My Fathers'?"
-    "Constructors are red / Types are blue / Your code always works / Because Idris loves you"))
-
-(defun idris-random-words-of-encouragement ()
-  "Return a random string of encouragement"
-  (nth (random (length idris-words-of-encouragement))
-       idris-words-of-encouragement))
-
-;;; Process stuff
 (defvar idris-process nil
   "The Idris process.")
 
@@ -186,31 +164,30 @@ This is maintained to restart Idris when the arguments change.")
 
 (defun idris-connection-available-input (process)
   "Process all complete messages which arrived from Idris PROCESS."
+  (while (idris-have-input-p process)
+    (let ((event (idris-receive process)))
+      (idris-event-log event nil)
+      (idris-dispatch-event event process))))
+
+(defun idris-have-input-p (process)
+  "Return `true' if a complete message is available in PROCESS buffer."
   (with-current-buffer (process-buffer process)
-    (while (idris-have-input-p)
-      (let ((event (idris-receive)))
-        (idris-event-log event nil)
-        (unwind-protect
-            (save-current-buffer
-              (idris-dispatch-event event process)))))))
+    (goto-char (point-min))
+    (and (>= (buffer-size) 6)
+         (>= (- (buffer-size) 6) (idris-decode-length)))))
 
-(defun idris-have-input-p ()
-  "Return true if a complete message is available."
-  (goto-char (point-min))
-  (and (>= (buffer-size) 6)
-       (>= (- (buffer-size) 6) (idris-decode-length))))
-
-(defun idris-receive ()
-  "Read a message from the Idris process."
-  (goto-char (point-min))
-  (let* ((length (idris-decode-length))
-         (start (+ 6 (point)))
-         (end (+ start length)))
-    (cl-assert (cl-plusp length))
-    (prog1 (save-restriction
-             (narrow-to-region start end)
-             (read (current-buffer)))
-      (delete-region (point-min) end))))
+(defun idris-receive (process)
+  "Read a message from the Idris PROCESS."
+  (with-current-buffer (process-buffer process)
+    (goto-char (point-min))
+    (let* ((length (idris-decode-length))
+           (start (+ 6 (point)))
+           (end (+ start length)))
+      (cl-assert (cl-plusp length))
+      (prog1 (save-restriction
+               (narrow-to-region start end)
+               (read (current-buffer)))
+        (delete-region (point-min) end)))))
 
 (defun idris-decode-length ()
   "Read a 24-bit hex-encoded integer from buffer."
@@ -270,22 +247,21 @@ The first function will be called with a final result, and the second
                  (t (error "Unexpected reply: %S %S" id value))))))))
 
 (cl-defmacro idris-rex ((&rest saved-vars) sexp intermediate &rest continuations)
-  "(idris-rex (VAR ...) (SEXP) INTERMEDIATE CLAUSES ...)
+  "Remote Execute SEXP.
 
-Remote Execute SEXP.
+\\(idris-rex (VAR ...) (SEXP) INTERMEDIATE CONTINUATIONS ...)
 
-VARs are a list of saved variables visible in the other forms.  Each
-VAR is either a symbol or a list (VAR INIT-VALUE).
+SAVED-VARS are a list of saved variables visible in the other forms.
+Each VAR is either a symbol or a list (VAR INIT-VALUE).
 
-SEXP is evaluated and the princed version is sent to Idris.
+SEXP is evaluated and the `princ'-ed version is sent to Idris.
 
 If INTERMEDIATE is non-nil, also register for intermediate results.
 
-CLAUSES is a list of patterns with same syntax as
-`destructure-case'.  The result of the evaluation of SEXP is
-dispatched on CLAUSES.  The result is either a sexp of the
-form (:ok VALUE) or (:error CONDITION).  CLAUSES is executed
-asynchronously.
+CONTINUATIONS is a list of patterns with same syntax as `destructure-case'.
+The result of the evaluation of SEXP is dispatched on CONTINUATIONS.
+The result is either a sexp of the form (:ok VALUE) or (:error CONDITION).
+CONTINUATIONS are executed asynchronously.
 
 Note: don't use backquote syntax for SEXP, because various Emacs
 versions cannot deal with that."
@@ -362,8 +338,7 @@ If `NO-ERRORS' is non-nil, don't trigger warning buffers and
            (accept-process-output idris-connection 0.1)))))))
 
 (defvar idris-options-cache '()
-  "An alist caching the Idris interpreter options, to
-  allow consulting them when the Idris interpreter is busy.")
+  "An alist caching the Idris interpreter options.")
 
 (defun idris-update-options-cache ()
   (idris-eval-async '(:get-options)
@@ -420,3 +395,4 @@ Returns nil if the version of Idris used doesn't support asking for versions."
 
 
 (provide 'inferior-idris)
+;;; inferior-idris.el ends here

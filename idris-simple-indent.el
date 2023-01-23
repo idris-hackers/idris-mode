@@ -84,7 +84,8 @@ Takes into account literate Idris syntax."
     (length (match-string 0))))
 
 (defun idris-simple-indent-indent-line-to (column)
-  "Just like `indent-line-to`, but ignoring the leading > for literate Idris."
+  "Indent current line to COLUMN.
+Just like `indent-line-to', but ignoring the leading > for literate Idris."
   (if (idris-lidr-p)
       (if (save-excursion (move-to-column 0) (looking-at ">")) ;; lidr code line - look out for >
           (progn
