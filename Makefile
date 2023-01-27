@@ -39,7 +39,8 @@ OBJS =	idris-commands.elc		\
 	idris-warnings-tree.elc		\
 	idris-xref.elc                  \
 	inferior-idris.elc              \
-	flycheck-idris.elc
+	flycheck-idris.elc              \
+	idris-format.elc
 
 .el.elc:
 	$(BYTECOMP) $<
