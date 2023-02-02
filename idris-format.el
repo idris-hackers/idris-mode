@@ -25,13 +25,14 @@
 (require 'rx)
 (require 'subr-x)
 (require 'cl-seq)
+(require 'idris-compat)
 
 (defun idris-split-line-to-lhs-rhs (line)
   "Split LINE string to two parts starting at first occurence of equal sign (=).
 The equal sign is part of the right hand side. If no equal sign found
 the `car' of result (LHS) is empty string and `cdr' of result (RHS) the LINE."
   (let* ((lhs-length (or (string-match "=" line) 0))
-         (lhs (string-trim-right (string-limit line lhs-length)))
+         (lhs (string-trim-right (idris-string-limit line lhs-length)))
          (rhs (substring line lhs-length)))
     (cons lhs rhs)))
 
@@ -106,9 +107,11 @@ Example: (idris-split-words \"foo (S k) k\")
      (lambda (lhs-rhs)
        (if (and prev-lhs-delta (null (car lhs-rhs)))
            (concat (make-string prev-lhs-delta ? ) (cdr lhs-rhs))
-         (let ((new-lhs (string-join (idris-mapcar-with-index (lambda (word j)
-                                                                (string-pad word (nth j mvl)))
-                                                              (car lhss-words))
+         (let ((new-lhs (string-join (idris-mapcar-with-index
+                                      (lambda (word j)
+                                        ;; inlined string-pad for Emacs 25.1
+                                        (concat word (make-string (- (nth j mvl) (length word)) ?\s)))
+                                      (car lhss-words))
                                      " ")))
            (setq prev-lhs-delta (- (length new-lhs) (length (car lhs-rhs))))
            (setq lhss-words (cdr lhss-words))
@@ -159,7 +162,7 @@ before line containing colon symbol (:) that contains equal sign (=)."
     (let* ((start (idris-beginning-of-clause))
            (end (idris-end-of-clause))
            (indent (make-string (idris-clause-point-column start) ? ))
-           (lines (string-lines (buffer-substring-no-properties start end)))
+           (lines (split-string (buffer-substring-no-properties start end) "\n"))
            (padded-lines (mapcar (lambda (line) (concat indent line))
                                  (idris-pad-lines lines)))
            (new-region (string-join padded-lines "\n")))
