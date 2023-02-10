@@ -283,3 +283,60 @@ Throughout a session with `idris-mode`, many frames will accumulate, such as `*i
 
 (add-hook 'idris-mode-hook #'my-idris-mode-hook)
 ```
+
+### Flycheck (asynchronous syntax checks in buffer)
+
+To enable on-the-fly syntax checking of Idris code using `flycheck` add these lines to your configuration:
+
+```elisp
+(require 'flycheck-idris)
+(add-hook 'idris-mode-hook #'flycheck-mode)
+```
+
+Example using `use-package` package:
+```elisp
+(use-package idris-mode
+  :ensure t
+
+  :config
+  (require 'flycheck-idris) ;; Syntax checker
+  (add-hook 'idris-mode-hook #'flycheck-mode))
+```
+
+### Xref (Cross-referencing commands)
+
+Jump to definitions `xref-find-definitions` (`M-.`) in current file or project is supported as long as Idris compiler returns file path to the definition.
+To support jump to definitions for which Idris could not find relevant source file you may want customise `idris-xref-idris-source-location` and `idris-xref-idris-source-locations`.
+You can do that interactively using `M-x customize-group` [enter] -> idris-xref [enter] command or
+programatically.
+Example using `use-package` package.
+
+```elisp
+(use-package idris-mode
+  :ensure t ;; Installing from (M)ELPA
+
+  :custom
+  (idris-interpreter-path "idris2")
+
+  ;; Assuming you did `git clone git@github.com:idris-lang/Idris2.git ~/sources/idris2`
+  (idris-xref-idris-source-location "~/sources/idris2")
+  ;; Paths to random additional idris packages you may be using
+  (idris-xref-idris-source-locations '("~/sources/idris-ncurses/src"
+                                       "~/sources/idris-foo/src")))
+```
+
+### Hideshow Minor Mode (hs-minor-mode)
+
+If you have enabled hs-minor-mode globally you may want to disable it for Idris prover buffers
+as it may cause errors in some situations (When invoking `idris-quit` command for example).
+Example of enabling `hs-minor-mode` for all buffers derived from `prog-mode` except the
+`idris-prover` buffers.
+
+```elisp
+
+(add-hook 'prog-mode-hook
+          #'(lambda ()
+              (if (derived-mode-p 'idris-prover-script-mode)
+                  (hs-minor-mode -1)
+                (hs-minor-mode))))
+```
