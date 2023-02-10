@@ -7,6 +7,14 @@ Much like Idris itself, `idris-mode` is run by volunteers and there are no full-
 Our time is limited and we must take care to ensure that the demands of our day job take priority.
 Thus, we must take care in ensure that *we* can maintain `idris-mode` itself.
 
+## Tests
+
+Before sending a patch or pull request, please run the automated tests for `idris-mode` and correct any errors that are found. There are two kinds of test:
+
+1. The Emacs byte code compiler can catch many issues. Running `make compile` will invoke the byte code compiler, failing if there are any warnings. You may wish to run `make clean` after `make compile` to get rid of pesky `.elc` files.
+
+2. There is a test suite that can be invoked with `make test`. It requires a functioning `idris` executable.
+
 ## General Comments
 
 We expect contributions to come in the form of PRs (via GitHub), and larger discussions to take place on the project's issue tracker, the Idris Mailing List, or the Idris Discord.

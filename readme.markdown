@@ -108,7 +108,7 @@ The following commands are available when there is an inferior Idris process (wh
 * `C-c C-t`: Get the type for the identifier under point. A prefix argument prompts for the name.
 * `C-c C-w`: Add a with block for the pattern-match clause under point
 * `C-c C-h a`: Search names, types, and docstrings for a given string.
-* `C-c C-z`: Pop to a presently open REPL buffer
+* `C-c C-z`: Pop to a presently open REPL buffer or to last Idris code buffer if invoked in REPL buffer.
 
 ## Online documentation
 
@@ -118,6 +118,7 @@ The Idris compiler supports documentation. The following commands access it:
 * `C-c C-d t`: Search for documentation regarding a particular type (`:search` at the REPL).
 
 Additionally, `idris-mode` integrates with `eldoc-mode`, which shows documentation overviews and type signatures in the minibuffer.
+(Eldoc support is yet to be implemented in the Idris2.)
 
 ## Completion
 
@@ -136,7 +137,10 @@ The following keybindings are available:
 * `C-c C-m c`: Show the core language for the term at point (`M-x idris-show-core-term`)
 
 ## Package files
-Idris's build system, which consists of package files ending in `.ipkg`, has rudimentary support from `idris-mode`. The following commands are available in Idris buffers or package buffers; if they are run from an Idris buffer, then `idris-mode` will attempt to locate the package file automatically. The mnemonic for `C-b` in the prefix is "build".
+
+Idris's build system, which consists of package files ending in `.ipkg`, has rudimentary support from `idris-mode`.
+The following commands are available in Idris buffers or package buffers; if they are run from an Idris buffer, then `idris-mode` will attempt to locate the package file automatically.
+The mnemonic for `C-b` in the prefix is "build".
 * `C-c C-b c`: Clean the package, removing `.ibc` files
 * `C-c C-b b`: Build the package
 * `C-c C-b i`: Install the package to the user's repository, building first if necessary
@@ -167,6 +171,27 @@ If you want `idris-mode` to be enabled by default, add the line `(require 'idris
 
 Idris mode is heavily dependent on the Idris compiler for its more advanced features. Thus, please ensure that Emacs can see your Idris binary. Emacs looks for executables in the directories specified in the variable `exec-path`, which is initialized from your PATH at startup. If Idris is not on your `PATH`, then you may need to add it to `exec-path` manually. E.g.: if you installed idris with cabal into `~/.cabal/bin`, then add the line `(add-to-list 'exec-path "~/.cabal/bin")` to your emacs initialization file. Alternatively, you can customize the variable `idris-interpreter-path` and provide an absolute path.
 
+Example of installation and setup for Idris2 with `use-package` package from MELPA.
+
+```elisp
+(use-package idris-mode
+  :ensure t
+
+  :custom
+  (idris-interpreter-path "idris2"))
+```
+
+Example of installation and setup for Idris2 with `use-package` package directly from source.
+
+```elisp
+(use-package idris-mode
+  :init (require 'idris-mode)
+  :load-path "path-to/idris-mode/root/source-code-directory/relative-to-current-file"
+
+  :custom
+  (idris-interpreter-path "idris2"))
+```
+
 ## Customization
 
 Customize various aspects of the mode using `M-x customize-group RET idris RET`.
@@ -176,15 +201,6 @@ Additionally, you may want to update your Emacs configuration so that it does no
 ## Keybinding conventions
 
 All three-letter keybindings are available in versions with and without `C-` on the final key, following the convention from SLIME.
-
-## Tests
-
-Before sending a patch or pull request, please run the automated tests for `idris-mode` and correct any errors that are found. There are two kinds of test:
-
-1. The Emacs byte code compiler can catch many issues. Running `make compile` will invoke the byte code compiler, failing if there are any warnings. You may wish to run `make clean` after `make compile` to get rid of pesky `.elc` files.
-
-2. There is a test suite that can be invoked with `make test`. It requires a functioning `idris` executable.
-
 
 ## Integration with other Emacs packages
 
@@ -266,4 +282,61 @@ Throughout a session with `idris-mode`, many frames will accumulate, such as `*i
   (add-to-list 'frames-only-mode-kill-frame-when-buffer-killed-buffer-list "*idris-holes*"))
 
 (add-hook 'idris-mode-hook #'my-idris-mode-hook)
+```
+
+### Flycheck (asynchronous syntax checks in buffer)
+
+To enable on-the-fly syntax checking of Idris code using `flycheck` add these lines to your configuration:
+
+```elisp
+(require 'flycheck-idris)
+(add-hook 'idris-mode-hook #'flycheck-mode)
+```
+
+Example using `use-package` package:
+```elisp
+(use-package idris-mode
+  :ensure t
+
+  :config
+  (require 'flycheck-idris) ;; Syntax checker
+  (add-hook 'idris-mode-hook #'flycheck-mode))
+```
+
+### Xref (Cross-referencing commands)
+
+Jump to definitions `xref-find-definitions` (`M-.`) in current file or project is supported as long as Idris compiler returns file path to the definition.
+To support jump to definitions for which Idris could not find relevant source file you may want customise `idris-xref-idris-source-location` and `idris-xref-idris-source-locations`.
+You can do that interactively using `M-x customize-group` [enter] -> idris-xref [enter] command or
+programatically.
+Example using `use-package` package.
+
+```elisp
+(use-package idris-mode
+  :ensure t ;; Installing from (M)ELPA
+
+  :custom
+  (idris-interpreter-path "idris2")
+
+  ;; Assuming you did `git clone git@github.com:idris-lang/Idris2.git ~/sources/idris2`
+  (idris-xref-idris-source-location "~/sources/idris2")
+  ;; Paths to random additional idris packages you may be using
+  (idris-xref-idris-source-locations '("~/sources/idris-ncurses/src"
+                                       "~/sources/idris-foo/src")))
+```
+
+### Hideshow Minor Mode (hs-minor-mode)
+
+If you have enabled hs-minor-mode globally you may want to disable it for Idris prover buffers
+as it may cause errors in some situations (When invoking `idris-quit` command for example).
+Example of enabling `hs-minor-mode` for all buffers derived from `prog-mode` except the
+`idris-prover` buffers.
+
+```elisp
+
+(add-hook 'prog-mode-hook
+          #'(lambda ()
+              (if (derived-mode-p 'idris-prover-script-mode)
+                  (hs-minor-mode -1)
+                (hs-minor-mode))))
 ```
