@@ -108,7 +108,7 @@ The following commands are available when there is an inferior Idris process (wh
 * `C-c C-t`: Get the type for the identifier under point. A prefix argument prompts for the name.
 * `C-c C-w`: Add a with block for the pattern-match clause under point
 * `C-c C-h a`: Search names, types, and docstrings for a given string.
-* `C-c C-z`: Pop to a presently open REPL buffer
+* `C-c C-z`: Pop to a presently open REPL buffer or to last Idris code buffer if invoked in REPL buffer.
 
 ## Online documentation
 
@@ -118,6 +118,7 @@ The Idris compiler supports documentation. The following commands access it:
 * `C-c C-d t`: Search for documentation regarding a particular type (`:search` at the REPL).
 
 Additionally, `idris-mode` integrates with `eldoc-mode`, which shows documentation overviews and type signatures in the minibuffer.
+(Eldoc support is yet to be implemented in the Idris2.)
 
 ## Completion
 
@@ -136,7 +137,10 @@ The following keybindings are available:
 * `C-c C-m c`: Show the core language for the term at point (`M-x idris-show-core-term`)
 
 ## Package files
-Idris's build system, which consists of package files ending in `.ipkg`, has rudimentary support from `idris-mode`. The following commands are available in Idris buffers or package buffers; if they are run from an Idris buffer, then `idris-mode` will attempt to locate the package file automatically. The mnemonic for `C-b` in the prefix is "build".
+
+Idris's build system, which consists of package files ending in `.ipkg`, has rudimentary support from `idris-mode`.
+The following commands are available in Idris buffers or package buffers; if they are run from an Idris buffer, then `idris-mode` will attempt to locate the package file automatically.
+The mnemonic for `C-b` in the prefix is "build".
 * `C-c C-b c`: Clean the package, removing `.ibc` files
 * `C-c C-b b`: Build the package
 * `C-c C-b i`: Install the package to the user's repository, building first if necessary
@@ -166,6 +170,27 @@ Alternatively, download the elisp files, and place them somewhere in your load p
 If you want `idris-mode` to be enabled by default, add the line `(require 'idris-mode)` to your `~/.emacs` or `~/.emacs.d/init.el` file.
 
 Idris mode is heavily dependent on the Idris compiler for its more advanced features. Thus, please ensure that Emacs can see your Idris binary. Emacs looks for executables in the directories specified in the variable `exec-path`, which is initialized from your PATH at startup. If Idris is not on your `PATH`, then you may need to add it to `exec-path` manually. E.g.: if you installed idris with cabal into `~/.cabal/bin`, then add the line `(add-to-list 'exec-path "~/.cabal/bin")` to your emacs initialization file. Alternatively, you can customize the variable `idris-interpreter-path` and provide an absolute path.
+
+Example of installation and setup for Idris2 with `use-package` package from MELPA.
+
+```elisp
+(use-package idris-mode
+  :ensure t
+
+  :custom
+  (idris-interpreter-path "idris2"))
+```
+
+Example of installation and setup for Idris2 with `use-package` package directly from source.
+
+```elisp
+(use-package idris-mode
+  :init (require 'idris-mode)
+  :load-path "path-to/idris-mode/root/source-code-directory/relative-to-current-file"
+
+  :custom
+  (idris-interpreter-path "idris2"))
+```
 
 ## Customization
 
