@@ -264,7 +264,6 @@ myReverse xs = revAcc [] xs where
                                 (7 4 ((:tt-term "AAAAAAAAAAAHAAAAAAA"))))))
       (advice-add 'idris-load-file-sync :override #'idris-load-file-sync-stub)
       (advice-add 'idris-eval :override #'idris-eval-stub)
-
       (unwind-protect
           (with-current-buffer buffer
             (switch-to-buffer buffer)
@@ -273,10 +272,8 @@ myReverse xs = revAcc [] xs where
             (funcall-interactively 'idris-type-at-point nil)
             (should (eq file-loaded-p t))
             (should (equal eval-args '((:type-of "Test"))))
-            (should (string= (buffer-name) idris-info-buffer-name))
-            (should (string-match-p "Test : Type" (buffer-substring-no-properties (point-min) (point-max))))
-            (idris-info-quit)
-            (should (eq (current-buffer) buffer)))
+            (with-current-buffer idris-info-buffer-name
+              (should (string-match-p "Test : Type" (buffer-string)))))
 
         (advice-remove 'idris-load-file-sync #'idris-load-file-sync-stub)
         (advice-remove 'idris-eval #'idris-eval-stub)

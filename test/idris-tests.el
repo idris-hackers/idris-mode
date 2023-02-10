@@ -183,6 +183,7 @@
 (load "idris-navigate-test")
 (load "idris-repl-test")
 (load "idris-xref-test")
+(load "idris-info-test")
 
 (provide 'idris-tests)
 ;;; idris-tests.el ends here
