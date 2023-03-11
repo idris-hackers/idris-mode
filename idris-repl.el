@@ -326,18 +326,6 @@ Invokes `idris-repl-mode-hook'."
             nil
           (list (+ idris-input-start (length partial)) (point-max) completions))))))
 
-(defun find-common-prefix (input slist)
-  "Finds longest common prefix of all strings in SLIST."
-  (let ((first (car slist))
-        (ilen (length input)))
-    (if (> (length first) ilen)
-        (progn
-          (let ((next (substring first 0 (1+ ilen))))
-            (if (cl-every (lambda (p) (string-prefix-p next p)) slist)
-                (find-common-prefix next slist)
-              input)))
-      input)))
-
 (defun idris-repl-begin-of-prompt ()
   "Go to the beginning of line or the prompt."
   (interactive)
