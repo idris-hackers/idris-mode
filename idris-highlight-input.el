@@ -118,8 +118,8 @@ See Info node `(elisp)Overlay Properties' to understand how ARGS are used."
 
 (defun idris-toggle-semantic-source-highlighting ()
   "Turn on/off semantic highlighting.
-This is controled by value of`idris-semantic-source-highlighting' variable.
-When the value is 'debug additional checks are performed on received data."
+This is controled by value of `idris-semantic-source-highlighting' variable.
+When the value is `debug' additional checks are performed on received data."
   (if idris-semantic-source-highlighting
       (progn
         (if (eq idris-semantic-source-highlighting 'debug)

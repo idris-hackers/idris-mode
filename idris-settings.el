@@ -342,7 +342,7 @@ using Idris2, then you may wish to customise this variable."
 
 (defcustom idris-repl-prompt-style 'short
   "What sort of prompt to show.
-'long shows the Idris REPL prompt, while 'short shows a shorter one."
+`long' shows the Idris REPL prompt, while `short' shows a shorter one."
   :options '(short long)
   :type 'symbol
   :group 'idris-repl)

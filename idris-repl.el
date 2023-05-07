@@ -497,7 +497,7 @@ highlighting information from Idris."
 
 (defun idris-repl-history-replace (direction)
   "Replace the current input with the next line in DIRECTION.
-DIRECTION is 'forward' or 'backward' (in the history list)."
+DIRECTION is `forward' or `backward' (in the history list)."
   (let* ((min-pos -1)
          (max-pos (length idris-repl-input-history))
          (prefix (idris-repl-history-prefix))
