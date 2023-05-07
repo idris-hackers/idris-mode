@@ -276,7 +276,22 @@ Invokes `idris-repl-mode-hook'."
      t)
     (`(:warning ,output ,_target)
      (when (member 'warnings-repl idris-warnings-printing)
-       (idris-repl-write-string (format "Error: %s line %d (col %d):\n%s" (nth 0 output) (nth 1 output) (if (eq (safe-length output) 3) 0 (nth 2 output)) (car (last output))))))
+       (pcase output
+         (`(,fname (,start-line ,start-col) (,_end-line ,_end-col) ,msg ,_spans)
+          (idris-repl-write-string (format "Error: %s line %d (col %d):\n%s"
+                                           fname
+                                           (1+ start-line)
+                                           (1+ start-col)
+                                           msg)))
+         ;; Keeping this old format for backward compatibility.
+         ;; Probably we can remove it at some point.
+         (_ (idris-repl-write-string (format "Error: %s line %d (col %d):\n%s"
+                                             (nth 0 output)
+                                             (nth 1 output)
+                                             (if (eq (safe-length output) 3)
+                                                 0
+                                               (nth 2 output))
+                                             (car (last output))))))))
     (`(:run-program ,file ,_target)
      (idris-execute-compiled-program file))
     (_ nil)))
