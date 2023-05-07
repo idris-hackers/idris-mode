@@ -390,7 +390,7 @@ and semantic annotations PROPS."
                  ,props)
                (idris-repl-highlight-input
                 start start-line start-col end-line end-col props))))))
-       (_ (idris-repl-insert-result result spans)))) ;; The actual result
+       (_ (idris-repl-insert-result (or result "") spans)))) ;; The actual result
     ((:error condition &optional spans)
      (idris-repl-show-abort condition spans))))
 
