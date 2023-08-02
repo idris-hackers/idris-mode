@@ -276,7 +276,22 @@ Invokes `idris-repl-mode-hook'."
      t)
     (`(:warning ,output ,_target)
      (when (member 'warnings-repl idris-warnings-printing)
-       (idris-repl-write-string (format "Error: %s line %d (col %d):\n%s" (nth 0 output) (nth 1 output) (if (eq (safe-length output) 3) 0 (nth 2 output)) (car (last output))))))
+       (pcase output
+         (`(,fname (,start-line ,start-col) (,_end-line ,_end-col) ,msg ,_spans)
+          (idris-repl-write-string (format "Error: %s line %d (col %d):\n%s"
+                                           fname
+                                           (1+ start-line)
+                                           (1+ start-col)
+                                           msg)))
+         ;; Keeping this old format for backward compatibility.
+         ;; Probably we can remove it at some point.
+         (_ (idris-repl-write-string (format "Error: %s line %d (col %d):\n%s"
+                                             (nth 0 output)
+                                             (nth 1 output)
+                                             (if (eq (safe-length output) 3)
+                                                 0
+                                               (nth 2 output))
+                                             (car (last output))))))))
     (`(:run-program ,file ,_target)
      (idris-execute-compiled-program file))
     (_ nil)))
@@ -378,7 +393,7 @@ and semantic annotations PROPS."
                  ,props)
                (idris-repl-highlight-input
                 start start-line start-col end-line end-col props))))))
-       (_ (idris-repl-insert-result result spans)))) ;; The actual result
+       (_ (idris-repl-insert-result (or result "") spans)))) ;; The actual result
     ((:error condition &optional spans)
      (idris-repl-show-abort condition spans))))
 
@@ -470,7 +485,7 @@ highlighting information from Idris."
 
 (defun idris-repl-history-replace (direction)
   "Replace the current input with the next line in DIRECTION.
-DIRECTION is 'forward' or 'backward' (in the history list)."
+DIRECTION is `forward' or `backward' (in the history list)."
   (let* ((min-pos -1)
          (max-pos (length idris-repl-input-history))
          (prefix (idris-repl-history-prefix))

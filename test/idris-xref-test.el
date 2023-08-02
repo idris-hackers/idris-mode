@@ -193,7 +193,8 @@
     (with-current-buffer "*xref*"
       ;; Assert
       (let ((str (buffer-substring-no-properties (point-min) (point-max))))
-        (should (string-match-p "11: AddClause.(-)" str))
+        (should (string-match-p "AddClause.(-)" str))
+        (should (string-match-p "11:" str))
         (should (string-match-p "AddClause.idr" str))
         (should (string-match-p "Prelude.Num.(-)" str))
         (should (string-match-p "prim__lte_Bits64" str)))

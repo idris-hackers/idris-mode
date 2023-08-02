@@ -47,7 +47,7 @@
   "Working directory of Idris process.")
 
 (defvar idris-command-line-option-functions nil
-  "A list of functions to call to compute the 'command-line' arguments to Idris.
+  "A list of functions to call to compute the `command-line' arguments to Idris.
 Each function should take no arguments and return a list of
 strings that are suitable arguments to `start-process'.")
 
