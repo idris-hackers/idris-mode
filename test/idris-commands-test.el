@@ -280,6 +280,39 @@ myReverse xs = revAcc [] xs where
         (kill-buffer buffer)
         (idris-quit)))))
 
+(ert-deftest idris-test-idris-start-project ()
+  "Test generating valid .ipkg file."
+  (let ((mock-project-name "TestProject")
+        (mock-package-file-name "test-project.ipkg")
+        (mock-source-directory "src")
+        (mock-first-module "TestModule")
+        (mock-directory-name "test-start-project"))
+    (unwind-protect
+        (cl-letf (((symbol-function 'read-string)
+                   (lambda (prompt &rest _)
+                     (cond ((string-prefix-p "Project name:" prompt)
+                            mock-project-name)
+                           ((string-prefix-p "Package file name" prompt)
+                            mock-package-file-name)
+                           ((string-prefix-p "Source directory" prompt)
+                            mock-source-directory)
+                           ((string-prefix-p "First module name" prompt)
+                            mock-first-module))))
+                  ((symbol-function 'read-directory-name)
+                   (lambda (&rest _) mock-directory-name)))
+          (idris-start-project)
+          (with-current-buffer mock-package-file-name
+            (goto-char (point-min))
+            (should (search-forward "package test-project"))
+            (should (search-forward "opts = \"\""))
+            (should (search-forward "sourcedir = \"src\""))
+            (should (search-forward "modules = TestModule"))
+            (kill-buffer)))
+      (if (get-buffer (concat mock-first-module ".idr"))
+          (kill-buffer (concat mock-first-module ".idr")))
+      (delete-directory mock-directory-name t)
+      (idris-quit))))
+
 ;; Tests by Yasuhiko Watanabe
 ;; https://github.com/idris-hackers/idris-mode/pull/537/files
 (idris-ert-command-action "test-data/CaseSplit.idr" idris-case-split idris-test-eq-buffer)

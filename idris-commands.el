@@ -1275,7 +1275,7 @@ of the term to replace."
     (newline)
     (insert "opts = \"\"")
     (newline)
-    (when src-dir (insert "sourcedir = " src-dir) (newline))
+    (when src-dir (insert "sourcedir = \"" src-dir "\"") (newline))
     (insert "modules = ")
     (insert first-mod)
     (newline)
