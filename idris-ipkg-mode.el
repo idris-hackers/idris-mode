@@ -86,6 +86,9 @@
 (defconst idris-ipkg-font-lock-defaults
   `(,idris-ipkg-keywords))
 
+(defconst idris-ipkg-sourcedir-re
+  "^sourcedir\\s-*=\\s-*\"?\\([a-zA-Z/0-9]+\\)\"?")
+;; "^\\s-*sourcedir\\s-*=\\s-*\\(\\sw+\\)"
 
 ;;; Completion
 
@@ -142,7 +145,7 @@
       (goto-char (point-min))
       (when (and (file-exists-p src-dir)
                  (file-directory-p src-dir)
-                 (re-search-forward "^sourcedir\\s-*=\\s-*\\([a-zA-Z/0-9]+\\)" nil t))
+                 (re-search-forward idris-ipkg-sourcedir-re nil t))
         (let ((start (match-beginning 1))
               (end (match-end 1))
               (map (make-sparse-keymap)))
@@ -304,9 +307,7 @@ arguments."
   (save-excursion
     (goto-char (point-min))
     (let ((found
-           (re-search-forward "^\\s-*sourcedir\\s-*=\\s-*\\(\\sw+\\)"
-                              nil
-                              t)))
+           (re-search-forward idris-ipkg-sourcedir-re nil t)))
       (if found
           (let ((subdir (buffer-substring-no-properties (match-beginning 1) (match-end 1))))
             (concat (file-name-directory basename) subdir))
