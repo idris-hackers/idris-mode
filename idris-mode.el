@@ -30,6 +30,7 @@
 (require 'idris-common-utils)
 (require 'idris-ipkg-mode)
 (require 'idris-xref)
+(require 'idris-format)
 
 (defun idris-mode-context-menu-items (plist)
   "Compute menu items from PLIST that are specific to editing text in `idris-mode'."

@@ -184,6 +184,7 @@
 (load "idris-repl-test")
 (load "idris-xref-test")
 (load "idris-info-test")
+(load "idris-format-test")
 
 (provide 'idris-tests)
 ;;; idris-tests.el ends here
