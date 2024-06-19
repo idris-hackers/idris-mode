@@ -19,8 +19,8 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        emacs: [25.3, 26.1, 27.2, 28.2]
-        idris: [git, stackage]
+        emacs: [28.2]
+        idris: [git]
     env:
       EMACS_VERSION: ${{ matrix.emacs }}
       IDRIS_VERSION: ${{ matrix.idris }}
