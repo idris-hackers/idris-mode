@@ -307,12 +307,10 @@ arguments."
 (defun idris-ipkg-buffer-src-dir (basename)
   (save-excursion
     (goto-char (point-min))
-    (let ((found
-           (re-search-forward idris-ipkg-sourcedir-re nil t)))
-      (if found
-          (let ((subdir (buffer-substring-no-properties (match-beginning 1) (match-end 1))))
-            (concat (file-name-directory basename) subdir))
-        (file-name-directory basename)))))
+    (if-let ((found (re-search-forward idris-ipkg-sourcedir-re nil t)))
+        (concat (file-name-directory basename)
+                (buffer-substring-no-properties (match-beginning 1) (match-end 1)))
+      (file-name-directory basename))))
 
 (defun idris-ipkg-find-src-dir (&optional ipkg-file)
   (let ((found (or (and ipkg-file (list ipkg-file))
