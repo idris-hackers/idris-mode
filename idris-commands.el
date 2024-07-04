@@ -925,10 +925,8 @@ type-correct, so loading will fail."
     (idris-compiler-notes-list-show (reverse idris-raw-warnings))))
 
 (defun idris-kill-buffers ()
-  (idris-warning-reset-all)
-  (setq idris-currently-loaded-buffer nil)
   ;; not killing :events since it it tremendously useful for debuging
-  (let ((bufs (list :connection :repl :proof-obligations :proof-shell :proof-script :log :info :notes :holes :tree-viewer)))
+  (let ((bufs (list :repl :proof-obligations :proof-shell :proof-script :log :info :notes :holes :tree-viewer)))
     (dolist (b bufs) (idris-kill-buffer b))))
 
 (defun idris-remove-event-hooks ()
@@ -960,7 +958,7 @@ https://github.com/clojure-emacs/cider"
   (interactive)
   (let ((command-line-flags (idris-compute-flags)))
     ;; Kill the running Idris if the command-line flags need updating
-    (when (and (get-buffer-process (get-buffer idris-connection-buffer-name))
+    (when (and (get-buffer-process idris-connection-buffer-name)
                (not (equal command-line-flags idris-current-flags)))
       (message "Idris command line arguments changed, restarting Idris")
       (idris-quit)
@@ -992,28 +990,26 @@ https://github.com/clojure-emacs/cider"
 (defun idris-quit ()
   "Quit the Idris process, cleaning up the state synchronized with Emacs."
   (interactive)
-  (setq idris-prover-currently-proving nil)
-  (let* ((pbuf (get-buffer idris-process-buffer-name))
-         (cbuf (get-buffer idris-connection-buffer-name)))
-    (when cbuf
-      (when (get-buffer-process cbuf)
-        (with-current-buffer cbuf (delete-process nil))) ; delete connection without asking
-      (kill-buffer cbuf))
-    (when pbuf
-      (when (get-buffer-process pbuf)
-        (with-current-buffer pbuf (delete-process nil))) ; delete process without asking
-      (kill-buffer pbuf)
-      (unless (get-buffer idris-process-buffer-name) (idris-kill-buffers))
-      (setq idris-rex-continuations '())
-      (when idris-loaded-region-overlay
-        (delete-overlay idris-loaded-region-overlay)
-        (setq idris-loaded-region-overlay nil)))
-    (idris-prover-end)
-    (idris-kill-buffers)
-    (idris-remove-event-hooks)
-    (setq idris-process-current-working-directory nil)
-    (setq idris-protocol-version 0
-          idris-protocol-version-minor 0)))
+  (if (get-buffer-process idris-process-buffer-name)
+      (delete-process idris-process-buffer-name))
+  (if (get-buffer-process idris-connection-buffer-name)
+      (delete-process idris-connection-buffer-name))
+  (if (get-buffer idris-process-buffer-name)
+      (kill-buffer idris-process-buffer-name))
+  (if (get-buffer idris-connection-buffer-name)
+      (kill-buffer idris-connection-buffer-name))
+  (if idris-loaded-region-overlay
+      (delete-overlay idris-loaded-region-overlay))
+  (idris-prover-end)
+  (idris-warning-reset-all)
+  (idris-remove-event-hooks)
+  (idris-kill-buffers)
+  (setq idris-loaded-region-overlay nil
+        idris-currently-loaded-buffer nil
+        idris-rex-continuations '()
+        idris-process-current-working-directory nil
+        idris-protocol-version 0
+        idris-protocol-version-minor 0))
 
 (defun idris-delete-ibc (no-confirmation)
   "Delete the IBC file for the current buffer.
