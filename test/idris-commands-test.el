@@ -426,6 +426,46 @@ closeDistance s1 s2 = closeDistance_rhs s1 s2"
       (advice-remove 'idris-load-file-sync #'idris-load-file-sync-stub)
       (advice-remove 'idris-eval #'idris-eval-stub))))
 
+(ert-deftest idris-test-idris-filename-to-load ()
+  "Test that `idris-filename-to-load' returns expected data structure."
+  (cl-flet ((idris-ipkg-find-src-dir-stub () src-dir)
+            (idris-find-file-upwards-stub (_ex) ipkg-files)
+            (buffer-file-name-stub () "/some/path/to/idris-project/src/Component/Foo.idr"))
+    (advice-add 'idris-ipkg-find-src-dir :override #'idris-ipkg-find-src-dir-stub)
+    (advice-add 'idris-find-file-upwards :override #'idris-find-file-upwards-stub)
+    (advice-add 'buffer-file-name :override #'buffer-file-name-stub)
+    (let* ((default-directory "/some/path/to/idris-project/src/Component")
+           ipkg-files
+           src-dir)
+      (unwind-protect
+          (progn
+            (let ((result (idris-filename-to-load)))
+              (should (equal default-directory (car result)))
+              (should (equal "Foo.idr" (cdr result))))
+
+            ;; When ipkg sourcedir value is set
+            ;; Then return combination of source directory
+            ;; and relative path of the file to the source directory
+            (let* ((src-dir "/some/path/to/idris-project/src")
+                   (result (idris-filename-to-load)))
+              (should (equal src-dir (car result)))
+              (should (equal "Component/Foo.idr" (cdr result))))
+
+            ;; When ipkg sourcedir value is set
+            ;; and idris-protocol-version is greater than 1
+            ;; Then return combination of work directory
+            ;; (Directory containing the first found ipkg file)
+            ;; and relative path of the file to the work directory
+            (let* ((ipkg-files '("/some/path/to/idris-project/baz.ipkg"))
+                   (idris-protocol-version 2)
+                   (result (idris-filename-to-load)))
+              (should (equal "/some/path/to/idris-project" (car result)))
+              (should (equal "src/Component/Foo.idr" (cdr result)))))
+
+        (advice-remove 'idris-ipkg-find-src-dir #'idris-ipkg-find-src-dir-stub)
+        (advice-remove 'idris-find-file-upwards #'idris-find-file-upwards-stub)
+        (advice-remove 'buffer-file-name #'buffer-file-name-stub)))))
+
 ;; Tests by Yasuhiko Watanabe
 ;; https://github.com/idris-hackers/idris-mode/pull/537/files
 (idris-ert-command-action "test-data/CaseSplit.idr" idris-case-split idris-test-eq-buffer)
