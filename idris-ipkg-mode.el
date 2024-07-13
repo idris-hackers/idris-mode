@@ -422,7 +422,8 @@ Invokes `idris-ipkg-mode-hook'."
   (set (make-local-variable 'font-lock-defaults)
        idris-ipkg-font-lock-defaults)
   (set (make-local-variable 'completion-at-point-functions)
-       '(idris-ipkg-complete-keyword)))
+       '(idris-ipkg-complete-keyword))
+  (set (make-local-variable 'comment-start) "--"))
 
 ;; Make filenames clickable
 (add-to-list 'compilation-error-regexp-alist-alist
