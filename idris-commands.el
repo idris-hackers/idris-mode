@@ -168,14 +168,14 @@
 (defun idris-filename-to-load ()
   "Compute the working directory and filename to load in Idris.
 Returning these as a cons."
-  (let* ((fn (buffer-file-name))
-         (ipkg-srcdir (idris-ipkg-find-src-dir))
-         (srcdir (or ipkg-srcdir (file-name-directory fn))))
-    (when (and  ;; check that srcdir is prefix of filename - then load relative
-           (> (length fn) (length srcdir))
-           (string= (substring fn 0 (length srcdir)) srcdir))
-      (setq fn (file-relative-name fn srcdir)))
-    (cons srcdir fn)))
+  (let* ((ipkg-file (car-safe (idris-find-file-upwards "ipkg")))
+         (file-name (buffer-file-name))
+         (work-dir (directory-file-name (idris-file-name-parent-directory (or ipkg-file file-name))))
+         (source-dir (or (idris-ipkg-find-src-dir) work-dir)))
+    ;; TODO: Update once https://github.com/idris-lang/Idris2/issues/3310 is resolved
+    (if (> idris-protocol-version 1)
+        (cons work-dir (file-relative-name file-name work-dir))
+      (cons source-dir (file-relative-name file-name source-dir)))))
 
 (defun idris-load-file (&optional set-line)
   "Pass the current buffer's file to the inferior Idris process.
