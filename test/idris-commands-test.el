@@ -313,6 +313,119 @@ myReverse xs = revAcc [] xs where
       (delete-directory mock-directory-name t)
       (idris-quit))))
 
+(ert-deftest idris-test-idris-make-lemma ()
+  "Test `idris-make-lemma' replacing a hole with a metavariable lemma."
+  (cl-flet ((idris-load-file-sync-stub () nil)
+            (idris-eval-stub (&optional &rest args)
+              '((:metavariable-lemma
+                 (:replace-metavariable "closeDistance_rhs s1 s2")
+                 (:definition-type "closeDistance_rhs : String -> String -> IO Bool")))))
+    (advice-add 'idris-load-file-sync :override #'idris-load-file-sync-stub)
+    (advice-add 'idris-eval :override #'idris-eval-stub)
+    (unwind-protect
+        (progn
+          (with-temp-buffer
+            (insert "closeDistance : String -> String -> IO Bool
+closeDistance s1 s2 = ?closeDistance_rhs")
+            (goto-char (point-min))
+            (re-search-forward "closeDistance_rh")
+            (funcall-interactively 'idris-make-lemma)
+            (should (string= "closeDistance_rhs : String -> String -> IO Bool
+
+closeDistance : String -> String -> IO Bool
+closeDistance s1 s2 = closeDistance_rhs s1 s2"
+                             (buffer-substring-no-properties (point-min) (point-max)))))
+
+          (with-temp-buffer
+            (insert "something_else
+
+closeDistance : String -> String -> IO Bool
+closeDistance s1 s2 = ?closeDistance_rhs")
+            (goto-char (point-min))
+            (re-search-forward "closeDistance_rh")
+            (funcall-interactively 'idris-make-lemma)
+            (should (string= "something_else
+
+closeDistance_rhs : String -> String -> IO Bool
+
+closeDistance : String -> String -> IO Bool
+closeDistance s1 s2 = closeDistance_rhs s1 s2"
+                             (buffer-substring-no-properties (point-min) (point-max)))))
+
+          (with-temp-buffer
+            (insert "something_else
+
+closeDistance : String -> String -> IO Bool
+closeDistance s1 s2 = ?closeDistance_rhs")
+            (goto-char (point-min))
+            (re-search-forward "closeDistance_rh")
+            (funcall-interactively 'idris-make-lemma)
+            (should (string= "something_else
+
+closeDistance_rhs : String -> String -> IO Bool
+
+closeDistance : String -> String -> IO Bool
+closeDistance s1 s2 = closeDistance_rhs s1 s2"
+                             (buffer-substring-no-properties (point-min) (point-max)))))
+
+          (with-temp-buffer
+            (insert "||| Check if two strings are close enough to be similar,
+||| using the namespace distance criteria.
+closeDistance : String -> String -> IO Bool
+closeDistance s1 s2 = ?closeDistance_rhs")
+            (goto-char (point-min))
+            (re-search-forward "closeDistance_rh")
+            (funcall-interactively 'idris-make-lemma)
+            (should (string= "closeDistance_rhs : String -> String -> IO Bool
+
+||| Check if two strings are close enough to be similar,
+||| using the namespace distance criteria.
+closeDistance : String -> String -> IO Bool
+closeDistance s1 s2 = closeDistance_rhs s1 s2"
+                             (buffer-substring-no-properties (point-min) (point-max)))))
+
+          (with-temp-buffer
+            (insert "something_else
+
+||| Check if two strings are close enough to be similar,
+||| using the namespace distance criteria.
+closeDistance : String -> String -> IO Bool
+closeDistance s1 s2 = ?closeDistance_rhs")
+            (goto-char (point-min))
+            (re-search-forward "closeDistance_rh")
+            (funcall-interactively 'idris-make-lemma)
+            ;; (message "%s" (buffer-substring-no-properties (point-min) (point-max)))
+            (should (string= "something_else
+
+closeDistance_rhs : String -> String -> IO Bool
+
+||| Check if two strings are close enough to be similar,
+||| using the namespace distance criteria.
+closeDistance : String -> String -> IO Bool
+closeDistance s1 s2 = closeDistance_rhs s1 s2"
+                             (buffer-substring-no-properties (point-min) (point-max)))))
+
+          (with-temp-buffer
+            (insert "something else
+
+-- some inline comment
+closeDistance : String -> String -> IO Bool
+closeDistance s1 s2 = ?closeDistance_rhs")
+            (goto-char (point-min))
+            (re-search-forward "closeDistance_rh")
+            (funcall-interactively 'idris-make-lemma)
+            (should (string= "something else
+
+closeDistance_rhs : String -> String -> IO Bool
+
+-- some inline comment
+closeDistance : String -> String -> IO Bool
+closeDistance s1 s2 = closeDistance_rhs s1 s2"
+                             (buffer-substring-no-properties (point-min) (point-max))))))
+
+      (advice-remove 'idris-load-file-sync #'idris-load-file-sync-stub)
+      (advice-remove 'idris-eval #'idris-eval-stub))))
+
 ;; Tests by Yasuhiko Watanabe
 ;; https://github.com/idris-hackers/idris-mode/pull/537/files
 (idris-ert-command-action "test-data/CaseSplit.idr" idris-case-split idris-test-eq-buffer)
