@@ -32,6 +32,7 @@ with release 0.9.19.
 
 ### Bug fixes
 
++ Fix `idris-identifier-face` looking wrong in `org-mode` blocks and the like.
 + [3c3a87c66c](https://github.com/idris-hackers/idris-mode/commit/3c3a87c66c): Fix failure to find beginning of function type definition when lifting hole and function name contains underscore.
 + [62c3ad2b0d](https://github.com/idris-hackers/idris-mode/commit/62c3ad2b0d): Do not display unnecessary `*idris-process*` buffer when loading file.
 + [486be1b740](https://github.com/idris-hackers/idris-mode/commit/486be1b740): Improve `idris-case-dwim` to make case expression from hole in edge case point positions.

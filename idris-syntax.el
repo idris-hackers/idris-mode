@@ -34,7 +34,7 @@ contributing the settings upstream to the theme maintainer."
   :prefix 'idris :group 'idris)
 
 (defface idris-identifier-face
-  '((t (:inherit default)))
+  '((t nil))
   "The face to highlight Idris identifiers with."
   :group 'idris-faces)
 
