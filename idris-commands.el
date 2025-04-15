@@ -653,12 +653,33 @@ Otherwise, case split as a pattern variable."
                  (re-search-backward (if (idris-lidr-p)
                                          "^\\(>\\s-*\\)\\(([^)]+)\\|[a-zA-Z_0-9]+\\)\\s-*:"
                                        "^\\(\\s-*\\)\\(([^)]+)\\|[a-zA-Z_0-9]+\\)\\s-*:"))
-                 (let ((indentation (match-string 1)) end-point)
+                 (let ((indentation (match-string 1))
+                       end-point)
                    (beginning-of-line)
+
+                   ;; make sure we are above the documentation string
+                   (forward-line -1)
+                   (while (and (not (looking-at-p "^\\s-*$"))
+                               (not (equal (point) (point-min)))
+                               (or (looking-at-p "^|||") (looking-at-p "^--")))
+                     (forward-line -1))
+
+                   ;; if we reached beginning of file
+                   ;; add new line between the type signature and the lemma
+                   (if (equal (point) (point-min))
+                       (progn
+                         (newline 1)
+                         (forward-line -1))
+                     ;; otherwise find first non empty line
+                     (forward-line -1)
+                     (when (looking-at-p "^.*\\S-.*$")
+                       (forward-line 1)
+                       (newline 1)))
+
                    (insert indentation)
                    (setq end-point (point))
                    (insert type-decl)
-                   (newline 2)
+                   (newline 1)
                    ;; make sure point ends up ready to start a new pattern match
                    (goto-char end-point))))
               ((equal lemma-type :provisional-definition-lemma)
@@ -669,7 +690,8 @@ Otherwise, case split as a pattern variable."
                  (let ((next-defn-point
                         (re-search-forward (if (idris-lidr-p)
                                                "^\\(>\\s-*\\)\\(([^)]+)\\|\\w+\\)\\s-*:"
-                                             "^\\(\\s-*\\)\\(([^)]+)\\|\\w+\\)\\s-*:") nil t)))
+                                             "^\\(\\s-*\\)\\(([^)]+)\\|\\w+\\)\\s-*:")
+                                           nil t)))
                    (if next-defn-point ;; if we found a definition
                        (let ((indentation (match-string 1)) end-point)
                          (goto-char next-defn-point)
