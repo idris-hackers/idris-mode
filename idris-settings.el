@@ -1,4 +1,4 @@
-;;; idris-settings.el --- Contains settings for idris-mode
+;;; idris-settings.el --- Contains settings for idris-mode  -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2013 Hannes Mehnert and David Raymond Christiansen
 
