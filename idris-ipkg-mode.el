@@ -74,6 +74,7 @@
     "preclean"
     "postclean"
     "version"
+    "langversion"
     "depends"
     "modules"
     "main"
