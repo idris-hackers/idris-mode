@@ -194,11 +194,10 @@ column, `tab-to-tab-stop' is done instead."
                               (search-forward-regexp
                                "[^ ]" (line-end-position) t 1))))
              (when end (cons start (1- end)))))))
+    (newline)
     (if start-end
-        (progn (newline)
-               (insert (buffer-substring-no-properties
-                        (car start-end) (cdr start-end))))
-      (newline))))
+        (insert (buffer-substring-no-properties
+                 (car start-end) (cdr start-end))))))
 
 
 ;;;###autoload
