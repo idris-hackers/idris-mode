@@ -1,4 +1,4 @@
-;;; idris-simple-indent.el --- Simple indentation module for Idris Mode
+;;; idris-simple-indent.el --- Simple indentation module for Idris Mode -*- lexical-binding: t -*-
 
 ;; Copyright (C) 1998 Heribert Schuetz, Graeme E Moss
 
@@ -187,19 +187,17 @@ column, `tab-to-tab-stop' is done instead."
 (defun idris-simple-indent-newline-same-col ()
   "Make a newline and go to the same column as the current line."
   (interactive)
-  (let ((point (point)))
-    (let ((start-end
-           (save-excursion
-             (let* ((start (line-beginning-position))
-                    (end (progn (goto-char start)
-                                (search-forward-regexp
-                                 "[^ ]" (line-end-position) t 1))))
-               (when end (cons start (1- end)))))))
-      (if start-end
-          (progn (newline)
-                 (insert (buffer-substring-no-properties
-                          (car start-end) (cdr start-end))))
-        (newline)))))
+  (let ((start-end
+         (save-excursion
+           (let* ((start (line-beginning-position))
+                  (end (progn (goto-char start)
+                              (search-forward-regexp
+                               "[^ ]" (line-end-position) t 1))))
+             (when end (cons start (1- end)))))))
+    (newline)
+    (if start-end
+        (insert (buffer-substring-no-properties
+                 (car start-end) (cdr start-end))))))
 
 
 ;;;###autoload
