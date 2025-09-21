@@ -46,7 +46,8 @@
 
 (ert-deftest idris-test-idris-quit ()
   "Ensure that running Idris and quitting doesn't leave behind unwanted buffers."
-  (let ((before (normalised-buffer-list)))
+  (let ((before (normalised-buffer-list))
+        (idris-log-events nil))
     (idris-repl)
     (dotimes (_ 10) (accept-process-output nil 0.1))
     (idris-quit)
@@ -58,8 +59,9 @@
   "Ensure that running Idris and quitting doesn't leave behind unwanted buffers.
 In particular, only *idris-events* should remain."
   (let ((before (normalised-buffer-list))
-        (idris-log-events t))
-
+        (idris-event-buffer-name "*idris-test-idris-events*")
+        (idris-log-events t)
+        (expected-difference ))
     (idris-repl)
     (dotimes (_ 10) (accept-process-output nil 0.1))
     (idris-quit)
