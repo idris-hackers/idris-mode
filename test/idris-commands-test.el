@@ -1,4 +1,4 @@
-;;; idris-commands-test.el --- Tests for interactive commands
+;;; idris-commands-test.el --- Tests for interactive commands  -*- lexical-binding: t -*-
 
 ;; Keywords: languages
 

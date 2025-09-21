@@ -1,4 +1,4 @@
-;;; idris-repl-test.el --- Tests for idris-repl
+;;; idris-repl-test.el --- Tests for idris-repl  -*- lexical-binding: t -*-
 
 (require 'ert)
 (require 'idris-repl)

@@ -1,4 +1,4 @@
-;;; idris-navigate-test.el --- Tests for idris-navigate
+;;; idris-navigate-test.el --- Tests for idris-navigate  -*- lexical-binding: t -*-
 
 (require 'idris-mode)
 (require 'idris-navigate)
