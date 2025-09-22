@@ -82,16 +82,15 @@
 
 (ert-deftest idris-test-error-buffer ()
   "Test that loading a type-incorrect Idris buffer results in an error message buffer."
-  (let ((buffer (find-file "test-data/TypeError.idr")))
+  (let ((buffer (find-file-noselect "test-data/TypeError.idr")))
     (with-current-buffer buffer
       (idris-load-file)
       (dotimes (_ 10) (accept-process-output nil 0.1))
-      (should (get-buffer idris-notes-buffer-name)))
+      (kill-buffer))
+    (should (get-buffer idris-notes-buffer-name))
     (with-current-buffer (get-buffer idris-notes-buffer-name)
       (goto-char (point-min))
       (should (re-search-forward "Nat" nil t))) ;; check that the buffer has something error-like
-    (with-current-buffer buffer
-      (kill-buffer))
     (idris-quit)))
 
 (ert-deftest idris-test-ipkg-packages-with-underscores-and-dashes ()
