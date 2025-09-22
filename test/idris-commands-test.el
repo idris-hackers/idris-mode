@@ -89,35 +89,28 @@ In particular, only *idris-events* should remain."
       (let ((mv-buffer (get-buffer idris-hole-list-buffer-name)))
         ;; The buffer exists and contains characters
         (should (bufferp mv-buffer))
-        (should (> (buffer-size mv-buffer) 10))
-        (kill-buffer mv-buffer))
+        (should (> (buffer-size mv-buffer) 10)))
 
       ;; Clean up
-      (with-current-buffer buffer
-        (idris-delete-ibc t)
-        (kill-buffer))))
-
-  ;; More cleanup
-  (idris-quit))
+      (idris-delete-ibc t)
+      (kill-buffer)
+      (idris-quit))))
 
 (ert-deftest idris-load-file-idris-hole-show-on-load-disabled ()
   "Test that holes buffer is not created."
   (let ((buffer (find-file-noselect "test-data/MetavarTest.idr"))
         (idris-hole-show-on-load nil))
     (with-current-buffer buffer
-      (idris-load-file))
-    (dotimes (_ 10) (accept-process-output nil 0.1))
-    (let ((mv-buffer (get-buffer idris-hole-list-buffer-name)))
-      (should-not (bufferp mv-buffer))
-      (should (null mv-buffer)))
+      (idris-load-file)
+      (dotimes (_ 10) (accept-process-output nil 0.1))
+      (let ((mv-buffer (get-buffer idris-hole-list-buffer-name)))
+        (should-not (bufferp mv-buffer))
+        (should (null mv-buffer)))
 
-    ;; Clean up
-    (with-current-buffer buffer
+      ;; Clean up
       (idris-delete-ibc t)
-      (kill-buffer)))
-
-  ;; More cleanup
-  (idris-quit))
+      (kill-buffer)
+      (idris-quit))))
 
 (ert-deftest idris-list-holes ()
   "Test `idris-list-holes' command."
