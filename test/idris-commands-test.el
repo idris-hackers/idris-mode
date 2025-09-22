@@ -21,6 +21,10 @@
 
 ;;; Code:
 
+;; to load idris-test-utils
+(let ((test-dir (file-name-directory (or load-file-name buffer-file-name))))
+  (add-to-list 'load-path test-dir))
+
 (require 'idris-commands)
 (require 'idris-test-utils)
 
