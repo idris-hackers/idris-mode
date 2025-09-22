@@ -67,7 +67,7 @@
     (should (string= "37072" (match-string 2 output)))))
 
 (ert-deftest idris-test-find-cmdline-args ()
-  "Test that idris-mode calculates command line arguments from .ipkg files."
+  "Test that `idris-mode' calculates command line arguments from .ipkg files."
   ;; Outside of a project, none are found
   (let ((buffer (find-file "test-data/ProofSearch.idr")))
     (with-current-buffer buffer
@@ -95,12 +95,11 @@
 
 (ert-deftest idris-test-ipkg-packages-with-underscores-and-dashes ()
   "Test that loading an ipkg file can have dependencies on packages with _ or - in the name."
-  (let ((buffer (find-file "test-data/package-test/Packaging.idr")))
+  (let ((buffer (find-file-noselect "test-data/package-test/Packaging.idr")))
     (with-current-buffer buffer
       (should (equal '("-p" "idris-free" "-p" "recursion_schemes")
                      (idris-ipkg-pkgs-flags-for-current-buffer)))
-      (kill-buffer buffer))
-    (idris-quit)))
+      (kill-buffer buffer))))
 
 (ert-deftest idris-test-warning-overlay ()
   "Test that `idris-warning-overaly-point' works as expected."
