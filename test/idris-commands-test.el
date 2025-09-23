@@ -426,45 +426,55 @@ closeDistance s1 s2 = closeDistance_rhs s1 s2"
       (advice-remove 'idris-load-file-sync #'idris-load-file-sync-stub)
       (advice-remove 'idris-eval #'idris-eval-stub))))
 
-(ert-deftest idris-test-idris-filename-to-load ()
-  "Test that `idris-filename-to-load' returns expected data structure."
-  (cl-flet ((idris-ipkg-find-src-dir-stub () src-dir)
-            (idris-find-file-upwards-stub (_ex) ipkg-files)
-            (buffer-file-name-stub () "/some/path/to/idris-project/src/Component/Foo.idr"))
-    (advice-add 'idris-ipkg-find-src-dir :override #'idris-ipkg-find-src-dir-stub)
-    (advice-add 'idris-find-file-upwards :override #'idris-find-file-upwards-stub)
-    (advice-add 'buffer-file-name :override #'buffer-file-name-stub)
-    (let* ((default-directory "/some/path/to/idris-project/src/Component")
-           ipkg-files
-           src-dir)
-      (unwind-protect
-          (progn
-            (let ((result (idris-filename-to-load)))
-              (should (equal default-directory (car result)))
-              (should (equal "Foo.idr" (cdr result))))
+(ert-deftest idris-filename-to-load-test ()
+  "Test `idris-filename-to-load' under different project setups."
+  (let ((default-directory "/some/path/to/idris-project/src/Component")
+        (idris-protocol-version 0)   ;; default unless overridden
+        ;; control variables that the stubs will read
+        current-src-dir
+        current-ipkg-files)
 
-            ;; When ipkg sourcedir value is set
-            ;; Then return combination of source directory
-            ;; and relative path of the file to the source directory
-            (let* ((src-dir "/some/path/to/idris-project/src")
-                   (result (idris-filename-to-load)))
-              (should (equal src-dir (car result)))
-              (should (equal "Component/Foo.idr" (cdr result))))
+    ;; Override project-related functions once for all scenarios.
+    (cl-letf (((symbol-function 'idris-ipkg-find-src-dir)
+               (lambda () current-src-dir))
+              ((symbol-function 'idris-find-file-upwards)
+               (lambda (_ex) current-ipkg-files))
+              ((symbol-function 'buffer-file-name)
+               (lambda () "/some/path/to/idris-project/src/Component/Foo.idr")))
 
-            ;; When ipkg sourcedir value is set
-            ;; and idris-protocol-version is greater than 1
-            ;; Then return combination of work directory
-            ;; (Directory containing the first found ipkg file)
-            ;; and relative path of the file to the work directory
-            (let* ((ipkg-files '("/some/path/to/idris-project/baz.ipkg"))
-                   (idris-protocol-version 2)
-                   (result (idris-filename-to-load)))
-              (should (equal "/some/path/to/idris-project" (car result)))
-              (should (equal "src/Component/Foo.idr" (cdr result)))))
+      ;; ── Scenario 1: no ipkg, no sourcedir ───────────────
+      (setq current-src-dir nil
+            current-ipkg-files nil
+            idris-protocol-version 0)
+      (let ((result (idris-filename-to-load)))
+        (should (equal default-directory (car result)))
+        (should (equal "Foo.idr" (cdr result))))
 
-        (advice-remove 'idris-ipkg-find-src-dir #'idris-ipkg-find-src-dir-stub)
-        (advice-remove 'idris-find-file-upwards #'idris-find-file-upwards-stub)
-        (advice-remove 'buffer-file-name #'buffer-file-name-stub)))))
+      ;; ── Scenario 2: ipkg sourcedir is set ───────────────
+      (setq current-src-dir "/some/path/to/idris-project/src"
+            current-ipkg-files nil
+            idris-protocol-version 0)
+      (let ((result (idris-filename-to-load)))
+        (should (equal current-src-dir (car result)))
+        (should (equal "Component/Foo.idr" (cdr result))))
+
+      ;; ── Scenario 3: ipkg sourcedir set, protocol v>1 ────
+      (setq current-src-dir "/some/path/to/idris-project/src"
+            current-ipkg-files '("/some/path/to/idris-project/baz.ipkg")
+            idris-protocol-version 2)
+      (let ((result (idris-filename-to-load)))
+        (should (equal "/some/path/to/idris-project" (car result)))
+        (should (equal "src/Component/Foo.idr" (cdr result))))
+
+      ;; ── Scenario 4: multiple ipkg files, first one wins ─
+      (setq current-src-dir "/some/path/to/idris-project/src"
+            current-ipkg-files '("/some/path/to/idris-project/zzz.ipkg"
+                                 "/some/path/to/idris-project/not-selected/baz.ipkg")
+            idris-protocol-version 2)
+      (let ((result (idris-filename-to-load)))
+        ;; Should pick the directory of the *first* ipkg
+        (should (equal "/some/path/to/idris-project" (car result)))
+        (should (equal "src/Component/Foo.idr" (cdr result)))))))
 
 ;; Tests by Yasuhiko Watanabe
 ;; https://github.com/idris-hackers/idris-mode/pull/537/files
