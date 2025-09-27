@@ -576,6 +576,25 @@ Otherwise, case split as a pattern variable."
     (idris-make-cases-from-hole))
    (t (idris-case-split))))
 
+(defun idris-line-indentation-for (thing)
+  "Return the indentation prefix string for the line indicated by THING.
+
+THING should be an Idris source location object, where the cdr gives the
+1-based line number of the expression the current command was invoked on.
+
+The return value is the leading whitespace of that line.
+For Idris protocol versions <= 1, the prefix may also include a leading ‘>’.
+If no indentation is found, return the empty string."
+  (save-excursion
+    (goto-char (point-min))
+    (forward-line (1- (cdr thing)))
+    (goto-char (line-beginning-position))
+    (re-search-forward (if (> idris-protocol-version 1)
+                           "^\\(\\s-*\\)"
+                         "\\(^>?\\s-*\\)")
+                       nil t)
+    (or (match-string 1) "")))
+
 (defun idris-add-clause (proof)
   "Add clauses to the declaration at point."
   (interactive "P")
@@ -585,12 +604,7 @@ Otherwise, case split as a pattern variable."
       (idris-load-file-sync)
       (let ((result (string-trim-left (car (idris-eval `(,command ,(cdr what) ,(car what))))))
             final-point
-            (prefix (save-excursion        ; prefix is the indentation to insert for the clause
-                      (goto-char (point-min))
-                      (forward-line (1- (cdr what)))
-                      (goto-char (line-beginning-position))
-                      (re-search-forward "\\(^>?\\s-*\\)" nil t)
-                      (or (match-string 1) ""))))
+            (prefix (idris-line-indentation-for what)))
         ;; Go forward until we get to a line with equal or less indentation to
         ;; the type declaration, or the end of the buffer, and insert the
         ;; result
@@ -789,12 +803,7 @@ Idris 2 only."
       (idris-load-file-sync)
       (let ((result (car (idris-eval `(:generate-def ,(cdr what) ,(car what)))))
             final-point
-            (prefix (save-excursion
-                      (goto-char (point-min))
-                      (forward-line (1- (cdr what)))
-                      (goto-char (line-beginning-position))
-                      (re-search-forward "\\(^>?\\s-*\\)" nil t)
-                      (or (match-string 1) ""))))
+            (prefix (idris-line-indentation-for what)))
         (if (string= result "")
             (error "Nothing found")
           (goto-char (line-beginning-position))
