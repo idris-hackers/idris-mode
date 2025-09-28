@@ -216,6 +216,30 @@ myReverse xs = revAcc [] xs where
       (kill-buffer))
     (idris-quit)))
 
+(ert-deftest idris-test-idris-add-clause-lidr ()
+  "Test that `idris-add-clause' generates definition with proper indentation."
+  :expected-result (if (string-match-p "idris2$" idris-interpreter-path)
+                       :passed
+                     :failed)
+  (let ((buffer (find-file-noselect "test-data/Literate.lidr"))
+        (buffer-content (with-temp-buffer
+                          (insert-file-contents "test-data/Literate.lidr")
+                          (buffer-string))))
+    (with-current-buffer buffer
+      (goto-char (point-min))
+      (re-search-forward "test :")
+      (goto-char (match-beginning 0))
+      (funcall-interactively 'idris-load-file-sync)
+      (funcall-interactively 'idris-add-clause nil)
+      (should (looking-at-p "> test \\w+ = \\?test_rhs"))
+      ;; Cleanup
+      (idris-delete-ibc t)
+      (erase-buffer)
+      (insert buffer-content)
+      (save-buffer)
+      (kill-buffer))
+    (idris-quit)))
+
 (ert-deftest idris-test-idris-refine ()
   "Test that `idris-refine' works as expected."
   (let* ((buffer (find-file "test-data/Refine.idr"))
