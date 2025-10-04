@@ -1,4 +1,4 @@
-;;; idris-commands-test.el --- Tests for interactive commands
+;;; idris-commands-test.el --- Tests for interactive commands  -*- lexical-binding: t -*-
 
 ;; Keywords: languages
 
@@ -20,6 +20,10 @@
 ;; This is a collection of tests for interactive commands in idris-mode.
 
 ;;; Code:
+
+;; to load idris-test-utils
+(let ((test-dir (file-name-directory (or load-file-name buffer-file-name))))
+  (add-to-list 'load-path test-dir))
 
 (require 'idris-commands)
 (require 'idris-test-utils)
@@ -46,7 +50,8 @@
 
 (ert-deftest idris-test-idris-quit ()
   "Ensure that running Idris and quitting doesn't leave behind unwanted buffers."
-  (let ((before (normalised-buffer-list)))
+  (let ((before (normalised-buffer-list))
+        (idris-log-events nil))
     (idris-repl)
     (dotimes (_ 10) (accept-process-output nil 0.1))
     (idris-quit)
@@ -58,8 +63,9 @@
   "Ensure that running Idris and quitting doesn't leave behind unwanted buffers.
 In particular, only *idris-events* should remain."
   (let ((before (normalised-buffer-list))
-        (idris-log-events t))
-
+        (idris-event-buffer-name "*idris-test-idris-events*")
+        (idris-log-events t)
+        (expected-difference ))
     (idris-repl)
     (dotimes (_ 10) (accept-process-output nil 0.1))
     (idris-quit)
@@ -83,35 +89,28 @@ In particular, only *idris-events* should remain."
       (let ((mv-buffer (get-buffer idris-hole-list-buffer-name)))
         ;; The buffer exists and contains characters
         (should (bufferp mv-buffer))
-        (should (> (buffer-size mv-buffer) 10))
-        (kill-buffer mv-buffer))
+        (should (> (buffer-size mv-buffer) 10)))
 
       ;; Clean up
-      (with-current-buffer buffer
-        (idris-delete-ibc t)
-        (kill-buffer))))
-
-  ;; More cleanup
-  (idris-quit))
+      (idris-delete-ibc t)
+      (kill-buffer)
+      (idris-quit))))
 
 (ert-deftest idris-load-file-idris-hole-show-on-load-disabled ()
   "Test that holes buffer is not created."
   (let ((buffer (find-file-noselect "test-data/MetavarTest.idr"))
         (idris-hole-show-on-load nil))
     (with-current-buffer buffer
-      (idris-load-file))
-    (dotimes (_ 10) (accept-process-output nil 0.1))
-    (let ((mv-buffer (get-buffer idris-hole-list-buffer-name)))
-      (should-not (bufferp mv-buffer))
-      (should (null mv-buffer)))
+      (idris-load-file)
+      (dotimes (_ 10) (accept-process-output nil 0.1))
+      (let ((mv-buffer (get-buffer idris-hole-list-buffer-name)))
+        (should-not (bufferp mv-buffer))
+        (should (null mv-buffer)))
 
-    ;; Clean up
-    (with-current-buffer buffer
+      ;; Clean up
       (idris-delete-ibc t)
-      (kill-buffer)))
-
-  ;; More cleanup
-  (idris-quit))
+      (kill-buffer)
+      (idris-quit))))
 
 (ert-deftest idris-list-holes ()
   "Test `idris-list-holes' command."
@@ -312,26 +311,27 @@ myReverse xs = revAcc [] xs where
         (mock-first-module "TestModule")
         (mock-directory-name "test-start-project"))
     (unwind-protect
-        (cl-letf (((symbol-function 'read-string)
-                   (lambda (prompt &rest _)
-                     (cond ((string-prefix-p "Project name:" prompt)
-                            mock-project-name)
-                           ((string-prefix-p "Package file name" prompt)
-                            mock-package-file-name)
-                           ((string-prefix-p "Source directory" prompt)
-                            mock-source-directory)
-                           ((string-prefix-p "First module name" prompt)
-                            mock-first-module))))
-                  ((symbol-function 'read-directory-name)
-                   (lambda (&rest _) mock-directory-name)))
-          (idris-start-project)
-          (with-current-buffer mock-package-file-name
-            (goto-char (point-min))
-            (should (search-forward "package test-project"))
-            (should (search-forward "opts = \"\""))
-            (should (search-forward "sourcedir = \"src\""))
-            (should (search-forward "modules = TestModule"))
-            (kill-buffer)))
+        (save-window-excursion
+          (cl-letf (((symbol-function 'read-string)
+                     (lambda (prompt &rest _)
+                       (cond ((string-prefix-p "Project name:" prompt)
+                              mock-project-name)
+                             ((string-prefix-p "Package file name" prompt)
+                              mock-package-file-name)
+                             ((string-prefix-p "Source directory" prompt)
+                              mock-source-directory)
+                             ((string-prefix-p "First module name" prompt)
+                              mock-first-module))))
+                    ((symbol-function 'read-directory-name)
+                     (lambda (&rest _) mock-directory-name)))
+            (idris-start-project)
+            (with-current-buffer mock-package-file-name
+              (goto-char (point-min))
+              (should (search-forward "package test-project"))
+              (should (search-forward "opts = \"\""))
+              (should (search-forward "sourcedir = \"src\""))
+              (should (search-forward "modules = TestModule"))
+              (kill-buffer))))
       (if (get-buffer (concat mock-first-module ".idr"))
           (kill-buffer (concat mock-first-module ".idr")))
       (delete-directory mock-directory-name t)
@@ -450,45 +450,55 @@ closeDistance s1 s2 = closeDistance_rhs s1 s2"
       (advice-remove 'idris-load-file-sync #'idris-load-file-sync-stub)
       (advice-remove 'idris-eval #'idris-eval-stub))))
 
-(ert-deftest idris-test-idris-filename-to-load ()
-  "Test that `idris-filename-to-load' returns expected data structure."
-  (cl-flet ((idris-ipkg-find-src-dir-stub () src-dir)
-            (idris-find-file-upwards-stub (_ex) ipkg-files)
-            (buffer-file-name-stub () "/some/path/to/idris-project/src/Component/Foo.idr"))
-    (advice-add 'idris-ipkg-find-src-dir :override #'idris-ipkg-find-src-dir-stub)
-    (advice-add 'idris-find-file-upwards :override #'idris-find-file-upwards-stub)
-    (advice-add 'buffer-file-name :override #'buffer-file-name-stub)
-    (let* ((default-directory "/some/path/to/idris-project/src/Component")
-           ipkg-files
-           src-dir)
-      (unwind-protect
-          (progn
-            (let ((result (idris-filename-to-load)))
-              (should (equal default-directory (car result)))
-              (should (equal "Foo.idr" (cdr result))))
+(ert-deftest idris-filename-to-load-test ()
+  "Test `idris-filename-to-load' under different project setups."
+  (let ((default-directory "/some/path/to/idris-project/src/Component")
+        (idris-protocol-version 0)   ;; default unless overridden
+        ;; control variables that the stubs will read
+        current-src-dir
+        current-ipkg-files)
 
-            ;; When ipkg sourcedir value is set
-            ;; Then return combination of source directory
-            ;; and relative path of the file to the source directory
-            (let* ((src-dir "/some/path/to/idris-project/src")
-                   (result (idris-filename-to-load)))
-              (should (equal src-dir (car result)))
-              (should (equal "Component/Foo.idr" (cdr result))))
+    ;; Override project-related functions once for all scenarios.
+    (cl-letf (((symbol-function 'idris-ipkg-find-src-dir)
+               (lambda () current-src-dir))
+              ((symbol-function 'idris-find-file-upwards)
+               (lambda (_ex) current-ipkg-files))
+              ((symbol-function 'buffer-file-name)
+               (lambda () "/some/path/to/idris-project/src/Component/Foo.idr")))
 
-            ;; When ipkg sourcedir value is set
-            ;; and idris-protocol-version is greater than 1
-            ;; Then return combination of work directory
-            ;; (Directory containing the first found ipkg file)
-            ;; and relative path of the file to the work directory
-            (let* ((ipkg-files '("/some/path/to/idris-project/baz.ipkg"))
-                   (idris-protocol-version 2)
-                   (result (idris-filename-to-load)))
-              (should (equal "/some/path/to/idris-project" (car result)))
-              (should (equal "src/Component/Foo.idr" (cdr result)))))
+      ;; ── Scenario 1: no ipkg, no sourcedir ───────────────
+      (setq current-src-dir nil
+            current-ipkg-files nil
+            idris-protocol-version 0)
+      (let ((result (idris-filename-to-load)))
+        (should (equal default-directory (car result)))
+        (should (equal "Foo.idr" (cdr result))))
 
-        (advice-remove 'idris-ipkg-find-src-dir #'idris-ipkg-find-src-dir-stub)
-        (advice-remove 'idris-find-file-upwards #'idris-find-file-upwards-stub)
-        (advice-remove 'buffer-file-name #'buffer-file-name-stub)))))
+      ;; ── Scenario 2: ipkg sourcedir is set ───────────────
+      (setq current-src-dir "/some/path/to/idris-project/src"
+            current-ipkg-files nil
+            idris-protocol-version 0)
+      (let ((result (idris-filename-to-load)))
+        (should (equal current-src-dir (car result)))
+        (should (equal "Component/Foo.idr" (cdr result))))
+
+      ;; ── Scenario 3: ipkg sourcedir set, protocol v>1 ────
+      (setq current-src-dir "/some/path/to/idris-project/src"
+            current-ipkg-files '("/some/path/to/idris-project/baz.ipkg")
+            idris-protocol-version 2)
+      (let ((result (idris-filename-to-load)))
+        (should (equal "/some/path/to/idris-project" (car result)))
+        (should (equal "src/Component/Foo.idr" (cdr result))))
+
+      ;; ── Scenario 4: multiple ipkg files, first one wins ─
+      (setq current-src-dir "/some/path/to/idris-project/src"
+            current-ipkg-files '("/some/path/to/idris-project/zzz.ipkg"
+                                 "/some/path/to/idris-project/not-selected/baz.ipkg")
+            idris-protocol-version 2)
+      (let ((result (idris-filename-to-load)))
+        ;; Should pick the directory of the *first* ipkg
+        (should (equal "/some/path/to/idris-project" (car result)))
+        (should (equal "src/Component/Foo.idr" (cdr result)))))))
 
 ;; Tests by Yasuhiko Watanabe
 ;; https://github.com/idris-hackers/idris-mode/pull/537/files

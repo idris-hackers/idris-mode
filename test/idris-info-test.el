@@ -1,4 +1,4 @@
-;;; idris-info-test.el --- Tests related to Idris info buffer -*- lexical-binding: t -*-
+;;; idris-info-test.el --- Tests related to Idris info buffer  -*- lexical-binding: t -*-
 ;; Copyright (C) 2022  Marek L.
 
 ;; Author: Marek L <nospam.keram@gmail.com>

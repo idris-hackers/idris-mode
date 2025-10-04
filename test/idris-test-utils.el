@@ -66,6 +66,7 @@ As this is not for a test of Idris itself, we do not care the results."
          (let ((this-buffer (current-buffer)))
            (should (,buffer-p buffer this-buffer))))
        (idris-delete-ibc t)
+       (not-modified)
        (kill-buffer))
      (idris-quit)))
 
@@ -84,6 +85,7 @@ As this is not for a test of Idris itself, we do not care the results."
          (idris-test-run-goto-char (function ,test-fun) nil)
          (let ((this-buffer (current-buffer)))
            (should (,buffer-p buffer this-buffer))))
+       (not-modified)
        (kill-buffer))
      (idris-quit)))
 
