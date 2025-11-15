@@ -806,10 +806,10 @@ Idris 2 only."
             (prefix (idris-line-indentation-for what)))
         (if (string= result "")
             (error "Nothing found")
-          (goto-char (line-beginning-position))
+          (beginning-of-line)
           (forward-line)
           (while (and (not (eobp))
-                      (progn (goto-char (line-beginning-position))
+                      (progn (beginning-of-line)
                              (looking-at-p (concat prefix "\\s-+"))))
             (forward-line))
           (insert prefix)
@@ -818,13 +818,7 @@ Idris 2 only."
           (insert result)
           (setq def-region-end (point))
           (newline)
-          (goto-char final-point)
-;          (save-excursion
-;            (forward-line 1)
-;            (setq def-region-start (point))
-;            (insert result)
-;            (setq def-region-end (point)))
-          )))))
+          (goto-char final-point))))))
 
 (defun idris-generate-def-next ()
   "Replace the previous generated definition with next definition, if it exists.
