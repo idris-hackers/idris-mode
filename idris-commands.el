@@ -502,7 +502,23 @@ Considered as a global variable"
 
 (defun idris-eldoc-lookup ()
   "Return Eldoc string associated with the thing at point."
-  (get-char-property (point) 'idris-eldoc))
+  (let ((prop-val (get-char-property (point) 'idris-eldoc)))
+    ;; Idris2 temporary hack to make eldoc bit useful
+    (if (and (stringp prop-val) (string-suffix-p ": " prop-val) (>=-protocol-version 2 1))
+        (let* ((thing (idris-name-at-point))
+               (ty (idris-eval (list :type-of thing) t))
+               ;; (ty (idris-eval (list :docs-for thing) t))
+               (result (car ty))
+               (formatting (cdr ty))
+               (result-colour (idris-propertize-str (idris-repl-semantic-text-props formatting)
+                                                    result)))
+          ;; memoize result
+          (dolist (overlay (overlays-at (point)))
+            (when (overlay-get overlay 'idris-source-highlight)
+              (overlay-put overlay 'idris-eldoc result-colour)))
+          result-colour)
+      ;; Idris 1 using :doc-overview semantic properties extracted from highlights
+      prop-val)))
 
 (defun idris-pretty-print ()
   "Get a term or definition pretty-printed by Idris.
