@@ -38,18 +38,19 @@
 (defvar idris-tree-printer 'idris-tree-default-printer)
 
 (defun idris-compiler-notes-list-show (notes)
-  (if (null notes)
-      nil ;; See https://github.com/idris-hackers/idris-mode/pull/148 TODO: revisit
-    (with-current-buffer (get-buffer-create idris-notes-buffer-name)
-      (idris-compiler-notes-mode)
-      (let ((buffer-read-only nil)
-            (root (idris-compiler-notes-to-tree notes)))
-        (erase-buffer)
+  (with-current-buffer (get-buffer-create idris-notes-buffer-name)
+    (idris-compiler-notes-mode)
+    (let ((inhibit-read-only t)
+          (window (get-buffer-window))
+          (root (idris-compiler-notes-to-tree notes)))
+      (erase-buffer)
+      (if (null notes)
+          (when window (quit-window nil window))
         (idris-tree-insert root "")
         (insert "\n\n")
         (message "Press q to close, return or mouse on error to navigate to source")
-        (goto-char (point-min))))
-    (display-buffer idris-notes-buffer-name)))
+        (goto-char (point-min))
+        (display-buffer idris-notes-buffer-name)))))
 
 (defun idris-tree-for-note (note)
   (let* ((buttonp (> (length (nth 0 note)) 0)) ;; if empty source location
