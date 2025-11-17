@@ -365,15 +365,15 @@ corresponding values in the CDR of VALUE."
                '()
              `((t (error "ELISP destructure-case failed: %S" ,tmp))))))))
 
+(defun idris-idr-p (&optional buffer)
+  "Return t if BUFFER is an Idris file (.idr)."
+  (if-let* ((file-name (buffer-file-name buffer)))
+      (string-equal (downcase (file-name-extension file-name)) "idr")))
+
 (defun idris-lidr-p (&optional buffer)
-  "Return t if BUFFER is a literate Idris file, or nil otherwise.
-Use the current buffer if BUFFER is not supplied or is nil."
-  (let ((file-name (buffer-file-name buffer)))
-    ;; We check for nil here because idris-lidr-p might be called on
-    ;; buffers that don't have associated files, such as the REPL
-    ;; buffer or an info buffer
-    (and (stringp file-name)
-         (string= (file-name-extension file-name) "lidr"))))
+  "Return t if BUFFER is a literate Idris file (.lidr)."
+  (if-let* ((file-name (buffer-file-name buffer)))
+      (string-equal (downcase (file-name-extension file-name)) "lidr")))
 
 (defun idris-make-file-link-overlay (start end keymap help-echo)
   (let ((overlay (make-overlay start end)))

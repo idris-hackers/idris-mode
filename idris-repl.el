@@ -186,9 +186,14 @@ If ALWAYS-INSERT is non-nil, always insert a prompt at the end of the buffer."
       (idris-repl-insert-prompt)
       (insert current-input))))
 
+(autoload 'idris-load-file-sync "idris-commands.el")
+;;;###autoload
 (defun idris-switch-to-repl ()
-  "Select the output buffer and scroll to bottom."
+  "Load the current Idris file buffer and jump to the Idris REPL."
   (interactive)
+  (if (or (idris-idr-p) (idris-lidr-p))
+      (idris-load-file-sync)
+    (user-error "This command can only be run from a buffer visiting an Idris `.idr' or `.lidr' file"))
   (pop-to-buffer (idris-repl-buffer))
   (goto-char (point-max)))
 
@@ -199,7 +204,8 @@ If ALWAYS-INSERT is non-nil, always insert a prompt at the end of the buffer."
 (defun idris-repl ()
   (interactive)
   (idris-run)
-  (idris-switch-to-repl))
+  (pop-to-buffer (idris-repl-buffer))
+  (goto-char (point-max)))
 
 (defvar idris-repl-mode-map
   (let ((map (make-sparse-keymap)))
