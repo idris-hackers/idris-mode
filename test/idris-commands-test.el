@@ -500,6 +500,50 @@ closeDistance s1 s2 = closeDistance_rhs s1 s2"
         (should (equal "/some/path/to/idris-project" (car result)))
         (should (equal "src/Component/Foo.idr" (cdr result)))))))
 
+(ert-deftest idris-generate-def-next ()
+  "Test `idris-generate-def-next'."
+  (skip-unless (string-match-p "idris2$" idris-interpreter-path))
+  (let (eval-result)
+    (cl-flet ((idris-load-file-sync-stub () nil)
+              (idris-eval-stub (sexp &optional no-errors)
+                (apply #'funcall eval-result)))
+      (advice-add 'idris-load-file-sync :override #'idris-load-file-sync-stub)
+      (advice-add 'idris-eval :override #'idris-eval-stub)
+      (unwind-protect
+          (with-temp-buffer
+            (insert "data Foo = A | B
+
+testf : Foo -> Int
+")
+            (goto-char (point-min))
+            (re-search-forward "test")
+            (setq eval-result (list #'identity '("testf A = testf B\ntestf B = testf A")))
+            (funcall-interactively 'idris-generate-def)
+
+            (setq eval-result (list #'identity '("testf A = 1\ntestf B = 2")))
+            (funcall-interactively 'idris-generate-def-next)
+            (should (string= "data Foo = A | B
+
+testf : Foo -> Int
+testf A = 1
+testf B = 2
+"
+                             (buffer-substring-no-properties (point-min) (point-max))))
+            (setq eval-result (list #'identity '("third definition")))
+            (funcall-interactively 'idris-generate-def-next)
+            (message "%s" (buffer-substring-no-properties (point-min) (point-max)))
+            (should (string= "data Foo = A | B
+
+testf : Foo -> Int
+third definition
+"
+                             (buffer-substring-no-properties (point-min) (point-max))))
+            (setq eval-result (list #'error "%s (synchronous Idris evaluation failed)" "No more results"))
+            (should-error (funcall-interactively 'idris-generate-def-next)))
+
+        (advice-remove 'idris-load-file-sync #'idris-load-file-sync-stub)
+        (advice-remove 'idris-eval #'idris-eval-stub)))))
+
 ;; Tests by Yasuhiko Watanabe
 ;; https://github.com/idris-hackers/idris-mode/pull/537/files
 (idris-ert-command-action "test-data/CaseSplit.idr" idris-case-split idris-test-eq-buffer)
