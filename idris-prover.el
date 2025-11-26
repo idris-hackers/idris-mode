@@ -204,7 +204,7 @@ Tactics are required to begin at the left margin."
         (next-tactic (idris-prover-find-tactic
                       idris-prover-script-processed)))
     (if (null next-tactic)
-        (error "At the end of the proof script")
+        (user-error "At the end of the proof script")
       (let* ((tactic-start (car next-tactic))
              (tactic-end (cdr next-tactic))
              (tactic-text (buffer-substring-no-properties tactic-start
@@ -267,7 +267,7 @@ Tactics are required to begin at the left margin."
                         #'(lambda (_result) t)
                         #'(lambda (condition)
                             (message (concat idris-prover-error-message-prefix condition))))
-    (error "No proof in progress")))
+    (user-error "No proof in progress")))
 
 (easy-menu-define idris-prover-script-mode-menu idris-prover-script-mode-map
   "Menu for Idris prover scripts."
@@ -374,7 +374,7 @@ the length reported by Idris."
             (yes-or-no-p "Abandon proof and discard script? "))
     (if idris-prover-currently-proving
         (idris-eval (list :interpret (if idris-enable-elab-prover ":abandon" "abandon")) t)
-      (error "No proof in progress"))))
+      (user-error "No proof in progress"))))
 
 (defun idris-prover-end ()
   "Remove buffers from proof mode and unset global state related to the prover."
