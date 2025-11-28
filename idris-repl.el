@@ -191,7 +191,7 @@ If ALWAYS-INSERT is non-nil, always insert a prompt at the end of the buffer."
 (defun idris-switch-to-repl ()
   "Load the current Idris file buffer and jump to the Idris REPL."
   (interactive nil idris-mode)
-  (idris-load-file-sync)
+  (idris-load-file-sync t)
   (pop-to-buffer (idris-repl-buffer))
   (goto-char (point-max)))
 
