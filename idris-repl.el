@@ -612,7 +612,7 @@ files and this function is sufficient."
   (let ((file (or filename (idris-repl-history-file-f)))
         (hist (or history idris-repl-input-history)))
     (unless (file-writable-p file)
-      (error (format "History file not writable: %s" file)))
+      (user-error (format "History file not writable: %s" file)))
     (let ((hist (cl-subseq hist 0 (min (length hist) idris-repl-history-size))))
       (with-temp-file file
         (let ((cs idris-repl-history-file-coding-system)
