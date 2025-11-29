@@ -272,7 +272,7 @@ This sets the load position to point, if there is one."
           (setq idris-currently-loaded-buffer nil)
           (idris-switch-working-directory srcdir)
           (let ((result
-                 (idris-eval
+                 (idris-user-eval
                   (if idris-load-to-here
                       `(:load-file ,fn ,(idris-get-line-num idris-load-to-here))
                     `(:load-file ,fn)))))
@@ -289,6 +289,8 @@ This sets the load position to point, if there is one."
   (let* ((ty (idris-eval (list command name)))
          (result (car ty))
          (formatting (cdr ty)))
+    (when (member 'warnings-tree idris-warnings-printing)
+      (idris-list-compiler-notes))
     (idris-show-info (format "%s" result) formatting)))
 
 
@@ -324,9 +326,9 @@ printing definition of a type at point."
 
 (defun idris-who-calls-name (name)
   "Show the callers of NAME in a tree."
-  (let* ((callers (idris-eval `(:who-calls ,name)))
+  (let* ((callers (idris-user-eval `(:who-calls ,name)))
          (roots (mapcar #'(lambda (c) (idris-caller-tree c :who-calls))
-                        (car callers))))
+                        callers)))
     (if (not (null roots))
         (idris-tree-info-show-multiple roots "Callers")
       (message "The name %s was not found." name))
@@ -341,8 +343,8 @@ printing definition of a type at point."
 
 (defun idris-name-calls-who (name)
   "Show the callees of NAME in a tree."
-  (let* ((callees (idris-eval `(:calls-who ,name)))
-         (roots (mapcar #'(lambda (c) (idris-caller-tree c :calls-who)) (car callees))))
+  (let* ((callees (idris-user-eval `(:calls-who ,name)))
+         (roots (mapcar #'(lambda (c) (idris-caller-tree c :calls-who)) callees)))
     (if (not (null roots))
         (idris-tree-info-show-multiple roots "Callees")
       (message "The name %s was not found." name))
@@ -515,9 +517,9 @@ Useful for writing papers or slides."
         (user-error "Width must be positive")
       (if (< (length what) 1)
           (user-error "Nothing to pretty-print")
-        (let ((text (idris-eval `(:interpret ,(concat ":pprint " fmt " " width " " what)))))
+        (let ((text (idris-user-eval `(:interpret ,(concat ":pprint " fmt " " width " " what)))))
           (with-idris-info-buffer
-            (insert (car text))
+            (insert text)
             (goto-char (point-min))
             (re-search-forward (if (string= fmt "latex")
                                    "% START CODE\n"
@@ -537,7 +539,7 @@ Useful for writing papers or slides."
   (let ((what (idris-thing-at-point)))
     (when (car what)
       (idris-load-file-sync)
-      (let ((result (car (idris-eval `(:case-split ,(cdr what) ,(car what)))))
+      (let ((result (idris-user-eval `(:case-split ,(cdr what) ,(car what))))
             (initial-position (point)))
         (if (<= (length result) 2)
             (message "Can't case split %s" (car what))
@@ -553,7 +555,7 @@ Useful for writing papers or slides."
   (let ((what (idris-thing-at-point)))
     (when (car what)
       (idris-load-file-sync)
-      (let ((result (car (idris-eval `(:make-case ,(cdr what) ,(car what))))))
+      (let ((result (idris-user-eval `(:make-case ,(cdr what) ,(car what)))))
         (if (<= (length result) 2)
             (message "Can't make cases from %s" (car what))
           (delete-region (line-beginning-position) (line-end-position))
@@ -602,7 +604,7 @@ If no indentation is found, return the empty string."
         (command (if proof :add-proof-clause :add-clause)))
     (when (car what)
       (idris-load-file-sync)
-      (let ((result (string-trim-left (car (idris-eval `(,command ,(cdr what) ,(car what))))))
+      (let ((result (string-trim-left (idris-user-eval `(,command ,(cdr what) ,(car what)))))
             final-point
             (prefix (idris-line-indentation-for what)))
         ;; Go forward until we get to a line with equal or less indentation to
@@ -628,7 +630,7 @@ If no indentation is found, return the empty string."
   (let ((what (idris-thing-at-point)))
     (when (car what)
       (idris-load-file-sync)
-      (let ((result (car (idris-eval `(:add-missing ,(cdr what) ,(car what))))))
+      (let ((result (idris-user-eval `(:add-missing ,(cdr what) ,(car what)))))
         (forward-line 1)
         (insert result)))))
 
@@ -638,7 +640,7 @@ If no indentation is found, return the empty string."
   (let ((what (idris-thing-at-point)))
     (when (car what)
       (idris-load-file-sync)
-      (let ((result (car (idris-eval `(:make-with ,(cdr what) ,(car what))))))
+      (let ((result (idris-user-eval `(:make-with ,(cdr what) ,(car what)))))
         (beginning-of-line)
         (kill-line)
         (insert result)))))
@@ -649,7 +651,7 @@ If no indentation is found, return the empty string."
   (let ((what (idris-thing-at-point)))
     (when (car what)
       (idris-load-file-sync)
-      (let* ((result (car (idris-eval `(:make-lemma ,(cdr what) ,(car what)))))
+      (let* ((result (idris-user-eval `(:make-lemma ,(cdr what) ,(car what))))
              (lemma-type (car result)))
         ;; There are two cases here: either a ?hole, or the {name} of a provisional defn.
         (cond ((equal lemma-type :metavariable-lemma)
@@ -767,11 +769,9 @@ A plain prefix ARG causes the command to prompt for hints and recursion
         (what (idris-thing-at-point)))
     (when (car what)
       (idris-load-file-sync)
-
-      (let ((result (car (if (> idris-protocol-version 1)
-                             (idris-eval `(:proof-search ,(cdr what) ,(car what)))
-                           (idris-eval `(:proof-search ,(cdr what) ,(car what) ,hints ,@depth))
-                           ))))
+      (let ((result (idris-user-eval (if (> idris-protocol-version 1)
+                                         `(:proof-search ,(cdr what) ,(car what))
+                                       `(:proof-search ,(cdr what) ,(car what) ,hints ,@depth)))))
         (if (string= result "")
             (user-error "Nothing found")
           (idris-replace-hole-with result))))))
@@ -782,7 +782,7 @@ Idris 2 only."
   (interactive)
   (if (not proof-region-start)
       (user-error "You must proof search first before looking for subsequent proof results")
-    (let ((result (car (idris-eval `:proof-search-next))))
+    (let ((result (idris-user-eval `:proof-search-next)))
       (if (string= result "No more results")
           (message "No more results")
         (save-excursion
@@ -801,7 +801,7 @@ Idris 2 only."
   (let ((what (idris-thing-at-point)))
     (when (car what)
       (idris-load-file-sync)
-      (let ((result (car (idris-eval `(:generate-def ,(cdr what) ,(car what)))))
+      (let ((result (idris-user-eval `(:generate-def ,(cdr what) ,(car what))))
             final-point
             (prefix (idris-line-indentation-for what)))
         (if (string= result "")
@@ -826,7 +826,7 @@ Idris 2 only."
   (interactive)
   (if (not def-region-start)
       (user-error "You must program search first before looking for subsequent program results")
-    (let ((result (car (idris-eval `:generate-def-next))))
+    (let ((result (idris-user-eval `:generate-def-next)))
       (if (string= result "No more results")
           (message "No more results")
         (save-excursion
@@ -843,7 +843,7 @@ Idris 2 only."
     (unless (car what)
       (user-error "Could not find a hole at point to refine by"))
     (idris-load-file-sync)
-    (let ((results (car (idris-eval `(:intro ,(cdr what) ,(car what))))))
+    (let ((results (idris-user-eval `(:intro ,(cdr what) ,(car what)))))
       (pcase results
         (`(,result) (idris-replace-hole-with result))
         (_ (idris-replace-hole-with (ido-completing-read "I'm hesitating between: " results)))))))
@@ -855,7 +855,7 @@ Idris 2 only."
     (unless (car what)
       (user-error "Could not find a hole at point to refine by"))
     (idris-load-file-sync)
-    (let ((result (car (idris-eval `(:refine ,(cdr what) ,(car what) ,name)))))
+    (let ((result (idris-user-eval `(:refine ,(cdr what) ,(car what) ,name))))
       (idris-replace-hole-with result))))
 
 (defun idris-identifier-backwards-from-point ()
@@ -910,7 +910,7 @@ type-correct, so loading will fail."
   (interactive)
   (when (idris-current-buffer-dirty-p)
     (idris-load-file-sync))
-  (idris-hole-list-show (car (idris-eval '(:metavariables 80)))))
+  (idris-hole-list-show (idris-user-eval '(:metavariables 80))))
 
 (defun idris-list-compiler-notes ()
   "Show the compiler notes in tree view."
@@ -1405,6 +1405,18 @@ of the term to replace."
                        (save-excursion
                          (idris-show-core-term
                           (idris--active-term-beginning tt-term pos)))))))))))
+
+(defun idris-user-eval (what &optional no-errors)
+  "Send WHAT to Idris process and return first item in the response.
+
+When `idris-warnings-printing' includes `warnings-tree' it also
+ calls `idris-list-compiler-notes' to display or update existing Idris notes.
+
+If `NO-ERRORS' is non-nil, don't raise `ERROR' if there was an Idris error."
+  (let ((ty (idris-eval what no-errors)))
+    (when (member 'warnings-tree idris-warnings-printing)
+      (idris-list-compiler-notes))
+    (car ty)))
 
 (provide 'idris-commands)
 ;;; idris-commands.el ends here
