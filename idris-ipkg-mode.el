@@ -88,9 +88,8 @@
   `(,idris-ipkg-keywords))
 
 (defconst idris-ipkg-sourcedir-re
-;;  "^sourcedir\\s-*=\\s-*\"?\\([a-zA-Z/0-9]+\\)\"?"
- "^\\s-*sourcedir\\s-*=\\s-*\\(\\sw+\\)"
-)
+  "^sourcedir\\s-*=\\s-*\"?\\([a-zA-Z/0-9]+\\)\"?")
+;; "^\\s-*sourcedir\\s-*=\\s-*\\(\\sw+\\)"
 
 ;;; Completion
 
