@@ -87,11 +87,6 @@
 (defconst idris-ipkg-font-lock-defaults
   `(,idris-ipkg-keywords))
 
-(defconst idris-ipkg-sourcedir-re
-;;  "^sourcedir\\s-*=\\s-*\"?\\([a-zA-Z/0-9]+\\)\"?"
- "^\\s-*sourcedir\\s-*=\\s-*\\(\\sw+\\)"
-)
-
 ;;; Completion
 
 (defun idris-ipkg-find-keyword ()
@@ -141,21 +136,19 @@
   "Make all modules with existing files clickable, where clicking opens them."
   (interactive)
   (idris-clear-file-link-overlays 'idris-ipkg-mode)
-  (let ((src-dir (idris-ipkg-buffer-src-dir (file-name-directory (buffer-file-name)))))
+  (let ((src-dir (idris-ipkg-buffer-src-dir (buffer-file-name))))
     ;; Make the sourcedir clickable
-    (save-excursion
-      (goto-char (point-min))
-      (when (and (file-exists-p src-dir)
-                 (file-directory-p src-dir)
-                 (re-search-forward idris-ipkg-sourcedir-re nil t))
-        (let ((start (match-beginning 1))
-              (end (match-end 1))
-              (map (make-sparse-keymap)))
-          (define-key map [mouse-2] #'(lambda ()
-                                        (interactive)
-                                        (dired src-dir)))
-          (idris-make-file-link-overlay start end map
-                                        (concat "mouse-2: dired " src-dir)))))
+    (when (and (file-exists-p src-dir)
+               (file-directory-p src-dir)
+               (idris-ipkg-buffer-sourcedir-point))
+      (let ((start (match-beginning 1))
+            (end (match-end 1))
+            (map (make-sparse-keymap)))
+        (define-key map [mouse-2] #'(lambda ()
+                                      (interactive)
+                                      (dired src-dir)))
+        (idris-make-file-link-overlay start end map
+                                      (concat "mouse-2: dired " src-dir))))
     ;; Make the modules clickable
     (save-excursion
       (goto-char (point-min))
@@ -305,15 +298,17 @@ arguments."
   (interactive)
   (idris-kill-buffer idris-ipkg-build-buffer-name))
 
-(defun idris-ipkg-buffer-src-dir (basename)
+(defun idris-ipkg-buffer-sourcedir-point ()
+  "Return nil or a point at the end of sourcedir value in the current ipkg file."
   (save-excursion
     (goto-char (point-min))
-    (let ((found
-           (re-search-forward idris-ipkg-sourcedir-re nil t)))
-      (if found
-          (let ((subdir (buffer-substring-no-properties (match-beginning 1) (match-end 1))))
-            (concat (file-name-directory basename) subdir))
-        (file-name-directory basename)))))
+    (re-search-forward "^sourcedir\\s-*=\\s-*\"?\\([A-Za-z0-9_-]+\\)\"?" nil t)))
+
+(defun idris-ipkg-buffer-src-dir (basename)
+  (if (idris-ipkg-buffer-sourcedir-point)
+      (concat (file-name-directory basename)
+              (buffer-substring-no-properties (match-beginning 1) (match-end 1)))
+    (file-name-directory basename)))
 
 (defun idris-ipkg-find-src-dir (&optional ipkg-file)
   (let ((found (or (and ipkg-file (list ipkg-file))
