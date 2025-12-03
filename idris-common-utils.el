@@ -123,6 +123,13 @@ inserted text (that is, relative to point prior to insertion)."
                                           (+ ,start begin length)
                                           props))))))
 
+(defun idris-propertize-str (spans text)
+  "Add properties indicated by SPANS to the TEXT.
+SPANS is a list of (BEGIN LENGTH PROPERTIES) elements."
+  (dolist (span spans text)
+    (cl-destructuring-bind (begin length props) span
+      (set-text-properties begin (+ begin length) props text))))
+
 ;;; TODO: Take care of circular dependency issue
 (autoload 'idris-eval "inferior-idris.el")
 
@@ -223,7 +230,6 @@ inserted text (that is, relative to point prior to insertion)."
           (namespace (list 'idris-eldoc
                            (cadr namespace)))
           (t nil))))
-
 
 (defun idris-semantic-properties-help-echo (props)
   (let* ((name (assoc :name props))
