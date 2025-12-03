@@ -164,7 +164,9 @@ Invokes `idris-mode-hook'."
   (set (make-local-variable 'prop-menu-item-functions)
        '(idris-context-menu-items idris-mode-context-menu-items))
 
-  (add-hook 'xref-backend-functions #'idris-xref-backend nil 'local))
+  (add-hook 'xref-backend-functions #'idris-xref-backend nil 'local)
+  ;; Support for xref-find-references
+  (setq-local semantic-symref-filepattern-alist '((idris-mode "*.idr" "*.lidr"))))
 
 ;; Automatically use idris-mode for .idr and .lidr files.
 ;;;###autoload
