@@ -192,7 +192,8 @@ syntax table won't support, such as characters."
     (goto-char begin)
     (while (re-search-forward "\\\\(" end t)
       (let ((open (match-beginning 0)))
-        (add-text-properties open (1+ open) '(syntax-table (1 . nil)))))))
+        (add-text-properties open (1+ open) '(syntax-table (1 . nil)))))
+    (funcall (syntax-propertize-rules ("\\(|||\\)" (1 "<"))) begin end)))
 
 (defconst idris-font-lock-keyword-regexp
   (regexp-opt (append idris-definition-keywords
