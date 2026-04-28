@@ -12,14 +12,32 @@
 
 # idris-mode for emacs
 
-This is an emacs mode for editing [Idris] code.
+This is a major mode for editing [Idris] code in GNU Emacs.
+As from version 1.1 of idris-mode supports Idris2 only.
 
-This mode was original designed to work with version 1 of the language through an IDE-Protocol.
-Idris2 uses the next iteration of the same protocol.
-Idris-mode tries to maintain compatibility with both protocol versions, however, not all the features from the IDE-Protocol have been realised in Idris2.
-When using idris-mode with Idris2 your experience might be a bit clunky.
+Support for Idris 1 is no longer maintained in this branch.
 
-PRs to both projects to get things working smoothly are more than welcome!
+### Idris 1 users
+
+If you need *Idris 1* support, you should either:
+
+- use an older, compatible release of idris-mode (lock to version 1.1),
+```
+(use-package idris-mode :pin melpa-stable)
+```
+- or use the idris1 branch from the repository with preserved Idris1 support
+
+```
+(use-package idris-mode
+  :vc (:url "https://github.com/idris-hackers/idris-mode"
+       :branch "idris1"))
+```
+
+### Notes
+
+Idris2 uses a newer iteration of the IDE protocol, and some features
+from Idris 1 are not yet available or behave differently.
+Contributions to improve the experience are welcome.
 
 ## Note on Syntax Highlighting.
 
@@ -102,7 +120,7 @@ The following commands are available when there is an inferior Idris process (wh
 * `C-c C-s`: Create an initial pattern match clause for a type declaration
 * `C-c C-m`: Add missing pattern-match cases to an existing definition
 * `C-c C-a`: Attempt to solve a hole automatically. A plain prefix argument prompts for hints, while a numeric prefix argument sets the recursion depth.
-* `C-c C-S-a`: (Idris 2 only) Replace the previous proof search answer with a different attempt by the compiler.  If no further attempts are available it leaves the last one unchanged.
+* `C-c C-S-a`: Replace the previous proof search answer with a different attempt by the compiler.  If no further attempts are available it leaves the last one unchanged.
 * `C-c C-e`: Extract a hole or provisional definition name to an explicit top level definition
 * `C-c C-c`: Case split the pattern variable under point, or fill the hole at point with a case expression.
 * `C-c C-t`: Get the type for the identifier under point. A prefix argument prompts for the name.

@@ -85,9 +85,7 @@
   "Switch working directory to NEW-WORKING-DIRECTORY."
   (unless (string= idris-process-current-working-directory new-working-directory)
     (idris-ensure-process-and-repl-buffer)
-    (let* ((path (if (> idris-protocol-version 1)
-                     (prin1-to-string new-working-directory)
-                   new-working-directory))
+    (let* ((path (prin1-to-string new-working-directory))
            (eval-result (idris-eval `(:interpret ,(concat ":cd " path))))
            (result-msg (or (car-safe eval-result) "")))
       ;; Check if the message from Idris contains the new directory path.
@@ -171,11 +169,11 @@ Returning these as a cons."
   (let* ((ipkg-file (car-safe (idris-find-file-upwards "ipkg")))
          (file-name (buffer-file-name))
          (work-dir (directory-file-name (idris-file-name-parent-directory (or ipkg-file file-name))))
-         (source-dir (or (idris-ipkg-find-src-dir) work-dir)))
+         ;; (source-dir (or (idris-ipkg-find-src-dir) work-dir))
+         )
     ;; TODO: Update once https://github.com/idris-lang/Idris2/issues/3310 is resolved
-    (if (> idris-protocol-version 1)
-        (cons work-dir (file-relative-name file-name work-dir))
-      (cons source-dir (file-relative-name file-name source-dir)))))
+    ;; (cons source-dir (file-relative-name file-name source-dir))
+    (cons work-dir (file-relative-name file-name work-dir))))
 
 (defun idris-load-file (&optional set-line)
   "Pass the current buffer's file to the inferior Idris process.
@@ -207,7 +205,6 @@ A prefix argument SET-LINE forces loading but only up to the current line."
                (idris-semantic-source-highlighting (idris-buffer-semantic-source-highlighting)))
           (setq idris-currently-loaded-buffer nil)
           (idris-switch-working-directory srcdir)
-          (idris-delete-ibc t) ;; delete the ibc to avoid interfering with partial loads
           (idris-toggle-semantic-source-highlighting)
           (idris-eval-async
            (if idris-load-to-here
@@ -304,9 +301,7 @@ This sets the load position to point, if there is one."
 
 (defun idris--print-definition-of-name (name)
   "Fetch from the Idris compiler and display the definition of the NAME."
-  (if (>=-protocol-version 2 1)
-      (idris-info-for-name :interpret (concat ":printdef " name))
-    (idris-info-for-name :print-definition name)))
+  (idris-info-for-name :interpret (concat ":printdef " name)))
 
 (defun idris-print-definition-of-name-at-point (name)
   "Display the definition of the function or type of the NAME at point.
@@ -542,9 +537,7 @@ Useful for writing papers or slides."
         (if (<= (length result) 2)
             (message "Can't case split %s" (car what))
           (delete-region (line-beginning-position) (line-end-position))
-          (if (> idris-protocol-version 1)
-              (insert (substring result 0 (length result)))
-            (insert (substring result 0 (1- (length result)))))
+          (insert (substring result 0 (length result)))
           (goto-char initial-position))))))
 
 (defun idris-make-cases-from-hole ()
@@ -557,9 +550,7 @@ Useful for writing papers or slides."
         (if (<= (length result) 2)
             (message "Can't make cases from %s" (car what))
           (delete-region (line-beginning-position) (line-end-position))
-          (if (> idris-protocol-version 1)
-              (insert (substring result 0 (length result)))
-            (insert (substring result 0 (1- (length result)))))
+          (insert (substring result 0 (length result)))
           (search-backward "_ of\n"))))))
 
 (defun idris-case-dwim ()
@@ -589,10 +580,7 @@ If no indentation is found, return the empty string."
     (goto-char (point-min))
     (forward-line (1- (cdr thing)))
     (goto-char (line-beginning-position))
-    (re-search-forward (if (> idris-protocol-version 1)
-                           "^\\(\\s-*\\)"
-                         "\\(^>?\\s-*\\)")
-                       nil t)
+    (re-search-forward "^\\(\\s-*\\)" nil t)
     (or (match-string 1) "")))
 
 (defun idris-add-clause (proof)
@@ -726,13 +714,12 @@ If no indentation is found, return the empty string."
 
 (defun idris-compile-and-execute ()
   "Execute the program in the current buffer."
-  (interactive)
-  (idris-load-file-sync)
-  (if (>=-protocol-version 2 1)
-      (let ((name (read-string "MExpression to compile & execute (default main): "
+  (interactive nil idris-mode)
+  (when (idris-current-buffer-dirty-p)
+    (idris-load-file-sync))
+  (let ((name (read-string "MExpression to compile & execute (default main): "
                                nil nil "main")))
-        (idris-repl-eval-string (format ":exec %s" name) 0))
-    (idris-eval '(:interpret ":exec"))))
+        (idris-repl-eval-string (format ":exec %s" name) 0)))
 
 (defun idris-replace-hole-with (expr)
   "Replace the hole under the cursor by some EXPR."
@@ -748,37 +735,20 @@ If no indentation is found, return the empty string."
 (defvar-local proof-region-end nil
   "The end position of the last proof region.")
 
-(defun idris-proof-search (&optional arg)
-  "Invoke the proof search.
-A plain prefix ARG causes the command to prompt for hints and recursion
- depth, while a numeric prefix argument sets the recursion depth directly."
+(defun idris-proof-search (&optional _arg)
+  "Invoke the proof search."
   (interactive "P")
-  (let ((hints (if (consp arg)
-                   (split-string (read-string "Hints: ") "[^a-zA-Z0-9']")
-                 '()))
-        (depth (cond ((consp arg)
-                      (let ((input (string-to-number (read-string "Search depth: "))))
-                        (if (= input 0)
-                            nil
-                          (list input))))
-                     ((numberp arg)
-                      (list arg))
-                     (t nil)))
-        (what (idris-thing-at-point)))
+  (let ((what (idris-thing-at-point)))
     (when (car what)
       (idris-load-file-sync)
 
-      (let ((result (car (if (> idris-protocol-version 1)
-                             (idris-eval `(:proof-search ,(cdr what) ,(car what)))
-                           (idris-eval `(:proof-search ,(cdr what) ,(car what) ,hints ,@depth))
-                           ))))
+      (let ((result (car (idris-eval `(:proof-search ,(cdr what) ,(car what))))))
         (if (string= result "")
             (user-error "Nothing found")
           (idris-replace-hole-with result))))))
 
 (defun idris-proof-search-next ()
-  "Replace the previous proof search result with the next one, if it exists.
-Idris 2 only."
+  "Replace the previous proof search result with the next one, if it exists."
   (interactive)
   (if (not proof-region-start)
       (user-error "You must proof search first before looking for subsequent proof results")
@@ -821,8 +791,7 @@ Idris 2 only."
           (goto-char final-point))))))
 
 (defun idris-generate-def-next ()
-  "Replace the previous generated definition with next definition, if it exists.
-Idris 2 only."
+  "Replace the previous generated definition with next definition, if it exists."
   (interactive)
   (if (not def-region-start)
       (user-error "You must program search first before looking for subsequent program results")
@@ -1004,22 +973,6 @@ https://github.com/clojure-emacs/cider"
         idris-process-current-working-directory nil
         idris-protocol-version 0
         idris-protocol-version-minor 0))
-
-(defun idris-delete-ibc (no-confirmation)
-  "Delete the IBC file for the current buffer.
-When NO-CONFIRMATION argument is set to t the deletion will be
-performed silently without confirmation from the user."
-  (interactive "P")
-  (unless (> idris-protocol-version 1)
-    (let* ((fname (buffer-file-name))
-           (ibc (concat (file-name-sans-extension fname) ".ibc")))
-      (if (not (member (file-name-extension fname)
-                       '("idr" "lidr" "org" "markdown" "md")))
-          (user-error "The current file is not an Idris file")
-        (when (or no-confirmation (y-or-n-p (concat "Really delete " ibc "?")))
-          (when (file-exists-p ibc)
-            (delete-file ibc)
-            (message "%s deleted" ibc)))))))
 
 (defun idris--active-term-beginning (term pos)
   "Find the beginning of active term TERM that occurs at POS.

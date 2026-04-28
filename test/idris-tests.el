@@ -129,7 +129,6 @@
       (should (string= (overlay-get expected-overlay 'help-echo)
                        "Some warning message"))
       ;; Cleanup
-      (idris-delete-ibc t)
       (kill-buffer))))
 
 (defun idris-buffer-contains-semantic-highlighting-p ()
@@ -170,7 +169,6 @@
 
       ;; Cleanup (Tear down)
       (dotimes (_ 5) (accept-process-output nil 0.1))
-      (idris-delete-ibc t)
       (erase-buffer)
       (insert buffer-content)
       (save-buffer)

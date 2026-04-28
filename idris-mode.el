@@ -73,7 +73,6 @@
     ["Load file" idris-load-file t]
     ["Choose packages" idris-set-idris-load-packages t]
     ["Compile and execute" idris-compile-and-execute]
-    ["Delete IBC file" idris-delete-ibc t]
     ["View compiler log" idris-view-compiler-log (get-buffer idris-log-buffer-name)]
     ["Quit inferior Idris process" idris-quit t]
     "-----------------"
@@ -84,10 +83,10 @@
     ["Extract lemma from hole" idris-make-lemma t]
     ["Solve hole with case expression" idris-case-dwim t]
     ["Attempt to solve hole" idris-proof-search t]
-    ["Get next solve attempt (Idris 2)" idris-proof-search-next t]
+    ["Get next solve attempt" idris-proof-search-next t]
 
-    ["Generate definition (Idris 2)" idris-generate-def t]
-    ["Get next definition (Idris 2)" idris-generate-def-next t]
+    ["Generate definition" idris-generate-def t]
+    ["Get next definition" idris-generate-def-next t]
     ["Display type" idris-type-at-point t]
     "-----------------"
     ["Open package" idris-open-package-file t]

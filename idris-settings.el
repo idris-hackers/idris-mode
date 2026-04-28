@@ -30,7 +30,7 @@
 
 (defgroup idris nil "Idris mode" :prefix 'idris :group 'languages)
 
-(defcustom idris-interpreter-path "idris"
+(defcustom idris-interpreter-path "idris2"
   "The path to the Idris interpreter."
   :type 'file
   :group 'idris)

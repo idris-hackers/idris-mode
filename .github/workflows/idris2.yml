@@ -93,6 +93,6 @@ jobs:
         run: |
           make clean
           make build
-          make test2
+          make test
 
 # -- [ EOF ]

@@ -44,7 +44,6 @@
       (dotimes (_ 10) (accept-process-output nil 0.1))
       (should idris-process)
       (should idris-connection))
-    (idris-delete-ibc t)
     (kill-buffer))
   (idris-quit))
 
@@ -92,7 +91,6 @@ In particular, only *idris-events* should remain."
         (should (> (buffer-size mv-buffer) 10)))
 
       ;; Clean up
-      (idris-delete-ibc t)
       (kill-buffer)
       (idris-quit))))
 
@@ -108,7 +106,6 @@ In particular, only *idris-events* should remain."
         (should (null mv-buffer)))
 
       ;; Clean up
-      (idris-delete-ibc t)
       (kill-buffer)
       (idris-quit))))
 
@@ -124,7 +121,7 @@ In particular, only *idris-events* should remain."
       (let ((holes-buffer (get-buffer idris-hole-list-buffer-name)))
         (should (bufferp holes-buffer))
         (should (> (buffer-size holes-buffer) 10)))
-      (idris-delete-ibc t))
+      )
 
     ;; Test that the hole info is updated for the other current buffer
     (with-current-buffer other-buffer
@@ -132,7 +129,7 @@ In particular, only *idris-events* should remain."
       (dotimes (_ 10) (accept-process-output nil 0.1))
       (let ((holes-buffer (get-buffer idris-hole-list-buffer-name)))
         (should (not (bufferp holes-buffer))))
-      (idris-delete-ibc t))
+      )
 
     (kill-buffer buffer)
     (kill-buffer other-buffer)
@@ -160,7 +157,6 @@ In particular, only *idris-events* should remain."
         (delete-region (point) (line-end-position))
         (insert "prf = ?search_here")
         (save-buffer)
-        (idris-delete-ibc t)
         (kill-buffer)))
 
     ;; More cleanup
@@ -187,13 +183,11 @@ In particular, only *idris-events* should remain."
       (goto-char (match-beginning 0))
       (funcall-interactively 'idris-add-clause nil)
       (should (looking-at-p "test \\w+ = \\?test_rhs"))
-      (idris-delete-ibc t)
 
       (re-search-forward "(-) :")
       (goto-char (1+ (match-beginning 0)))
       (funcall-interactively 'idris-add-clause nil)
       (should (looking-at-p "(-) = \\?\\w+_rhs"))
-      (idris-delete-ibc t)
 
       ;; Test that response with indentation (Idris2) are aligned correctly
       ;; Idris1 response: "revAcc xs ys = ?revAcc_rhs"
@@ -232,7 +226,6 @@ myReverse xs = revAcc [] xs where
       (funcall-interactively 'idris-add-clause nil)
       (should (looking-at-p "> test \\w+ = \\?test_rhs"))
       ;; Cleanup
-      (idris-delete-ibc t)
       (erase-buffer)
       (insert buffer-content)
       (save-buffer)
@@ -248,16 +241,11 @@ myReverse xs = revAcc [] xs where
     (beginning-of-line)
     (funcall-interactively 'idris-add-clause nil)
     (should (looking-at-p "test \\w+ = \\?test_rhs"))
-    (idris-delete-ibc t)
     (search-forward "?test")
     (funcall-interactively 'idris-refine "x")
-    (should (looking-at-p
-             (if (>=-protocol-version 2 1)
-                 "x"
-               "?test_rhs1")))
+    (should (looking-at-p "x"))
 
     ;; Cleanup
-    (idris-delete-ibc t)
     (erase-buffer)
     (insert buffer-content)
     (save-buffer)
@@ -453,7 +441,6 @@ closeDistance s1 s2 = closeDistance_rhs s1 s2"
 (ert-deftest idris-filename-to-load-test ()
   "Test `idris-filename-to-load' under different project setups."
   (let ((default-directory "/some/path/to/idris-project/src/Component")
-        (idris-protocol-version 0)   ;; default unless overridden
         ;; control variables that the stubs will read
         current-src-dir
         current-ipkg-files)
@@ -466,26 +453,9 @@ closeDistance s1 s2 = closeDistance_rhs s1 s2"
               ((symbol-function 'buffer-file-name)
                (lambda () "/some/path/to/idris-project/src/Component/Foo.idr")))
 
-      ;; ── Scenario 1: no ipkg, no sourcedir ───────────────
-      (setq current-src-dir nil
-            current-ipkg-files nil
-            idris-protocol-version 0)
-      (let ((result (idris-filename-to-load)))
-        (should (equal default-directory (car result)))
-        (should (equal "Foo.idr" (cdr result))))
-
-      ;; ── Scenario 2: ipkg sourcedir is set ───────────────
-      (setq current-src-dir "/some/path/to/idris-project/src"
-            current-ipkg-files nil
-            idris-protocol-version 0)
-      (let ((result (idris-filename-to-load)))
-        (should (equal current-src-dir (car result)))
-        (should (equal "Component/Foo.idr" (cdr result))))
-
       ;; ── Scenario 3: ipkg sourcedir set, protocol v>1 ────
       (setq current-src-dir "/some/path/to/idris-project/src"
-            current-ipkg-files '("/some/path/to/idris-project/baz.ipkg")
-            idris-protocol-version 2)
+            current-ipkg-files '("/some/path/to/idris-project/baz.ipkg"))
       (let ((result (idris-filename-to-load)))
         (should (equal "/some/path/to/idris-project" (car result)))
         (should (equal "src/Component/Foo.idr" (cdr result))))
@@ -493,8 +463,7 @@ closeDistance s1 s2 = closeDistance_rhs s1 s2"
       ;; ── Scenario 4: multiple ipkg files, first one wins ─
       (setq current-src-dir "/some/path/to/idris-project/src"
             current-ipkg-files '("/some/path/to/idris-project/zzz.ipkg"
-                                 "/some/path/to/idris-project/not-selected/baz.ipkg")
-            idris-protocol-version 2)
+                                 "/some/path/to/idris-project/not-selected/baz.ipkg"))
       (let ((result (idris-filename-to-load)))
         ;; Should pick the directory of the *first* ipkg
         (should (equal "/some/path/to/idris-project" (car result)))
