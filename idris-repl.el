@@ -436,9 +436,16 @@ and semantic annotations PROPS."
                  ,props)
                (idris-repl-highlight-input
                 start start-line start-col end-line end-col props))))))
-       (_ (idris-repl-insert-result (or result "") spans)))) ;; The actual result
+       ((pred listp) (idris-repl-insert-list-result result spans))
+       ((pred stringp) (idris-repl-insert-result result spans))
+       (_ (progn
+            (message "Unable process result from Idris. \n%s" result)
+            (idris-repl-insert-prompt)))))
     ((:error condition &optional spans)
      (idris-repl-show-abort condition spans))))
+
+(defun idris-repl-insert-list-result (lst spans)
+  (idris-repl-insert-result (mapconcat (lambda (l) (format "%s" l)) lst "\n")) spans)
 
 (defun idris-repl-show-abort (condition &optional highlighting)
   (with-current-buffer (idris-repl-buffer)
