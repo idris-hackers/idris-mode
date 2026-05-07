@@ -577,6 +577,140 @@ testf x = ?hole1
         (advice-remove 'idris-load-file-sync #'idris-load-file-sync-stub)
         (advice-remove 'idris-eval #'idris-eval-stub)))))
 
+(defmacro idris-test-with-buffer (content &rest body)
+  "Create a temp buffer with CONTENT and run BODY."
+  (declare (indent 1))
+  `(with-temp-buffer
+     (insert ,content)
+     (goto-char (point-min))
+     ;; Minimal syntax setup: treat -- as comment starter
+     (modify-syntax-entry ?- ". 12")
+     (modify-syntax-entry ?\n ">")
+     ,@body))
+
+(defun idris-test--with-hole-name (name fn)
+  "Stub `idris--hole-name' to return NAME in FN context."
+  (cl-letf (((symbol-function 'idris--hole-name)
+             (lambda () name)))
+    (funcall fn)))
+
+(ert-deftest idris-comment-and-make-hole/point-no-comment ()
+  (idris-test--with-hole-name
+   "?h"
+   (lambda ()
+     (idris-test-with-buffer
+         "foo = bar"
+       (search-forward "= ")
+       (idris-comment-and-make-hole)
+       (should (equal (buffer-string)
+                      "foo = ?h -- ?h: bar"))))))
+
+(ert-deftest idris-comment-and-make-hole/point-with-comment ()
+  (idris-test--with-hole-name
+   "?h"
+   (lambda ()
+     (idris-test-with-buffer
+         "foo = bar -- existing"
+       (search-forward "= ")
+       (idris-comment-and-make-hole)
+       (should (equal (buffer-string)
+                      "foo = ?h -- existing\n-- ?h: bar"))))))
+
+(ert-deftest idris-comment-and-make-hole/region ()
+  (idris-test--with-hole-name
+   "?hole"
+   (lambda ()
+     (idris-test-with-buffer
+         "foo = bar + baz"
+       (search-forward "= ")
+       (set-mark (point))
+       (search-forward "baz")
+       (activate-mark)
+       (idris-comment-and-make-hole)
+       (should (equal (buffer-string)
+                      "foo = ?hole -- ?hole: bar + baz"))))))
+
+(ert-deftest idris-comment-and-make-hole/error-blank-region ()
+  (idris-test-with-buffer
+      "foo =    "
+    (search-forward "=")
+    (should-error
+     (idris-comment-and-make-hole)
+     :type 'user-error)))
+
+(ert-deftest idris-comment-and-make-hole/error-multiline ()
+  (idris-test-with-buffer
+      "foo = bar\nbaz = qux"
+    (goto-char (point-min))
+    (set-mark (point))
+    (goto-char (point-max))
+    (activate-mark)
+    (should-error
+     (idris-comment-and-make-hole)
+     :type 'user-error)))
+
+(ert-deftest idris-comment-and-make-hole/undo ()
+  (idris-test--with-hole-name
+   "?h"
+   (lambda ()
+     (idris-test-with-buffer
+         "foo = bar"
+       (buffer-enable-undo)
+       (search-forward "= ")
+       (idris-comment-and-make-hole)
+       (primitive-undo 1 buffer-undo-list)
+       (should (equal (buffer-string) "foo = bar"))))))
+
+(ert-deftest idris-restore-code-from-hole/point-roundtrip ()
+  (idris-test--with-hole-name
+   "?h"
+   (lambda ()
+     (idris-test-with-buffer
+         "foo = bar"
+       (search-forward "= ")
+       (idris-comment-and-make-hole)
+       (should (string-match-p "\\?h" (buffer-string)))
+
+       (beginning-of-line)
+       (search-forward "?h")
+       (idris-restore-code-from-hole)
+       (should (equal (string-trim (buffer-string)) "foo = bar"))))))
+
+(ert-deftest idris-restore-code-from-hole/error-not-on-hole ()
+  (idris-test-with-buffer
+      "foo = bar"
+    (search-forward "bar")
+    (should-error
+     (idris-restore-code-from-hole)
+     :type 'user-error)))
+
+(ert-deftest idris-restore-code-from-hole/error-missing-comment ()
+  (idris-test--with-hole-name
+   "?h"
+   (lambda ()
+     (idris-test-with-buffer
+         "foo = ?h"
+       (search-forward "?h")
+       (should-error
+        (idris-restore-code-from-hole)
+        :type 'user-error)))))
+
+(ert-deftest idris-restore-code-from-hole/undo-only ()
+  "Test undo of `idris-restore-code-from-hole` in isolation."
+  (idris-test--with-hole-name
+   "?h"
+   (lambda ()
+     (idris-test-with-buffer
+         "foo = ?h -- ?h: bar"
+       (buffer-enable-undo)
+       (beginning-of-line)
+       (search-forward "?h")
+       (idris-restore-code-from-hole)
+       (should (equal (string-trim (buffer-string)) "foo = bar"))
+
+       (primitive-undo 1 buffer-undo-list)
+       (should (equal (buffer-string) "foo = ?h -- ?h: bar"))))))
+
 ;; Tests by Yasuhiko Watanabe
 ;; https://github.com/idris-hackers/idris-mode/pull/537/files
 (idris-ert-command-action "test-data/CaseSplit.idr" idris-case-split idris-test-eq-buffer)

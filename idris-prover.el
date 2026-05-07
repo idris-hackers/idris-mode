@@ -464,4 +464,14 @@ Should agree with the one in the Idris compiler source.")
       (insert proof)
       (newline))))
 
+(defun idris-prove-hole (name &optional elab)
+  "Launch the prover on the hole NAME, using Elab mode if ELAB is non-nil."
+  (idris-eval-async `(:interpret ,(concat (if elab ":elab " ":p ") name))
+                    (lambda (_) t))
+  ;; The timer is necessary because of the async nature of starting the prover
+  (run-with-timer 0.25 nil
+                  #'(lambda ()
+                      (if-let* ((window (get-buffer-window idris-prover-script-buffer-name)))
+                          (select-window window)))))
+
 (provide 'idris-prover)

@@ -30,6 +30,7 @@
 (require 'idris-keys)
 (require 'idris-warnings-tree)
 (require 'idris-settings)
+(require 'idris-prover)
 (require 'idris-xref)
 
 (defvar idris-hole-list-buffer-name (idris-buffer-name :holes)
@@ -70,37 +71,43 @@ Invokes `idris-hole-list-mode-hook'."
   (setq-local prop-menu-item-functions '(idris-context-menu-items))
   (add-hook 'xref-backend-functions #'idris-xref-backend nil 'local))
 
-;; TODO: Auto detect mode for idris holes buffer instead of
-;; invoking `idris-hole-list-mode' in `idris-hole-list-show'
-;; (push '("#\\*idris-holes\\*$" . idris-hole-list-mode) auto-mode-alist)
-
 (defun idris-hole-list-buffer ()
   "Return the Idris hole buffer, creating one if there is not one."
   (get-buffer-create idris-hole-list-buffer-name))
+
+(defun idris-update-holes-buffer-content (buffer hole-info)
+  (with-current-buffer buffer
+    (idris-hole-list-mode)
+    (let ((buffer-read-only nil))
+      (erase-buffer)
+      (insert (propertize "Holes" 'face 'idris-info-title-face) "\n\n")
+      (when idris-show-help-text
+        (insert "This buffer displays the unsolved holes from the currently-loaded code. ")
+        (insert (concat "Press the "
+                        (if idris-enable-elab-prover "[E]" "[P]")
+                        " buttons to solve the holes interactively in the prover."))
+        (let ((fill-column 80))
+          (fill-region (point-min) (point-max)))
+        (insert "\n\n"))
+      (if (null hole-info)
+          (insert "No holes found.")
+        (dolist (tree (mapcar #'idris-tree-for-hole hole-info))
+          (idris-tree-insert tree "")
+          (insert "\n\n")))
+      (goto-char (point-min)))))
 
 (defun idris-hole-list-show (hole-info)
   (if (null hole-info)
       (progn (message "No holes found!")
              (idris-hole-list-quit))
-    (with-current-buffer (idris-hole-list-buffer)
-      (idris-hole-list-mode)
-      (let ((buffer-read-only nil))
-        (erase-buffer)
-        (insert (propertize "Holes" 'face 'idris-info-title-face) "\n\n")
-        (when idris-show-help-text
-          (insert "This buffer displays the unsolved holes from the currently-loaded code. ")
-          (insert (concat "Press the "
-                          (if idris-enable-elab-prover "[E]" "[P]")
-                          " buttons to solve the holes interactively in the prover."))
-          (let ((fill-column 80))
-            (fill-region (point-min) (point-max)))
-          (insert "\n\n"))
-        (dolist (tree (mapcar #'idris-tree-for-hole hole-info))
-          (idris-tree-insert tree "")
-          (insert "\n\n"))
-        (message "Press q to close")
-        (goto-char (point-min))))
+    (idris-update-holes-buffer-content (idris-hole-list-buffer) hole-info)
     (display-buffer (idris-hole-list-buffer))))
+
+(defun idris-update-holes-buffer ()
+  "Update content of Idris holes buffer if it exists."
+  (when-let* ((buffer (get-buffer idris-hole-list-buffer-name))
+              (ty (idris-eval '(:metavariables 80) t)))
+    (idris-update-holes-buffer-content buffer (car ty))))
 
 (defun idris-hole-tree-printer (tree)
   "Print TREE, formatted for holes."
@@ -110,10 +117,6 @@ Invokes `idris-hole-list-mode-hook'."
     (insert " ")
     (apply #'insert-button (idris-tree.button tree))
     (insert (idris-tree.after-button tree))))
-
-
-;;; Prevent circularity error
-(autoload 'idris-prove-hole "idris-commands.el")
 
 (defun idris-tree-for-hole (hole)
   "Generate a tree for HOLE.

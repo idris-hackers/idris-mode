@@ -81,6 +81,7 @@
     ["Add missing cases" idris-add-missing t]
     ["Case split pattern variable" idris-case-dwim t]
     ["Add with block" idris-make-with-block t]
+    ["List holes" idris-list-holes t]
     ["Extract lemma from hole" idris-make-lemma t]
     ["Solve hole with case expression" idris-case-dwim t]
     ["Attempt to solve hole" idris-proof-search t]
