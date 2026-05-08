@@ -65,8 +65,7 @@
 
 (defun idris-warning-overlay-at-point (point)
   "Return the overlay for a note starting at POINT, otherwise nil."
-  (cl-find point (cl-remove-if-not 'idris-warning-overlay-p (overlays-at point))
-        :key 'overlay-start))
+  (seq-find #'idris-warning-overlay-p (overlays-at point)))
 
 (defun idris-warning-overlay (warning)
   "Add a compiler warning to the buffer as an overlay.

@@ -60,16 +60,17 @@
 
 (defun idris-current-buffer-dirty-p ()
   "Check whether the current buffer's most recent version is loaded."
-  (or idris-buffer-dirty-p
-      (not (equal (current-buffer)
-                  idris-currently-loaded-buffer))
-      ;; for when we load the whole buffer
-      (and (not idris-load-to-here) (not idris-loaded-region-overlay))
-      ;; true when the place to load is outside the loaded region - extend region!
-      (and idris-loaded-region-overlay
-           idris-load-to-here
-           (> (marker-position idris-load-to-here)
-              (overlay-end idris-loaded-region-overlay)))))
+  (and (derived-mode-p 'idris-mode)
+       (or idris-buffer-dirty-p
+           (not (equal (current-buffer)
+                       idris-currently-loaded-buffer))
+           ;; for when we load the whole buffer
+           (and (not idris-load-to-here) (not idris-loaded-region-overlay))
+           ;; true when the place to load is outside the loaded region - extend region!
+           (and idris-loaded-region-overlay
+                idris-load-to-here
+                (> (marker-position idris-load-to-here)
+                   (overlay-end idris-loaded-region-overlay))))))
 
 (defun idris-position-loaded-p (pos)
   (and idris-loaded-region-overlay

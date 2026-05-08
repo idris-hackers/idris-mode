@@ -50,6 +50,19 @@
 (defvar idris-connection-buffer-name (idris-buffer-name :connection)
   "The name of the Idris connection buffer.")
 
+(defvar idris-rex-continuations '()
+  "List of (ID FUNCTION [FUNCTION]) continuations waiting for RPC results.
+The first function will be called with a final result, and the second
+ (if present) will be called with intermediate output results.")
+
+(defvar idris-continuation-counter 1
+  "Continuation serial number counter.")
+
+(defvar idris-event-hooks '())
+
+(defvar idris-options-cache '()
+  "An alist caching the Idris interpreter options.")
+
 (defun idris-version-hook-function (event)
   (pcase event
     (`(:protocol-version ,version ,minor)
@@ -105,13 +118,16 @@ This is maintained to restart Idris when the arguments change.")
     (message "Connection to Idris established.")))
 
 (defun idris-sentinel (_process msg)
-  (message "Idris disconnected: %s" (substring msg 0 -1))
+  (message "Idris disconnected: %s" (string-trim-right msg))
   (when idris-connection
     (delete-process idris-connection)
     (setq idris-connection nil))
   (when idris-process
     (delete-process idris-process)
-    (setq idris-process nil)))
+    (setq idris-process nil))
+  ;; to prevent memory leaks and clear state
+  (setq idris-rex-continuations '()
+        idris-options-cache '()))
 
 (defvar idris-process-port-output-regexp (rx (? (group (+ anychar (not num)))) (group (+ (any num))))
   "Regexp used to match the port of an Idris process.")
@@ -214,16 +230,6 @@ This is maintained to restart Idris when the arguments change.")
           print-level)
       (prin1 sexp (current-buffer))
       (buffer-string))))
-
-(defvar idris-rex-continuations '()
-  "List of (ID FUNCTION [FUNCTION]) continuations waiting for RPC results.
-The first function will be called with a final result, and the second
- (if present) will be called with intermediate output results.")
-
-(defvar idris-continuation-counter 1
-  "Continuation serial number counter.")
-
-(defvar idris-event-hooks '())
 
 (defun idris-dispatch-event (event process)
   (or (run-hook-with-args-until-success 'idris-event-hooks event)
@@ -334,9 +340,6 @@ If `NO-ERRORS' is non-nil, don't call `ERROR' if there was an Idris error."
            (when (eq (process-status idris-process) 'exit)
              (error "Idris process exited unexpectedly"))
            (accept-process-output idris-connection 0.1)))))))
-
-(defvar idris-options-cache '()
-  "An alist caching the Idris interpreter options.")
 
 (defun idris-update-options-cache ()
   (idris-eval-async '(:get-options)

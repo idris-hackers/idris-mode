@@ -75,7 +75,8 @@
     ["Compile and execute" idris-compile-and-execute]
     ["Delete IBC file" idris-delete-ibc t]
     ["View compiler log" idris-view-compiler-log (get-buffer idris-log-buffer-name)]
-    ["Quit inferior Idris process" idris-quit t]
+    ["Quit inferior Idris process" idris-quit :visible idris-process]
+    ["Start inferior Idris process" idris-run :visible (not idris-process)]
     "-----------------"
     ["Add initial match clause to type declaration" idris-add-clause t]
     ["Add missing cases" idris-add-missing t]
@@ -170,10 +171,11 @@ Invokes `idris-mode-hook'."
 
 ;; Automatically use idris-mode for .idr and .lidr files.
 ;;;###autoload
-(push '("\\.idr$" . idris-mode) auto-mode-alist)
+(add-to-list 'auto-mode-alist '("\\.idr$" . idris-mode))
 ;;;###autoload
-(push '("\\.lidr$" . idris-mode) auto-mode-alist)
-
+(add-to-list 'auto-mode-alist '("\\.lidr$" . idris-mode))
+;;;###autoload
+(add-to-list 'interpreter-mode-alist (cons idris-interpreter-path 'idris-mode))
 
 (provide 'idris-mode)
 ;;; idris-mode.el ends here

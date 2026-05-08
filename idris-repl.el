@@ -255,6 +255,9 @@ and there is an active region, paste the region into the REPL."
 (easy-menu-define idris-repl-mode-menu idris-repl-mode-map
   "Menu for the Idris REPL mode."
   `("Idris REPL"
+    ;; No need for a start item as repl exist only with running process
+    ["Quit inferior Idris process" idris-quit :visible idris-process]
+    "-----------------"
     ("Interpreter options" :active idris-process
      ["Show implicits" (idris-set-option :show-implicits t)
       :visible (not (idris-get-option :show-implicits))]
@@ -266,8 +269,7 @@ and there is an active region, paste the region into the REPL."
       :visible (idris-get-option :error-context)])
     ["Show term interaction widgets" idris-add-term-widgets t]
     ["Customize idris-mode" (customize-group 'idris) t]
-    ["Quit inferior Idris process" idris-quit t]
-    ))
+    ["Customize fonts and colors" (customize-group 'idris-faces) t]))
 
 (define-derived-mode idris-repl-mode fundamental-mode "Idris-REPL"
   "Major mode for interacting with Idris.
